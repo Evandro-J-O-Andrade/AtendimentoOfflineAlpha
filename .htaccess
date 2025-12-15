@@ -1,0 +1,12 @@
+# .htaccess (Coloque este arquivo dentro de D:/AtendimentoOfflineAlpha/dist)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  # EXCLUIR PASTA DA API: Não reescreve requisições que começam com /api/
+  RewriteCond %{REQUEST_URI} !^/api/ [NC] 
+
+  # Redireciona tudo que não for um arquivo/diretório real para o index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.html [L]
+</IfModule>
