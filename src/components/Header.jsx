@@ -1,7 +1,16 @@
+import React from 'react';
+
 export default function Header() {
-  return (
-    <header style={{ padding: '15px', borderBottom: '1px solid #ccc' }}>
-      <h2>Pronto Atendimento Hospitalar</h2>
-    </header>
-  );
+    return (
+        <header style={{
+            width: '100%',
+            padding: '20px',
+            background: '#1976d2',
+            color: '#fff',
+            fontSize: '20px',
+            fontWeight: 'bold'
+        }}>
+            Sistema de Atendimento - ADM
+        </header>
+    );
 }
