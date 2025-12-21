@@ -1,47 +1,101 @@
 <?php
-// middleware.php - Verifica o Token de Autorização em TODAS as requisições
+// api/middleware.php
+require_once __DIR__ . '/config.php';
 
 /**
- * Função simples de validação de token.
- * EM PRODUÇÃO, esta função deveria validar um JWT (JSON Web Token)
- * e o token deveria ser armazenado em uma tabela de Sessões para ser revogado.
- * * Por enquanto, apenas checa se o token existe e, opcionalmente, busca o usuário.
- *
- * @param PDO $pdo Objeto de conexão PDO.
- * @return array Retorna o array de dados do usuário autenticado.
+ * Valida token enviado no header Authorization: Bearer <token>
+ * Retorna dados do usuário autenticado
+ * Encerra a execução se inválido
  */
-function validarToken($pdo) {
-    // 1. Pega o token do cabeçalho 'Authorization' (padrão Bearer)
-    $headers = getallheaders();
-    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-    
-    // Espera-se "Bearer [token_sha256]"
-    if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-        http_response_code(401);
-        echo json_encode(["erro" => "Token de Autorização ausente ou mal formatado."]);
+function validarToken(PDO $pdo) {
+
+    /* =========================
+       HEADERS
+    ========================= */
+    header("Access-Control-Allow-Origin: http://localhost:5173");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+    header("Content-Type: application/json; charset=UTF-8");
+
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(200);
         exit;
     }
-    
+
+    /* =========================
+       TOKEN
+    ========================= */
+    $headers = getallheaders();
+    $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+
+    if (!preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
+        http_response_code(401);
+        echo json_encode(["message" => "Token não informado"]);
+        exit;
+    }
+
     $token = $matches[1];
-    
-    // 2. Aqui você faria a validação real (ex: Decodificar o JWT ou buscar na tabela de sessões)
-    // Para simplificar, neste modelo estamos APENAS verificando se o token existe.
-    
-    // Simulação: se o token fosse real, você buscaria o usuário no banco
-    // através de uma tabela de sessões onde o token estaria registrado.
-    
-    // **Ajuste para seu ambiente:** Crie uma tabela de sessões e valide o token nela.
-    
-    // Se a validação falhar:
-    // http_response_code(401);
-    // echo json_encode(["erro" => "Token inválido ou expirado."]);
-    // exit;
-    
-    // 3. Se for válido, retorna os dados do usuário para uso nos scripts
-    // Simulação dos dados do usuário (em uma API real, viriam da busca do token)
+    $payload = json_decode(base64_decode($token), true);
+
+    if (!$payload || !isset($payload['id_usuario'], $payload['exp'])) {
+        http_response_code(401);
+        echo json_encode(["message" => "Token inválido"]);
+        exit;
+    }
+
+    if ($payload['exp'] < time()) {
+        http_response_code(401);
+        echo json_encode(["message" => "Token expirado"]);
+        exit;
+    }
+
+    /* =========================
+       USUÁRIO
+    ========================= */
+    $stmt = $pdo->prepare("
+        SELECT 
+            u.id_usuario,
+            u.login,
+            p.nome_completo
+        FROM usuario u
+        JOIN pessoa p ON p.id_pessoa = u.id_pessoa
+        WHERE u.id_usuario = ?
+          AND u.ativo = 1
+    ");
+    $stmt->execute([$payload['id_usuario']]);
+    $usuario = $stmt->fetch();
+
+    if (!$usuario) {
+        http_response_code(401);
+        echo json_encode(["message" => "Usuário inválido"]);
+        exit;
+    }
+
+    /* =========================
+       PERFIS
+    ========================= */
+    $stmt = $pdo->prepare("
+        SELECT p.nome
+        FROM usuario_perfil up
+        JOIN perfil p ON p.id_perfil = up.id_perfil
+        WHERE up.id_usuario = ?
+    ");
+    $stmt->execute([$usuario['id_usuario']]);
+    $perfis = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    if (!$perfis) {
+        http_response_code(403);
+        echo json_encode(["message" => "Usuário sem perfil"]);
+        exit;
+    }
+
+    /* =========================
+       RETORNO
+    ========================= */
     return [
-        'id_usuario' => 1, // Exemplo: Substituir pelo ID real obtido via token
-        'nome' => 'Usuário Autenticado',
-        'perfil' => 'MEDICO'
-    ]; 
+        'id_usuario' => $usuario['id_usuario'],
+        'login'      => $usuario['login'],
+        'nome'       => $usuario['nome_completo'],
+        'perfis'     => $perfis
+    ];
 }

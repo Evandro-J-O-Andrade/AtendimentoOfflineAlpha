@@ -3,6 +3,16 @@
 require "config.php";
 require "middleware.php"; 
 
+
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Authorization, Content-Type");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit;
+}
+
 // A proteção da rota é crucial, mesmo para dados auxiliares
 $usuario = validarToken($pdo); 
 

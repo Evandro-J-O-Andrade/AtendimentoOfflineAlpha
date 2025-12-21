@@ -122,6 +122,8 @@ CREATE TABLE atendimento (
     INDEX idx_status_local (status_atendimento, id_local_atual)
 );
 
+
+
 CREATE TABLE atendimento_movimentacao (
     id_mov BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT,
@@ -1908,3 +1910,333 @@ BEGIN
 END$$
 
 DELIMITER ;
+-- Garante que o banco de dados 'pronto_atendimento' está em uso
+USE pronto_atendimento;
+
+-- Cria a tabela 'documento' com os tipos de dados corretos para as chaves estrangeiras
+CREATE TABLE documento (
+    id_documento BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT para consistência
+    id_atendimento BIGINT NOT NULL,              -- Corrigido para BIGINT
+    tipo ENUM('RECEITA','EXAME','ATESTADO','EVOLUCAO','ALTA','RETORNO') NOT NULL,
+    conteudo LONGTEXT,
+    id_usuario BIGINT NOT NULL,                  -- Corrigido para BIGINT
+    data_geracao DATETIME DEFAULT CURRENT_TIMESTAMP, -- Adicionado DEFAULT para data
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Garante que o banco de dados 'pronto_atendimento' está em uso
+USE pronto_atendimento;
+
+-- Cria a tabela 'nao_atendido' com os tipos de dados corretos para as chaves estrangeiras
+CREATE TABLE nao_atendido (
+    id_nao_atendido BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT para consistência
+    id_atendimento BIGINT NOT NULL,                 -- Corrigido para BIGINT
+    motivo TEXT,
+    id_usuario BIGINT NOT NULL,                     -- Corrigido para BIGINT
+    data_registro DATETIME DEFAULT CURRENT_TIMESTAMP, -- Adicionado DEFAULT para data
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+CREATE TABLE pedido_exame (
+  id_pedido_exame INT AUTO_INCREMENT PRIMARY KEY,
+  id_atendimento INT NOT NULL,
+  id_usuario_medico INT NOT NULL,
+  status ENUM('SOLICITADO','COLETADO','REALIZADO','CANCELADO') NOT NULL,
+  data_solicitacao DATETIME,
+  data_execucao DATETIME,
+  FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
+  FOREIGN KEY (id_usuario_medico) REFERENCES usuario(id_usuario) ON DELETE RESTRICT,
+  INDEX idx_atendimento (id_atendimento),
+  INDEX idx_status (status)
+);
+
+CREATE TABLE sigpat_procedimento (
+  id_sigpat INT AUTO_INCREMENT PRIMARY KEY,
+  codigo_sigpat VARCHAR(20) UNIQUE NOT NULL,
+  descricao TEXT NOT NULL,
+  grupo VARCHAR(100),
+  subgrupo VARCHAR(100),
+  tipo ENUM('EXAME','RX','PROCEDIMENTO') NOT NULL,
+  ativo BOOLEAN DEFAULT TRUE,
+  INDEX idx_grupo (grupo),
+  INDEX idx_tipo (tipo)
+);
+
+-- Garante que o banco de dados 'pronto_atendimento' está em uso
+USE pronto_atendimento;
+
+-- 1. Tabela prescricao_medica (Corrigido para BIGINT)
+CREATE TABLE prescricao_medica (
+    id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
+    id_atendimento BIGINT NOT NULL,                 -- Corrigido para BIGINT
+    id_usuario_medico BIGINT NOT NULL,              -- Corrigido para BIGINT
+    data_prescricao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
+    FOREIGN KEY (id_usuario_medico) REFERENCES usuario(id_usuario) ON DELETE RESTRICT,
+    INDEX idx_atendimento (id_atendimento)
+) ENGINE=InnoDB;
+
+-- 2. Tabela prescricao_item (Chave estrangeira corrigida para BIGINT)
+CREATE TABLE prescricao_item (
+    id_item BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
+    id_prescricao BIGINT NOT NULL,           -- Corrigido para BIGINT
+    medicamento VARCHAR(150),
+    dose VARCHAR(50),
+    via VARCHAR(50),
+    frequencia VARCHAR(50),
+    duracao VARCHAR(50),
+    FOREIGN KEY (id_prescricao) REFERENCES prescricao_medica(id_prescricao) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- 3. Tabela pedido_exame (Corrigido para BIGINT)
+CREATE TABLE pedido_exame (
+    id_pedido_exame BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
+    id_atendimento BIGINT NOT NULL,                   -- Corrigido para BIGINT
+    id_usuario_medico BIGINT NOT NULL,                -- Corrigido para BIGINT
+    status ENUM('SOLICITADO','COLETADO','REALIZADO','CANCELADO') NOT NULL,
+    data_solicitacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_execucao DATETIME,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
+    FOREIGN KEY (id_usuario_medico) REFERENCES usuario(id_usuario) ON DELETE RESTRICT,
+    INDEX idx_atendimento (id_atendimento),
+    INDEX idx_status (status)
+) ENGINE=InnoDB;
+
+-- 4. Tabela pedido_exame_item (Chave estrangeira corrigida para BIGINT, Referência SIGPAT comentada)
+CREATE TABLE pedido_exame_item (
+    id_item BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
+    id_pedido_exame BIGINT NOT NULL,         -- Corrigido para BIGINT
+    id_sigpat INT NOT NULL,                  -- Mantido INT (assumindo que 'sigpat_procedimento' usa INT)
+    observacao TEXT,
+    FOREIGN KEY (id_pedido_exame) REFERENCES pedido_exame(id_pedido_exame) ON DELETE RESTRICT
+    -- FOREIGN KEY (id_sigpat) REFERENCES sigpat_procedimento(id_sigpat) ON DELETE RESTRICT
+    -- COMENTADO: A tabela 'sigpat_procedimento' precisa ser criada antes de adicionar esta FK.
+) ENGINE=InnoDB;
+
+-- Garante que o banco de dados 'pronto_atendimento' está em uso
+USE pronto_atendimento;
+
+-- Cria a tabela 'historico_status' com os tipos de dados corretos para as chaves estrangeiras
+CREATE TABLE historico_status (
+    id_historico BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT para consistência
+    id_atendimento BIGINT NOT NULL,              -- Corrigido para BIGINT
+    status VARCHAR(30) NOT NULL,
+    id_usuario BIGINT,                           -- Corrigido para BIGINT
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP, -- Adicionado DEFAULT para data
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE triagem (
+  id_triagem INT AUTO_INCREMENT PRIMARY KEY,
+  id_atendimento INT NOT NULL,
+  id_usuario INT NOT NULL,
+  sinais_vitais JSON,
+  classificacao_risco VARCHAR(30),
+  observacoes TEXT,
+  data_triagem DATETIME,
+  FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
+  FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE RESTRICT
+);
+CREATE TABLE paciente (
+  id_paciente INT AUTO_INCREMENT PRIMARY KEY,
+  nome_completo VARCHAR(150) NOT NULL,
+  cpf VARCHAR(14) UNIQUE,
+  cns VARCHAR(20),
+  data_nascimento DATE,
+  sexo CHAR(1),
+  nome_mae VARCHAR(150),
+  telefone VARCHAR(20),
+  endereco TEXT,
+  ativo BOOLEAN DEFAULT TRUE,
+  INDEX idx_nome (nome_completo),
+  INDEX idx_cns (cns)
+);
+CREATE OR REPLACE VIEW vw_sidebar_fila AS
+SELECT
+    a.id_atendimento,
+    a.protocolo AS numero_atendimento, -- CORRIGIDO: usa 'protocolo' e renomeia
+    p.nome_completo,
+    a.status_atendimento,
+    cr.cor AS classificacao_risco,    -- OBTIDO: através da tabela 'triagem'
+    ar.prioridade,                    -- OBTIDO: através da tabela 'atendimento_recepcao'
+    TIMESTAMPDIFF(MINUTE, a.data_abertura, NOW()) AS tempo
+FROM atendimento a
+JOIN pessoa p ON p.id_pessoa = a.id_pessoa
+-- Junta para obter a prioridade (do cadastro na recepção)
+LEFT JOIN atendimento_recepcao ar ON ar.id_atendimento = a.id_atendimento
+-- Junta para obter a classificação de risco
+LEFT JOIN triagem t ON t.id_atendimento = a.id_atendimento
+LEFT JOIN classificacao_risco cr ON cr.id_risco = t.id_risco
+-- CORRIGIDO: Filtra para mostrar apenas atendimentos ativos/abertos
+WHERE a.status_atendimento NOT IN ('FINALIZADO', 'NAO_ATENDIDO')
+ORDER BY 
+    CASE ar.prioridade
+        WHEN 'GESTANTE' THEN 1
+        WHEN 'IDOSO' THEN 2
+        WHEN 'AUTISTA' THEN 3
+        WHEN 'CRIANCA_COLO' THEN 4
+        ELSE 5
+    END,
+    CASE cr.cor
+        WHEN 'VERMELHO' THEN 1
+        WHEN 'LARANJA' THEN 2
+        WHEN 'AMARELO' THEN 3
+        WHEN 'VERDE' THEN 4
+        WHEN 'AZUL' THEN 5
+        ELSE 6
+    END,
+    a.data_abertura ASC;
+    
+CREATE OR REPLACE VIEW vw_busca AS
+SELECT
+    -- CORRIGIDO: Usa 'protocolo' no lugar de 'numero_atendimento'
+    a.protocolo AS numero_atendimento,
+    p.nome_completo,
+    p.cpf,
+    p.cns,
+    a.status_atendimento
+FROM atendimento a
+-- CORRIGIDO: Junta com a tabela 'pessoa' usando id_pessoa
+JOIN pessoa p ON p.id_pessoa = a.id_pessoa;
+
+USE pronto_atendimento;
+
+-- Adiciona a coluna que calcula o ID da pessoa apenas se o atendimento estiver ATIVO
+ALTER TABLE atendimento
+ADD COLUMN uk_atendimento_ativo BIGINT AS (
+    CASE 
+        WHEN status_atendimento IN ('FINALIZADO', 'NAO_ATENDIDO') THEN NULL 
+        ELSE id_pessoa 
+    END
+) VIRTUAL;
+
+-- Cria o índice UNIQUE sobre a coluna gerada
+CREATE UNIQUE INDEX uk_pessoa_atendimento_ativo
+ON atendimento (uk_atendimento_ativo);
+
+
+-- EXEMPLO DE SP DE BUSCA PARA O COMPONENTE ATENDIMENTO.JSX
+DROP PROCEDURE IF EXISTS sp_buscar_ficha_atendimento;
+
+DELIMITER $$
+CREATE PROCEDURE sp_buscar_ficha_atendimento(
+    IN p_id_atendimento BIGINT
+)
+BEGIN
+
+    -- 1. DADOS BASE E PACIENTE (JOIN 1:1)
+    SELECT
+        a.protocolo,
+        a.status_atendimento,
+        a.data_abertura,
+        p.nome_completo,
+        p.cpf,
+        p.cns,
+        ar.motivo_procura,
+        ar.tipo_atendimento
+    FROM atendimento a
+    JOIN pessoa p ON p.id_pessoa = a.id_pessoa
+    LEFT JOIN atendimento_recepcao ar ON ar.id_atendimento = a.id_atendimento
+    WHERE a.id_atendimento = p_id_atendimento;
+
+    -- 2. DADOS DE TRIAGEM E RISCO (JOIN 1:1)
+    SELECT
+        t.queixa,
+        t.sinais_vitais, -- Campo JSON
+        cr.cor,
+        cr.descricao AS risco_descricao,
+        t.data_hora AS dt_triagem
+    FROM triagem t
+    JOIN classificacao_risco cr ON cr.id_risco = t.id_risco
+    WHERE t.id_atendimento = p_id_atendimento;
+
+    -- 3. ANAMNESES E EXAMES FÍSICOS (LISTA 1:N)
+    (SELECT 'ANAMNESE' AS tipo, descricao, data_hora FROM anamnese WHERE id_atendimento = p_id_atendimento)
+    UNION ALL
+    (SELECT 'EXAME_FISICO' AS tipo, descricao, data_hora FROM exame_fisico WHERE id_atendimento = p_id_atendimento)
+    ORDER BY data_hora DESC;
+
+    -- 4. PRESCRIÇÕES ATIVAS (LISTA 1:N)
+    -- Prescrição Mestra
+    SELECT
+        pc.id_prescricao,
+        pc.tipo,
+        pc.data_hora,
+        GROUP_CONCAT(pi.descricao SEPARATOR '; ') AS itens_prescritos
+    FROM prescricao_continua pc
+    JOIN prescricao_item pi ON pi.id_prescricao = pc.id_prescricao
+    WHERE pc.id_atendimento = p_id_atendimento AND pc.ativa = TRUE
+    GROUP BY pc.id_prescricao
+    ORDER BY pc.data_hora DESC;
+    
+    -- 5. SOLICITAÇÕES DE EXAME (LISTA 1:N)
+    SELECT
+        se.id_solicitacao,
+        e.descricao AS exame_nome,
+        se.status,
+        se.data_hora
+    FROM solicitacao_exame se
+    JOIN exame e ON e.id_exame = se.id_exame
+    WHERE se.id_atendimento = p_id_atendimento
+    ORDER BY se.data_hora DESC;
+
+END$$
+DELIMITER ;
+
+-- PESSOA ADMIN
+INSERT INTO pessoa (nome_completo, cpf, data_nascimento, sexo)
+VALUES ('Administrador Master', '00000000000', '1980-01-02', 'O')
+ON DUPLICATE KEY UPDATE nome_completo = VALUES(nome_completo);
+
+SET @id_pessoa_admin = (
+    SELECT id_pessoa FROM pessoa WHERE cpf = '00000000000'
+);
+
+-- USUÁRIO ADMIN
+INSERT INTO usuario (login, senha_hash, ativo, id_pessoa)
+VALUES (
+    'admin',
+    '$2y$10$R/9eO6N7wQ1wVq2SjT3hwuF1eFf8c1s.pZ/3v2A2A8b2Q9R/P4S8A',
+    1,
+    @id_pessoa_admin
+)
+ON DUPLICATE KEY UPDATE
+    senha_hash = VALUES(senha_hash),
+    ativo = 1,
+    id_pessoa = VALUES(id_pessoa);
+
+SET @id_usuario_admin = (
+    SELECT id_usuario FROM usuario WHERE login = 'admin'
+);
+
+-- PERFIL ADMIN
+INSERT INTO usuario_perfil (id_usuario, id_perfil)
+SELECT
+    @id_usuario_admin,
+    id_perfil
+FROM perfil
+WHERE nome = 'ADMIN'
+ON DUPLICATE KEY UPDATE id_perfil = id_perfil;
+
+
+INSERT INTO usuario_perfil (id_usuario, id_perfil)
+SELECT 
+    @id_usuario_admin,
+    p.id_perfil
+FROM perfil p
+WHERE p.nome = 'ADMIN'
+ON DUPLICATE KEY UPDATE
+    usuario_perfil.id_perfil = usuario_perfil.id_perfil;
+
+CREATE TABLE sessao (
+    id_sessao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT NOT NULL,
+    token CHAR(64) NOT NULL UNIQUE,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expira_em DATETIME,
+    ativo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);

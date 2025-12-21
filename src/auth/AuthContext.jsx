@@ -1,79 +1,75 @@
-import { createContext, useState, useEffect } from "react"; // 1. Importar useEffect
-import api from "../api/api"; // Assume que 'api' é o cliente Axios configurado
+import { createContext, useState, useEffect, useContext } from 'react';
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-    // 2. Inicialmente, o estado é null. A validação do token o definirá.
-    const [user, setUser] = useState(null); 
-    const [loading, setLoading] = useState(true); // 3. Estado para controlar o carregamento inicial
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem('token'));
+    const [loading, setLoading] = useState(true);
 
-    // Função de login está correta
-    async function login(login, senha) {
-        try {
-            const res = await api.post("/auth.php", { login, senha });
-            const { token, usuario } = res.data; // Pega o token e o objeto 'usuario'
-
-            // Ajuste aqui: O PHP envia o objeto 'usuario' (que tem id, nome, perfil)
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(usuario)); // Armazena o objeto 'usuario'
-            setUser(usuario);
-            return true; // Sucesso
-        } catch (error) {
-            // Lógica de erro de login
-            console.error("Login falhou:", error);
-            throw error; 
-        }
+   // AuthProvider - NOVO useEffect
+useEffect(() => {
+    // Esta função será executada apenas na montagem inicial do componente (uma vez)
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (storedToken && storedUser) {
+        setToken(storedToken);
+        // Garante que o user seja carregado do localStorage
+        setUser(JSON.parse(storedUser));
     }
 
-    function logout() {
-        localStorage.clear();
+    setLoading(false);
+}, []); // Array de dependências vazio
+
+    const signIn = (newToken, userData) => {
+        setToken(newToken);
+        setUser(userData);
+        localStorage.setItem('token', newToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+    };
+
+    const signOut = () => {
+        setToken(null);
         setUser(null);
-    }
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    };
 
-    // 4. EFEITO PARA VALIDAR O TOKEN NA INICIALIZAÇÃO
-    useEffect(() => {
-        async function loadUserFromStorage() {
-            const token = localStorage.getItem("token");
-            const userString = localStorage.getItem("user");
+    // ======= HELPERS DE PERFIL =======
+    const hasPerfil = (perfil) =>
+        user?.perfis?.includes(perfil);
 
-            if (token && userString) {
-                // Configura o token no cabeçalho do Axios para a validação
-                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                
-                try {
-                    // Chama a rota de validação no PHP
-                    const res = await api.get("/auth.php?action=validate");
-                    
-                    if (res.data.ok) {
-                         // Se o PHP retornar ok, a sessão é válida
-                         setUser(res.data.usuario || JSON.parse(userString)); 
-                    } else {
-                        // Se o PHP retornar 200, mas com erro de sessão (caso improvável)
-                        logout(); 
-                    }
-                } catch (error) {
-                    // Se a API retornar 401 (Token inválido/expirado)
-                    console.error("Token expirado/inválido. Fazendo logout automático.", error);
-                    logout();
-                }
-            }
-            setLoading(false); // Termina o carregamento
-        }
-        
-        loadUserFromStorage();
-    }, []); // Executa apenas uma vez na montagem do componente
+    const isAdmin = () =>
+        hasPerfil('ADMIN');
 
-    // Se estiver carregando, mostra um componente de loading (opcional, mas recomendado)
-    if (loading) {
-        return <div>Carregando sessão...</div>; // Ou um spinner de carregamento
-    }
+   
+
+    const isMedico = () =>
+        hasPerfil('MEDICO');
+
+    const isRecepcao = () =>
+        hasPerfil('RECEPCAO');
+
+    const authContextValue = {
+        user,
+        token,
+        loading,
+        isAuthenticated: !!token,
+        signIn,
+        signOut,
+        hasPerfil,
+        isAdmin,
+        isMedico,
+        isRecepcao
+    };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={authContextValue}>
             {children}
         </AuthContext.Provider>
     );
-}
+};
 
-// Observação: Você também precisará configurar o Axios ('../api/api.js') para incluir o token em todas as requisições após o login.
+// Hook de conveniência
+export const useAuth = () => useContext(AuthContext);
