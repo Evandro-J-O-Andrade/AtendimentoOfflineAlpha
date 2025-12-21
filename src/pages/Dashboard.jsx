@@ -1,43 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import Header from "../components/Header";
 import Sidebar from "../pages/Sidebar";
+import Card from "../components/Card";
+import api from "../api/api";
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    total: 0,
+    pendentes: 0,
+    usuarios: 0
+  });
+
+  useEffect(() => {
+    // Exemplo: buscar estatísticas da API
+    api.get("/atendimento.php")
+      .then(res => {
+        const fila = Array.isArray(res.data) ? res.data : [];
+        setStats({
+          total: fila.length,
+          pendentes: fila.filter(p => p.status_atendimento === "PENDENTE").length,
+          usuarios: 50 // se quiser, pode buscar do banco
+        });
+      })
+      .catch(err => console.error(err));
+  }, []);
+
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      {/* Sidebar fixa */}
-      <Sidebar />
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Cabeçalho */}
+      <Header />
 
       {/* Conteúdo principal */}
-      <main style={{ flex: 1, padding: "20px" }}>
-        <h1>Bem-vindo, Administrador!</h1>
-        <p>Aqui você pode gerenciar atendimentos, usuários e relatórios.</p>
+      <div style={{ display: "flex", flex: 1 }}>
+        {/* Sidebar */}
+        <Sidebar />
 
-        {/* Exemplo de cards */}
-        <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-          <div style={cardStyle}>
-            <h3>Total de Atendimentos</h3>
-            <p>120</p>
+        {/* Área principal */}
+        <main style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
+          <h2>Fila de Atendimentos do Dia</h2>
+
+          {/* Cards de estatísticas */}
+          <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
+            <Card title="Total de Atendimentos" value={stats.total} />
+            <Card title="Atendimentos Pendentes" value={stats.pendentes} />
+            <Card title="Usuários Cadastrados" value={stats.usuarios} />
           </div>
-          <div style={cardStyle}>
-            <h3>Atendimentos Pendentes</h3>
-            <p>35</p>
+
+          {/* Lista detalhada */}
+          <div style={{ marginTop: "30px" }}>
+            <h3>Lista Detalhada de Pacientes</h3>
+            <p>Aqui será implementada a lista detalhada da fila de atendimentos.</p>
           </div>
-          <div style={cardStyle}>
-            <h3>Usuários Cadastrados</h3>
-            <p>50</p>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
-
-// Estilo simples para os cards
-const cardStyle = {
-  background: "#f5f5f5",
-  padding: "20px",
-  borderRadius: "8px",
-  boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-  flex: 1,
-  textAlign: "center",
-};
