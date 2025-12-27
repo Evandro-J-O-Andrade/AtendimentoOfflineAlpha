@@ -1,40 +1,137 @@
-import React, { useEffect, useState } from 'react';
-import api from '../api/api';
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  FaUserInjured,
+  FaClipboardList,
+  FaNotesMedical,
+  FaPills,
+  FaProcedures,
+  FaExchangeAlt,
+  FaTicketAlt,
+  FaUserCog,
+  FaKey,
+  FaSignOutAlt
+} from "react-icons/fa";
+import SelectLocalModal from "../components/SelectLocalModal";
+import { useAuth } from "../auth/AuthContext";
+import "./Sidebar.css";
 
-export default function Sidebar() {
-    const [fila, setFila] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+export default function Sidebar({ usuario }) {
+  const { authLocal, setAuthLocal, signOut } = useAuth();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        setLoading(true);
-        api.get('/atendimento.php')
-            .then(res => {
-                const data = Array.isArray(res.data) ? res.data : [];
-                setFila(data);
-                setError(null);
-            })
-            .catch(err => {
-                console.error(err);
-                setFila([]);
-                setError('Não foi possível carregar a fila.');
-            })
-            .finally(() => setLoading(false));
-    }, []);
+  const [openLocalModal, setOpenLocalModal] = useState(false);
 
-    return (
-        <aside style={{ width: '300px', padding: '20px', background: '#f5f5f5' }}>
-            <h3>Fila de Atendimento</h3>
+  // Abre modal se usuário não tiver selecionado local e precisa
+  useEffect(() => {
+    if (
+      usuario &&
+      (usuario.perfis.includes("RECEPCAO") || usuario.perfis.includes("MEDICO")) &&
+      !authLocal
+    ) {
+      setOpenLocalModal(true);
+    }
+  }, [usuario, authLocal]);
 
-            {loading && <p>Carregando...</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {!loading && !error && fila.length === 0 && <p>Nenhum atendimento na fila.</p>}
+  const handleLocalSelect = (local) => {
+    setAuthLocal(local);
+    setOpenLocalModal(false);
+    // Redireciona para rota correta
+    if (local.tipo === "MEDICO") navigate("/medico/fila");
+    else navigate("/recepcao");
+  };
 
-            {!loading && !error && fila.map(p => (
-                <div key={p.id_atendimento} style={{ marginBottom: '10px', padding: '5px', border: '1px solid #ddd', borderRadius: '5px' }}>
-                    {p.nome_completo} ({p.status_atendimento})
-                </div>
-            ))}
-        </aside>
-    );
+  return (
+    <>
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <h2>Pronto Atendimento</h2>
+          <span className="perfil">{usuario?.perfil}</span>
+        </div>
+
+        <nav className="sidebar-menu">
+          {/* RECEPÇÃO */}
+          {usuario?.perfis?.includes("RECEPCAO") && (
+            <NavLink to="/recepcao" className="menu-item">
+              <FaTicketAlt />
+              <span>Recepção</span>
+            </NavLink>
+          )}
+
+          {/* GESTÃO DE USUÁRIOS */}
+          {(usuario?.perfis?.includes("ADMIN") || usuario?.perfis?.includes("SUPORTE")) && (
+            <NavLink to="/admin/usuarios" className="menu-item">
+              <FaUserCog />
+              <span>Gestão de Usuários</span>
+            </NavLink>
+          )}
+
+          {/* FILA */}
+          <NavLink to="/fila" className="menu-item">
+            <FaClipboardList />
+            <span>Fila de Atendimento</span>
+          </NavLink>
+
+          {/* SESSÕES */}
+          <NavLink to="/account/sessions" className="menu-item">
+            <FaKey />
+            <span>Sessões</span>
+          </NavLink>
+
+          {/* PACIENTE */}
+          <NavLink to="/paciente" className="menu-item">
+            <FaUserInjured />
+            <span>Paciente</span>
+          </NavLink>
+
+          {/* MÉDICO */}
+          {usuario?.perfil === "MEDICO" && (
+            <>
+              <div className="menu-section">Ações Médicas</div>
+
+              <NavLink to="/evolucao" className="menu-item">
+                <FaNotesMedical />
+                <span>Evolução</span>
+              </NavLink>
+
+              <NavLink to="/prescricao" className="menu-item">
+                <FaPills />
+                <span>Prescrição</span>
+              </NavLink>
+
+              <NavLink to="/exames" className="menu-item">
+                <FaClipboardList />
+                <span>Solicitar Exames</span>
+              </NavLink>
+
+              <NavLink to="/internacao" className="menu-item">
+                <FaProcedures />
+                <span>Internação</span>
+              </NavLink>
+
+              <NavLink to="/interconsulta" className="menu-item">
+                <FaExchangeAlt />
+                <span>Interconsulta</span>
+              </NavLink>
+            </>
+          )}
+        </nav>
+
+        <div className="sidebar-footer">
+          <button className="logout" onClick={signOut}>
+            <FaSignOutAlt />
+            Sair
+          </button>
+        </div>
+      </aside>
+
+      {/* Modal de escolha de guichê/sala */}
+      <SelectLocalModal
+        open={openLocalModal}
+        perfil={usuario?.perfil || null}
+        onClose={() => setOpenLocalModal(false)}
+        onSelect={handleLocalSelect}
+      />
+    </>
+  );
 }

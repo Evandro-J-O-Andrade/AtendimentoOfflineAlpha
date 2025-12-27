@@ -1,21 +1,16 @@
 <?php
-// api/middleware.php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/jwt.php';
 
-/**
- * Valida token enviado no header Authorization: Bearer <token>
- * Retorna dados do usuário autenticado
- * Encerra a execução se inválido
- */
-function validarToken(PDO $pdo) {
+function validarToken(PDO $pdo): array {
 
     /* =========================
-       HEADERS
+       HEADERS / CORS
     ========================= */
-    header("Access-Control-Allow-Origin: http://localhost:5173");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
     header("Content-Type: application/json; charset=UTF-8");
+    header("Access-Control-Allow-Origin: http://prontoatendimento.local");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         http_response_code(200);
@@ -28,24 +23,20 @@ function validarToken(PDO $pdo) {
     $headers = getallheaders();
     $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
 
-    if (!preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
+    if (!preg_match('/Bearer\s+(\S+)/', $auth, $matches)) {
         http_response_code(401);
         echo json_encode(["message" => "Token não informado"]);
         exit;
     }
 
     $token = $matches[1];
-    $payload = json_decode(base64_decode($token), true);
 
-    if (!$payload || !isset($payload['id_usuario'], $payload['exp'])) {
-        http_response_code(401);
-        echo json_encode(["message" => "Token inválido"]);
-        exit;
-    }
+    // jwt_decode já valida assinatura e exp
+    $payload = jwt_decode($token);
 
-    if ($payload['exp'] < time()) {
+    if (!$payload || !isset($payload['id_usuario'])) {
         http_response_code(401);
-        echo json_encode(["message" => "Token expirado"]);
+        echo json_encode(["message" => "Token inválido ou expirado"]);
         exit;
     }
 
@@ -63,7 +54,7 @@ function validarToken(PDO $pdo) {
           AND u.ativo = 1
     ");
     $stmt->execute([$payload['id_usuario']]);
-    $usuario = $stmt->fetch();
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$usuario) {
         http_response_code(401);

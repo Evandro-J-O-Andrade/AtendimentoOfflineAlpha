@@ -4,7 +4,7 @@ COLLATE utf8mb4_general_ci;
 
 USE pronto_atendimento;
 
-CREATE TABLE pessoa (
+CREATE TABLE IF NOT EXISTS pessoa (
     id_pessoa BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome_completo VARCHAR(200) NOT NULL,
     nome_social VARCHAR(200),
@@ -20,7 +20,7 @@ CREATE TABLE pessoa (
     UNIQUE KEY uk_cns (cns)
 ) ENGINE=InnoDB;
 
-CREATE TABLE usuario (
+CREATE TABLE IF NOT EXISTS usuario (
     id_usuario BIGINT AUTO_INCREMENT PRIMARY KEY,
     login VARCHAR(100) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
@@ -30,12 +30,12 @@ CREATE TABLE usuario (
     FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
 );
 
-CREATE TABLE perfil (
+CREATE TABLE IF NOT EXISTS perfil (
     id_perfil INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE usuario_perfil (
+CREATE TABLE IF NOT EXISTS usuario_perfil (
     id_usuario BIGINT,
     id_perfil INT,
     PRIMARY KEY (id_usuario, id_perfil),
@@ -43,13 +43,13 @@ CREATE TABLE usuario_perfil (
     FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil)
 );
 
-CREATE TABLE especialidade (
+CREATE TABLE IF NOT EXISTS especialidade (
     id_especialidade INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
     ativa BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE medico (
+CREATE TABLE IF NOT EXISTS medico (
     id_usuario BIGINT PRIMARY KEY,
     crm VARCHAR(20) NOT NULL,
     uf_crm CHAR(2) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE medico (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE medico_especialidade (
+CREATE TABLE IF NOT EXISTS medico_especialidade (
     id_usuario BIGINT,
     id_especialidade INT,
     PRIMARY KEY (id_usuario, id_especialidade),
@@ -65,12 +65,12 @@ CREATE TABLE medico_especialidade (
     FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
 );
 
-CREATE TABLE local_atendimento (
+CREATE TABLE IF NOT EXISTS local_atendimento (
     id_local INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE sala (
+CREATE TABLE IF NOT EXISTS sala (
     id_sala INT AUTO_INCREMENT PRIMARY KEY,
     nome_exibicao VARCHAR(100) NOT NULL,
     id_local INT NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE sala (
     FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
 );
 
-CREATE TABLE usuario_alocacao (
+CREATE TABLE IF NOT EXISTS usuario_alocacao (
     id_alocacao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_usuario BIGINT NOT NULL,
     id_sala INT NOT NULL,
@@ -92,15 +92,26 @@ CREATE TABLE usuario_alocacao (
     FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
 );
 
-CREATE TABLE senha (
+CREATE TABLE IF NOT EXISTS senha (
     id_senha BIGINT AUTO_INCREMENT PRIMARY KEY,
     numero INT NOT NULL,
-    origem ENUM('TOTEM','RECEPCAO'),
+    origem ENUM('TOTEM','RECEPCAO','TOTEM_PRI_PEDI','TOTEM_PRI_ADULTO'),
     data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
     chamada BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE atendimento (
+-- Tabela para armazenar feedbacks do Totem (pesquisa de satisfação)
+CREATE TABLE IF NOT EXISTS totem_feedback (
+    id_feedback BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_senha BIGINT NULL,
+    origem VARCHAR(50) NULL,
+    nota INT NULL,
+    comentario TEXT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_senha) REFERENCES senha(id_senha)
+);
+
+CREATE TABLE IF NOT EXISTS atendimento (
     id_atendimento BIGINT AUTO_INCREMENT PRIMARY KEY,
     protocolo VARCHAR(30) NOT NULL UNIQUE,
     id_pessoa BIGINT NOT NULL,
@@ -124,7 +135,7 @@ CREATE TABLE atendimento (
 
 
 
-CREATE TABLE atendimento_movimentacao (
+CREATE TABLE IF NOT EXISTS atendimento_movimentacao (
     id_mov BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT,
     de_local INT,
@@ -136,7 +147,7 @@ CREATE TABLE atendimento_movimentacao (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE anamnese (
+CREATE TABLE IF NOT EXISTS anamnese (
     id_anamnese BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT,
     descricao TEXT,
@@ -146,7 +157,7 @@ CREATE TABLE anamnese (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE prescricao (
+CREATE TABLE IF NOT EXISTS prescricao (
     id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT,
     tipo ENUM('INTERNA','CONTROLADA','CASA'),
@@ -158,12 +169,12 @@ CREATE TABLE prescricao (
     FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
 );
 
-CREATE TABLE protocolo_sequencia (
+CREATE TABLE IF NOT EXISTS protocolo_sequencia (
     id INT AUTO_INCREMENT PRIMARY KEY
 ) ENGINE=InnoDB;
 
 
-CREATE TABLE log_auditoria (
+CREATE TABLE IF NOT EXISTS log_auditoria (
     id_log BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_usuario BIGINT,
     acao VARCHAR(100),
@@ -178,24 +189,7 @@ CREATE TABLE log_auditoria (
 
 
 
-DELIMITER $$
 
-CREATE FUNCTION fn_gera_protocolo()
-RETURNS VARCHAR(30)
-NOT DETERMINISTIC
-READS SQL DATA
-BEGIN
-    DECLARE seq INT;
-
-    INSERT INTO protocolo_sequencia VALUES (NULL);
-    SET seq = LAST_INSERT_ID();
-
-    RETURN CONCAT(
-        YEAR(NOW()),
-        'GPAT/',
-        LPAD(seq, 6, '0')
-    );
-END$$
 
 DELIMITER ;
 
@@ -214,12 +208,12 @@ JOIN pessoa p ON p.id_pessoa = a.id_pessoa
 JOIN local_atendimento l ON l.id_local = a.id_local_atual
 WHERE a.status_atendimento IN ('ABERTO','EM_ATENDIMENTO','EM_OBSERVACAO');
 
-CREATE TABLE configuracao (
+CREATE TABLE IF NOT EXISTS configuracao (
     chave VARCHAR(100) PRIMARY KEY,
     valor TEXT
 );
 
-CREATE TABLE atendimento_recepcao (
+CREATE TABLE IF NOT EXISTS atendimento_recepcao (
     id_atendimento BIGINT PRIMARY KEY,
     tipo_atendimento ENUM(
         'CLINICO',
@@ -239,6 +233,8 @@ CREATE TABLE atendimento_recepcao (
         'CRIANCA_COLO',
         'GESTANTE',
         'IDOSO',
+        'PRIORITARIO_PEDI',
+        'PRIORITARIO_ADULTO',
         'NORMAL'
     ) DEFAULT 'NORMAL',
     motivo_procura TEXT,
@@ -255,14 +251,14 @@ CREATE TABLE atendimento_recepcao (
     FOREIGN KEY (id_recepcionista) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE classificacao_risco (
+CREATE TABLE IF NOT EXISTS classificacao_risco (
     id_risco INT AUTO_INCREMENT PRIMARY KEY,
     cor ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
     tempo_max INT,
     descricao VARCHAR(100)
 );
 
-CREATE TABLE triagem (
+CREATE TABLE IF NOT EXISTS triagem (
     id_triagem BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT NOT NULL,
     id_risco INT NOT NULL,
@@ -277,7 +273,7 @@ CREATE TABLE triagem (
     UNIQUE KEY uk_triagem_atendimento (id_atendimento)
 );
 
-CREATE TABLE reabertura_atendimento (
+CREATE TABLE IF NOT EXISTS reabertura_atendimento (
     id_reabertura BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT NOT NULL,
     id_usuario BIGINT NOT NULL,
@@ -569,7 +565,7 @@ END$$
 DELIMITER ;
 
 
-CREATE TABLE chamada_painel (
+CREATE TABLE IF NOT EXISTS chamada_painel (
     id_chamada BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT NOT NULL,
     id_sala INT NOT NULL,
@@ -600,7 +596,7 @@ BEGIN
 END$$
 DELIMITER ;
 
-CREATE TABLE exame_fisico (
+CREATE TABLE IF NOT EXISTS exame_fisico (
     id_exame BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT,
     descricao TEXT,
@@ -610,7 +606,7 @@ CREATE TABLE exame_fisico (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE hipotese_diagnostica (
+CREATE TABLE IF NOT EXISTS hipotese_diagnostica (
     id_hipotese BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT,
     cid10 VARCHAR(10),
@@ -621,14 +617,14 @@ CREATE TABLE hipotese_diagnostica (
     FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
 );
 
-CREATE TABLE exame (
+CREATE TABLE IF NOT EXISTS exame (
     id_exame INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(20) UNIQUE,
     descricao VARCHAR(255),
     tipo ENUM('LAB','RX','OUTROS')
 );
 
-CREATE TABLE solicitacao_exame (
+CREATE TABLE IF NOT EXISTS solicitacao_exame (
     id_solicitacao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT,
     id_exame INT,
@@ -640,7 +636,7 @@ CREATE TABLE solicitacao_exame (
     FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
 );
 
-CREATE TABLE retorno_atendimento (
+CREATE TABLE IF NOT EXISTS retorno_atendimento (
     id_retorno BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento_origem BIGINT,
     id_atendimento_retorno BIGINT,
@@ -662,14 +658,14 @@ FROM atendimento a
 JOIN pessoa p ON p.id_pessoa = a.id_pessoa
 JOIN local_atendimento l ON l.id_local = a.id_local_atual;
 
-CREATE TABLE setor (
+CREATE TABLE IF NOT EXISTS setor (
     id_setor INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     tipo ENUM('OBSERVACAO','INTERNACAO','UTI') NOT NULL,
     ativo BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE leito (
+CREATE TABLE IF NOT EXISTS leito (
     id_leito INT AUTO_INCREMENT PRIMARY KEY,
     id_setor INT NOT NULL,
     identificacao VARCHAR(50) NOT NULL,
@@ -678,7 +674,7 @@ CREATE TABLE leito (
     UNIQUE KEY uk_setor_leito (id_setor, identificacao)
 );
 
-CREATE TABLE internacao (
+CREATE TABLE IF NOT EXISTS internacao (
     id_internacao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT NOT NULL,
     id_leito INT NOT NULL,
@@ -693,7 +689,7 @@ CREATE TABLE internacao (
 
 
 
-CREATE TABLE evolucao_medica (
+CREATE TABLE IF NOT EXISTS evolucao_medica (
     id_evolucao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_internacao BIGINT NOT NULL,
     descricao TEXT NOT NULL,
@@ -703,7 +699,7 @@ CREATE TABLE evolucao_medica (
     FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
 );
 
-CREATE TABLE prescricao_internacao (
+CREATE TABLE IF NOT EXISTS prescricao_internacao (
     id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_internacao BIGINT NOT NULL,
     tipo ENUM('MEDICAMENTO','CUIDADO','DIETA','OUTROS') NOT NULL,
@@ -715,7 +711,7 @@ CREATE TABLE prescricao_internacao (
     FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
 );
 
-CREATE TABLE administracao_medicacao (
+CREATE TABLE IF NOT EXISTS administracao_medicacao (
     id_admin BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_prescricao BIGINT NOT NULL,
     id_enfermeiro BIGINT NOT NULL,
@@ -727,7 +723,7 @@ CREATE TABLE administracao_medicacao (
     FOREIGN KEY (id_enfermeiro) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE evolucao_enfermagem (
+CREATE TABLE IF NOT EXISTS evolucao_enfermagem (
     id_evolucao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_internacao BIGINT NOT NULL,
     descricao TEXT NOT NULL,
@@ -736,7 +732,7 @@ CREATE TABLE evolucao_enfermagem (
     FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao),
     FOREIGN KEY (id_enfermeiro) REFERENCES usuario(id_usuario)
 );
-CREATE TABLE anotacao_enfermagem (
+CREATE TABLE IF NOT EXISTS anotacao_enfermagem (
     id_anotacao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_internacao BIGINT NOT NULL,
     descricao TEXT NOT NULL,
@@ -746,7 +742,7 @@ CREATE TABLE anotacao_enfermagem (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE interconsulta (
+CREATE TABLE IF NOT EXISTS interconsulta (
     id_interconsulta BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_internacao BIGINT NOT NULL,
     id_especialidade INT NOT NULL,
@@ -1158,7 +1154,7 @@ END$$
 
 DELIMITER ;
 
-CREATE TABLE atendimento_observacao (
+CREATE TABLE IF NOT EXISTS atendimento_observacao (
     id_obs BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT NOT NULL,
     tipo ENUM('OBSERVACAO','INTERNACAO') NOT NULL,
@@ -1172,7 +1168,7 @@ CREATE TABLE atendimento_observacao (
 );
 
 
-CREATE TABLE prescricao_continua (
+CREATE TABLE IF NOT EXISTS prescricao_continua (
     id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT NOT NULL,
     tipo ENUM('MEDICAMENTOS','CUIDADOS_GERAIS') NOT NULL,
@@ -1182,7 +1178,7 @@ CREATE TABLE prescricao_continua (
     FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
     FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
 );
-CREATE TABLE prescricao_item (
+CREATE TABLE IF NOT EXISTS prescricao_item (
     id_item BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_prescricao BIGINT NOT NULL,
     descricao TEXT NOT NULL,
@@ -1193,7 +1189,7 @@ CREATE TABLE prescricao_item (
     FOREIGN KEY (id_prescricao) REFERENCES prescricao_continua(id_prescricao)
 );
 
-CREATE TABLE evolucao_multidisciplinar (
+CREATE TABLE IF NOT EXISTS evolucao_multidisciplinar (
     id_evolucao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_atendimento BIGINT NOT NULL,
     area VARCHAR(100), -- fisioterapia, nutrição, etc
@@ -1203,7 +1199,7 @@ CREATE TABLE evolucao_multidisciplinar (
     FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
-CREATE TABLE intercorrencia (
+CREATE TABLE IF NOT EXISTS intercorrencia (
     id_intercorrencia BIGINT AUTO_INCREMENT PRIMARY KEY,
 
     id_atendimento BIGINT NOT NULL,
@@ -1665,7 +1661,7 @@ FROM log_auditoria la
 LEFT JOIN usuario u ON u.id_usuario = la.id_usuario
 ORDER BY la.data_hora DESC;
 
-CREATE TABLE enfermagem (
+CREATE TABLE IF NOT EXISTS enfermagem (
     id_usuario BIGINT PRIMARY KEY,
     coren VARCHAR(20) NOT NULL,
     uf_coren CHAR(2) NOT NULL,
@@ -1674,13 +1670,13 @@ CREATE TABLE enfermagem (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE permissao (
+CREATE TABLE IF NOT EXISTS permissao (
     id_permissao INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(100) UNIQUE NOT NULL,
     descricao VARCHAR(255)
 );
 
-CREATE TABLE perfil_permissao (
+CREATE TABLE IF NOT EXISTS perfil_permissao (
     id_perfil INT,
     id_permissao INT,
     PRIMARY KEY (id_perfil, id_permissao),
@@ -1763,7 +1759,7 @@ AND pe.codigo IN ('VER_AUDITORIA');
 
 ALTER TABLE perfil_permissao ADD COLUMN permissao VARCHAR(255);
 
-CREATE TABLE permissao_procedure (
+CREATE TABLE IF NOT EXISTS permissao_procedure (
     id_perfil INT,
     procedure_nome VARCHAR(100),
     PRIMARY KEY(id_perfil, procedure_nome),
@@ -1914,7 +1910,7 @@ DELIMITER ;
 USE pronto_atendimento;
 
 -- Cria a tabela 'documento' com os tipos de dados corretos para as chaves estrangeiras
-CREATE TABLE documento (
+CREATE TABLE IF NOT EXISTS documento (
     id_documento BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT para consistência
     id_atendimento BIGINT NOT NULL,              -- Corrigido para BIGINT
     tipo ENUM('RECEITA','EXAME','ATESTADO','EVOLUCAO','ALTA','RETORNO') NOT NULL,
@@ -1929,7 +1925,7 @@ CREATE TABLE documento (
 USE pronto_atendimento;
 
 -- Cria a tabela 'nao_atendido' com os tipos de dados corretos para as chaves estrangeiras
-CREATE TABLE nao_atendido (
+CREATE TABLE IF NOT EXISTS nao_atendido (
     id_nao_atendido BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT para consistência
     id_atendimento BIGINT NOT NULL,                 -- Corrigido para BIGINT
     motivo TEXT,
@@ -1939,7 +1935,7 @@ CREATE TABLE nao_atendido (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
-CREATE TABLE pedido_exame (
+CREATE TABLE IF NOT EXISTS pedido_exame (
   id_pedido_exame INT AUTO_INCREMENT PRIMARY KEY,
   id_atendimento INT NOT NULL,
   id_usuario_medico INT NOT NULL,
@@ -1952,7 +1948,7 @@ CREATE TABLE pedido_exame (
   INDEX idx_status (status)
 );
 
-CREATE TABLE sigpat_procedimento (
+CREATE TABLE IF NOT EXISTS sigpat_procedimento (
   id_sigpat INT AUTO_INCREMENT PRIMARY KEY,
   codigo_sigpat VARCHAR(20) UNIQUE NOT NULL,
   descricao TEXT NOT NULL,
@@ -1968,7 +1964,7 @@ CREATE TABLE sigpat_procedimento (
 USE pronto_atendimento;
 
 -- 1. Tabela prescricao_medica (Corrigido para BIGINT)
-CREATE TABLE prescricao_medica (
+CREATE TABLE IF NOT EXISTS prescricao_medica (
     id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
     id_atendimento BIGINT NOT NULL,                 -- Corrigido para BIGINT
     id_usuario_medico BIGINT NOT NULL,              -- Corrigido para BIGINT
@@ -1979,7 +1975,7 @@ CREATE TABLE prescricao_medica (
 ) ENGINE=InnoDB;
 
 -- 2. Tabela prescricao_item (Chave estrangeira corrigida para BIGINT)
-CREATE TABLE prescricao_item (
+CREATE TABLE IF NOT EXISTS prescricao_item (
     id_item BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
     id_prescricao BIGINT NOT NULL,           -- Corrigido para BIGINT
     medicamento VARCHAR(150),
@@ -1991,7 +1987,7 @@ CREATE TABLE prescricao_item (
 ) ENGINE=InnoDB;
 
 -- 3. Tabela pedido_exame (Corrigido para BIGINT)
-CREATE TABLE pedido_exame (
+CREATE TABLE IF NOT EXISTS pedido_exame (
     id_pedido_exame BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
     id_atendimento BIGINT NOT NULL,                   -- Corrigido para BIGINT
     id_usuario_medico BIGINT NOT NULL,                -- Corrigido para BIGINT
@@ -2005,7 +2001,7 @@ CREATE TABLE pedido_exame (
 ) ENGINE=InnoDB;
 
 -- 4. Tabela pedido_exame_item (Chave estrangeira corrigida para BIGINT, Referência SIGPAT comentada)
-CREATE TABLE pedido_exame_item (
+CREATE TABLE IF NOT EXISTS pedido_exame_item (
     id_item BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT
     id_pedido_exame BIGINT NOT NULL,         -- Corrigido para BIGINT
     id_sigpat INT NOT NULL,                  -- Mantido INT (assumindo que 'sigpat_procedimento' usa INT)
@@ -2019,7 +2015,7 @@ CREATE TABLE pedido_exame_item (
 USE pronto_atendimento;
 
 -- Cria a tabela 'historico_status' com os tipos de dados corretos para as chaves estrangeiras
-CREATE TABLE historico_status (
+CREATE TABLE IF NOT EXISTS historico_status (
     id_historico BIGINT AUTO_INCREMENT PRIMARY KEY, -- Alterado para BIGINT para consistência
     id_atendimento BIGINT NOT NULL,              -- Corrigido para BIGINT
     status VARCHAR(30) NOT NULL,
@@ -2029,7 +2025,7 @@ CREATE TABLE historico_status (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
-CREATE TABLE triagem (
+CREATE TABLE IF NOT EXISTS triagem (
   id_triagem INT AUTO_INCREMENT PRIMARY KEY,
   id_atendimento INT NOT NULL,
   id_usuario INT NOT NULL,
@@ -2040,7 +2036,7 @@ CREATE TABLE triagem (
   FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE RESTRICT
 );
-CREATE TABLE paciente (
+CREATE TABLE IF NOT EXISTS paciente (
   id_paciente INT AUTO_INCREMENT PRIMARY KEY,
   nome_completo VARCHAR(150) NOT NULL,
   cpf VARCHAR(14) UNIQUE,
@@ -2231,7 +2227,7 @@ WHERE p.nome = 'ADMIN'
 ON DUPLICATE KEY UPDATE
     usuario_perfil.id_perfil = usuario_perfil.id_perfil;
 
-CREATE TABLE sessao (
+CREATE TABLE IF NOT EXISTS sessao (
     id_sessao BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_usuario BIGINT NOT NULL,
     token CHAR(64) NOT NULL UNIQUE,
@@ -2240,3 +2236,320 @@ CREATE TABLE sessao (
     ativo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
+USE pronto_atendimento;
+
+-- 1. Garante que o ID da pessoa 'Administrador Master' está na variável
+SET @id_pessoa_admin = (
+    SELECT id_pessoa FROM pessoa WHERE cpf = '00000000000'
+);
+
+-- 2. Atualiza (ou insere) o usuário com o hash correto para a senha '123456'
+-- (O hash abaixo é o mesmo que você já usou no script)
+INSERT INTO usuario (login, senha_hash, ativo, id_pessoa)
+VALUES (
+    'admin',
+    '$2y$10$R/9eO6N7wQ1wVq2SjT3hwuF1eFf8c1s.pZ/3v2A2A8b2Q9R/P4S8A',
+    TRUE,
+    @id_pessoa_admin
+)
+ON DUPLICATE KEY UPDATE
+    senha_hash = VALUES(senha_hash),
+    ativo = 1,
+    id_pessoa = VALUES(id_pessoa);
+
+-- 3. Confirma o ID do usuário
+SET @id_usuario_admin = (
+    SELECT id_usuario FROM usuario WHERE login = 'admin'
+);
+
+-- 4. Garante que o perfil ADMIN está associado
+INSERT INTO usuario_perfil (id_usuario, id_perfil)
+SELECT 
+    @id_usuario_admin,
+    p.id_perfil
+FROM perfil p
+WHERE p.nome = 'admin'
+ON DUPLICATE KEY UPDATE
+    usuario_perfil.id_perfil = usuario_perfil.id_perfil;
+    
+    USE pronto_atendimento;
+
+UPDATE usuario
+SET senha_hash = '$2y$10$dwht9oLbGLKgdF/vBjAK6OL.FyjIQ0.8QaokhpRRGBb0CnK8gdI8y' 
+WHERE login = 'admin';
+
+SELECT 'Senha do usuário admin atualizada com sucesso!' AS Status;
+
+
+CREATE TABLE IF NOT EXISTS farmaco (
+    id_farmaco BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome_comercial VARCHAR(150) NOT NULL,
+    principio_ativo VARCHAR(150),
+    tipo ENUM('CONTROLADO','PADRAO','HEMODERIVADO') NOT NULL,
+    unidade_medida VARCHAR(20) -- ex: mg, ml, UI
+);
+
+CREATE TABLE IF NOT EXISTS estoque_local (
+    id_estoque BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_farmaco BIGINT NOT NULL,
+    id_local INT NOT NULL, -- ex: Farmácia Central, Farmácia da Emergência
+    quantidade_atual INT NOT NULL DEFAULT 0,
+    min_estoque INT DEFAULT 0,
+    FOREIGN KEY (id_farmaco) REFERENCES farmaco(id_farmaco),
+    FOREIGN KEY (id_local) REFERENCES local_atendimento(id_local),
+    UNIQUE KEY uk_farmaco_local (id_farmaco, id_local)
+);
+
+
+CREATE TABLE IF NOT EXISTS dispensacao_farmacia (
+    id_dispensacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_prescricao BIGINT NOT NULL, -- Qual prescrição gerou o pedido (FK para prescricao_medica)
+    id_prescricao_item BIGINT NOT NULL, -- Qual item da prescrição está sendo atendido (FK para prescricao_item)
+    id_farmaco BIGINT NOT NULL,
+    id_estoque BIGINT NOT NULL, -- De qual local de estoque (estoque_local) saiu
+    quantidade_dispensada DECIMAL(10, 2) NOT NULL,
+    id_usuario_farmaceutico BIGINT NOT NULL, -- Quem liberou/dispensou
+    data_hora_dispensacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_prescricao) REFERENCES prescricao(id_prescricao),
+    FOREIGN KEY (id_prescricao_item) REFERENCES prescricao_item(id_item),
+    FOREIGN KEY (id_farmaco) REFERENCES farmaco(id_farmaco),
+    FOREIGN KEY (id_estoque) REFERENCES estoque_local(id_estoque),
+    FOREIGN KEY (id_usuario_farmaceutico) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_baixa_estoque_dispensacao
+AFTER INSERT ON dispensacao_farmacia
+FOR EACH ROW
+BEGIN
+    -- Subtrai a quantidade dispensada do estoque
+    UPDATE estoque_local
+    SET quantidade_atual = quantidade_atual - NEW.quantidade_dispensada
+    WHERE id_estoque = NEW.id_estoque;
+    
+    -- Opcional: Adicionar lógica para alerta de estoque mínimo
+    -- Se a quantidade_atual < min_estoque, insira um alerta em uma tabela de log/alerta.
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_registrar_recepcao(
+    IN p_id_atendimento BIGINT,
+    IN p_tipo ENUM('CLINICO','PEDIATRICO','EMERGENCIA','EXAME_EXTERNO','MEDICACAO_EXTERNA'),
+    IN p_chegada ENUM('MEIOS_PROPRIOS','AMBULANCIA','POLICIA','OUTROS'),
+    IN p_prioridade ENUM('AUTISTA','CRIANCA_COLO','GESTANTE','IDOSO','NORMAL'),
+    IN p_motivo TEXT,
+    IN p_destino ENUM('TRIAGEM','MEDICO','EMERGENCIA','RX','MEDICACAO'),
+    IN p_usuario BIGINT
+)
+BEGIN
+    -- Calcula prioridade automaticamente quando não fornecida
+    DECLARE v_prioridade ENUM('AUTISTA','CRIANCA_COLO','GESTANTE','IDOSO','PRIORITARIO_PEDI','PRIORITARIO_ADULTO','NORMAL');
+    DECLARE v_data_nasc DATE;
+    DECLARE v_idade INT;
+    DECLARE v_origem VARCHAR(50);
+
+    SET v_prioridade = p_prioridade;
+
+    IF v_prioridade IS NULL OR v_prioridade = '' THEN
+        -- tenta inferir a partir da origem da senha (TOTEM_PRI_PEDI / TOTEM_PRI_ADULTO)
+        SELECT s.origem INTO v_origem
+        FROM atendimento a
+        JOIN senha s ON s.id_senha = a.id_senha
+        WHERE a.id_atendimento = p_id_atendimento
+        LIMIT 1;
+
+        IF v_origem = 'TOTEM_PRI_PEDI' THEN
+            SET v_prioridade = 'PRIORITARIO_PEDI';
+        ELSEIF v_origem = 'TOTEM_PRI_ADULTO' THEN
+            SET v_prioridade = 'PRIORITARIO_ADULTO';
+        ELSE
+            -- fallback para cálculo por idade
+            SELECT pe.data_nascimento INTO v_data_nasc
+            FROM pessoa pe
+            JOIN atendimento a ON a.id_pessoa = pe.id_pessoa
+            WHERE a.id_atendimento = p_id_atendimento
+            LIMIT 1;
+
+            IF v_data_nasc IS NOT NULL THEN
+                SET v_idade = TIMESTAMPDIFF(YEAR, v_data_nasc, CURDATE());
+
+                IF v_idade >= 60 THEN
+                    SET v_prioridade = 'IDOSO';
+                ELSEIF v_idade <= 2 THEN
+                    SET v_prioridade = 'CRIANCA_COLO';
+                ELSE
+                    SET v_prioridade = 'NORMAL';
+                END IF;
+            ELSE
+                SET v_prioridade = 'NORMAL';
+            END IF;
+        END IF;
+    END IF;
+
+    INSERT INTO atendimento_recepcao (
+        id_atendimento,
+        tipo_atendimento,
+        chegada,
+        prioridade,
+        motivo_procura,
+        destino_inicial,
+        id_recepcionista
+    )
+    VALUES (
+        p_id_atendimento,
+        p_tipo,
+        p_chegada,
+        v_prioridade,
+        p_motivo,
+        p_destino,
+        p_usuario
+    );
+END$$
+
+DELIMITER ;
+
+-- Procedure to ensure schema exists (idempotent)
+DELIMITER $$
+CREATE PROCEDURE sp_ensure_schema()
+BEGIN
+    -- Core tables (created in dependency order to satisfy FKs)
+    CREATE TABLE IF NOT EXISTS pessoa (
+        id_pessoa BIGINT AUTO_INCREMENT PRIMARY KEY,
+        nome_completo VARCHAR(200) NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS usuario (
+        id_usuario BIGINT AUTO_INCREMENT PRIMARY KEY,
+        login VARCHAR(100) NOT NULL UNIQUE,
+        senha_hash VARCHAR(255) NOT NULL,
+        ativo BOOLEAN DEFAULT TRUE,
+        id_pessoa BIGINT
+    );
+
+    CREATE TABLE IF NOT EXISTS perfil (
+        id_perfil INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(50) NOT NULL UNIQUE
+    );
+
+    CREATE TABLE IF NOT EXISTS usuario_perfil (
+        id_usuario BIGINT,
+        id_perfil INT,
+        PRIMARY KEY (id_usuario, id_perfil)
+    );
+
+    CREATE TABLE IF NOT EXISTS especialidade (
+        id_especialidade INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(100) NOT NULL UNIQUE
+    );
+
+    CREATE TABLE IF NOT EXISTS local_atendimento (
+        id_local INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(100) NOT NULL UNIQUE
+    );
+
+    CREATE TABLE IF NOT EXISTS sala (
+        id_sala INT AUTO_INCREMENT PRIMARY KEY,
+        nome_exibicao VARCHAR(100) NOT NULL,
+        id_local INT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS senha (
+        id_senha BIGINT AUTO_INCREMENT PRIMARY KEY,
+        numero INT NOT NULL,
+        origem ENUM('TOTEM','RECEPCAO','TOTEM_PRI_PEDI','TOTEM_PRI_ADULTO'),
+        data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS totem_feedback (
+        id_feedback BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_senha BIGINT NULL,
+        origem VARCHAR(50) NULL,
+        nota INT NULL,
+        comentario TEXT NULL,
+        data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS atendimento (
+        id_atendimento BIGINT AUTO_INCREMENT PRIMARY KEY,
+        protocolo VARCHAR(30) NOT NULL UNIQUE,
+        id_pessoa BIGINT NOT NULL,
+        id_senha BIGINT
+    );
+
+    CREATE TABLE IF NOT EXISTS atendimento_recepcao (
+        id_recepcao BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_atendimento BIGINT,
+        id_usuario BIGINT,
+        prioridade ENUM('NORMAL','IDOSO','CRIANCA_COLO','PRIORITARIO_PEDI','PRIORITARIO_ADULTO')
+    );
+
+    CREATE TABLE IF NOT EXISTS atendimento_movimentacao (
+        id_mov BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_atendimento BIGINT
+    );
+
+    CREATE TABLE IF NOT EXISTS classificacao_risco (
+        id_risco INT AUTO_INCREMENT PRIMARY KEY,
+        cor ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL')
+    );
+
+    CREATE TABLE IF NOT EXISTS triagem (
+        id_triagem BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_atendimento BIGINT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS prescricao_medica (
+        id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_atendimento BIGINT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS prescricao_item (
+        id_item BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_prescricao BIGINT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS pedido_exame (
+        id_pedido_exame BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_atendimento BIGINT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS pedido_exame_item (
+        id_item BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_pedido_exame BIGINT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS chamada_painel (
+        id_chamada BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_atendimento BIGINT
+    );
+
+    CREATE TABLE IF NOT EXISTS historico_status (
+        id_historico BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_atendimento BIGINT NOT NULL
+    );
+
+END$$
+DELIMITER ;
+DELIMITER $$
+
+CREATE FUNCTION fn_gera_protocolo()
+RETURNS VARCHAR(30)
+NOT DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE seq INT;
+
+    INSERT INTO protocolo_sequencia VALUES (NULL);
+    SET seq = LAST_INSERT_ID();
+
+    RETURN CONCAT(
+        YEAR(NOW()),
+        'GPAT/',
+        LPAD(seq, 6, '0')
+    );
+END$$

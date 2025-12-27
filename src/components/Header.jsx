@@ -1,15 +1,9 @@
 import React from 'react';
+import './Header.css';
 
 export default function Header() {
     return (
-        <header style={{
-            width: '100%',
-            padding: '20px',
-            background: '#1976d2',
-            color: '#fff',
-            fontSize: '20px',
-            fontWeight: 'bold'
-        }}>
+        <header className="header">
             Sistema de Atendimento - ADM
         </header>
     );

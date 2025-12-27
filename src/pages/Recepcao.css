@@ -1,0 +1,133 @@
+/* Wrapper geral */
+.recepcao-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* Conteúdo principal */
+.recepcao-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* Header */
+.recepcao-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Main */
+.recepcao-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Formulário de cadastro */
+.cadastro-form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cadastro-form input,
+.cadastro-form select {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.cadastro-form button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cadastro-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Fila */
+.fila-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.fila-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fila-container th,
+.fila-container td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.fila-container th {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.fila-container tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.fila-container button {
+  padding: 5px 10px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.fila-container button:hover {
+  background-color: #1e7e34;
+}
+
+/* Footer */
+.recepcao-footer {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.recepcao-footer button {
+  padding: 10px 15px;
+  background-color: #17a2b8;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.recepcao-footer button:hover {
+  background-color: #117a8b;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .recepcao-main {
+    flex-direction: column;
+  }
+
+  .fila-container table,
+  .fila-container th,
+  .fila-container td {
+    font-size: 14px;
+  }
+}

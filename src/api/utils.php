@@ -3,33 +3,45 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/middleware.php';
 
 /* =========================
-   HEADERS
-========================= */
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Headers: Authorization, Content-Type");
-header("Access-Control-Allow-Methods: GET, OPTIONS");
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-/* =========================
-   CONEXÃO
+   CONEXÃO COM O BANCO
 ========================= */
 $pdo = getPDO();
 
 /* =========================
-   PROTEÇÃO
+   PROTEÇÃO DA ROTA
 ========================= */
 $usuario = validarToken($pdo);
 
 /* =========================
-   EXEMPLO DE RETORNO
+   FUNÇÕES ÚTEIS DO SISTEMA
 ========================= */
-echo json_encode([
-    'ok' => true,
-    'message' => 'Acesso autorizado',
-    'usuario' => $usuario
-]);
+
+/**
+ * Retorna o usuário autenticado
+ */
+function usuarioAutenticado() {
+    global $usuario;
+    return $usuario;
+}
+
+/**
+ * Verifica se o usuário possui um perfil específico
+ */
+function usuarioTemPerfil(string $perfil): bool {
+    global $usuario;
+    return in_array($perfil, $usuario['perfis'] ?? []);
+}
+
+/**
+ * Força perfil específico (ex: ADMIN)
+ */
+function exigirPerfil(string $perfil) {
+    if (!usuarioTemPerfil($perfil)) {
+        http_response_code(403);
+        echo json_encode([
+            'erro' => 'Acesso negado',
+            'mensagem' => "Perfil '$perfil' necessário"
+        ]);
+        exit;
+    }
+}

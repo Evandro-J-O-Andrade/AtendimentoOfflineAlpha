@@ -22,12 +22,33 @@ a:hover {
   color: #535bf2;
 }
 
-body {
+html, body, #root {
+  height: 100%;       /* garante altura total da viewport */
   margin: 0;
+  padding: 0;
+}
+
+body {
   display: flex;
-  place-items: center;
+  flex-direction: column;  /* empilha header, main, footer */
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100%;
+  background-color: var(--color-bg, #242424);
+  color: var(--color-text, rgba(255,255,255,0.87));
+  box-sizing: border-box;
+}
+
+/* Header, Main, Footer */
+header, footer {
+  flex-shrink: 0;
+}
+
+main {
+  flex: 1;                /* ocupa o espaço restante */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
 }
 
 h1 {
@@ -44,7 +65,7 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, background 0.25s;
 }
 button:hover {
   border-color: #646cff;
@@ -64,5 +85,26 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+/* Cards e conteúdo central */
+.card, form {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #1a1a1a;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .card, form {
+    padding: 1.5rem;
+  }
+  main {
+    padding: 1rem;
   }
 }

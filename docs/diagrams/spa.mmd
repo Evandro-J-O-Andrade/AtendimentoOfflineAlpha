@@ -1,0 +1,30 @@
+flowchart LR
+  subgraph PUBLIC
+    TOTE["/totem\nTotem (gerar senha)"]
+    PAINEL["/painel-chamada\nPainel público de chamadas"]
+    LOGIN["/login\nAutenticação"]
+  end
+
+  subgraph APP
+    DASH["/dashboard\nFila (todas as filas por local)"]
+    RECEP["/recepcao\nAbertura de atendimento"]
+    TRIAGEM["/triagem\nRegistro triagem"]
+    MEDICO["/medico\nProntuário / Prescrição"]
+    FARM["/farmacia\nDispensação / Estoque"]
+  end
+
+  LOGIN --> DASH
+  TOTE --> PAINEL
+  PAINEL --> DASH
+  DASH --> RECEP
+  RECEP --> TRIAGEM
+  TRIAGEM --> MEDICO
+  MEDICO --> FARM
+
+  classDef perfilRecepcao fill:#ffe;stroke:#333
+  classDef perfilEnfermagem fill:#efe;stroke:#333
+  classDef perfilMedico fill:#eef;stroke:#333
+
+  class RECEP perfilRecepcao
+  class TRIAGEM perfilEnfermagem
+  class MEDICO perfilMedico

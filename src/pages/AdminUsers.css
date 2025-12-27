@@ -1,0 +1,126 @@
+.admin-users {
+  padding: 18px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  color: #222;
+}
+
+.admin-users h1 {
+  margin-bottom: 12px;
+}
+
+.admin-users .create {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e6e6e6;
+  margin-bottom: 16px;
+}
+
+.admin-users .create input,
+.admin-users .create select {
+  padding: 8px 10px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+}
+
+.admin-users .create button {
+  padding: 8px 14px;
+  background: #2b6cb0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.admin-users .create .message {
+  margin-top: 8px;
+  color: #155724;
+  background: #d4edda;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.admin-users .create .error {
+  margin-top: 8px;
+  color: #721c24;
+  background: #f8d7da;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.admin-users .list input[placeholder] {
+  padding: 8px;
+  width: 320px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.admin-users table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.admin-users th,
+.admin-users td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.admin-users tbody tr:hover {
+  background: #fbfbfb;
+}
+
+/* Inputs used in inline edit mode */
+.admin-users td input,
+.admin-users td select {
+  padding: 6px 8px;
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  min-width: 140px;
+}
+
+.admin-users td input[type="password"] {
+  min-width: 180px;
+}
+
+.admin-users button {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #bfbfbf;
+  background: #fff;
+  cursor: pointer;
+}
+
+.admin-users button:hover {
+  background: #f6f6f6;
+}
+
+.admin-users button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Small success/error toast near top-right */
+.admin-users .toast {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  z-index: 9999;
+}
+
+.admin-users .toast.success {
+  background: #e6ffed;
+  color: #0f5132;
+}
+
+.admin-users .toast.error {
+  background: #fff0f0;
+  color: #6b0f0f;
+}

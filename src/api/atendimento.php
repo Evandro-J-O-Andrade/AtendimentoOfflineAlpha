@@ -1,5 +1,6 @@
 <?php
 require "config.php";
+$pdo = getPDO();
 require "middleware.php"; // Protege a rota!
 
 $usuario = validarToken($pdo); // Autentica o usuário e pega seus dados

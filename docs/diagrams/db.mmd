@@ -1,0 +1,98 @@
+erDiagram
+    PESSOA {
+        BIGINT id_pessoa PK
+        VARCHAR nome_completo
+        DATE data_nascimento
+        VARCHAR cpf
+        VARCHAR cns
+    }
+    USUARIO {
+        BIGINT id_usuario PK
+        VARCHAR login
+        VARCHAR senha_hash
+        BIGINT id_pessoa FK
+    }
+    PERFIL {
+        INT id_perfil PK
+        VARCHAR nome
+    }
+    USUARIO_PERFIL {
+        BIGINT id_usuario FK
+        INT id_perfil FK
+    }
+    SENHA {
+        BIGINT id_senha PK
+        INT numero
+        ENUM origem
+        DATETIME data_hora
+        BOOL chamada
+    }
+    ATENDIMENTO {
+        BIGINT id_atendimento PK
+        VARCHAR protocolo
+        BIGINT id_pessoa FK
+        BIGINT id_senha FK
+        ENUM status_atendimento
+        INT id_local_atual FK
+        INT id_sala_atual FK
+        DATETIME data_abertura
+    }
+    ATENDIMENTO_RECEPCAO {
+        BIGINT id_atendimento FK
+        ENUM tipo_atendimento
+        ENUM chegada
+        ENUM prioridade
+        TEXT motivo_procura
+        ENUM destino_inicial
+        BIGINT id_recepcionista FK
+    }
+    TRIAGEM {
+        BIGINT id_triagem PK
+        BIGINT id_atendimento FK
+        INT id_risco FK
+        JSON sinais_vitais
+    }
+    PRESCRICAO {
+        BIGINT id_prescricao PK
+        BIGINT id_atendimento FK
+        ENUM tipo
+        TEXT descricao
+    }
+    FARMACO {
+        BIGINT id_farmaco PK
+        VARCHAR nome_comercial
+        ENUM tipo
+    }
+    ESTOQUE_LOCAL {
+        BIGINT id_estoque PK
+        BIGINT id_farmaco FK
+        INT id_local FK
+        INT quantidade_atual
+    }
+    DISPENSACAO_FARMACIA {
+        BIGINT id_dispensacao PK
+        BIGINT id_prescricao FK
+        BIGINT id_prescricao_item FK
+        BIGINT id_farmaco FK
+        BIGINT id_estoque FK
+        DEC quantidade_dispensada
+    }
+    CHAMADA_PAINEL {
+        BIGINT id_chamada PK
+        BIGINT id_atendimento FK
+        INT id_sala FK
+        ENUM status
+        DATETIME data_hora
+    }
+
+    PESSOA ||--o{ USUARIO : "tem"
+    USUARIO ||--o{ USUARIO_PERFIL : "pertence a"
+    PERFIL ||--o{ USUARIO_PERFIL : "contém"
+    PESSOA ||--o{ ATENDIMENTO : "possui"
+    SENHA ||--o{ ATENDIMENTO : "vincula"
+    ATENDIMENTO ||--o{ ATENDIMENTO_RECEPCAO : "registrado em"
+    ATENDIMENTO ||--o{ TRIAGEM : "tem"
+    ATENDIMENTO ||--o{ PRESCRICAO : "tem"
+    FARMACO ||--o{ ESTOQUE_LOCAL : "armazenado em"
+    ESTOQUE_LOCAL ||--o{ DISPENSACAO_FARMACIA : "baixa via"
+    ATENDIMENTO ||--o{ CHAMADA_PAINEL : "chamado em"

@@ -1,0 +1,39 @@
+/* Dashboard.css */
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.dashboard-content {
+  display: flex;
+  flex: 1;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.cards-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.fila-detalhada {
+  margin-top: 30px;
+}
+
+.fila-detalhada table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fila-detalhada th,
+.fila-detalhada td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}

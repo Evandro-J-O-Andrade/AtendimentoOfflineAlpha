@@ -9,9 +9,24 @@ $senha_hash = password_hash($data['senha'], PASSWORD_DEFAULT);
 try {
     $pdo->beginTransaction();
 
-    // 1. Insere o registro na tabela pessoa (se não existir, ou se for um novo cadastro)
-    // Para simplificar, vamos assumir que id_pessoa já foi criado ou é passado.
-    $id_pessoa = $data['id_pessoa']; 
+    // 1. Resolve ou cria a pessoa: aceita id_pessoa, ou usa nome/cpf/data_nasc/sexo para criar/buscar
+    $id_pessoa = $data['id_pessoa'] ?? null;
+    if (!$id_pessoa) {
+        $stmt = $pdo->prepare("CALL sp_buscar_ou_criar_pessoa(:nome, :cpf, :cns, :data_nasc, :sexo, @p_id_pessoa)");
+        $stmt->execute([
+            ':nome' => $data['nome'] ?? null,
+            ':cpf' => $data['cpf'] ?? null,
+            ':cns' => $data['cns'] ?? null,
+            ':data_nasc' => $data['data_nasc'] ?? null,
+            ':sexo' => $data['sexo'] ?? null,
+        ]);
+
+        $row = $pdo->query("SELECT @p_id_pessoa AS id_pessoa")->fetch(PDO::FETCH_ASSOC);
+        $id_pessoa = $row['id_pessoa'] ?? null;
+        if (!$id_pessoa) {
+            throw new Exception('Falha ao obter id_pessoa');
+        }
+    }
 
     // 2. Insere na tabela usuario
     $stmt_user = $pdo->prepare("
@@ -25,12 +40,20 @@ try {
     ]);
     $id_usuario = $pdo->lastInsertId();
 
-    // 3. Vincula o perfil
-    $stmt_perfil = $pdo->prepare("
-        INSERT INTO usuario_perfil (id_usuario, id_perfil)
-        VALUES (?, ?)
-    ");
-    $stmt_perfil->execute([$id_usuario, $data['id_perfil']]);
+    // 3. Vincula os perfis (aceita id_perfil único para compatibilidade ou id_perfis array)
+    $id_perfis = [];
+    if (!empty($data['id_perfis']) && is_array($data['id_perfis'])) {
+        $id_perfis = $data['id_perfis'];
+    } elseif (!empty($data['id_perfil'])) {
+        $id_perfis = [$data['id_perfil']];
+    }
+
+    if (count($id_perfis) > 0) {
+        $stmt_perfil = $pdo->prepare("INSERT INTO usuario_perfil (id_usuario, id_perfil) VALUES (?, ?)");
+        foreach ($id_perfis as $pid) {
+            $stmt_perfil->execute([$id_usuario, (int)$pid]);
+        }
+    }
 
     $pdo->commit();
     echo json_encode(["ok" => true, "id_usuario" => $id_usuario]);

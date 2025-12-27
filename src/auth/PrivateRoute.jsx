@@ -1,16 +1,33 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../auth/AuthContext";
 
-export default function PrivateRoute({ children }) {
- const { user, loading } = useAuth(); // <-- MUDAR AQUI para 'user' e 'loading'
+export default function PrivateRoute({ children, perfil }) {
+  const { user, loading } = useAuth();
 
- if (loading) { // <-- MUDAR AQUI
- return <div>Carregando...</div>;
- }
+  // Aguarda validação do token no backend
+  if (loading) {
+    return (
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh"
+      }}>
+        <span>Carregando...</span>
+      </div>
+    );
+  }
 
- if (!user) { // <-- MUDAR AQUI
- return <Navigate to="/login" replace />;
- }
+  // Não autenticado
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
- return children;
+  // Autenticado, mas sem perfil permitido
+  if (perfil && !user.perfis?.includes(perfil)) {
+    return <Navigate to="/403" replace />;
+  }
+
+  // Tudo OK
+  return children;
 }
