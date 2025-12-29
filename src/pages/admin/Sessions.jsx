@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import api from '../api/api';
-import { useAuth } from '../auth/AuthContext';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Sessions() {
   const { user, tokenPayload, isAdmin, signOut } = useAuth();

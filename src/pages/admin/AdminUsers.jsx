@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../api/api'
-import { AuthContext } from '../auth/AuthContext'
+import api from '../../services/api'
+import { AuthContext } from '../../context/AuthContext'
 import './AdminUsers.css'
 
 export default function AdminUsers() {

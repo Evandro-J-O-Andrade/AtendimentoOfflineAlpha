@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import api from '../api/api'
+import api from '@/services/api'
 import './Totem.css'
 
 export default function Totem() {

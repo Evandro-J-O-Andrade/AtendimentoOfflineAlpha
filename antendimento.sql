@@ -2050,6 +2050,7 @@ CREATE TABLE IF NOT EXISTS paciente (
   INDEX idx_nome (nome_completo),
   INDEX idx_cns (cns)
 );
+
 CREATE OR REPLACE VIEW vw_sidebar_fila AS
 SELECT
     a.id_atendimento,
@@ -2553,3 +2554,133 @@ BEGIN
         LPAD(seq, 6, '0')
     );
 END$$
+
+CREATE TABLE IF NOT EXISTS local_usuario (
+    id_local_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,                -- Nome do guichê, sala ou local de atendimento
+    tipo ENUM('RECEPCAO','MEDICO','TRIAGEM','SUPORTE','ADMIN','GESTAO') NOT NULL DEFAULT 'RECEPCAO',
+    ativo TINYINT(1) DEFAULT 1,               -- 1 = ativo, 0 = inativo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE if not exists fila_senha (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  senha VARCHAR(10) NOT NULL,
+  tipo ENUM('CLINICO','PEDIATRICO','EMERGENCIA','EXTERNO') NOT NULL,
+  prioridade TINYINT DEFAULT 0,
+  status ENUM(
+    'AGUARDANDO',
+    'CHAMANDO',
+    'EM_ATENDIMENTO',
+    'NAO_ATENDIDO',
+    'FINALIZADO'
+  ) NOT NULL DEFAULT 'AGUARDANDO',
+  id_paciente BIGINT NULL,
+  origem ENUM('TOTEM','MANUAL') NOT NULL,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE if not exists fila_evento (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_fila BIGINT NOT NULL,
+  evento ENUM(
+    'GERADA',
+    'CHAMADA',
+    'NAO_ATENDIDO',
+    'REENTRADA',
+    'ABERTURA_FFA',
+    'ENCAMINHAMENTO'
+  ) NOT NULL,
+  id_usuario BIGINT NULL,
+  id_local BIGINT NULL,
+  detalhe TEXT NULL,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_fila) REFERENCES fila_senha(id)
+);
+
+
+drop procedure sp_chamar_senha;
+DELIMITER $$
+
+CREATE PROCEDURE sp_chamar_senha (
+    IN p_id_senha BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_local BIGINT
+)
+BEGIN
+    DECLARE v_status_atual VARCHAR(20);
+
+    -- trava a senha
+    SELECT status
+    INTO v_status_atual
+    FROM fila_senha
+    WHERE id = p_id_senha
+    FOR UPDATE;
+
+    -- só pode chamar se estiver aguardando
+    IF v_status_atual <> 'AGUARDANDO' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Senha não está em estado AGUARDANDO';
+    END IF;
+
+    -- atualiza status
+    UPDATE fila_senha
+    SET
+        status = 'CHAMANDO'
+    WHERE id = p_id_senha;
+
+    -- registra evento (auditoria)
+    INSERT INTO fila_evento (
+        id_senha,
+        evento,
+        id_usuario,
+        id_local,
+        criado_em
+    ) VALUES (
+        p_id_senha,
+        'CHAMADA',
+        p_id_usuario,
+        p_id_local,
+        NOW()
+    );
+
+END$$
+
+DELIMITER ;
+
+
+DROP VIEW IF EXISTS vw_fila_recepcao;
+
+CREATE VIEW vw_fila_recepcao AS
+SELECT
+  f.id,
+  f.senha,
+  f.tipo,
+  f.prioridade,
+  f.status,
+  f.criado_em
+FROM fila_senha f
+WHERE f.status IN ('AGUARDANDO','CHAMANDO')
+ORDER BY
+  f.prioridade DESC,
+  f.criado_em ASC;
+
+CALL sp_chamar_senha(123, 10, 2);
+
+CREATE OR REPLACE VIEW vw_fila_recepcao AS
+SELECT
+    f.id,
+    f.senha,
+    f.tipo,
+    f.prioridade,
+    f.status,
+    f.criado_em
+FROM fila_senha f
+WHERE f.status IN ('AGUARDANDO','CHAMANDO')
+ORDER BY
+    f.prioridade DESC,
+    f.criado_em ASC;
+

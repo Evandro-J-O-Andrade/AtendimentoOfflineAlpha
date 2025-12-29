@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
-import Sidebar from "../pages/Sidebar";
-import api from "../api/api";
-import { useAuth } from "../auth/AuthContext";
-import SelectLocalModal from "../components/SelectLocalModal";
+import Header from "../../components/Header";
+import Sidebar from "../Sidebar";
+import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import SelectLocalModal from "../../components/SelectLocalModal";
 
 export default function Medico() {
   const { user } = useAuth();

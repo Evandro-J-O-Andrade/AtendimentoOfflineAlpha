@@ -13,7 +13,7 @@ import {
   FaSignOutAlt
 } from "react-icons/fa";
 import SelectLocalModal from "../components/SelectLocalModal";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import "./Sidebar.css";
 
 export default function Sidebar({ usuario }) {

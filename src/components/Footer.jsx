@@ -1,6 +1,6 @@
 import './Footer.css';
 import { useState, useEffect } from 'react'
-import { useAuth } from '../auth/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import SelectLocalModal from './SelectLocalModal'
 
 export default function Footer() {
