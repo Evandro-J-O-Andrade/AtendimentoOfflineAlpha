@@ -384,7 +384,8 @@ DELIMITER ;
 
 
 
-DROP PROCEDURE IF EXISTS sp_abre_atendimento;
+DROP PROCEDURE IF EXISTS sp_abre_atendimento; 
+
 DROP PROCEDURE IF EXISTS sp_abrir_atendimento;
 
 DELIMITER $$
@@ -2536,24 +2537,49 @@ BEGIN
 
 END$$
 DELIMITER ;
+DROP FUNCTION IF EXISTS fn_gera_protocolo;
+
 DELIMITER $$
 
-CREATE FUNCTION fn_gera_protocolo()
+
+
+CREATE FUNCTION fn_gera_protocolo(p_id_usuario BIGINT)
 RETURNS VARCHAR(30)
 NOT DETERMINISTIC
 READS SQL DATA
 BEGIN
     DECLARE seq INT;
+    DECLARE protocolo VARCHAR(30);
 
-    INSERT INTO protocolo_sequencia VALUES (NULL);
+    -- Inserir na tabela de sequência com usuário e timestamp
+    INSERT INTO protocolo_sequencia (id_usuario, created_at) 
+    VALUES (p_id_usuario, NOW());
+    
+    -- Pega o ID gerado
     SET seq = LAST_INSERT_ID();
 
-    RETURN CONCAT(
+    -- Monta o protocolo GPAT no formato: ANO + GPAT + número sequencial 6 dígitos
+    SET protocolo = CONCAT(
         YEAR(NOW()),
         'GPAT/',
         LPAD(seq, 6, '0')
     );
+
+    RETURN protocolo;
 END$$
+
+DELIMITER ;
+
+
+drop table protocolo_sequencia;
+
+CREATE TABLE if not exists protocolo_sequencia (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT NOT NULL,
+    created_at DATETIME NOT NULL
+);
+
+
 
 CREATE TABLE IF NOT EXISTS local_usuario (
     id_local_usuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -2603,54 +2629,37 @@ CREATE TABLE if not exists fila_evento (
 
 
 drop procedure sp_chamar_senha;
+
 DELIMITER $$
 
 CREATE PROCEDURE sp_chamar_senha (
-    IN p_id_senha BIGINT,
+    IN p_id_fila BIGINT,
     IN p_id_usuario BIGINT,
     IN p_id_local BIGINT
 )
 BEGIN
-    DECLARE v_status_atual VARCHAR(20);
-
-    -- trava a senha
-    SELECT status
-    INTO v_status_atual
-    FROM fila_senha
-    WHERE id = p_id_senha
-    FOR UPDATE;
-
-    -- só pode chamar se estiver aguardando
-    IF v_status_atual <> 'AGUARDANDO' THEN
+    -- Validação básica
+    IF NOT EXISTS (
+        SELECT 1
+        FROM fila_senha
+        WHERE id = p_id_fila
+          AND status = 'AGUARDANDO'
+    ) THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Senha não está em estado AGUARDANDO';
+        SET MESSAGE_TEXT = 'Senha inválida ou não está aguardando';
     END IF;
 
-    -- atualiza status
+    -- Atualiza status para CHAMANDO
     UPDATE fila_senha
-    SET
-        status = 'CHAMANDO'
-    WHERE id = p_id_senha;
+    SET status = 'CHAMANDO'
+    WHERE id = p_id_fila;
 
-    -- registra evento (auditoria)
-    INSERT INTO fila_evento (
-        id_senha,
-        evento,
-        id_usuario,
-        id_local,
-        criado_em
-    ) VALUES (
-        p_id_senha,
-        'CHAMADA',
-        p_id_usuario,
-        p_id_local,
-        NOW()
-    );
+    -- Aqui futuramente entra auditoria
+    -- Aqui futuramente entra integração com painel / voz
 
 END$$
 
 DELIMITER ;
-
 
 DROP VIEW IF EXISTS vw_fila_recepcao;
 
@@ -2668,7 +2677,13 @@ ORDER BY
   f.prioridade DESC,
   f.criado_em ASC;
 
-CALL sp_chamar_senha(123, 10, 2);
+
+
+UPDATE fila_senha
+SET status = 'AGUARDANDO'
+WHERE id = 123;
+
+CALL sp_chamar_senha(45, 10, 2);
 
 CREATE OR REPLACE VIEW vw_fila_recepcao AS
 SELECT
@@ -2684,3 +2699,2266 @@ ORDER BY
     f.prioridade DESC,
     f.criado_em ASC;
 
+SELECT id, senha, status, tipo, prioridade, criado_em
+FROM fila_senha
+ORDER BY criado_em DESC
+LIMIT 20;
+
+
+INSERT INTO fila_senha (
+  senha,
+  tipo,
+  prioridade,
+  status,
+  criado_em
+) VALUES (
+  'A001',
+  'CLINICO',
+  0,
+  'AGUARDANDO',
+  NOW()
+);
+
+
+CALL sp_chamar_senha(1, 10, 2);
+
+ALTER TABLE fila_senha
+ADD origem ENUM('TOTEM','RECEPCAO','SAMU') NOT NULL DEFAULT 'TOTEM',
+ADD gerada_manual TINYINT(1) DEFAULT 0;
+
+drop procedure sp_gerar_senha;
+DELIMITER $$
+
+CREATE PROCEDURE sp_gerar_senha (
+    IN p_tipo ENUM('CLINICO','PEDIATRICO','EMERGENCIA','EXTERNO'),
+    IN p_origem ENUM('TOTEM','MANUAL'),
+    IN p_prioridade TINYINT,
+    IN p_id_paciente BIGINT
+)
+BEGIN
+    DECLARE v_seq INT DEFAULT 0;
+    DECLARE v_senha VARCHAR(10);
+
+    -- Garante prioridade mínima
+    IF p_prioridade IS NULL THEN
+        SET p_prioridade = 0;
+    END IF;
+
+    -- Calcula próximo número da senha por TIPO no DIA
+    SELECT COUNT(*) + 1
+    INTO v_seq
+    FROM fila_senha
+    WHERE tipo = p_tipo
+      AND DATE(criado_em) = CURDATE();
+
+    -- Monta senha (C, P, E, X)
+    SET v_senha = CONCAT(
+        CASE p_tipo
+            WHEN 'CLINICO' THEN 'C'
+            WHEN 'PEDIATRICO' THEN 'P'
+            WHEN 'EMERGENCIA' THEN 'E'
+            WHEN 'EXTERNO' THEN 'X'
+        END,
+        LPAD(v_seq, 3, '0')
+    );
+
+    -- Insere na fila
+    INSERT INTO fila_senha (
+        senha,
+        tipo,
+        prioridade,
+        status,
+        id_paciente,
+        origem,
+        criado_em,
+        atualizado_em
+    ) VALUES (
+        v_senha,
+        p_tipo,
+        p_prioridade,
+        'AGUARDANDO',
+        p_id_paciente,
+        p_origem,
+        NOW(),
+        NOW()
+    );
+
+    -- Retorna dados para o frontend
+    SELECT
+        LAST_INSERT_ID() AS id_fila,
+        v_senha          AS senha,
+        p_tipo           AS tipo,
+        p_prioridade     AS prioridade,
+        p_origem         AS origem;
+
+END$$
+
+DELIMITER ;
+
+CALL sp_gerar_senha('CLINICO','TOTEM',0,NULL);
+CALL sp_gerar_senha('EMERGENCIA','TOTEM',10,NULL);
+CALL sp_gerar_senha('CLINICO','MANUAL',5,12345);
+
+SELECT * FROM fila_senha ORDER BY criado_em DESC;
+
+CREATE TABLE if not exists fila_retorno (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_fila BIGINT NOT NULL,
+    retorno_em DATETIME NOT NULL,
+    ativo TINYINT(1) DEFAULT 1,
+    criado_em DATETIME DEFAULT NOW(),
+    FOREIGN KEY (id_fila) REFERENCES fila_senha(id)
+);
+
+drop procedure sp_nao_atendido;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_nao_atendido (
+    IN p_id_fila BIGINT,
+    IN p_delay_minutos INT
+)
+BEGIN
+    -- Validação
+    IF NOT EXISTS (
+        SELECT 1
+        FROM fila_senha
+        WHERE id = p_id_fila
+          AND status = 'CHAMANDO'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Senha não está em chamada';
+    END IF;
+
+    -- Atualiza status
+    UPDATE fila_senha
+    SET status = 'NAO_ATENDIDO',
+        atualizado_em = NOW()
+    WHERE id = p_id_fila;
+
+    -- Agenda retorno
+    INSERT INTO fila_retorno (
+        id_fila,
+        retorno_em
+    ) VALUES (
+        p_id_fila,
+        DATE_ADD(NOW(), INTERVAL p_delay_minutos MINUTE)
+    );
+
+END$$
+
+DELIMITER ;
+
+CALL sp_nao_atendido(1, 5);
+
+CREATE OR REPLACE VIEW vw_fila_pronta AS
+SELECT f.*
+FROM fila_senha f
+LEFT JOIN fila_retorno r ON r.id_fila = f.id AND r.ativo = 1
+WHERE
+    f.status = 'AGUARDANDO'
+    OR (
+        f.status = 'NAO_ATENDIDO'
+        AND r.retorno_em <= NOW()
+    )
+ORDER BY f.prioridade DESC, f.criado_em ASC;
+
+drop table ffa;
+
+CREATE TABLE IF NOT EXISTS ffa (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_paciente BIGINT NOT NULL,
+    gpat VARCHAR(30) NOT NULL,                     -- protocolo hospitalar
+    status ENUM(
+        'EM_ATENDIMENTO',
+        'OBSERVACAO',
+        'INTERNACAO',
+        'ALTA',
+        'TRANSFERENCIA',
+        'ABERTO',
+        'EM_TRIAGEM'
+    ) NOT NULL,
+    layout VARCHAR(50) DEFAULT 'TRIAGEM',          -- layout inicial
+    id_usuario_criacao BIGINT NOT NULL,            -- usuário que criou a FFA
+    id_usuario_alteracao BIGINT DEFAULT NULL,      -- usuário que alterou por último
+    criado_em DATETIME DEFAULT NOW(),
+    atualizado_em DATETIME DEFAULT NOW() ON UPDATE NOW()
+);
+
+
+ALTER TABLE fila_senha
+ADD id_ffa BIGINT NULL;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_atendimento (
+    IN p_id_fila BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_paciente BIGINT;
+    DECLARE v_id_ffa BIGINT;
+
+    -- Validação
+    IF NOT EXISTS (
+        SELECT 1 FROM fila_senha
+        WHERE id = p_id_fila
+          AND status = 'CHAMANDO'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Senha não está em chamada';
+    END IF;
+
+    -- Obtém paciente
+    SELECT id_paciente
+    INTO v_id_paciente
+    FROM fila_senha
+    WHERE id = p_id_fila;
+
+    -- Cria FFA
+    INSERT INTO ffa (
+        id_paciente,
+        status
+    ) VALUES (
+        v_id_paciente,
+        'EM_ATENDIMENTO'
+    );
+
+    SET v_id_ffa = LAST_INSERT_ID();
+
+    -- Vincula fila à FFA
+    UPDATE fila_senha
+    SET status = 'EM_ATENDIMENTO',
+        id_ffa = v_id_ffa,
+        atualizado_em = NOW()
+    WHERE id = p_id_fila;
+
+END$$
+
+DELIMITER 
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_abrir_ffa (
+    IN p_id_fila BIGINT,
+    IN p_id_paciente BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+    DECLARE v_gpat VARCHAR(30);
+
+    -- Valida senha
+    IF NOT EXISTS (
+        SELECT 1 FROM fila_senha
+        WHERE id = p_id_fila
+          AND status = 'CHAMANDO'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Senha inválida para abertura de FFA';
+    END IF;
+
+    -- Gera protocolo / GPAT
+    SET v_gpat = fn_gera_protocolo();
+
+    -- Cria FFA
+    INSERT INTO ffa (
+        id_paciente,
+        gpat,
+        status,
+        criado_em,
+        atualizado_em
+    ) VALUES (
+        p_id_paciente,
+        v_gpat,
+        'EM_ATENDIMENTO',
+        NOW(),
+        NOW()
+    );
+
+    SET v_id_ffa = LAST_INSERT_ID();
+
+    -- Vincula senha à FFA (interno, não exibido ao paciente)
+    UPDATE fila_senha
+    SET id_paciente = p_id_paciente,
+        id_ffa = v_id_ffa,
+        status = 'EM_ATENDIMENTO',
+        atualizado_em = NOW()
+    WHERE id = p_id_fila;
+
+    -- Aqui entram triggers de auditoria
+
+    -- Retorno para o frontend
+    SELECT
+        v_id_ffa AS id_ffa,
+        v_gpat   AS gpat;
+
+END$$
+
+DELIMITER ;
+
+
+drop procedure sp_finalizar_atendimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_atendimento (
+    IN p_id_ffa BIGINT,
+    IN p_status_final ENUM('ALTA','TRANSFERENCIA')
+)
+BEGIN
+    DECLARE v_status_atual VARCHAR(30);
+
+    -- Verifica se a FFA existe e está ativa
+    SELECT status
+    INTO v_status_atual
+    FROM ffa
+    WHERE id = p_id_ffa;
+
+    IF v_status_atual IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'FFA não encontrada';
+    END IF;
+
+    IF v_status_atual IN ('ALTA','TRANSFERENCIA') THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'FFA já está finalizada';
+    END IF;
+
+    -- Finaliza a FFA
+    UPDATE ffa
+    SET status = p_status_final,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Finaliza a senha vinculada
+    UPDATE fila_senha
+    SET status = 'FINALIZADO',
+        atualizado_em = NOW()
+    WHERE id_ffa = p_id_ffa;
+
+    -- Aqui entra trigger de auditoria
+
+END$$
+
+DELIMITER ;
+
+CALL sp_finalizar_atendimento(1, 'ALTA');
+
+CALL sp_finalizar_atendimento(1, 'TRANSFERENCIA');
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_abre_ffa$$
+
+CREATE PROCEDURE sp_abre_ffa(
+    IN p_id_fila BIGINT,        -- corresponde a fila_senha.id
+    IN p_id_usuario BIGINT,     -- usuário que abre a FFA
+    IN p_id_paciente BIGINT,    -- paciente vinculado
+    OUT p_id_ffa BIGINT,        -- retorna o id da FFA criada
+    OUT p_gpat VARCHAR(30)      -- retorna o GPAT gerado
+)
+BEGIN
+    DECLARE v_status VARCHAR(50);
+
+    -- 1️⃣ Verifica se já existe FFA aberta para essa fila
+    SELECT id, status INTO p_id_ffa, v_status
+    FROM ffa
+    WHERE id_paciente = p_id_paciente
+      AND status IN ('ABERTO','EM_TRIAGEM')
+    ORDER BY criado_em DESC
+    LIMIT 1;
+
+    -- 2️⃣ Se não existir, cria nova FFA
+    IF p_id_ffa IS NULL THEN
+        -- Gera GPAT usando o usuário que abriu a FFA
+        SET p_gpat = fn_gera_protocolo(p_id_usuario);
+
+        -- Insere nova FFA
+        INSERT INTO ffa (
+            id_paciente,
+            gpat,
+            status,
+            layout,
+            id_usuario_criacao,
+            criado_em,
+            atualizado_em
+        ) VALUES (
+            p_id_paciente,
+            p_gpat,
+            'ABERTO',
+            'TRIAGEM',
+            p_id_usuario,
+            NOW(),
+            NOW()
+        );
+
+        SET p_id_ffa = LAST_INSERT_ID();
+
+        -- Atualiza fila_senha com o id_ffa
+        UPDATE fila_senha
+        SET id_ffa = p_id_ffa
+        WHERE id = p_id_fila;
+
+        -- Auditoria: criação de FFA
+        INSERT INTO auditoria_ffa (
+            id_ffa,
+            id_usuario,
+            acao,
+            timestamp
+        ) VALUES (
+            p_id_ffa,
+            p_id_usuario,
+            CONCAT('CRIACAO: FFA aberta para paciente ', p_id_paciente),
+            NOW()
+        );
+
+    ELSE
+        -- Se já existe, retorna GPAT existente
+        SELECT gpat INTO p_gpat FROM ffa WHERE id = p_id_ffa;
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+-- Mudar delimitador
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_auditoria_ffa$$
+
+CREATE TRIGGER trg_auditoria_ffa
+AFTER UPDATE ON ffa
+FOR EACH ROW
+BEGIN
+    DECLARE v_acao VARCHAR(50);
+
+    -- Detecta mudanças de status
+    IF NEW.status <> OLD.status THEN
+        SET v_acao = CONCAT('STATUS: ', OLD.status, ' -> ', NEW.status);
+        INSERT INTO auditoria_ffa (
+            id_ffa,
+            id_usuario,
+            acao,
+            timestamp
+        ) VALUES (
+            NEW.id,
+            NEW.id_usuario_alteracao,  -- usuário que fez a alteração
+            v_acao,
+            NOW()
+        );
+    END IF;
+
+    -- Detecta mudanças de layout
+    IF NEW.layout <> OLD.layout THEN
+        SET v_acao = CONCAT('LAYOUT: ', OLD.layout, ' -> ', NEW.layout);
+        INSERT INTO auditoria_ffa (
+            id_ffa,
+            id_usuario,
+            acao,
+            timestamp
+        ) VALUES (
+            NEW.id,
+            NEW.id_usuario_alteracao,
+            v_acao,
+            NOW()
+        );
+    END IF;
+END$$
+
+-- Voltar delimitador para padrão
+DELIMITER ;
+
+ALTER TABLE ffa
+ADD COLUMN layout VARCHAR(50) DEFAULT 'TRIAGEM';
+
+
+
+CREATE TABLE IF NOT EXISTS paciente (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome_completo VARCHAR(200) NOT NULL,
+    nome_social VARCHAR(200),
+    cpf VARCHAR(14),
+    cns VARCHAR(20),
+    data_nascimento DATE,
+    sexo ENUM('M','F','O'),
+    nome_mae VARCHAR(200),
+    criado_em DATETIME DEFAULT NOW(),
+    atualizado_em DATETIME DEFAULT NOW() ON UPDATE NOW()
+);
+
+CREATE OR REPLACE VIEW vw_painel_triagem AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+WHERE f.status IN ('ABERTO','EM_TRIAGEM')
+ORDER BY f.criado_em ASC;
+
+
+CREATE TABLE IF NOT EXISTS protocolo_sequencia (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- sequência única
+    id_usuario BIGINT NOT NULL,            -- usuário que gerou o protocolo
+    created_at DATETIME NOT NULL DEFAULT NOW()  -- data/hora da geração
+);
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_abre_ffa$$
+
+CREATE PROCEDURE sp_abre_ffa(
+    IN p_id_senha BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_paciente BIGINT,
+    OUT p_id_ffa BIGINT,
+    OUT p_gpat VARCHAR(30)
+)
+BEGIN
+    DECLARE v_status_inicial VARCHAR(20);
+    DECLARE v_layout_inicial VARCHAR(50);
+
+    -- Status e layout inicial
+    SET v_status_inicial = 'ABERTO';
+    SET v_layout_inicial = 'TRIAGEM';
+
+    -- Gerar GPAT
+    SET p_gpat = fn_gera_protocolo(p_id_usuario);
+
+    -- Criar FFA
+    INSERT INTO ffa (
+        id_paciente,
+        gpat,
+        status,
+        layout,
+        id_usuario_criacao,
+        criado_em
+    ) VALUES (
+        p_id_paciente,
+        p_gpat,
+        v_status_inicial,
+        v_layout_inicial,
+        p_id_usuario,
+        NOW()
+    );
+
+    SET p_id_ffa = LAST_INSERT_ID();
+
+    -- Registrar auditoria inicial
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_senha,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_senha,
+        p_id_usuario,
+        'ABERTURA',
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_auditoria_ffa$$
+
+CREATE TRIGGER trg_auditoria_ffa
+AFTER UPDATE ON ffa
+FOR EACH ROW
+BEGIN
+    DECLARE v_acao VARCHAR(100);
+
+    -- Detecta mudanças de status
+    IF NEW.status <> OLD.status THEN
+        SET v_acao = CONCAT('STATUS: ', OLD.status, ' -> ', NEW.status);
+        INSERT INTO auditoria_ffa (
+            id_ffa,
+            id_usuario,
+            acao,
+            timestamp
+        ) VALUES (
+            NEW.id,
+            NEW.id_usuario_alteracao,  -- usuário que fez a alteração
+            v_acao,
+            NOW()
+        );
+    END IF;
+
+    -- Detecta mudanças de layout
+    IF NEW.layout <> OLD.layout THEN
+        SET v_acao = CONCAT('LAYOUT: ', OLD.layout, ' -> ', NEW.layout);
+        INSERT INTO auditoria_ffa (
+            id_ffa,
+            id_usuario,
+            acao,
+            timestamp
+        ) VALUES (
+            NEW.id,
+            NEW.id_usuario_alteracao,  -- usuário que fez a alteração
+            v_acao,
+            NOW()
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+-- ============================================
+-- 1️⃣ Criar paciente de teste
+-- ============================================
+INSERT INTO paciente (
+    nome_completo,
+    nome_social,
+    cpf,
+    cns,
+    data_nascimento,
+    sexo,
+    nome_mae,
+    criado_em
+) VALUES (
+    'João da Silva',
+    'João',
+    '123.456.789-00',
+    '123456789012345',
+    '2000-01-01',
+    'M',
+    'Maria da Silva',
+    NOW()
+);
+
+SET @id_paciente_teste = LAST_INSERT_ID();
+
+-- ============================================
+-- 2️⃣ Registrar senha do totem
+-- ============================================
+INSERT INTO fila_senha (id_paciente, criado_em)
+VALUES (@id_paciente_teste, NOW());
+
+SET @id_senha_teste = LAST_INSERT_ID();
+
+-- ============================================
+-- 3️⃣ Abrir FFA usando sp_abre_ffa
+-- ============================================
+SET @id_usuario = 1;  -- usuário recepção de teste
+CALL sp_abre_ffa(
+    @id_senha_teste,
+    @id_usuario,
+    @id_paciente_teste,
+    @id_ffa_teste,
+    @gpat_teste
+);
+
+-- Conferir saída
+SELECT @id_ffa_teste AS id_ffa, @gpat_teste AS GPAT;
+
+-- ============================================
+-- 4️⃣ Conferir FFA criada
+-- ============================================
+SELECT * FROM ffa WHERE id = @id_ffa_teste;
+
+-- ============================================
+-- 5️⃣ Consultar painel de triagem
+-- ============================================
+SELECT * FROM vw_painel_triagem;
+
+-- ============================================
+-- 6️⃣ Atualizar status e layout da FFA
+-- ============================================
+UPDATE ffa
+SET status = 'EM_ATENDIMENTO',
+    layout = 'SALA_1',
+    id_usuario_alteracao = @id_usuario
+WHERE id = @id_ffa_teste;
+
+-- ============================================
+-- 7️⃣ Conferir auditoria automática
+-- ============================================
+SELECT * FROM auditoria_ffa
+WHERE id_ffa = @id_ffa_teste
+ORDER BY timestamp ASC;
+
+
+-- 1️⃣ Desabilitar temporariamente checagem de FK
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 2️⃣ Dropar tabela antiga se existir
+DROP TABLE IF EXISTS fila_senha;
+
+-- 3️⃣ Criar tabela nova completa
+
+
+DROP TABLE IF EXISTS fila_senha;
+
+CREATE TABLE fila_senha (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,  -- compatível com fila_evento.id_fila
+    senha BIGINT NOT NULL,                           -- senha gerada pelo Totem
+    id_paciente BIGINT NOT NULL,                     -- paciente vinculado
+    criado_em DATETIME NOT NULL DEFAULT NOW(),      -- data/hora de entrada na fila
+    origem ENUM('TOTEM','RECEPCAO','SAMU') NOT NULL DEFAULT 'TOTEM',
+    gerada_manual TINYINT(1) DEFAULT 0,             -- indica se foi abertura manual
+    id_ffa BIGINT NULL,                              -- vinculo com FFA, se já aberta
+    CONSTRAINT fk_fila_senha_ffa
+        FOREIGN KEY (id_ffa) REFERENCES ffa(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_fila_senha_auto$$
+
+CREATE TRIGGER trg_fila_senha_auto
+BEFORE INSERT ON fila_senha
+FOR EACH ROW
+BEGIN
+    DECLARE v_max BIGINT;
+
+    -- Se a senha não for preenchida, gera a próxima automaticamente
+    IF NEW.senha IS NULL OR NEW.senha = 0 THEN
+        SELECT COALESCE(MAX(senha), 0) + 1 INTO v_max FROM fila_senha;
+        SET NEW.senha = v_max;
+    END IF;
+END$$
+
+DELIMITER ;
+
+CREATE TABLE IF NOT EXISTS auditoria_ffa (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,                -- FFA vinculada
+    id_usuario BIGINT NOT NULL,            -- usuário que realizou a ação
+    acao VARCHAR(255) NOT NULL,            -- descrição da ação
+    timestamp DATETIME NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_auditoria_ffa_ffa
+        FOREIGN KEY (id_ffa) REFERENCES ffa(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+--- ============================================
+-- 0️⃣ Variáveis de controle
+-- ============================================
+SET @id_usuario = 1;  -- usuário de recepção de teste
+
+-- ============================================
+-- 1️⃣ Criar paciente de teste
+-- ============================================
+INSERT INTO paciente (
+    nome_completo,
+    nome_social,
+    cpf,
+    cns,
+    data_nascimento,
+    sexo,
+    nome_mae,
+    criado_em
+) VALUES (
+    'João da Silva',
+    'João',
+    '123.456.789-00',
+    '123456789012345',
+    '2000-01-01',
+    'M',
+    'Maria da Silva',
+    NOW()
+);
+
+SET @id_paciente_teste = LAST_INSERT_ID();
+
+-- ============================================
+-- 2️⃣ Inserir na fila_senha (trigger gera senha automaticamente)
+-- ============================================
+INSERT INTO fila_senha (id_paciente)
+VALUES (@id_paciente_teste);
+
+SET @id_fila_teste = LAST_INSERT_ID();
+
+-- ============================================
+-- 3️⃣ Abrir FFA usando sp_abre_ffa
+-- ============================================
+CALL sp_abre_ffa(
+    @id_fila_teste,        -- ID da fila_senha
+    @id_usuario,           -- usuário que abre a FFA
+    @id_paciente_teste,    -- paciente vinculado
+    @id_ffa_teste,         -- OUT: ID da FFA criada
+    @gpat_teste            -- OUT: GPAT gerado
+);
+
+-- Conferir saída
+SELECT @id_ffa_teste AS id_ffa, @gpat_teste AS GPAT;
+
+-- ============================================
+-- 4️⃣ Conferir FFA criada
+-- ============================================
+SELECT * FROM ffa WHERE id = @id_ffa_teste;
+
+-- ============================================
+-- 5️⃣ Consultar painel de triagem
+-- ============================================
+SELECT * FROM vw_painel_triagem;
+
+-- ============================================
+-- 6️⃣ Atualizar status e layout da FFA
+-- ============================================
+UPDATE ffa
+SET status = 'EM_ATENDIMENTO',
+    layout = 'SALA_1',
+    id_usuario_alteracao = @id_usuario
+WHERE id = @id_ffa_teste;
+
+-- ============================================
+-- 7️⃣ Conferir auditoria automática
+-- ============================================
+SELECT * FROM auditoria_ffa
+WHERE id_ffa = @id_ffa_teste
+ORDER BY timestamp ASC;
+
+
+CREATE OR REPLACE VIEW vw_painel_triagem AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.origem
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO', 'EM_TRIAGEM')
+ORDER BY fs.criado_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_painel_atendimento AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.origem
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('EM_ATENDIMENTO', 'OBSERVACAO')
+ORDER BY fs.criado_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_painel_internacao AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.origem
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status = 'INTERNACAO'
+ORDER BY fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_clinico AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.origem,
+    fs.classificacao_manchester,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','EM_ATENDIMENTO','OBSERVACAO')
+ORDER BY
+    CASE fs.classificacao_manchester
+        WHEN 'VERMELHO' THEN 1
+        WHEN 'LARANJA' THEN 2
+        WHEN 'AMARELO' THEN 3
+        WHEN 'VERDE' THEN 4
+        WHEN 'AZUL' THEN 5
+        ELSE 6
+    END,
+    fs.criado_em ASC;
+
+ALTER TABLE fila_senha
+ADD COLUMN prioridade_temporaria ENUM('NORMAL','IDOSO','CRIANCA_COLO','ESPECIAL','EMERGENCIA') DEFAULT 'NORMAL',
+ADD COLUMN prioridade_recepcao ENUM('NORMAL','IDOSO','CRIANCA_COLO','ESPECIAL','EMERGENCIA') DEFAULT NULL;
+
+
+CREATE OR REPLACE VIEW vw_fila_totem AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.id_paciente,
+    fs.prioridade_temporaria,
+    fs.criado_em AS hora_chegada
+FROM fila_senha fs
+WHERE fs.id_ffa IS NULL  -- apenas senhas ainda não associadas a FFA
+ORDER BY FIELD(fs.prioridade_temporaria,'EMERGENCIA','ESPECIAL','CRIANCA_COLO','IDOSO','NORMAL'),
+         fs.criado_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_fila_recepcao AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.id_paciente,
+    fs.prioridade_recepcao,
+    fs.prioridade_temporaria,
+    f.status,
+    f.layout,
+    fs.criado_em AS hora_chegada
+FROM fila_senha fs
+LEFT JOIN ffa f ON fs.id_ffa = f.id
+ORDER BY
+    CASE
+        WHEN fs.prioridade_recepcao='EMERGENCIA' THEN 1
+        WHEN fs.prioridade_recepcao='ESPECIAL' THEN 2
+        WHEN fs.prioridade_recepcao='CRIANCA_COLO' THEN 3
+        WHEN fs.prioridade_recepcao='IDOSO' THEN 4
+        ELSE 5
+    END,
+    fs.criado_em ASC;
+ALTER TABLE ffa
+ADD COLUMN classificacao_manchester ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') DEFAULT NULL;
+
+
+CREATE OR REPLACE VIEW vw_painel_clinico AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.prioridade_recepcao,
+    f.classificacao_manchester,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','EM_ATENDIMENTO','OBSERVACAO')
+ORDER BY
+    CASE f.classificacao_manchester
+        WHEN 'VERMELHO' THEN 1
+        WHEN 'LARANJA' THEN 2
+        WHEN 'AMARELO' THEN 3
+        WHEN 'VERDE' THEN 4
+        WHEN 'AZUL' THEN 5
+        ELSE 6
+    END,
+    fs.criado_em ASC;
+    
+    CREATE OR REPLACE VIEW vw_painel_chamada AS
+SELECT
+    fs.senha,
+    fs.prioridade_recepcao,
+    f.layout AS local_atendimento
+FROM fila_senha fs
+JOIN ffa f ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','EM_ATENDIMENTO')
+ORDER BY
+    CASE fs.prioridade_recepcao
+        WHEN 'EMERGENCIA' THEN 1
+        WHEN 'ESPECIAL' THEN 2
+        WHEN 'CRIANCA_COLO' THEN 3
+        WHEN 'IDOSO' THEN 4
+        ELSE 5
+    END,
+    fs.criado_em ASC
+LIMIT 1;
+
+
+CREATE OR REPLACE VIEW vw_fila_totem AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.id_paciente,
+    fs.prioridade_temporaria,
+    fs.criado_em AS hora_chegada
+FROM fila_senha fs
+WHERE fs.id_ffa IS NULL
+ORDER BY FIELD(fs.prioridade_temporaria,'EMERGENCIA','ESPECIAL','CRIANCA_COLO','IDOSO','NORMAL'),
+         fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_fila_recepcao AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.id_paciente,
+    fs.prioridade_recepcao,
+    fs.prioridade_temporaria,
+    f.status,
+    f.layout,
+    fs.criado_em AS hora_chegada
+FROM fila_senha fs
+LEFT JOIN ffa f ON fs.id_ffa = f.id
+ORDER BY
+    CASE
+        WHEN fs.prioridade_recepcao='EMERGENCIA' THEN 1
+        WHEN fs.prioridade_recepcao='ESPECIAL' THEN 2
+        WHEN fs.prioridade_recepcao='CRIANCA_COLO' THEN 3
+        WHEN fs.prioridade_recepcao='IDOSO' THEN 4
+        ELSE 5
+    END,
+    fs.criado_em ASC;
+    
+CREATE OR REPLACE VIEW vw_painel_clinico AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.prioridade_recepcao,
+    f.classificacao_manchester,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','EM_ATENDIMENTO','OBSERVACAO')
+ORDER BY
+    CASE f.classificacao_manchester
+        WHEN 'VERMELHO' THEN 1
+        WHEN 'LARANJA' THEN 2
+        WHEN 'AMARELO' THEN 3
+        WHEN 'VERDE' THEN 4
+        WHEN 'AZUL' THEN 5
+        ELSE 6
+    END,
+    fs.criado_em ASC;
+    
+    CREATE OR REPLACE VIEW vw_painel_chamada AS
+SELECT
+    fs.senha,
+    fs.prioridade_recepcao,
+    f.layout AS local_atendimento
+FROM fila_senha fs
+JOIN ffa f ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','EM_ATENDIMENTO')
+ORDER BY
+    CASE fs.prioridade_recepcao
+        WHEN 'EMERGENCIA' THEN 1
+        WHEN 'ESPECIAL' THEN 2
+        WHEN 'CRIANCA_COLO' THEN 3
+        WHEN 'IDOSO' THEN 4
+        ELSE 5
+    END,
+    fs.criado_em ASC
+LIMIT 1;
+
+
+
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_fila_senha_prioridade_temporaria$$
+
+CREATE TRIGGER trg_fila_senha_prioridade_temporaria
+BEFORE INSERT ON fila_senha
+FOR EACH ROW
+BEGIN
+    -- Define prioridade temporária baseada no tipo de paciente (ex.: emergência manual, idoso, etc.)
+    -- Para agora, se não for especificado, coloca 'NORMAL'
+    IF NEW.prioridade_temporaria IS NULL THEN
+        SET NEW.prioridade_temporaria = 'NORMAL';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_confirma_prioridade_recepcao$$
+
+CREATE PROCEDURE sp_confirma_prioridade_recepcao(
+    IN p_id_fila BIGINT,
+    IN p_prioridade ENUM('NORMAL','IDOSO','CRIANCA_COLO','ESPECIAL','EMERGENCIA'),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    -- Atualiza prioridade oficial da recepção
+    UPDATE fila_senha
+    SET prioridade_recepcao = p_prioridade
+    WHERE id = p_id_fila;
+
+    -- Auditoria opcional
+    INSERT INTO auditoria_fila (id_fila, id_usuario, acao, timestamp)
+    VALUES (p_id_fila, p_id_usuario, CONCAT('Prioridade recepção setada para ', p_prioridade), NOW());
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_atualiza_classificacao_manchester$$
+
+CREATE PROCEDURE sp_atualiza_classificacao_manchester(
+    IN p_id_ffa BIGINT,
+    IN p_classificacao ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    -- Atualiza classificação Manchester na FFA
+    UPDATE ffa
+    SET classificacao_manchester = p_classificacao,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria opcional
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('Classificação Manchester atualizada para ', p_classificacao), NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_atualiza_classificacao_manchester$$
+
+CREATE PROCEDURE sp_atualiza_classificacao_manchester(
+    IN p_id_ffa BIGINT,
+    IN p_classificacao ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    -- Atualiza classificação Manchester na FFA
+    UPDATE ffa
+    SET classificacao_manchester = p_classificacao,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria opcional
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('Classificação Manchester atualizada para ', p_classificacao), NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_triagem$$
+
+CREATE PROCEDURE sp_inicio_triagem(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    -- Atualiza status para triagem em andamento
+    UPDATE ffa
+    SET status = 'EM_TRIAGEM_ATENDIMENTO',
+        layout = 'TRIAGEM',
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, 'INICIOU TRIAGEM', NOW());
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finaliza_triagem$$
+
+CREATE PROCEDURE sp_finaliza_triagem(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_layout_medico VARCHAR(50) -- ex: SALA_1
+)
+BEGIN
+    -- Atualiza status para aguardando médico
+    UPDATE ffa
+    SET status = 'AGUARDANDO_CHAMADA_MEDICO',
+        layout = p_layout_medico,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, 'TRIAGEM FINALIZADA, AGUARDANDO MEDICO', NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_atendimento_medico$$
+
+CREATE PROCEDURE sp_inicio_atendimento_medico(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_procedimento VARCHAR(50) -- MEDICACAO / RX / EXAMES / etc.
+)
+BEGIN
+    -- Define status específico do procedimento
+    UPDATE ffa
+    SET status = CONCAT('EM_ATENDIMENTO_', UPPER(p_procedimento)),
+        layout = p_procedimento,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('INICIOU ATENDIMENTO: ', p_procedimento), NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finaliza_atendimento$$
+
+CREATE PROCEDURE sp_finaliza_atendimento(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_status_final ENUM('ALTA','AGUARDANDO_RETORNO','INTERNACAO','TRANSFERENCIA')
+)
+BEGIN
+    -- Atualiza status final
+    UPDATE ffa
+    SET status = p_status_final,
+        layout = 'FINALIZADO',
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('FINALIZOU ATENDIMENTO: ', p_status_final), NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_procedimento$$
+
+CREATE PROCEDURE sp_inicio_procedimento(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_procedimento ENUM('MEDICACAO','RX','EXAMES')
+)
+BEGIN
+    -- Atualiza status específico do procedimento
+    UPDATE ffa
+    SET status = CONCAT('EM_ATENDIMENTO_', UPPER(p_procedimento)),
+        layout = p_procedimento,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('INICIOU PROCEDIMENTO: ', p_procedimento), NOW());
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finaliza_procedimento$$
+
+CREATE PROCEDURE sp_finaliza_procedimento(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_status_final ENUM('ALTA','AGUARDANDO_RETORNO','INTERNACAO','TRANSFERENCIA')
+)
+BEGIN
+    -- Atualiza status final após procedimento
+    UPDATE ffa
+    SET status = p_status_final,
+        layout = 'FINALIZADO',
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('FINALIZOU PROCEDIMENTO, STATUS: ', p_status_final), NOW());
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_cancelar_chamada$$
+
+CREATE PROCEDURE sp_cancelar_chamada(
+    IN p_id_fila BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+
+    -- Pega a FFA vinculada
+    SELECT id_ffa INTO v_id_ffa
+    FROM fila_senha
+    WHERE id = p_id_fila;
+
+    -- Atualiza status da FFA e da fila
+    UPDATE ffa
+    SET status = 'CANCELADA',
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = v_id_ffa;
+
+    UPDATE fila_senha
+    SET origem = 'RECEPCAO', -- registra alteração
+        gerada_manual = 1
+    WHERE id = p_id_fila;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (v_id_ffa, p_id_usuario, 'CHAMADA CANCELADA / NAO ATENDIDO', NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_update_painel_ffa$$
+
+CREATE TRIGGER trg_update_painel_ffa
+AFTER UPDATE ON ffa
+FOR EACH ROW
+BEGIN
+    -- Aqui podemos colocar lógica para atualizar view ou enviar evento
+    -- Ex: atualizar vw_painel_clinico, vw_painel_recepcao, etc.
+    -- Dependendo do frontend, pode ser polling ou websocket
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_chama_paciente$$
+
+CREATE PROCEDURE sp_chama_paciente(
+    IN p_id_fila BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+
+    -- Pega a FFA vinculada à fila
+    SELECT id_ffa INTO v_id_ffa
+    FROM fila_senha
+    WHERE id = p_id_fila;
+
+    -- Atualiza status na fila
+    UPDATE fila_senha
+    SET status = 'CHAMANDO'
+    WHERE id = p_id_fila;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (v_id_ffa, p_id_usuario, 'PACIENTE CHAMADO NA RECEPCAO', NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_triagem$$
+
+CREATE PROCEDURE sp_inicio_triagem(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_classificacao ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL')
+)
+BEGIN
+    -- Inicia triagem
+    UPDATE ffa
+    SET status = 'EM_TRIAGEM_ATENDIMENTO',
+        classificacao_manchester = p_classificacao,
+        layout = 'TRIAGEM',
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('TRIAGEM INICIADA, CLASSIFICACAO: ', p_classificacao), NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_atendimento_medico$$
+
+CREATE PROCEDURE sp_inicio_atendimento_medico(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa
+    SET status = 'EM_ATENDIMENTO_MEDICO',
+        layout = 'MEDICO',
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, 'INICIO ATENDIMENTO MEDICO', NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_cancelar_chamada$$
+
+CREATE PROCEDURE sp_cancelar_chamada(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_status_final ENUM('CANCELADA','NAO_ATENDIDO','ALTA','AGUARDANDO_RETORNO','INTERNACAO','TRANSFERENCIA')
+)
+BEGIN
+    -- Atualiza status final na FFA
+    UPDATE ffa
+    SET status = p_status_final,
+        layout = CASE
+                    WHEN p_status_final IN ('ALTA','AGUARDANDO_RETORNO') THEN 'FINALIZADO'
+                    ELSE layout
+                 END,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('STATUS FINAL: ', p_status_final), NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_procedimento$$
+
+CREATE PROCEDURE sp_inicio_procedimento(
+    IN p_id_ffa BIGINT,                 -- ID da FFA do paciente
+    IN p_id_usuario BIGINT,             -- Usuário que iniciou o procedimento
+    IN p_procedimento ENUM('MEDICACAO','RX','EXAMES')  -- Tipo de procedimento
+)
+BEGIN
+    -- Atualiza status da FFA de acordo com o procedimento
+    UPDATE ffa
+    SET status = CASE 
+                    WHEN p_procedimento = 'MEDICACAO' THEN 'EM_ATENDIMENTO_MEDICACAO'
+                    WHEN p_procedimento = 'RX' THEN 'EM_ATENDIMENTO_RX'
+                    WHEN p_procedimento = 'EXAMES' THEN 'EM_ATENDIMENTO_EXAMES'
+                 END,
+        layout = p_procedimento,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('INICIO PROCEDIMENTO: ', p_procedimento), NOW());
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finaliza_procedimento$$
+
+CREATE PROCEDURE sp_finaliza_procedimento(
+    IN p_id_ffa BIGINT, 
+    IN p_id_usuario BIGINT, 
+    IN p_status_final ENUM('ALTA','AGUARDANDO_RETORNO','INTERNACAO','TRANSFERENCIA')
+)
+BEGIN
+    -- Atualiza status final da FFA
+    UPDATE ffa
+    SET status = p_status_final,
+        layout = CASE 
+                    WHEN p_status_final IN ('ALTA','AGUARDANDO_RETORNO') THEN 'FINALIZADO'
+                    ELSE layout
+                 END,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria do procedimento finalizado
+    INSERT INTO auditoria_ffa (id_ffa, id_usuario, acao, timestamp)
+    VALUES (p_id_ffa, p_id_usuario, CONCAT('PROCEDIMENTO FINALIZADO, STATUS: ', p_status_final), NOW());
+END$$
+
+DELIMITER ;
+
+CREATE OR REPLACE VIEW vw_painel_clinico_completo AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.prioridade_recepcao,
+    f.classificacao_manchester,
+    f.status AS status_ffa,
+    f.layout AS layout_ffa,
+    fs.criado_em AS hora_chegada,
+    CASE
+        WHEN f.status LIKE 'EM_ATENDIMENTO_MEDICACAO%' THEN 'MEDICACAO'
+        WHEN f.status LIKE 'EM_ATENDIMENTO_RX%' THEN 'RX'
+        WHEN f.status LIKE 'EM_ATENDIMENTO_EXAMES%' THEN 'EXAMES'
+        ELSE NULL
+    END AS procedimento_atual
+FROM ffa f
+JOIN paciente p ON p.id = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN (
+    'ABERTO', 'EM_TRIAGEM_AGUARDANDO', 'EM_TRIAGEM_ATENDIMENTO',
+    'AGUARDANDO_CHAMADA_MEDICO', 'EM_ATENDIMENTO_MEDICO',
+    'EM_ATENDIMENTO_MEDICACAO', 'EM_ATENDIMENTO_RX', 'EM_ATENDIMENTO_EXAMES'
+)
+ORDER BY 
+    CASE f.classificacao_manchester
+        WHEN 'VERMELHO' THEN 1
+        WHEN 'LARANJA' THEN 2
+        WHEN 'AMARELO' THEN 3
+        WHEN 'VERDE' THEN 4
+        WHEN 'AZUL' THEN 5
+        ELSE 6
+    END,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_totem AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_geracao
+FROM fila_senha fs
+LEFT JOIN ffa f ON f.id = fs.id_ffa
+WHERE fs.id_ffa IS NULL OR f.status IN ('ABERTO');
+
+CREATE OR REPLACE VIEW vw_painel_recepcao AS
+SELECT
+    vpc.id_ffa,
+    vpc.paciente_nome,
+    vpc.senha,
+    vpc.prioridade_recepcao,
+    vpc.status_ffa,
+    vpc.hora_chegada
+FROM vw_painel_clinico_completo vpc
+WHERE vpc.status_ffa IN (
+    'ABERTO',
+    'EM_TRIAGEM_AGUARDANDO',
+    'EM_TRIAGEM_ATENDIMENTO',
+    'AGUARDANDO_CHAMADA_MEDICO'
+)
+ORDER BY 
+    vpc.prioridade_recepcao DESC,
+    vpc.hora_chegada ASC;
+
+
+CREATE OR REPLACE VIEW vw_painel_triagem AS
+SELECT
+    vpc.id_ffa,
+    vpc.paciente_nome,
+    vpc.senha,
+    vpc.classificacao_manchester,
+    vpc.status_ffa,
+    vpc.hora_chegada
+FROM vw_painel_clinico_completo vpc
+WHERE vpc.status_ffa IN ('EM_TRIAGEM_AGUARDANDO','EM_TRIAGEM_ATENDIMENTO')
+ORDER BY
+    CASE vpc.classificacao_manchester
+        WHEN 'VERMELHO' THEN 1
+        WHEN 'LARANJA' THEN 2
+        WHEN 'AMARELO' THEN 3
+        WHEN 'VERDE' THEN 4
+        WHEN 'AZUL' THEN 5
+        ELSE 6
+    END,
+    vpc.hora_chegada ASC;
+
+
+CREATE OR REPLACE VIEW vw_painel_medico AS
+SELECT
+    vpc.id_ffa,
+    vpc.paciente_nome,
+    vpc.senha,
+    vpc.status_ffa,
+    vpc.layout_ffa,
+    vpc.procedimento_atual,
+    vpc.classificacao_manchester,
+    vpc.hora_chegada
+FROM vw_painel_clinico_completo vpc
+WHERE vpc.status_ffa IN (
+    'AGUARDANDO_CHAMADA_MEDICO',
+    'EM_ATENDIMENTO_MEDICO',
+    'EM_ATENDIMENTO_MEDICACAO',
+    'EM_ATENDIMENTO_RX',
+    'EM_ATENDIMENTO_EXAMES'
+)
+ORDER BY 
+    CASE vpc.classificacao_manchester
+        WHEN 'VERMELHO' THEN 1
+        WHEN 'LARANJA' THEN 2
+        WHEN 'AMARELO' THEN 3
+        WHEN 'VERDE' THEN 4
+        WHEN 'AZUL' THEN 5
+        ELSE 6
+    END,
+    vpc.hora_chegada ASC;
+
+CREATE OR REPLACE VIEW vw_painel_procedimentos AS
+SELECT
+    vpc.id_ffa,
+    vpc.paciente_nome,
+    vpc.procedimento_atual,
+    vpc.status_ffa,
+    vpc.hora_chegada
+FROM vw_painel_clinico_completo vpc
+WHERE vpc.procedimento_atual IS NOT NULL
+ORDER BY 
+    vpc.procedimento_atual,
+    vpc.hora_chegada ASC;
+
+INSERT INTO paciente (nome_completo, cpf, cns, data_nascimento, sexo, nome_mae, criado_em, atualizado_em)
+VALUES ('João da Silva', '123.456.789-00', '123456789012345', '2000-01-01', 'M', 'Maria da Silva', NOW(), NOW());
+
+SET @id_paciente_teste = LAST_INSERT_ID();
+
+INSERT INTO fila_senha (id_paciente, criado_em, origem, gerada_manual)
+VALUES (@id_paciente_teste, NOW(), 'TOTEM', 0);
+
+SET @id_fila_teste = LAST_INSERT_ID();
+
+CALL sp_abre_ffa(
+    @id_fila_teste,
+    1,                 -- id_usuario da recepção
+    @id_paciente_teste,
+    @id_ffa_teste,     -- OUT: ID da FFA criada
+    @gpat_teste        -- OUT: GPAT gerado
+);
+
+CALL sp_inicio_triagem(
+    @id_ffa_teste,   -- ID da FFA
+    2,               -- usuário da triagem
+    'TRIAGEM_1'      -- sala de triagem
+);
+
+
+UPDATE ffa
+SET classificacao_manchester = 'AMARELO',
+    id_usuario_alteracao = 2,
+    atualizado_em = NOW()
+WHERE id = @id_ffa_teste;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_triagem$$
+
+CREATE PROCEDURE sp_inicio_triagem(
+    IN p_id_ffa BIGINT,        -- ID da FFA
+    IN p_id_usuario BIGINT,    -- usuário da triagem
+    IN p_sala VARCHAR(50)      -- sala de triagem
+)
+BEGIN
+    DECLARE v_classificacao ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL');
+
+    -- Define classificação padrão temporária
+    SET v_classificacao = 'AZUL';
+
+    -- Atualiza status da FFA para EM_TRIAGEM e layout para painel da triagem
+    UPDATE ffa
+    SET status = 'EM_TRIAGEM',
+        layout = p_sala,
+        classificacao_manchester = v_classificacao,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria da ação
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        CONCAT('INICIO TRIAGEM: FFA em ', p_sala, ', classificacao ', v_classificacao),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finaliza_triagem$$
+
+CREATE PROCEDURE sp_finaliza_triagem(
+    IN p_id_ffa BIGINT,                           -- ID da FFA
+    IN p_id_usuario BIGINT,                       -- Usuário que finaliza a triagem
+    IN p_classificacao ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),  -- Classificação Manchester
+    IN p_sala_medico VARCHAR(50)                 -- Sala do painel médico
+)
+BEGIN
+    -- Atualiza FFA: muda status, layout e classificação
+    UPDATE ffa
+    SET status = 'AGUARDANDO_CHAMADA_MEDICO',    -- agora válido no ENUM
+        layout = p_sala_medico,
+        classificacao_manchester = p_classificacao,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria da ação
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        CONCAT('FINALIZA TRIAGEM: classificacao ', p_classificacao, ', encaminhado para ', p_sala_medico),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+CALL sp_finaliza_triagem(
+    @id_ffa_teste,     -- ID da FFA
+    2,                 -- id_usuario da triagem
+    'AMARELO',         -- classificação Manchester real
+    'PAINEL_MEDICO'    -- sala/painel médico
+);
+
+-- 1️⃣ Desabilita temporariamente safe updates
+SET SQL_SAFE_UPDATES = 0;
+
+-- 2️⃣ Atualiza status antigos usando JOIN com subselect derivado
+
+-- Triagem e recepção
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'ABERTO'
+WHERE tmp.status = 'ABERTO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'EM_TRIAGEM'
+WHERE tmp.status = 'EM_TRIAGEM';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'AGUARDANDO_CHAMADA_MEDICO'
+WHERE tmp.status = 'EM_TRIAGEM_FINALIZADA';
+
+-- Atendimento médico
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'CHAMANDO_MEDICO'
+WHERE tmp.status = 'CHAMANDO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'EM_ATENDIMENTO_MEDICO'
+WHERE tmp.status = 'EM_ATENDIMENTO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'OBSERVACAO'
+WHERE tmp.status = 'OBSERVACAO';
+
+-- Procedimentos específicos
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'MEDICACAO'
+WHERE tmp.status = 'MEDICACAO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'AGUARDANDO_MEDICACAO'
+WHERE tmp.status = 'AGUARDANDO_MEDICACAO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'AGUARDANDO_RX'
+WHERE tmp.status = 'AGUARDANDO_RX';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'EM_RX'
+WHERE tmp.status = 'EM_RX';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'AGUARDANDO_COLETA'
+WHERE tmp.status = 'AGUARDANDO_COLETA';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'EM_COLETA'
+WHERE tmp.status = 'EM_COLETA';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'AGUARDANDO_ECG'
+WHERE tmp.status = 'AGUARDANDO_ECG';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'EM_ECG'
+WHERE tmp.status = 'EM_ECG';
+
+-- Encerramento / outros
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'ALTA'
+WHERE tmp.status = 'ALTA';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'TRANSFERENCIA'
+WHERE tmp.status = 'TRANSFERENCIA';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'INTERNACAO'
+WHERE tmp.status = 'INTERNACAO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'FINALIZADO'
+WHERE tmp.status = 'FINALIZADO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'AGUARDANDO_RETORNO'
+WHERE tmp.status = 'AGUARDANDO_RETORNO';
+
+UPDATE ffa
+JOIN (SELECT id, status FROM ffa) AS tmp ON ffa.id = tmp.id
+SET ffa.status = 'EMERGENCIA'
+WHERE tmp.status = 'EMERGENCIA';
+
+-- 3️⃣ Alterar coluna status para o ENUM completo
+ALTER TABLE ffa 
+MODIFY COLUMN status ENUM(
+    -- Triagem e recepção
+    'ABERTO',
+    'EM_TRIAGEM',
+    'AGUARDANDO_CHAMADA_MEDICO',
+
+    -- Atendimento médico
+    'CHAMANDO_MEDICO',
+    'EM_ATENDIMENTO_MEDICO',
+    'OBSERVACAO',
+
+    -- Procedimentos específicos
+    'MEDICACAO',
+    'AGUARDANDO_MEDICACAO',
+    'AGUARDANDO_RX',
+    'EM_RX',
+    'AGUARDANDO_COLETA',
+    'EM_COLETA',
+    'AGUARDANDO_ECG',
+    'EM_ECG',
+
+    -- Encerramento
+    'ALTA',
+    'TRANSFERENCIA',
+    'INTERNACAO',
+    'FINALIZADO',
+    'AGUARDANDO_RETORNO',
+    'EMERGENCIA'
+) NOT NULL;
+
+-- 4️⃣ Reativa safe updates (opcional)
+SET SQL_SAFE_UPDATES = 1;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_abre_ffa$$
+
+CREATE PROCEDURE sp_abre_ffa(
+    IN p_id_fila BIGINT,        -- fila_senha.id
+    IN p_id_usuario BIGINT,     -- usuário que abre a FFA
+    IN p_id_paciente BIGINT,    -- paciente vinculado
+    OUT p_id_ffa BIGINT,        -- retorna o id da FFA criada
+    OUT p_gpat VARCHAR(30)      -- retorna o GPAT gerado
+)
+BEGIN
+    DECLARE v_status VARCHAR(50);
+
+    -- Verifica se já existe FFA aberta
+    SELECT id, status INTO p_id_ffa, v_status
+    FROM ffa
+    WHERE id_paciente = p_id_paciente
+      AND status IN ('ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO')
+    ORDER BY criado_em DESC
+    LIMIT 1;
+
+    -- Se não existir, cria nova FFA
+    IF p_id_ffa IS NULL THEN
+        -- Gera GPAT
+        SET p_gpat = fn_gera_protocolo(p_id_usuario);
+
+        -- Insere nova FFA
+        INSERT INTO ffa (
+            id_paciente,
+            gpat,
+            status,
+            layout,
+            id_usuario_criacao,
+            criado_em,
+            atualizado_em
+        ) VALUES (
+            p_id_paciente,
+            p_gpat,
+            'ABERTO',
+            'TRIAGEM',
+            p_id_usuario,
+            NOW(),
+            NOW()
+        );
+
+        SET p_id_ffa = LAST_INSERT_ID();
+
+        -- Atualiza fila_senha com o id_ffa
+        UPDATE fila_senha
+        SET id_ffa = p_id_ffa
+        WHERE id = p_id_fila;
+
+        -- Auditoria
+        INSERT INTO auditoria_ffa (
+            id_ffa,
+            id_usuario,
+            acao,
+            timestamp
+        ) VALUES (
+            p_id_ffa,
+            p_id_usuario,
+            CONCAT('CRIACAO: FFA aberta para paciente ', p_id_paciente),
+            NOW()
+        );
+
+    ELSE
+        -- Se já existe, retorna GPAT existente
+        SELECT gpat INTO p_gpat FROM ffa WHERE id = p_id_ffa;
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inicio_triagem$$
+
+CREATE PROCEDURE sp_inicio_triagem(
+    IN p_id_ffa BIGINT,        -- FFA
+    IN p_id_usuario BIGINT,    -- triagem
+    IN p_sala VARCHAR(50)      -- sala de triagem
+)
+BEGIN
+    -- Atualiza FFA com status de triagem
+    UPDATE ffa
+    SET status = 'EM_TRIAGEM',
+        layout = p_sala,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        CONCAT('INICIO TRIAGEM em ', p_sala),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finaliza_triagem$$
+
+CREATE PROCEDURE sp_finaliza_triagem(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_classificacao_manchester ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    IN p_layout VARCHAR(50) -- painel médico
+)
+BEGIN
+    -- Atualiza FFA com status e classificação
+    UPDATE ffa
+    SET status = 'AGUARDANDO_CHAMADA_MEDICO',
+        layout = p_layout,
+        classificacao_manchester = p_classificacao_manchester,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        CONCAT('FINALIZA TRIAGEM com classificação ', p_classificacao_manchester),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_atualiza_status_clinico$$
+
+CREATE PROCEDURE sp_atualiza_status_clinico(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_novo_status ENUM(
+        'CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO','OBSERVACAO',
+        'MEDICACAO','AGUARDANDO_MEDICACAO',
+        'AGUARDANDO_RX','EM_RX',
+        'AGUARDANDO_COLETA','EM_COLETA',
+        'AGUARDANDO_ECG','EM_ECG',
+        'ALTA','TRANSFERENCIA','INTERNACAO',
+        'FINALIZADO','AGUARDANDO_RETORNO','EMERGENCIA'
+    ),
+    IN p_layout VARCHAR(50)
+)
+BEGIN
+    -- Atualiza status, layout e usuário
+    UPDATE ffa
+    SET status = p_novo_status,
+        layout = p_layout,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        CONCAT('ATUALIZA STATUS para ', p_novo_status),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_fluxo_procedimentos$$
+
+CREATE PROCEDURE sp_fluxo_procedimentos(
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_procedimento ENUM('MEDICACAO','RX','COLETA','ECG'),
+    IN p_layout_padrao VARCHAR(50) -- layout do painel para este procedimento
+)
+BEGIN
+    DECLARE v_status_aguardando VARCHAR(50);
+    DECLARE v_status_em VARCHAR(50);
+
+    -- Define status de acordo com o procedimento
+    IF p_procedimento = 'MEDICACAO' THEN
+        SET v_status_aguardando = 'AGUARDANDO_MEDICACAO';
+        SET v_status_em = 'MEDICACAO';
+    ELSEIF p_procedimento = 'RX' THEN
+        SET v_status_aguardando = 'AGUARDANDO_RX';
+        SET v_status_em = 'EM_RX';
+    ELSEIF p_procedimento = 'COLETA' THEN
+        SET v_status_aguardando = 'AGUARDANDO_COLETA';
+        SET v_status_em = 'EM_COLETA';
+    ELSEIF p_procedimento = 'ECG' THEN
+        SET v_status_aguardando = 'AGUARDANDO_ECG';
+        SET v_status_em = 'EM_ECG';
+    END IF;
+
+    -- Atualiza FFA para status aguardando procedimento
+    UPDATE ffa
+    SET status = v_status_aguardando,
+        layout = p_layout_padrao,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria: aguardando procedimento
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        CONCAT('AGUARDANDO ', p_procedimento),
+        NOW()
+    );
+
+    -- Simula início do procedimento (pode ser chamado quando paciente entra no procedimento)
+    UPDATE ffa
+    SET status = v_status_em,
+        layout = p_layout_padrao,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Auditoria: em procedimento
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        CONCAT('EM ', p_procedimento),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_fluxo_procedimentos_fila$$
+
+CREATE PROCEDURE sp_fluxo_procedimentos_fila(
+    IN p_procedimento ENUM('MEDICACAO','RX','COLETA','ECG'),
+    IN p_id_usuario BIGINT,
+    IN p_layout_padrao VARCHAR(50)
+)
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_id_ffa BIGINT;
+    DECLARE v_prioridade INT;
+    DECLARE cur CURSOR FOR
+        SELECT f.id
+        FROM ffa f
+        JOIN fila_senha fs ON fs.id_ffa = f.id
+        WHERE f.status IN (
+            CASE p_procedimento
+                WHEN 'MEDICACAO' THEN 'AGUARDANDO_MEDICACAO'
+                WHEN 'RX' THEN 'AGUARDANDO_RX'
+                WHEN 'COLETA' THEN 'AGUARDANDO_COLETA'
+                WHEN 'ECG' THEN 'AGUARDANDO_ECG'
+            END
+        )
+        ORDER BY 
+            CASE f.classificacao_manchester
+                WHEN 'VERMELHO' THEN 1
+                WHEN 'LARANJA' THEN 2
+                WHEN 'AMARELO' THEN 3
+                WHEN 'VERDE' THEN 4
+                WHEN 'AZUL' THEN 5
+                ELSE 6
+            END,
+            fs.criado_em ASC;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO v_id_ffa;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Atualiza status para "em procedimento"
+        UPDATE ffa
+        SET status = CASE p_procedimento
+                        WHEN 'MEDICACAO' THEN 'MEDICACAO'
+                        WHEN 'RX' THEN 'EM_RX'
+                        WHEN 'COLETA' THEN 'EM_COLETA'
+                        WHEN 'ECG' THEN 'EM_ECG'
+                     END,
+            layout = p_layout_padrao,
+            id_usuario_alteracao = p_id_usuario,
+            atualizado_em = NOW()
+        WHERE id = v_id_ffa;
+
+        -- Auditoria
+        INSERT INTO auditoria_ffa (
+            id_ffa,
+            id_usuario,
+            acao,
+            timestamp
+        ) VALUES (
+            v_id_ffa,
+            p_id_usuario,
+            CONCAT('INICIA PROCEDIMENTO: ', p_procedimento),
+            NOW()
+        );
+
+    END LOOP;
+
+    CLOSE cur;
+END$$
+
+DELIMITER ;
+
+CALL sp_fluxo_procedimentos_fila('MEDICACAO', 2, 'PAINEL_MEDICACAO');
+CALL sp_fluxo_procedimentos_fila('RX', 2, 'PAINEL_RX');
+CALL sp_fluxo_procedimentos_fila('COLETA', 2, 'PAINEL_COLETA');
+CALL sp_fluxo_procedimentos_fila('ECG', 2, 'PAINEL_ECG');
