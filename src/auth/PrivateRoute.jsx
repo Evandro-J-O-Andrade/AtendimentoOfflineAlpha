@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function PrivateRoute({ children, perfil }) {
-  const { user, loading } = useAuth();
+  const { user, loading, local } = useAuth();
 
   // Aguarda validação do token no backend
   if (loading) {
@@ -26,6 +26,12 @@ export default function PrivateRoute({ children, perfil }) {
   // Autenticado, mas sem perfil permitido
   if (perfil && !user.perfis?.includes(perfil)) {
     return <Navigate to="/403" replace />;
+  }
+
+  // Perfis que precisam escolher local
+  const precisaLocal = user.perfis?.some(p => p === "RECEPCAO" || p === "MEDICO");
+  if (precisaLocal && !local) {
+    return <Navigate to="/select-local" replace />;
   }
 
   // Tudo OK

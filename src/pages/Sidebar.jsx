@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import {
-  FaUserInjured,
-  FaClipboardList,
-  FaNotesMedical,
-  FaPills,
-  FaProcedures,
-  FaExchangeAlt,
-  FaTicketAlt,
-  FaUserCog,
-  FaKey,
-  FaSignOutAlt
-} from "react-icons/fa";
 import SelectLocalModal from "../components/SelectLocalModal";
 import { useAuth } from "../context/AuthContext";
 import "./Sidebar.css";
@@ -19,14 +7,13 @@ import "./Sidebar.css";
 export default function Sidebar({ usuario }) {
   const { authLocal, setAuthLocal, signOut } = useAuth();
   const navigate = useNavigate();
-
   const [openLocalModal, setOpenLocalModal] = useState(false);
 
   // Abre modal se usuário não tiver selecionado local e precisa
   useEffect(() => {
     if (
       usuario &&
-      (usuario.perfis.includes("RECEPCAO") || usuario.perfis.includes("MEDICO")) &&
+      (usuario.perfis.includes("RECEPCAO") || usuario.perfis.includes("MEDICO") || usuario.perfis.includes("ENFERMAGEM")) &&
       !authLocal
     ) {
       setOpenLocalModal(true);
@@ -36,9 +23,11 @@ export default function Sidebar({ usuario }) {
   const handleLocalSelect = (local) => {
     setAuthLocal(local);
     setOpenLocalModal(false);
-    // Redireciona para rota correta
-    if (local.tipo === "MEDICO") navigate("/medico/fila");
-    else navigate("/recepcao");
+
+    // Redireciona conforme perfil
+    if (usuario.perfis.includes("MEDICO")) navigate("/medico/fila");
+    else if (usuario.perfis.includes("RECEPCAO")) navigate("/recepcao");
+    else if (usuario.perfis.includes("ENFERMAGEM")) navigate("/triagem");
   };
 
   return (
@@ -50,85 +39,23 @@ export default function Sidebar({ usuario }) {
         </div>
 
         <nav className="sidebar-menu">
-          {/* RECEPÇÃO */}
-          {usuario?.perfis?.includes("RECEPCAO") && (
-            <NavLink to="/recepcao" className="menu-item">
-              <FaTicketAlt />
-              <span>Recepção</span>
-            </NavLink>
-          )}
-
-          {/* GESTÃO DE USUÁRIOS */}
+          {usuario?.perfis?.includes("RECEPCAO") && <NavLink to="/recepcao">Recepção</NavLink>}
+          {usuario?.perfis?.includes("MEDICO") && <NavLink to="/medico/fila">Fila Médico</NavLink>}
+          {usuario?.perfis?.includes("ENFERMAGEM") && <NavLink to="/triagem">Triagem</NavLink>}
           {(usuario?.perfis?.includes("ADMIN") || usuario?.perfis?.includes("SUPORTE")) && (
-            <NavLink to="/admin/usuarios" className="menu-item">
-              <FaUserCog />
-              <span>Gestão de Usuários</span>
-            </NavLink>
-          )}
-
-          {/* FILA */}
-          <NavLink to="/fila" className="menu-item">
-            <FaClipboardList />
-            <span>Fila de Atendimento</span>
-          </NavLink>
-
-          {/* SESSÕES */}
-          <NavLink to="/account/sessions" className="menu-item">
-            <FaKey />
-            <span>Sessões</span>
-          </NavLink>
-
-          {/* PACIENTE */}
-          <NavLink to="/paciente" className="menu-item">
-            <FaUserInjured />
-            <span>Paciente</span>
-          </NavLink>
-
-          {/* MÉDICO */}
-          {usuario?.perfil === "MEDICO" && (
-            <>
-              <div className="menu-section">Ações Médicas</div>
-
-              <NavLink to="/evolucao" className="menu-item">
-                <FaNotesMedical />
-                <span>Evolução</span>
-              </NavLink>
-
-              <NavLink to="/prescricao" className="menu-item">
-                <FaPills />
-                <span>Prescrição</span>
-              </NavLink>
-
-              <NavLink to="/exames" className="menu-item">
-                <FaClipboardList />
-                <span>Solicitar Exames</span>
-              </NavLink>
-
-              <NavLink to="/internacao" className="menu-item">
-                <FaProcedures />
-                <span>Internação</span>
-              </NavLink>
-
-              <NavLink to="/interconsulta" className="menu-item">
-                <FaExchangeAlt />
-                <span>Interconsulta</span>
-              </NavLink>
-            </>
+            <NavLink to="/admin/usuarios">Gestão de Usuários</NavLink>
           )}
         </nav>
 
         <div className="sidebar-footer">
-          <button className="logout" onClick={signOut}>
-            <FaSignOutAlt />
-            Sair
-          </button>
+          <button onClick={() => setOpenLocalModal(true)}>Alterar Local</button>
+          <button onClick={signOut}>Sair</button>
         </div>
       </aside>
 
-      {/* Modal de escolha de guichê/sala */}
       <SelectLocalModal
         open={openLocalModal}
-        perfil={usuario?.perfil || null}
+        usuario={usuario}
         onClose={() => setOpenLocalModal(false)}
         onSelect={handleLocalSelect}
       />

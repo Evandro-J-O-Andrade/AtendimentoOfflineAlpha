@@ -1,11 +1,11 @@
 import PainelFila from './PainelFila';
 
-export default function Coleta() {
-    const usuario = "Coleta";
+export default function MedicacaoAdulta() {
+    const usuario = "Medicacao Adulta";
 
     return (
         <div>
-            <h1>Painel Coleta</h1>
+            <h1>Painel Medicacao Adulta</h1>
             <PainelFila usuario={usuario} />
         </div>
     );

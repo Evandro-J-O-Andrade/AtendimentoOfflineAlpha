@@ -2037,19 +2037,14 @@ CREATE TABLE IF NOT EXISTS triagem (
   FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento) ON DELETE RESTRICT,
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE RESTRICT
 );
-CREATE TABLE IF NOT EXISTS paciente (
-  id_paciente INT AUTO_INCREMENT PRIMARY KEY,
-  nome_completo VARCHAR(150) NOT NULL,
-  cpf VARCHAR(14) UNIQUE,
-  cns VARCHAR(20),
-  data_nascimento DATE,
-  sexo CHAR(1),
-  nome_mae VARCHAR(150),
-  telefone VARCHAR(20),
-  endereco TEXT,
-  ativo BOOLEAN DEFAULT TRUE,
-  INDEX idx_nome (nome_completo),
-  INDEX idx_cns (cns)
+drop	 table paciente;
+CREATE TABLE if not exists paciente (
+    id_paciente BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_pessoa BIGINT NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
+    UNIQUE KEY uk_pessoa_paciente (id_pessoa)
 );
 
 CREATE OR REPLACE VIEW vw_sidebar_fila AS
@@ -4962,3 +4957,1671 @@ CALL sp_fluxo_procedimentos_fila('MEDICACAO', 2, 'PAINEL_MEDICACAO');
 CALL sp_fluxo_procedimentos_fila('RX', 2, 'PAINEL_RX');
 CALL sp_fluxo_procedimentos_fila('COLETA', 2, 'PAINEL_COLETA');
 CALL sp_fluxo_procedimentos_fila('ECG', 2, 'PAINEL_ECG');
+
+
+DROP VIEW IF EXISTS vw_fila_pronta;
+
+CREATE VIEW vw_fila_pronta AS
+SELECT
+    f.id,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    f.criado_em,
+    f.atualizado_em
+FROM ffa f
+WHERE f.status IN (
+    'AGUARDANDO_CHAMADA_MEDICO',
+    'AGUARDANDO_RETORNO',
+    'EMERGENCIA'
+)
+ORDER BY
+    FIELD(
+        f.classificacao_manchester,
+        'VERMELHO',
+        'LARANJA',
+        'AMARELO',
+        'VERDE',
+        'AZUL'
+    ),
+    f.criado_em;
+
+SELECT * FROM vw_fila_pronta;
+
+CREATE TABLE if not exists pessoa_contato (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_pessoa BIGINT NOT NULL,
+    tipo ENUM('EMAIL','TELEFONE','WHATSAPP'),
+    valor VARCHAR(150),
+    principal BOOLEAN DEFAULT 0,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE if not exists acompanhante (
+    id_acompanhante BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_pessoa BIGINT NOT NULL,
+    id_ffa BIGINT NOT NULL,
+    tipo ENUM(
+        'PAI',
+        'MAE',
+        'RESPONSAVEL_LEGAL',
+        'ACOMPANHANTE',
+        'OUTRO'
+    ) NOT NULL,
+    observacao VARCHAR(255),
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id),
+
+    UNIQUE KEY uk_acompanhante_por_ffa (id_pessoa, id_ffa)
+);
+
+CREATE TABLE if not exists logradouro (
+    id_logradouro BIGINT AUTO_INCREMENT PRIMARY KEY,
+    cep VARCHAR(9) NOT NULL,
+    logradouro VARCHAR(200) NOT NULL,
+    numero VARCHAR(20),
+    complemento VARCHAR(100),
+    bairro VARCHAR(100),
+    cidade VARCHAR(100),
+    uf CHAR(2),
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE if not exists pessoa_logradouro (
+    id_pessoa BIGINT NOT NULL,
+    id_logradouro BIGINT NOT NULL,
+    principal BOOLEAN DEFAULT TRUE,
+    data_inicio DATE NOT NULL,
+    data_fim DATE NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+
+    PRIMARY KEY (id_pessoa, id_logradouro, data_inicio),
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
+    FOREIGN KEY (id_logradouro) REFERENCES logradouro(id_logradouro)
+);
+
+CREATE INDEX idx_pessoa_logradouro_ativo
+    ON pessoa_logradouro (id_pessoa, ativo);
+
+CREATE INDEX idx_pessoa_logradouro_principal
+    ON pessoa_logradouro (id_pessoa, principal);
+
+DELIMITER $$
+
+CREATE TRIGGER trg_endereco_principal
+BEFORE INSERT ON pessoa_logradouro
+FOR EACH ROW
+BEGIN
+    IF NEW.principal = 1 THEN
+        UPDATE pessoa_logradouro
+        SET principal = 0
+        WHERE id_pessoa = NEW.id_pessoa
+          AND ativo = 1;
+    END IF;
+END$$
+
+DELIMITER ;
+
+CREATE TABLE if not exists evento_ffa (
+    id_evento BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    id_ffa BIGINT NOT NULL,
+    id_paciente BIGINT NULL,
+    id_usuario BIGINT NULL,
+
+    origem ENUM(
+        'PAINEL_TOTEM',
+        'PAINEL_RECEPCAO',
+        'PAINEL_TRIAGEM',
+        'PAINEL_MEDICO',
+        'PAINEL_PROCEDIMENTO',
+        'PAINEL_SATISFACAO',
+        'SISTEMA'
+    ) NOT NULL,
+
+    tipo_evento ENUM(
+        -- Totem / senha
+        'GERAR_SENHA',
+        'IMPRIMIR_SENHA',
+
+        -- Recepção
+        'CHAMAR_SENHA',
+        'CONFIRMAR_PRESENCA',
+        'CRIAR_FFA',
+
+        -- Triagem
+        'INICIO_TRIAGEM',
+        'FINAL_TRIAGEM',
+
+        -- Médico
+        'CHAMADA_MEDICA',
+        'INICIO_ATENDIMENTO_MEDICO',
+        'FINAL_ATENDIMENTO_MEDICO',
+
+        -- Procedimentos
+        'CHAMADA_PROCEDIMENTO',
+        'INICIO_PROCEDIMENTO',
+        'FINAL_PROCEDIMENTO',
+
+        -- Sistema
+        'STATUS_AUTOMATICO',
+        'NAO_COMPARECEU',
+        'TIMEOUT',
+
+        -- Satisfação
+        'AVALIACAO_ATENDIMENTO'
+    ) NOT NULL,
+
+    status_origem ENUM(
+        'ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO',
+        'CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO',
+        'OBSERVACAO','AGUARDANDO_MEDICACAO','MEDICACAO',
+        'AGUARDANDO_RX','EM_RX',
+        'AGUARDANDO_COLETA','EM_COLETA',
+        'AGUARDANDO_ECG','EM_ECG',
+        'ALTA','TRANSFERENCIA','INTERNACAO',
+        'FINALIZADO','AGUARDANDO_RETORNO','EMERGENCIA'
+    ) NULL,
+
+    status_destino ENUM(
+        'ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO',
+        'CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO',
+        'OBSERVACAO','AGUARDANDO_MEDICACAO','MEDICACAO',
+        'AGUARDANDO_RX','EM_RX',
+        'AGUARDANDO_COLETA','EM_COLETA',
+        'AGUARDANDO_ECG','EM_ECG',
+        'ALTA','TRANSFERENCIA','INTERNACAO',
+        'FINALIZADO','AGUARDANDO_RETORNO','EMERGENCIA'
+    ) NULL,
+
+    payload JSON NULL,   -- dados extras (sala, guichê, nota satisfação, etc)
+
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_evento_ffa (id_ffa),
+    INDEX idx_evento_tipo (tipo_evento),
+    INDEX idx_evento_origem (origem)
+);
+
+CREATE TABLE if not exists fluxo_status (
+    status_origem VARCHAR(50),
+    status_destino VARCHAR(50),
+    origem_evento VARCHAR(50),
+    permitido BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (status_origem, status_destino, origem_evento)
+);
+
+INSERT INTO fluxo_status VALUES
+('ABERTO','EM_TRIAGEM','PAINEL_TRIAGEM',TRUE),
+('EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO','PAINEL_TRIAGEM',TRUE),
+('AGUARDANDO_CHAMADA_MEDICO','CHAMANDO_MEDICO','PAINEL_MEDICO',TRUE),
+('CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO','PAINEL_MEDICO',TRUE),
+('EM_ATENDIMENTO_MEDICO','AGUARDANDO_RX','PAINEL_MEDICO',TRUE),
+('AGUARDANDO_RX','EM_RX','PAINEL_PROCEDIMENTO',TRUE),
+('EM_RX','AGUARDANDO_CHAMADA_MEDICO','PAINEL_PROCEDIMENTO',TRUE);
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_transicao_status (
+    IN p_id_ffa BIGINT,
+    IN p_status_destino VARCHAR(50),
+    IN p_origem VARCHAR(50),
+    IN p_tipo_evento VARCHAR(50),
+    IN p_layout VARCHAR(50),
+    IN p_id_usuario BIGINT,
+    IN p_payload JSON
+)
+BEGIN
+    DECLARE v_status_atual VARCHAR(50);
+    DECLARE v_permitido INT DEFAULT 0;
+
+    -- 1️⃣ Status atual
+    SELECT status INTO v_status_atual
+    FROM ffa
+    WHERE id = p_id_ffa
+    FOR UPDATE;
+
+    -- 2️⃣ Valida transição
+    SELECT COUNT(*) INTO v_permitido
+    FROM fluxo_status
+    WHERE status_origem = v_status_atual
+      AND status_destino = p_status_destino
+      AND origem_evento = p_origem
+      AND permitido = TRUE;
+
+    IF v_permitido = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Transição de status não permitida';
+    END IF;
+
+    -- 3️⃣ Atualiza FFA
+    UPDATE ffa
+    SET status = p_status_destino,
+        layout = p_layout,
+        id_usuario_alteracao = p_id_usuario,
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- 4️⃣ Registra evento
+    INSERT INTO evento_ffa (
+        id_ffa,
+        id_usuario,
+        origem,
+        tipo_evento,
+        status_origem,
+        status_destino,
+        payload
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        p_origem,
+        p_tipo_evento,
+        v_status_atual,
+        p_status_destino,
+        p_payload
+    );
+
+END$$
+DELIMITER ;
+
+CREATE TABLE if not exists regra_timeout (
+    status VARCHAR(50),
+    minutos INT,
+    evento_timeout VARCHAR(50)
+);
+
+
+CALL sp_transicao_status(
+    4,
+    'CHAMANDO_MEDICO',
+    'PAINEL_MEDICO',
+    'CHAMADA_MEDICA',
+    'SALA_2',
+    10,
+    JSON_OBJECT('sala','SALA_2')
+);
+
+SELECT id, status, layout
+FROM ffa
+WHERE id = 4;
+
+
+INSERT INTO fluxo_status (
+    status_origem,
+    status_destino,
+    origem_evento,
+    permitido
+) VALUES (
+    'AGUARDANDO_CHAMADA_MEDICO',
+    'CHAMANDO_MEDICO',
+    'PAINEL_MEDICO',
+    TRUE
+);
+
+CALL sp_transicao_status(
+    4,
+    'AGUARDANDO_RX',
+    'PAINEL_MEDICO',
+    'SOLICITACAO_RX',
+    'RX',
+    10,
+    JSON_OBJECT('origem','MEDICO')
+);
+
+CALL sp_transicao_status(
+    4,
+    'ALTA',
+    'PAINEL_MEDICO',
+    'ALTA_MEDICA',
+    'FINAL',
+    10,
+    NULL
+);
+
+
+INSERT INTO fluxo_status (
+    status_origem,
+    status_destino,
+    origem_evento,
+    permitido
+) VALUES (
+    'EM_ATENDIMENTO_MEDICO',
+    'ALTA',
+    'PAINEL_MEDICO',
+    TRUE
+);
+
+CALL sp_transicao_status(
+    4,
+    'ALTA',
+    'PAINEL_MEDICO',
+    'ALTA_MEDICA',
+    'FINAL',
+    10,
+    NULL
+);
+
+ALTER TABLE auditoria_ffa 
+MODIFY COLUMN tipo_evento ENUM(
+  'CRIACAO',
+  'STATUS',
+  'LAYOUT',
+  'CHAMADA_MEDICA',
+  'SOLICITACAO_RX',
+  'SOLICITACAO_MEDICACAO',
+  'ALTA_MEDICA',
+  'TRANSFERENCIA',
+  'INTERNACAO'
+) NOT NULL;
+
+ALTER TABLE auditoria_ffa
+ADD COLUMN tipo_evento ENUM(
+  'CRIACAO',
+  'STATUS',
+  'LAYOUT',
+  'CHAMADA_MEDICA',
+  'SOLICITACAO_RX',
+  'SOLICITACAO_MEDICACAO',
+  'ALTA_MEDICA',
+  'TRANSFERENCIA',
+  'INTERNACAO'
+) NOT NULL AFTER id_usuario;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_registra_evento_rx (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    INSERT INTO auditoria_ffa (
+        id_ffa,
+        id_usuario,
+        tipo_evento,
+        acao,
+        timestamp
+    ) VALUES (
+        p_id_ffa,
+        p_id_usuario,
+        'SOLICITACAO_RX',
+        'Paciente encaminhado para RX',
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+CALL sp_registra_evento_rx(4, 10);
+
+CREATE TABLE if not exists status_timeout (
+    status ENUM(
+        'AGUARDANDO_CHAMADA_MEDICO',
+        'CHAMANDO_MEDICO',
+        'AGUARDANDO_RX',
+        'CHAMANDO_RX'
+    ) PRIMARY KEY,
+    tempo_max_segundos INT NOT NULL,
+    status_fallback ENUM(
+        'AGUARDANDO_CHAMADA_MEDICO',
+        'AGUARDANDO_RX'
+    ) NOT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS status_timeout (
+    status ENUM(
+        'AGUARDANDO_CHAMADA_MEDICO',
+        'CHAMANDO_MEDICO',
+        'AGUARDANDO_RX',
+        'CHAMANDO_RX',
+        'AGUARDANDO_MEDICACAO',
+        'EM_MEDICACAO'
+    ) PRIMARY KEY,
+
+    tempo_max_segundos INT NOT NULL,
+    status_fallback ENUM(
+        'AGUARDANDO_CHAMADA_MEDICO',
+        'AGUARDANDO_RX',
+        'AGUARDANDO_MEDICACAO'
+    ) NOT NULL,
+
+    ativo BOOLEAN DEFAULT TRUE
+);
+INSERT INTO status_timeout (status, tempo_max_segundos, status_fallback) VALUES
+('CHAMANDO_MEDICO',     60,  'AGUARDANDO_CHAMADA_MEDICO'),
+('CHAMANDO_RX',         90,  'AGUARDANDO_RX'),
+('EM_MEDICACAO',      1800,  'AGUARDANDO_MEDICACAO');
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_verifica_timeouts()
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+    DECLARE v_status_atual VARCHAR(50);
+    DECLARE v_status_fallback VARCHAR(50);
+    DECLARE v_tempo_max INT;
+    DECLARE v_ultimo_evento DATETIME;
+    DECLARE done INT DEFAULT 0;
+
+    DECLARE cur CURSOR FOR
+        SELECT 
+            f.id,
+            f.status,
+            st.status_fallback,
+            st.tempo_max_segundos,
+            MAX(a.timestamp) AS ultimo_evento
+        FROM ffa f
+        JOIN status_timeout st ON st.status = f.status AND st.ativo = TRUE
+        JOIN auditoria_ffa a ON a.id_ffa = f.id
+        WHERE f.status NOT IN ('ALTA','TRANSFERENCIA','INTERNACAO')
+        GROUP BY f.id, f.status, st.status_fallback, st.tempo_max_segundos;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO v_id_ffa, v_status_atual, v_status_fallback, v_tempo_max, v_ultimo_evento;
+        IF done = 1 THEN
+            LEAVE read_loop;
+        END IF;
+
+        IF TIMESTAMPDIFF(SECOND, v_ultimo_evento, NOW()) > v_tempo_max THEN
+            CALL sp_transicao_status(
+                v_id_ffa,
+                v_status_fallback,
+                'SISTEMA',
+                'TIMEOUT',
+                NULL,
+                NULL,
+                JSON_OBJECT('status_origem', v_status_atual)
+            );
+        END IF;
+    END LOOP;
+
+    CLOSE cur;
+END$$
+
+DELIMITER ;
+
+CREATE OR REPLACE VIEW vw_proxima_chamada_medico AS
+SELECT 
+    f.id AS id_ffa,
+    f.classificacao_manchester,
+    f.criado_em
+FROM ffa f
+WHERE f.status = 'AGUARDANDO_CHAMADA_MEDICO'
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    f.criado_em
+LIMIT 1;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_chamada_automatica_medico()
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+
+    SELECT id_ffa INTO v_id_ffa
+    FROM vw_proxima_chamada_medico
+    LIMIT 1;
+
+    IF v_id_ffa IS NOT NULL THEN
+        CALL sp_transicao_status(
+            v_id_ffa,
+            'CHAMANDO_MEDICO',
+            'SISTEMA',
+            'CHAMADA_MEDICA',
+            'SALA_AUTO',
+            NULL,
+            JSON_OBJECT('automatica', true)
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+SHOW CREATE VIEW vw_painel_alta_transferencia;
+
+
+DROP VIEW IF EXISTS vw_painel_alta_transferencia;
+
+DROP VIEW IF EXISTS vw_painel_alta_transferencia;
+
+CREATE VIEW vw_painel_alta_transferencia AS
+SELECT
+    f.id                    AS id_ffa,
+    p.nome_completo         AS paciente,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    f.atualizado_em
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+WHERE f.status IN ('ALTA_MEDICA', 'TRANSFERENCIA');
+SHOW CREATE VIEW vw_painel_atendimento;
+
+
+SELECT * FROM vw_painel_alta_transferencia;
+
+DROP VIEW IF EXISTS vw_painel_atendimento;
+
+
+CREATE DEFINER = CURRENT_USER
+SQL SECURITY DEFINER
+VIEW vw_painel_atendimento AS
+SELECT
+    f.id                      AS id_ffa,
+    f.gpat                    AS gpat,
+    p.id_pessoa               AS id_pessoa,
+    p.nome_completo            AS paciente,
+    f.status                  AS status,
+    f.layout                  AS layout,
+    f.classificacao_manchester,
+    f.atualizado_em
+FROM ffa f
+INNER JOIN pessoa p 
+    ON p.id_pessoa = f.id_paciente
+WHERE f.status IN (
+    -- Fila / atendimento médico
+    'AGUARDANDO_CHAMADA_MEDICO',
+    'CHAMANDO_MEDICO',
+    'EM_ATENDIMENTO_MEDICO',
+
+    -- Permanência assistida
+    'OBSERVACAO',
+    'MEDICACAO',
+    'AGUARDANDO_MEDICACAO',
+
+    -- Exames e procedimentos
+    'AGUARDANDO_RX',
+    'EM_RX',
+    'AGUARDANDO_COLETA',
+    'EM_COLETA',
+    'AGUARDANDO_ECG',
+    'EM_ECG'
+);
+
+DROP VIEW IF EXISTS vw_painel_clinico;
+
+CREATE DEFINER = CURRENT_USER
+SQL SECURITY DEFINER
+VIEW vw_painel_clinico AS
+SELECT
+    f.id                      AS id_ffa,
+    f.gpat                    AS gpat,
+    p.id_pessoa               AS id_pessoa,
+    p.nome_completo            AS paciente,
+    f.status                  AS status,
+    f.layout                  AS layout,
+    f.classificacao_manchester,
+    f.atualizado_em
+FROM ffa f
+INNER JOIN pessoa p 
+    ON p.id_pessoa = f.id_paciente
+WHERE f.status IN (
+    -- Recepção / triagem
+    'ABERTO',
+    'EM_TRIAGEM',
+
+    -- Fila médica
+    'AGUARDANDO_CHAMADA_MEDICO',
+    'CHAMANDO_MEDICO',
+    'EM_ATENDIMENTO_MEDICO',
+
+    -- Permanência clínica
+    'OBSERVACAO',
+    'MEDICACAO',
+    'AGUARDANDO_MEDICACAO',
+
+    -- Exames / procedimentos
+    'AGUARDANDO_RX',
+    'EM_RX',
+    'AGUARDANDO_COLETA',
+    'EM_COLETA',
+    'AGUARDANDO_ECG',
+    'EM_ECG'
+);
+SELECT * FROM vw_painel_clinico;
+
+SHOW FULL TABLES
+WHERE Table_type = 'VIEW';
+
+DROP VIEW IF EXISTS
+    vw_painel_alta_transferencia,
+    vw_painel_atendimento,
+    vw_painel_chamada,
+    vw_painel_clinico,
+    vw_painel_clinico_completo,
+    vw_painel_internacao,
+    vw_painel_medico,
+    vw_painel_procedimentos,
+    vw_painel_recepcao,
+    vw_painel_totem,
+    vw_painel_triagem,
+    vw_fila_atendimento,
+    vw_fila_atual,
+    vw_fila_pronta,
+    vw_fila_recepcao,
+    vw_fila_totem,
+    vw_fila_triagem,
+    vw_proxima_chamada_medico;
+    
+  CREATE VIEW vw_ffa_core AS
+SELECT
+    f.id                  AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo        AS paciente,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    f.atualizado_em,
+    f.criado_em
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente;
+
+CREATE VIEW vw_fila_core AS
+SELECT
+    fs.id,
+    fs.id_ffa,
+    fs.senha,
+    fs.prioridade_recepcao,
+    fs.prioridade_temporaria,
+    fs.criado_em
+FROM fila_senha fs;
+
+CREATE VIEW vw_painel_recepcao AS
+SELECT
+    c.id_ffa,
+    c.gpat,
+    c.paciente,
+    c.status,
+    f.senha,
+    f.prioridade_recepcao,
+    f.criado_em AS hora_chegada
+FROM vw_ffa_core c
+LEFT JOIN vw_fila_core f ON f.id_ffa = c.id_ffa
+WHERE c.status IN ('ABERTO','EM_TRIAGEM');
+
+CREATE VIEW vw_painel_totem AS
+SELECT
+    id,
+    senha,
+    prioridade_temporaria,
+    criado_em
+FROM vw_fila_core
+WHERE id_ffa IS NULL;
+
+CREATE VIEW vw_painel_triagem AS
+SELECT
+    id_ffa,
+    gpat,
+    paciente,
+    status,
+    classificacao_manchester
+FROM vw_ffa_core
+WHERE status IN ('EM_TRIAGEM');
+
+CREATE VIEW vw_painel_medico AS
+SELECT
+    id_ffa,
+    gpat,
+    paciente,
+    status,
+    classificacao_manchester
+FROM vw_ffa_core
+WHERE status IN (
+    'AGUARDANDO_CHAMADA_MEDICO',
+    'CHAMANDO_MEDICO',
+    'EM_ATENDIMENTO_MEDICO',
+    'OBSERVACAO'
+);
+
+CREATE VIEW vw_painel_medicacao AS
+SELECT
+    id_ffa,
+    gpat,
+    paciente,
+    status
+FROM vw_ffa_core
+WHERE status IN ('AGUARDANDO_MEDICACAO','MEDICACAO');
+
+CREATE VIEW vw_painel_rx AS
+SELECT
+    id_ffa,
+    gpat,
+    paciente,
+    status
+FROM vw_ffa_core
+WHERE status IN ('AGUARDANDO_RX','EM_RX');
+
+CREATE VIEW vw_painel_ecg AS
+SELECT
+    id_ffa,
+    gpat,
+    paciente,
+    status
+FROM vw_ffa_core
+WHERE status IN ('AGUARDANDO_ECG','EM_ECG');
+
+CREATE VIEW vw_painel_alta_transferencia AS
+SELECT
+    id_ffa,
+    gpat,
+    paciente,
+    status,
+    atualizado_em
+FROM vw_ffa_core
+WHERE status IN ('ALTA','TRANSFERENCIA','INTERNACAO');
+
+CREATE VIEW vw_painel_clinico_completo AS
+SELECT
+    c.id_ffa,
+    c.gpat,
+    c.paciente,
+    c.status,
+    c.classificacao_manchester,
+    f.senha,
+    f.prioridade_recepcao,
+    f.criado_em AS hora_chegada
+FROM vw_ffa_core c
+LEFT JOIN vw_fila_core f ON f.id_ffa = c.id_ffa
+WHERE c.status NOT IN ('FINALIZADO')
+ORDER BY
+    FIELD(c.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    f.criado_em;
+
+CREATE TABLE if not exists prioridade_social (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(30) UNIQUE NOT NULL,
+    descricao VARCHAR(100) NOT NULL,
+    peso INT NOT NULL,
+    ativo TINYINT(1) DEFAULT 1
+);
+
+INSERT INTO prioridade_social (codigo, descricao, peso) VALUES
+('IDOSO', 'Paciente idoso', 20),
+('AUTISTA', 'Paciente com TEA', 25),
+('PCD', 'Pessoa com deficiência', 20),
+('GESTANTE', 'Gestante', 15),
+('CRIANCACOLO', 'Criança de colo', 15);
+
+CREATE TABLE if not exists ffa_prioridade (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    codigo_prioridade VARCHAR(30) NOT NULL,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ativo TINYINT(1) DEFAULT 1
+);
+
+DELIMITER $$
+
+CREATE FUNCTION fn_score_prioridade_social(p_id_ffa BIGINT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE v_score INT;
+
+    SELECT COALESCE(SUM(ps.peso), 0)
+    INTO v_score
+    FROM ffa_prioridade fp
+    JOIN prioridade_social ps ON ps.codigo = fp.codigo_prioridade
+    WHERE fp.id_ffa = p_id_ffa
+      AND fp.ativo = 1
+      AND ps.ativo = 1;
+
+
+    RETURN v_score;
+END$$
+
+DELIMITER ;
+
+drop view  vw_fila_atendimento_v2;
+
+CREATE OR REPLACE VIEW vw_fila_atendimento_v2 AS
+SELECT
+    f.id,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    f.criado_em,
+    fn_score_prioridade_social(f.id) AS prioridade_score
+FROM ffa f
+WHERE f.status = 'AGUARDANDO_CHAMADA_MEDICO'
+ORDER BY
+    FIELD(
+        f.classificacao_manchester,
+        'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'
+    ),
+    prioridade_score DESC,
+    f.criado_em;
+
+SELECT *
+FROM vw_fila_atendimento_v2
+ORDER BY
+  FIELD(classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+  prioridade_score DESC,
+  criado_em;
+
+ALTER TABLE ffa
+ADD COLUMN linha_assistencial ENUM(
+    'CLINICA',
+    'PEDIATRICA'
+) NOT NULL DEFAULT 'CLINICA';
+
+DELIMITER $$
+
+CREATE FUNCTION fn_idade_em_anos(p_data_nascimento DATE)
+RETURNS INT
+DETERMINISTIC
+RETURN TIMESTAMPDIFF(YEAR, p_data_nascimento, CURDATE());
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE FUNCTION fn_linha_assistencial(p_data_nascimento DATE)
+RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN
+    DECLARE idade INT;
+
+    SET idade = TIMESTAMPDIFF(YEAR, p_data_nascimento, CURDATE());
+
+    IF idade < 12 THEN
+        RETURN 'PEDIATRICA';
+    END IF;
+
+    RETURN 'CLINICA';
+END$$
+
+DELIMITER ;
+
+drop procedure sp_definir_linha_assistencial_ffa;
+DELIMITER $$
+
+CREATE PROCEDURE sp_definir_linha_assistencial_ffa (
+    IN p_id_ffa BIGINT
+)
+BEGIN
+    DECLARE v_data_nascimento DATE;
+    DECLARE v_linha VARCHAR(20);
+
+    -- Busca data de nascimento do paciente da FFA
+    SELECT p.data_nascimento
+      INTO v_data_nascimento
+      FROM ffa f
+      JOIN pessoa p ON p.id_pessoa = f.id_paciente
+     WHERE f.id = p_id_ffa;
+
+    -- Define linha assistencial
+    SET v_linha = fn_linha_assistencial(v_data_nascimento);
+
+    -- Atualiza FFA
+    UPDATE ffa
+       SET linha_assistencial = v_linha,
+           layout = CASE
+               WHEN v_linha = 'PEDIATRICA' THEN 'PAINEL_PEDIATRICO'
+               ELSE 'PAINEL_CLINICO'
+           END
+     WHERE id = p_id_ffa;
+END$$
+
+DELIMITER ;
+CALL sp_definir_linha_assistencial_ffa(4);
+SELECT id, linha_assistencial, layout FROM ffa WHERE id = 4;
+
+
+CREATE OR REPLACE VIEW vw_prioridade_ffa AS
+SELECT
+    f.id AS id_ffa,
+
+    (
+      CASE f.classificacao_manchester
+        WHEN 'VERMELHO' THEN 100
+        WHEN 'LARANJA'  THEN 80
+        WHEN 'AMARELO'  THEN 60
+        WHEN 'VERDE'    THEN 40
+        WHEN 'AZUL'     THEN 20
+        ELSE 10
+      END
+    +
+      IF(fs.prioridade_recepcao = 'IDOSO', 10, 0)
+    +
+      IF(fs.prioridade_recepcao = 'PCD', 15, 0)
+    +
+      IF(fs.prioridade_recepcao = 'CRIANCA_COLO', 10, 0)
+    ) AS prioridade_score
+
+FROM ffa f
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id;
+
+
+CREATE OR REPLACE VIEW vw_fila_atendimento AS
+SELECT
+    f.id,
+    f.gpat,
+    p.nome_completo,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    pr.prioridade_score,
+    f.criado_em
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+JOIN vw_prioridade_ffa pr ON pr.id_ffa = f.id
+WHERE f.status = 'AGUARDANDO_CHAMADA_MEDICO'
+
+ORDER BY
+    pr.prioridade_score DESC,
+    f.criado_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_fila_totem AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.id_paciente,
+    p.nome_completo AS paciente_nome,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM fila_senha fs
+JOIN pessoa p ON p.id_pessoa = fs.id_paciente
+WHERE fs.id_ffa IS NULL
+ORDER BY
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_recepcao AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.prioridade_recepcao,
+    f.status,
+    f.layout,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO')
+ORDER BY
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_painel_clinico AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    f.classificacao_manchester,
+    fs.criado_em AS hora_chegada,
+    fs.prioridade_recepcao
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','EM_ATENDIMENTO','OBSERVACAO')
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_painel_clinico_completo AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    f.classificacao_manchester,
+    fs.criado_em AS hora_chegada,
+    fs.prioridade_recepcao
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_fila_totem AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.id_paciente,
+    p.nome_completo AS paciente_nome,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM fila_senha fs
+JOIN pessoa p ON p.id_pessoa = fs.id_paciente
+WHERE fs.id_ffa IS NULL
+ORDER BY
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+    
+    CREATE OR REPLACE VIEW vw_painel_recepcao AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente_nome,
+    fs.senha,
+    fs.prioridade_recepcao,
+    f.status,
+    f.layout,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO')
+ORDER BY
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_clinico AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    f.classificacao_manchester,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ABERTO','EM_TRIAGEM','EM_ATENDIMENTO','OBSERVACAO')
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_clinico_completo AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    f.status,
+    f.layout,
+    p.nome_completo AS paciente_nome,
+    f.classificacao_manchester,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_alta_transferencia AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('ALTA','TRANSFERENCIA')
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+    
+CREATE OR REPLACE VIEW vw_painel_atendimento AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente_nome,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status NOT IN ('FINALIZADO','ALTA','TRANSFERENCIA')
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+    
+
+CREATE OR REPLACE VIEW vw_painel_atendimento AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente_nome,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status NOT IN ('FINALIZADO','ALTA','TRANSFERENCIA')
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_medico AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente_nome,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO','OBSERVACAO')
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_procedimentos AS
+SELECT
+    f.id AS id_ffa,
+    f.gpat,
+    f.id_paciente,
+    p.nome_completo AS paciente_nome,
+    f.status,
+    f.layout,
+    f.classificacao_manchester,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM ffa f
+JOIN pessoa p ON p.id_pessoa = f.id_paciente
+LEFT JOIN fila_senha fs ON fs.id_ffa = f.id
+WHERE f.status IN ('AGUARDANDO_MEDICACAO','MEDICACAO','AGUARDANDO_RX','EM_RX','AGUARDANDO_COLETA','EM_COLETA','AGUARDANDO_ECG','EM_ECG')
+ORDER BY
+    FIELD(f.classificacao_manchester,'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE OR REPLACE VIEW vw_painel_totem AS
+SELECT
+    fs.id AS id_fila,
+    fs.senha,
+    fs.id_paciente,
+    p.nome_completo AS paciente_nome,
+    fs.prioridade_recepcao,
+    fs.criado_em AS hora_chegada
+FROM fila_senha fs
+JOIN pessoa p ON p.id_pessoa = fs.id_paciente
+WHERE fs.id_ffa IS NULL
+ORDER BY
+    CASE fs.prioridade_recepcao
+        WHEN 'IDOSO' THEN 3
+        WHEN 'CRIANCA' THEN 2
+        WHEN 'ESPECIAL' THEN 1
+        ELSE 0
+    END DESC,
+    fs.criado_em ASC;
+
+CREATE TABLE IF NOT EXISTS plantao (
+    id_plantao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT NOT NULL,       -- médico ou profissional de saúde
+    data_inicio DATETIME NOT NULL,
+    data_fim DATETIME NOT NULL,
+    tipo_plantao ENUM('DIURNO','NOTURNO') NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+drop table medicos;
+-- Médicos
+CREATE TABLE IF NOT EXISTS medicos (
+    id_medico BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT NOT NULL, -- vincula ao usuário do HIS
+    nome VARCHAR(150) NOT NULL,
+    crm VARCHAR(20) UNIQUE,
+    id_especialidade INT,
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
+);
+
+drop table plantoes;
+-- Plantões
+CREATE TABLE IF NOT EXISTS plantoes (
+    id_plantao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_medico BIGINT NOT NULL,
+    data DATE NOT NULL,
+    turno ENUM('DIA','NOITE','24H','CUSTOM') NOT NULL,
+    hora_inicio TIME DEFAULT NULL,
+    hora_fim TIME DEFAULT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_medico) REFERENCES medicos(id_medico)
+);
+
+
+CREATE OR REPLACE VIEW vw_medicos_plantao AS
+SELECT
+    m.id_medico,
+    m.nome,
+    m.crm,
+    m.id_especialidade,
+    p.data,
+    p.turno,
+    COALESCE(p.hora_inicio, CASE p.turno
+        WHEN 'DIA' THEN '07:00:00'
+        WHEN 'NOITE' THEN '19:00:00'
+        WHEN '24H' THEN '00:00:00'
+        ELSE NULL
+    END) AS hora_inicio,
+    COALESCE(p.hora_fim, CASE p.turno
+        WHEN 'DIA' THEN '19:00:00'
+        WHEN 'NOITE' THEN '07:00:00'
+        WHEN '24H' THEN '23:59:59'
+        ELSE NULL
+    END) AS hora_fim
+FROM medicos m
+JOIN plantoes p ON p.id_medico = m.id_medico
+WHERE m.ativo = 1
+  AND p.ativo = 1;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_medicos_disponiveis(
+    IN p_data DATE,
+    IN p_hora TIME
+)
+BEGIN
+    SELECT
+        m.id_medico,
+        m.nome,
+        m.crm,
+        m.id_especialidade,
+        p.turno,
+        p.hora_inicio,
+        p.hora_fim
+    FROM medicos m
+    JOIN plantoes p ON p.id_medico = m.id_medico
+    WHERE m.ativo = 1
+      AND p.ativo = 1
+      AND p.data = p_data
+      AND p_hora BETWEEN COALESCE(p.hora_inicio, '00:00:00')
+                     AND COALESCE(p.hora_fim, '23:59:59');
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_abrir_ffa_com_plantao(
+    IN p_id_paciente BIGINT,
+    IN p_id_usuario BIGINT,
+    OUT p_id_ffa BIGINT
+)
+BEGIN
+    DECLARE v_id_medico BIGINT;
+
+    -- Seleciona primeiro médico disponível na linha assistencial do paciente
+    SELECT id_medico
+      INTO v_id_medico
+      FROM vw_medicos_plantao
+     WHERE CURTIME() BETWEEN hora_inicio AND hora_fim
+     LIMIT 1;
+
+    IF v_id_medico IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Nenhum médico disponível no plantão atual';
+    END IF;
+
+    -- Chama SP de abertura de FFA existente
+    CALL sp_abre_ffa(
+        NULL,        -- se houver fila, pode passar id_fila
+        p_id_usuario,
+        p_id_paciente,
+        p_id_ffa,
+        NULL         -- GPAT será gerado pela SP
+    );
+END$$
+
+DELIMITER ;
+
+
+-- Apaga a tabela se já existir
+DROP TABLE IF EXISTS plantao;
+
+-- Cria a tabela de plantões
+CREATE TABLE if not exists plantao (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_medico BIGINT NOT NULL,          -- FK para tabela de médicos
+    nome_medico VARCHAR(200) NOT NULL,  -- Nome do médico (redundante para exibição rápida)
+    tipo_plantao ENUM('CLINICO','PEDIATRIA','EMERGENCIA') NOT NULL,
+    inicio_plantao DATETIME NOT NULL,
+    fim_plantao DATETIME NOT NULL,
+    ativo TINYINT(1) DEFAULT 1,         -- 1 = ativo, 0 = inativo
+    criado_em DATETIME DEFAULT NOW(),
+    atualizado_em DATETIME DEFAULT NOW() ON UPDATE NOW()
+);
+
+-- Opcional: exemplo de inserção
+INSERT INTO plantao (id_medico, nome_medico, tipo_plantao, inicio_plantao, fim_plantao, ativo)
+VALUES
+(1, 'Dr. Carlos Silva', 'CLINICO', '2025-12-31 07:00:00', '2025-12-31 19:00:00', 1),
+(2, 'Dra. Ana Souza', 'PEDIATRIA', '2025-12-31 07:00:00', '2025-12-31 19:00:00', 1),
+(3, 'Dr. Rafael Lima', 'EMERGENCIA', '2025-12-31 19:00:00', '2026-01-01 07:00:00', 1);
+
+-- View pronta para painel / TTS / recepção
+CREATE OR REPLACE VIEW vw_plantao_ativo AS
+SELECT 
+    p.id,
+    p.id_medico,
+    p.nome_medico,
+    p.tipo_plantao,
+    p.inicio_plantao,
+    p.fim_plantao
+FROM plantao p
+WHERE p.ativo = 1
+  AND NOW() BETWEEN p.inicio_plantao AND p.fim_plantao
+ORDER BY FIELD(p.tipo_plantao, 'EMERGENCIA','PEDIATRIA','CLINICO'), p.inicio_plantao;
+
+
+CREATE OR REPLACE VIEW vw_ffa_com_plantao AS
+SELECT 
+    f.id AS id_ffa,
+    f.gpat AS senha,
+    f.id_paciente,
+    p.nome_completo AS nome_paciente,
+    pl.id_medico,
+    pl.nome_medico,
+    pl.tipo_plantao,
+    f.status,
+    f.criado_em,
+    f.atualizado_em
+FROM ffa f
+JOIN pessoa p ON f.id_paciente = p.id_pessoa
+LEFT JOIN plantao pl 
+    ON NOW() BETWEEN pl.inicio_plantao AND pl.fim_plantao
+    AND pl.ativo = 1
+ORDER BY FIELD(pl.tipo_plantao, 'EMERGENCIA','PEDIATRIA','CLINICO'), f.criado_em;
+
+
+DROP PROCEDURE IF EXISTS sp_chama_paciente;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_chama_paciente(IN p_id_ffa BIGINT)
+BEGIN
+    -- Atualiza status da FFA
+    UPDATE ffa
+    SET status = 'CHAMANDO_MEDICO',
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Retorna dados para painel/TTS
+    SELECT 
+        f.gpat AS senha,
+        p.nome_completo AS nome_paciente,
+        pl.nome_medico,
+        pl.tipo_plantao,
+        CONCAT('Atenção paciente ', p.nome_completo, ', comparecer à sala ', pl.tipo_plantao, ' chamado pelo médico ', pl.nome_medico) AS tts_texto
+    FROM ffa f
+    JOIN pessoa p ON f.id_paciente = p.id_pessoa
+    LEFT JOIN plantao pl 
+        ON NOW() BETWEEN pl.inicio_plantao AND pl.fim_plantao
+        AND pl.ativo = 1
+    WHERE f.id = p_id_ffa;
+END$$
+
+DELIMITER ;
+
+CREATE OR REPLACE VIEW vw_senhas_chamadas AS
+SELECT 
+    f.gpat AS senha,
+    f.status,
+    p.nome_completo AS nome_paciente,
+    pl.nome_medico,
+    pl.tipo_plantao
+FROM ffa f
+JOIN pessoa p ON f.id_paciente = p.id_pessoa
+LEFT JOIN plantao pl
+    ON NOW() BETWEEN pl.inicio_plantao AND pl.fim_plantao
+    AND pl.ativo = 1
+WHERE f.status IN ('CHAMANDO_MEDICO','AGUARDANDO_CHAMADA_MEDICO')
+ORDER BY f.criado_em;
+
+
+-- ================================
+-- 1️⃣ View: FFA com Plantão
+-- ================================
+DROP VIEW IF EXISTS vw_ffa_com_plantao;
+
+CREATE OR REPLACE VIEW vw_ffa_com_plantao AS
+SELECT 
+    f.id AS id_ffa,
+    f.gpat AS senha,
+    f.id_paciente,
+    p.nome_completo AS nome_paciente,
+    pl.id_medico,
+    pl.nome_medico,
+    pl.tipo_plantao,
+    f.status,
+    f.criado_em,
+    f.atualizado_em
+FROM ffa f
+JOIN pessoa p ON f.id_paciente = p.id_pessoa
+LEFT JOIN plantao pl 
+    ON NOW() BETWEEN pl.inicio_plantao AND pl.fim_plantao
+    AND pl.ativo = 1
+ORDER BY FIELD(pl.tipo_plantao, 'EMERGENCIA','PEDIATRIA','CLINICO'), f.criado_em;
+
+-- ================================
+-- 2️⃣ View: Senhas chamadas para Recepção/Totem
+-- ================================
+DROP VIEW IF EXISTS vw_senhas_chamadas;
+
+CREATE OR REPLACE VIEW vw_senhas_chamadas AS
+SELECT 
+    f.gpat AS senha,
+    f.status,
+    p.nome_completo AS nome_paciente,
+    pl.nome_medico,
+    pl.tipo_plantao
+FROM ffa f
+JOIN pessoa p ON f.id_paciente = p.id_pessoa
+LEFT JOIN plantao pl
+    ON NOW() BETWEEN pl.inicio_plantao AND pl.fim_plantao
+    AND pl.ativo = 1
+WHERE f.status IN ('CHAMANDO_MEDICO','AGUARDANDO_CHAMADA_MEDICO')
+ORDER BY f.criado_em;
+
+-- ================================
+-- 3️⃣ SP: Chamar paciente e gerar TTS
+-- ================================
+DROP PROCEDURE IF EXISTS sp_chama_paciente;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_chama_paciente(IN p_id_ffa BIGINT)
+BEGIN
+    -- Atualiza status da FFA
+    UPDATE ffa
+    SET status = 'CHAMANDO_MEDICO',
+        atualizado_em = NOW()
+    WHERE id = p_id_ffa;
+
+    -- Retorna dados para painel/TTS
+    SELECT 
+        f.gpat AS senha,
+        p.nome_completo AS nome_paciente,
+        pl.nome_medico,
+        pl.tipo_plantao,
+        CONCAT('Atenção paciente ', p.nome_completo, ', comparecer à sala ', pl.tipo_plantao, ' chamado pelo médico ', pl.nome_medico) AS tts_texto
+    FROM ffa f
+    JOIN pessoa p ON f.id_paciente = p.id_pessoa
+    LEFT JOIN plantao pl 
+        ON NOW() BETWEEN pl.inicio_plantao AND pl.fim_plantao
+        AND pl.ativo = 1
+    WHERE f.id = p_id_ffa;
+END$$
+
+DELIMITER ;
+
+
+DROP TABLE IF EXISTS auditoria_excecoes;
+
+CREATE TABLE auditoria_excecoes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    id_paciente BIGINT NOT NULL,
+    motivo VARCHAR(255) NOT NULL,
+    chamado_por VARCHAR(200) DEFAULT NULL,  -- pode ser médico ou recepção
+    criado_em DATETIME DEFAULT NOW()
+);
+
+
+DROP VIEW IF EXISTS vw_proxima_chamada_medico;
+
+CREATE OR REPLACE VIEW vw_proxima_chamada_medico AS
+SELECT 
+    f.id AS id_ffa,
+    f.gpat AS senha,
+    p.nome_completo AS nome_paciente,
+    pl.nome_medico,
+    pl.tipo_plantao,
+    f.status,
+    f.classificacao_manchester,
+    -- Flag de prioridade absoluta
+    CASE 
+        WHEN pl.tipo_plantao = 'PEDIATRIA' AND f.classificacao_manchester = 'VERMELHO' THEN 1
+        ELSE 2
+    END AS prioridade_pediatrico_vermelho
+FROM ffa f
+JOIN pessoa p ON f.id_paciente = p.id_pessoa
+LEFT JOIN plantao pl 
+    ON NOW() BETWEEN pl.inicio_plantao AND pl.fim_plantao
+    AND pl.ativo = 1
+ORDER BY 
+    prioridade_pediatrico_vermelho,
+    FIELD(f.classificacao_manchester, 'VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    f.criado_em;
+
+
+DROP PROCEDURE IF EXISTS sp_auditoria_excecao;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_auditoria_excecao(
+    IN p_id_ffa BIGINT,
+    IN p_motivo VARCHAR(255),
+    IN p_chamado_por VARCHAR(200)
+)
+BEGIN
+    -- Registra exceção apenas quando a prioridade é aplicada manualmente
+    INSERT INTO auditoria_excecoes (id_ffa, id_paciente, motivo, chamado_por)
+    SELECT f.id, f.id_paciente, p_motivo, p_chamado_por
+    FROM ffa f
+    WHERE f.id = p_id_ffa;
+END$$
+
+DELIMITER ;

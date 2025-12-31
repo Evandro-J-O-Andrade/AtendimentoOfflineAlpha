@@ -16,19 +16,40 @@ export default function Dashboard() {
   });
   const [fila, setFila] = useState([]);
 
+  // Função para carregar dados da fila e stats
+  const carregarFila = async () => {
+    try {
+      const res = await api.get("/atendimento.php");
+      const data = Array.isArray(res.data) ? res.data : [];
+
+      // Padroniza nomes dos campos
+      const filaPadronizada = data.map(p => ({
+        id: p.id || p.id_ffa,
+        senha: p.gpat || p.senha,
+        nome: p.nome_completo || p.nome,
+        prioridade: p.score_prioridade || p.prioridade || "-",
+        status_atendimento: p.status || p.status_atendimento || "-",
+        hora_chegada: p.criado_em || p.hora_chegada || "-"
+      }));
+
+      setFila(filaPadronizada);
+
+      // Atualiza stats
+      setStats({
+        total: filaPadronizada.length,
+        pendentes: filaPadronizada.filter(p => p.status_atendimento === "AGUARDANDO_MEDICO" || p.status_atendimento === "PENDENTE").length,
+        usuarios: 50 // futuramente buscar do backend /usuarios/count
+      });
+
+    } catch (err) {
+      console.error("Erro ao carregar fila:", err);
+    }
+  };
+
   useEffect(() => {
-    // Buscar estatísticas gerais
-    api.get("/atendimento.php")
-      .then(res => {
-        const data = Array.isArray(res.data) ? res.data : [];
-        setFila(data);
-        setStats({
-          total: data.length,
-          pendentes: data.filter(p => p.status_atendimento === "PENDENTE").length,
-          usuarios: 50 // ou buscar do banco de usuários
-        });
-      })
-      .catch(err => console.error(err));
+    carregarFila(); // primeiro carregamento
+    const intervalo = setInterval(carregarFila, 5000); // atualiza a cada 5s
+    return () => clearInterval(intervalo);
   }, []);
 
   return (
@@ -64,15 +85,21 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {fila.map(p => (
-                  <tr key={p.id}>
-                    <td>{p.senha}</td>
-                    <td>{p.nome}</td>
-                    <td>{p.prioridade}</td>
-                    <td>{p.status_atendimento}</td>
-                    <td>{p.hora_chegada}</td>
+                {fila.length > 0 ? (
+                  fila.map(p => (
+                    <tr key={p.id}>
+                      <td>{p.senha}</td>
+                      <td>{p.nome}</td>
+                      <td>{p.prioridade}</td>
+                      <td>{p.status_atendimento}</td>
+                      <td>{p.hora_chegada}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5">Nenhum paciente na fila</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

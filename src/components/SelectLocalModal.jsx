@@ -1,27 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import './SelectLocalModal.css';
 
-export default function SelectLocalModal({ open, onClose, onSelect, tipoUsuario }) {
+export default function SelectLocalModal({ open, onClose, onSelect, usuario }) {
   const [locais, setLocais] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState('');
 
+  // Carrega locais do backend quando modal abrir
   useEffect(() => {
     if (!open) return;
 
     setLoading(true);
-    api.get('/local_usuario_listar.php')  // endpoint que retorna todos os locais
+    api.get('/local_usuario_listar.php')
       .then(res => {
-        const data = Array.isArray(res.data) ? res.data : [];
-        // Filtra pelo tipo do usuário
-        setLocais(data.filter(l => l.tipo === tipoUsuario && l.ativo === 1));
+        let data = Array.isArray(res.data) ? res.data : [];
+
+        // Filtra conforme tipo do usuário
+        if (usuario.perfis.includes('MEDICO')) {
+          data = data.filter(l => l.tipo === 'MEDICO' && l.ativo === 1);
+        } else if (usuario.perfis.includes('RECEPCAO')) {
+          data = data.filter(l => l.tipo === 'RECEPCAO' && l.ativo === 1);
+        } else if (usuario.perfis.includes('ENFERMAGEM')) {
+          data = data.filter(l => l.tipo === 'ENFERMAGEM' && l.ativo === 1);
+        }
+
+        setLocais(data);
       })
       .catch(err => {
         console.error('Erro ao carregar locais', err);
         setLocais([]);
       })
       .finally(() => setLoading(false));
-  }, [open, tipoUsuario]);
+  }, [open, usuario]);
 
   useEffect(() => {
     if (!open) setSelected('');
@@ -33,6 +44,11 @@ export default function SelectLocalModal({ open, onClose, onSelect, tipoUsuario 
     <div className="select-local-modal-overlay">
       <div className="select-local-modal">
         <h3>Escolha seu local de atendimento</h3>
+        <div className="usuario-info">
+          <strong>Usuário:</strong> {usuario.nome_completo}<br/>
+          <strong>Perfil:</strong> {usuario.perfis.join(', ')}
+        </div>
+
         {loading ? (
           <div>Carregando locais...</div>
         ) : (
@@ -40,13 +56,13 @@ export default function SelectLocalModal({ open, onClose, onSelect, tipoUsuario 
             <option value="">-- selecione --</option>
             {locais.map(l => (
               <option key={l.id_local_usuario} value={JSON.stringify(l)}>
-                {l.nome}
+                {l.nome} {l.sala ? `- Sala: ${l.sala}` : ''}
               </option>
             ))}
           </select>
         )}
 
-        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+        <div className="actions">
           <button onClick={() => selected && onSelect(JSON.parse(selected))}>Selecionar</button>
           <button onClick={onClose}>Fechar</button>
         </div>
