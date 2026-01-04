@@ -1,8 +1,8 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import PrivateRoute from "./auth/PrivateRoute";
-import RequireLocal from "./auth/RequireLocal";
+import PrivateRoute from "./routes/PrivateRoute";
+import RequireLocal from "./routes/RequireContexto";
 
 // PÁGINAS PÚBLICAS
 import Login from "./pages/login/Login";

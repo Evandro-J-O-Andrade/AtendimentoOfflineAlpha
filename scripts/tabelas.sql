@@ -854,3 +854,296 @@ CREATE TABLE observacoes_eventos (
     INDEX idx_entidade (entidade, id_entidade)
 ) ENGINE=InnoDB COMMENT 'Observações e comunicações como eventos';
 
+DROP TABLE IF EXISTS usuario_refresh;
+
+CREATE TABLE usuario_refresh (
+  id_refresh BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID do refresh token',
+  id_usuario BIGINT NOT NULL COMMENT 'Usuário dono do token',
+  token_hash CHAR(64) NOT NULL COMMENT 'Hash do refresh token',
+  expires_at DATETIME NOT NULL COMMENT 'Expiração do token',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Data de criação',
+  revoked TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Token revogado',
+  user_agent VARCHAR(255) DEFAULT NULL COMMENT 'User agent do dispositivo',
+  ip VARCHAR(45) DEFAULT NULL COMMENT 'IP de origem',
+  CONSTRAINT fk_usuario_refresh_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES usuario(id_usuario)
+    ON DELETE CASCADE,
+  UNIQUE KEY uk_token_hash (token_hash),
+  KEY idx_usuario (id_usuario)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COMMENT='Refresh tokens de autenticação com rotação e revogação';
+
+
+CREATE TABLE if not exists ffa_substatus (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    categoria ENUM(
+        'MEDICACAO',
+        'FARMACIA',
+        'OBSERVACAO',
+        'RX',
+        'ECG',
+        'COLETA',
+        'OUTRO'
+    ) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    ativo TINYINT(1) DEFAULT 1,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    finalizado_em DATETIME NULL,
+    id_usuario BIGINT NULL,
+    observacao TEXT,
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    INDEX idx_ffa_categoria (id_ffa, categoria, ativo)
+) ENGINE=InnoDB COMMENT='Substatus assistenciais da FFA';
+
+CREATE TABLE if not exists prescricao_medicacao (
+    id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    id_medico BIGINT NOT NULL,
+    descricao TEXT NOT NULL COMMENT 'Descrição livre da prescrição',
+    controlada TINYINT(1) DEFAULT 0 COMMENT 'Se exige liberação da farmácia',
+    criada_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ativa TINYINT(1) DEFAULT 1,
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_medico) REFERENCES usuario(id_usuario) ON DELETE RESTRICT,
+    INDEX idx_ffa (id_ffa)
+) ENGINE=InnoDB COMMENT='Prescrições de medicação do PA';
+
+DROP TABLE IF EXISTS ffa_procedimento;
+
+CREATE TABLE ffa_procedimento (
+    id_procedimento BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    tipo ENUM('RX','ECG','EXAME_LAB','OUTROS') NOT NULL,
+    descricao TEXT,
+    solicitado_por BIGINT NOT NULL,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    finalizado_em DATETIME NULL,
+    ativo TINYINT(1) DEFAULT 1,
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id),
+    FOREIGN KEY (solicitado_por) REFERENCES usuario(id_usuario),
+    INDEX idx_ffa (id_ffa)
+) ENGINE=InnoDB COMMENT='Procedimentos solicitados durante o atendimento';
+
+
+DROP TABLE IF EXISTS fila_operacional;
+
+CREATE TABLE fila_operacional (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    tipo ENUM('RX','ECG','LAB','PROCEDIMENTO','MEDICACAO') NOT NULL,
+    status ENUM(
+        'AGUARDANDO',
+        'EM_EXECUCAO',
+        'FINALIZADO',
+        'CANCELADO'
+    ) NOT NULL DEFAULT 'AGUARDANDO',
+    prioridade TINYINT DEFAULT 0,
+    solicitado_por BIGINT COMMENT 'Usuário (médico)',
+    iniciado_em DATETIME NULL,
+    finalizado_em DATETIME NULL,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id),
+    FOREIGN KEY (solicitado_por) REFERENCES usuario(id_usuario),
+    INDEX idx_ffa_status (id_ffa, status),
+    INDEX idx_tipo_status (tipo, status)
+) ENGINE=InnoDB COMMENT='Fila operacional de execução (RX, ECG, etc)';
+-- ===============================
+-- DESLIGA TEMPORARIAMENTE FK
+-- ===============================
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ===============================
+-- DROP TABELA ANTIGA
+-- ===============================
+DROP TABLE IF EXISTS internacao;
+DROP TABLE IF EXISTS internacao_historico;
+
+-- ===============================
+-- CRIAÇÃO DA TABELA INTERNACAO
+-- ===============================
+CREATE TABLE internacao (
+    id_internacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL COMMENT 'Episódio assistencial',
+    id_leito INT NOT NULL COMMENT 'Leito ocupado',
+    tipo ENUM('OBSERVACAO','INTERNACAO') NOT NULL,
+    status ENUM('ATIVA','EM_OBSERVACAO','TRANSFERIDA','ENCERRADA') NOT NULL DEFAULT 'ATIVA',
+    motivo TEXT COMMENT 'Motivo clínico da internação',
+    data_entrada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_saida DATETIME NULL,
+    id_usuario_responsavel BIGINT NOT NULL COMMENT 'Médico ou profissional que internou',
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id),
+    FOREIGN KEY (id_leito) REFERENCES leito(id_leito),
+    FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario),
+    INDEX idx_ffa_status (id_ffa, status),
+    INDEX idx_leito_status (id_leito, status)
+) ENGINE=InnoDB COMMENT='Internação e observação clínica vinculadas ao FFA';
+
+-- ===============================
+-- TABELA DE HISTÓRICO DE INTERNACAO
+-- ===============================
+CREATE TABLE internacao_historico (
+    id_historico BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao BIGINT NOT NULL,
+    status_anterior ENUM('ATIVA','EM_OBSERVACAO','TRANSFERIDA','ENCERRADA') NOT NULL,
+    status_novo ENUM('ATIVA','EM_OBSERVACAO','TRANSFERIDA','ENCERRADA') NOT NULL,
+    data_alteracao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_usuario BIGINT COMMENT 'Usuário que realizou a alteração',
+    comentario TEXT COMMENT 'Observação sobre a alteração',
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    INDEX idx_internacao_data (id_internacao, data_alteracao)
+) ENGINE=InnoDB COMMENT='Histórico de mudanças de status e alterações na internação';
+
+-- ===============================
+-- PROCEDURE: INTERNAR PACIENTE
+-- ===============================
+DELIMITER $$
+CREATE PROCEDURE sp_internar_paciente(
+    IN p_id_ffa BIGINT,
+    IN p_id_leito INT,
+    IN p_tipo ENUM('OBSERVACAO','INTERNACAO'),
+    IN p_motivo TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    INSERT INTO internacao (id_ffa, id_leito, tipo, status, motivo, id_usuario_responsavel)
+    VALUES (p_id_ffa, p_id_leito, p_tipo, 'ATIVA', p_motivo, p_id_usuario);
+END$$
+DELIMITER ;
+
+-- ===============================
+-- PROCEDURE: TRANSFERIR INTERNACAO
+-- ===============================
+DELIMITER $$
+CREATE PROCEDURE sp_transferir_internacao(
+    IN p_id_internacao BIGINT,
+    IN p_novo_leito INT,
+    IN p_id_usuario BIGINT,
+    IN p_comentario TEXT
+)
+BEGIN
+    DECLARE v_status_atual ENUM('ATIVA','EM_OBSERVACAO','TRANSFERIDA','ENCERRADA');
+
+    SELECT status INTO v_status_atual FROM internacao WHERE id_internacao = p_id_internacao;
+
+    -- Atualiza leito e status para TRANSFERIDA
+    UPDATE internacao
+    SET id_leito = p_novo_leito,
+        status = 'TRANSFERIDA',
+        atualizado_em = NOW()
+    WHERE id_internacao = p_id_internacao;
+
+    -- Insere histórico
+    INSERT INTO internacao_historico (id_internacao, status_anterior, status_novo, id_usuario, comentario)
+    VALUES (p_id_internacao, v_status_atual, 'TRANSFERIDA', p_id_usuario, p_comentario);
+END$$
+DELIMITER ;
+
+-- ===============================
+-- PROCEDURE: FINALIZAR INTERNACAO
+-- ===============================
+DELIMITER $$
+CREATE PROCEDURE sp_finalizar_internacao(
+    IN p_id_internacao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_comentario TEXT
+)
+BEGIN
+    DECLARE v_status_atual ENUM('ATIVA','EM_OBSERVACAO','TRANSFERIDA','ENCERRADA');
+
+    SELECT status INTO v_status_atual FROM internacao WHERE id_internacao = p_id_internacao;
+
+    UPDATE internacao
+    SET status = 'ENCERRADA',
+        data_saida = NOW(),
+        atualizado_em = NOW()
+    WHERE id_internacao = p_id_internacao;
+
+    -- Insere histórico
+    INSERT INTO internacao_historico (id_internacao, status_anterior, status_novo, id_usuario, comentario)
+    VALUES (p_id_internacao, v_status_atual, 'ENCERRADA', p_id_usuario, p_comentario);
+END$$
+DELIMITER ;
+
+-- ===============================
+-- PROCEDURE: ATUALIZAR STATUS INTERNACAO
+-- ===============================
+DELIMITER $$
+CREATE PROCEDURE sp_atualizar_status_internacao(
+    IN p_id_internacao BIGINT,
+    IN p_novo_status ENUM('ATIVA','EM_OBSERVACAO','TRANSFERIDA','ENCERRADA'),
+    IN p_id_usuario BIGINT,
+    IN p_comentario TEXT
+)
+BEGIN
+    DECLARE v_status_atual ENUM('ATIVA','EM_OBSERVACAO','TRANSFERIDA','ENCERRADA');
+
+    SELECT status INTO v_status_atual FROM internacao WHERE id_internacao = p_id_internacao;
+
+    UPDATE internacao
+    SET status = p_novo_status,
+        atualizado_em = NOW()
+    WHERE id_internacao = p_id_internacao;
+
+    -- Insere histórico
+    INSERT INTO internacao_historico (id_internacao, status_anterior, status_novo, id_usuario, comentario)
+    VALUES (p_id_internacao, v_status_atual, p_novo_status, p_id_usuario, p_comentario);
+END$$
+DELIMITER ;
+
+-- ===============================
+-- REATIVA FK
+-- ===============================
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+-- ===============================
+-- DESLIGA TEMPORARIAMENTE FK
+-- ===============================
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ===============================
+-- DROP TABELA ANTIGA
+-- ===============================
+DROP TABLE IF EXISTS fila_operacional;
+
+-- ===============================
+-- CRIAÇÃO DA TABELA
+-- ===============================
+CREATE TABLE fila_operacional (
+    id_fila BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL COMMENT 'Episódio assistencial',
+    tipo ENUM('TRIAGEM','MEDICO','MEDICACAO','EXAME','RX','ECG','PROCEDIMENTO','OBSERVACAO') NOT NULL COMMENT 'Tipo de fila',
+    substatus ENUM(
+        'AGUARDANDO',
+        'EM_EXECUCAO',
+        'EM_OBSERVACAO',
+        'FINALIZADO',
+        'CRITICO'
+    ) NOT NULL DEFAULT 'AGUARDANDO' COMMENT 'Substatus do paciente nesta fila',
+    prioridade ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') DEFAULT 'AZUL' COMMENT 'Prioridade de Manchester',
+    data_entrada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Chegada na fila',
+    data_inicio DATETIME COMMENT 'Início do atendimento/exame',
+    data_fim DATETIME COMMENT 'Término do atendimento/exame',
+    id_responsavel BIGINT COMMENT 'Usuário que está atendendo/executando',
+    observacao TEXT COMMENT 'Notas ou observações específicas',
+    id_local INT COMMENT 'Local ou sala de atendimento',
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id),
+    FOREIGN KEY (id_responsavel) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_local) REFERENCES local_atendimento(id_local),
+    INDEX idx_ffa_tipo_substatus (id_ffa, tipo, substatus),
+    INDEX idx_tipo_prioridade (tipo, prioridade, substatus)
+) ENGINE=InnoDB COMMENT='Fila operacional de todos os atendimentos, procedimentos, exames, medicação e observação';
+
+-- ===============================
+-- REATIVA FK
+-- ===============================
+SET FOREIGN_KEY_CHECKS = 1;
+
