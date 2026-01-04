@@ -1,0 +1,36 @@
+DELIMITER $$
+CREATE FUNCTION fn_calcula_idade(p_data_nascimento DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN TIMESTAMPDIFF(YEAR, p_data_nascimento, CURDATE());
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE FUNCTION fn_gera_protocolo(p_id_usuario BIGINT)
+RETURNS VARCHAR(30)
+DETERMINISTIC
+BEGIN
+    DECLARE seq INT;
+    INSERT INTO protocolo_sequencia (id) VALUES (NULL); -- Gera sequência
+    SET seq = LAST_INSERT_ID();
+    RETURN CONCAT(YEAR(NOW()), 'GPAT/', LPAD(seq, 6, '0'));
+END$$
+DELIMITER ;
+
+-- Function para pontuação de prioridade
+DELIMITER $$
+CREATE FUNCTION fn_prioridade_score(p_prioridade ENUM('NORMAL','IDOSO','CRIANCA_COLO','ESPECIAL','EMERGENCIA'))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    CASE p_prioridade
+        WHEN 'EMERGENCIA' THEN RETURN 5;
+        WHEN 'IDOSO' THEN RETURN 4;
+        WHEN 'CRIANCA_COLO' THEN RETURN 3;
+        WHEN 'ESPECIAL' THEN RETURN 2;
+        ELSE RETURN 1;
+    END CASE;
+END$$
+DELIMITER ;

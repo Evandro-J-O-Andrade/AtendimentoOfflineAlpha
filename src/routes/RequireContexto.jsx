@@ -1,8 +1,10 @@
 import { Navigate } from "react-router-dom";
+import { useContextoAtendimento } from "@/context/ContextoAtendimento";
 import { useAuth } from "@/context/AuthContext";
 
-export default function RequireLocal({ children }) {
-  const { localAtual, loading } = useAuth();
+export default function RequireContexto({ children }) {
+  const { contexto } = useContextoAtendimento();
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -17,9 +19,9 @@ export default function RequireLocal({ children }) {
     );
   }
 
-  // Usuário logado mas sem local definido
-  if (!localAtual) {
-    return <Navigate to="/select-local" replace />;
+  // Logado, mas sem contexto → força selecionar
+  if (!contexto) {
+    return <Navigate to="/contexto" replace />;
   }
 
   return children;

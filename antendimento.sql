@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS usuario_alocacao (
     FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
 );
 
-CREATE TABLE IF NOT EXISTS senha (
+CREATE TABLE IF NOT EXISTS senhas (
     id_senha BIGINT AUTO_INCREMENT PRIMARY KEY,
     numero INT NOT NULL,
     origem ENUM('TOTEM','RECEPCAO','TOTEM_PRI_PEDI','TOTEM_PRI_ADULTO'),
@@ -6625,3 +6625,1379 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+DROP TABLE IF EXISTS senhas;
+
+CREATE TABLE senhas (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+  numero INT NOT NULL,
+  prefixo VARCHAR(5) NOT NULL, -- A, B, C, P etc
+
+  tipo_atendimento ENUM(
+    'CLINICO',
+    'PEDIATRICO',
+    'PRIORITARIO',
+    'EMERGENCIA',
+    'VISITA',
+    'EXAME'
+  ) NOT NULL,
+
+  status ENUM(
+    'GERADA',
+    'EM_FILA',
+    'CHAMADA',
+    'EM_ATENDIMENTO_RECEPCAO',
+    'CONVERTIDA_FFA',
+    'NAO_COMPARECEU',
+    'CANCELADA',
+    'EXPIRADA'
+  ) NOT NULL DEFAULT 'GERADA',
+
+  origem ENUM('TOTEM', 'RECEPCAO', 'ADMIN') NOT NULL,
+
+  id_ffa BIGINT NULL, -- vínculo com a FFA após conversão
+
+  guiche_chamada VARCHAR(20) NULL,
+  id_usuario_chamada BIGINT NULL,
+
+  criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  chamada_em DATETIME NULL,
+  atendida_em DATETIME NULL,
+  cancelada_em DATETIME NULL,
+
+  observacao VARCHAR(255) NULL,
+
+  INDEX idx_status (status),
+  INDEX idx_tipo (tipo_atendimento),
+  INDEX idx_criada_em (criada_em),
+  INDEX idx_ffa (id_ffa)
+);
+
+
+DROP TABLE IF EXISTS eventos_fluxo;
+
+CREATE TABLE eventos_fluxo (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+  entidade ENUM(
+    'SENHA',
+    'FFA'
+  ) NOT NULL,
+
+  id_entidade BIGINT NOT NULL,
+
+  tipo_evento ENUM(
+    'SENHA_GERADA',
+    'SENHA_CHAMADA',
+    'SENHA_CANCELADA',
+    'SENHA_NAO_COMPARECEU',
+    'SENHA_CONVERTIDA_FFA',
+
+    'FFA_ABERTA',
+    'INICIO_TRIAGEM',
+    'FIM_TRIAGEM',
+
+    'ENCAMINHADO',
+    'RETORNO',
+    'FINALIZADO'
+  ) NOT NULL,
+
+  descricao VARCHAR(255) NULL,
+
+  id_usuario BIGINT NULL,
+  perfil_usuario VARCHAR(50) NULL,
+
+  local VARCHAR(50) NULL, -- guichê, sala, triagem
+
+  data_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_entidade (entidade, id_entidade),
+  INDEX idx_tipo_evento (tipo_evento),
+  INDEX idx_data (data_hora)
+);
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_chamar_senha (
+  IN p_id_senha BIGINT,
+  IN p_guiche VARCHAR(20),
+  IN p_id_usuario BIGINT,
+  IN p_perfil VARCHAR(50)
+)
+BEGIN
+  UPDATE senhas
+     SET status = 'CHAMADA',
+         guiche_chamada = p_guiche,
+         id_usuario_chamada = p_id_usuario,
+         chamada_em = NOW()
+   WHERE id = p_id_senha
+     AND status IN ('GERADA','EM_FILA');
+
+  INSERT INTO eventos_fluxo (
+    entidade, entidade_id, tipo_evento,
+    descricao, id_usuario, perfil_usuario, local
+  ) VALUES (
+    'SENHA', p_id_senha, 'SENHA_CHAMADA',
+    CONCAT('Senha chamada no guichê ', p_guiche),
+    p_id_usuario, p_perfil, p_guiche
+  );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_senha_nao_compareceu (
+  IN p_id_senha BIGINT,
+  IN p_id_usuario BIGINT,
+  IN p_perfil VARCHAR(50)
+)
+BEGIN
+  UPDATE senhas
+     SET status = 'NAO_COMPARECEU'
+   WHERE id = p_id_senha
+     AND status = 'CHAMADA';
+
+  INSERT INTO eventos_fluxo (
+    entidade, entidade_id, tipo_evento,
+    descricao, id_usuario, perfil_usuario
+  ) VALUES (
+    'SENHA', p_id_senha, 'SENHA_NAO_COMPARECEU',
+    'Paciente não compareceu à chamada',
+    p_id_usuario, p_perfil
+  );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_cancelar_senha (
+  IN p_id_senha BIGINT,
+  IN p_motivo VARCHAR(255),
+  IN p_id_usuario BIGINT,
+  IN p_perfil VARCHAR(50)
+)
+BEGIN
+  UPDATE senhas
+     SET status = 'CANCELADA',
+         cancelada_em = NOW(),
+         observacao = p_motivo
+   WHERE id = p_id_senha
+     AND status NOT IN ('ATENDIDA','CANCELADA');
+
+  INSERT INTO eventos_fluxo (
+    entidade, entidade_id, tipo_evento,
+    descricao, id_usuario, perfil_usuario
+  ) VALUES (
+    'SENHA', p_id_senha, 'SENHA_CANCELADA',
+    p_motivo,
+    p_id_usuario, p_perfil
+  );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_converter_senha_em_ffa (
+  IN p_id_senha BIGINT,
+  IN p_id_paciente BIGINT,
+  IN p_id_usuario BIGINT,
+  IN p_perfil VARCHAR(50)
+)
+BEGIN
+  DECLARE v_id_ffa BIGINT;
+
+  -- cria FFA
+  INSERT INTO ffa (
+    id_paciente,
+    status,
+    criada_em
+  ) VALUES (
+    p_id_paciente,
+    'ABERTA',
+    NOW()
+  );
+
+  SET v_id_ffa = LAST_INSERT_ID();
+
+  -- vincula senha à FFA
+  UPDATE senhas
+     SET status = 'ATENDIDA',
+         atendida_em = NOW(),
+         id_ffa = v_id_ffa
+   WHERE id = p_id_senha
+     AND status = 'CHAMADA';
+
+  -- evento senha
+  INSERT INTO eventos_fluxo (
+    entidade, entidade_id, tipo_evento,
+    descricao, id_usuario, perfil_usuario
+  ) VALUES (
+    'SENHA', p_id_senha, 'SENHA_CONVERTIDA_FFA',
+    CONCAT('Senha convertida em FFA ', v_id_ffa),
+    p_id_usuario, p_perfil
+  );
+
+  -- evento FFA
+  INSERT INTO eventos_fluxo (
+    entidade, entidade_id, tipo_evento,
+    descricao, id_usuario, perfil_usuario
+  ) VALUES (
+    'FFA', v_id_ffa, 'FFA_ABERTA',
+    'Ficha aberta na recepção',
+    p_id_usuario, p_perfil
+  );
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE TRIGGER trg_bloquear_senha_convertida
+BEFORE UPDATE ON senhas
+FOR EACH ROW
+BEGIN
+  IF OLD.id_ffa IS NOT NULL THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Senha já convertida em FFA não pode ser alterada';
+  END IF;
+END$$
+
+DELIMITER ;
+
+
+
+CREATE OR REPLACE VIEW vw_fila_recepcao AS
+SELECT
+    s.id AS id_senha,
+    s.numero,
+    s.prefixo,
+    s.tipo_atendimento,
+    s.status,
+    s.origem,
+    s.guiche_chamada,
+    s.id_usuario_chamada,
+    s.prioridade,
+    s.criada_em,
+    s.chamada_em,
+    s.atendida_em,
+    s.cancelada_em,
+    s.observacao,
+    s.id_ffa,
+    
+    -- tempo de espera em minutos
+    TIMESTAMPDIFF(MINUTE, s.criada_em, NOW()) AS tempo_espera,
+
+    -- flag se já pode ser chamada
+    CASE
+        WHEN s.status IN ('GERADA','EM_FILA') THEN 1
+        ELSE 0
+    END AS pode_chamar
+
+FROM
+    senhas s
+
+ORDER BY
+    -- prioridade primeiro, depois tipo de atendimento, depois hora de criação
+    s.prioridade DESC,
+    FIELD(s.tipo_atendimento, 'EMERGENCIA', 'PRIORITARIO', 'CLINICO', 'PEDIATRICO', 'VISITA', 'EXAME') ASC,
+    s.criada_em ASC;
+
+
+CREATE OR REPLACE VIEW vw_senhas_ativas AS
+SELECT
+    s.id AS id_senha,
+    s.numero,
+    s.prefixo,
+    s.tipo_atendimento,
+    s.status,
+    s.origem,
+    s.guiche_chamada,
+    s.id_usuario_chamada,
+    s.prioridade,
+    s.criada_em,
+    s.chamada_em,
+    s.atendida_em,
+    s.cancelada_em,
+    s.observacao,
+    s.id_ffa
+FROM
+    senhas s
+WHERE
+    s.status NOT IN ('ATENDIDA', 'NAO_COMPARECEU', 'CANCELADA', 'EXPIRADA')
+ORDER BY
+    s.prioridade DESC,
+    FIELD(s.tipo_atendimento, 'EMERGENCIA', 'PRIORITARIO', 'CLINICO', 'PEDIATRICO', 'VISITA', 'EXAME') ASC,
+    s.criada_em ASC;
+
+CREATE OR REPLACE VIEW vw_senhas_chamadas AS
+SELECT
+    s.id AS id_senha,
+    s.numero,
+    s.prefixo,
+    s.tipo_atendimento,
+    s.status,
+    s.origem,
+    s.guiche_chamada,
+    s.id_usuario_chamada,
+    s.prioridade,
+    s.criada_em,
+    s.chamada_em,
+    s.atendida_em,
+    s.cancelada_em,
+    s.observacao,
+    s.id_ffa
+FROM
+    senhas s
+WHERE
+    s.status = 'CHAMADA'
+ORDER BY
+    s.chamada_em ASC;
+
+CREATE OR REPLACE VIEW vw_senhas_historico AS
+SELECT
+    s.id AS id_senha,
+    s.numero,
+    s.prefixo,
+    s.tipo_atendimento,
+    s.status,
+    s.origem,
+    s.guiche_chamada,
+    s.id_usuario_chamada,
+    s.prioridade,
+    s.criada_em,
+    s.chamada_em,
+    s.atendida_em,
+    s.cancelada_em,
+    s.observacao,
+    s.id_ffa
+FROM
+    senhas s
+WHERE
+    s.status IN ('ATENDIDA', 'NAO_COMPARECEU', 'CANCELADA', 'EXPIRADA')
+ORDER BY
+    s.criada_em DESC;
+    
+   
+   DROP TABLE IF EXISTS eventos_fluxo;
+
+    CREATE TABLE if not exists eventos_fluxo (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  entidade ENUM('SENHA', 'FFA') NOT NULL,
+  entidade_id BIGINT NOT NULL,
+  tipo_evento ENUM(
+    'SENHA_GERADA',
+    'SENHA_CHAMADA',
+    'SENHA_CANCELADA',
+    'FFA_ABERTA',
+    'INICIO_TRIAGEM',
+    'FIM_TRIAGEM',
+    'ENCAMINHADO',
+    'RETORNO',
+    'FINALIZADO'
+  ) NOT NULL,
+  descricao VARCHAR(255) NULL,
+  id_usuario BIGINT NULL,
+  perfil_usuario VARCHAR(50) NULL,
+  local VARCHAR(50) NULL,
+  data_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_entidade (entidade, entidade_id),
+  INDEX idx_tipo_evento (tipo_evento),
+  INDEX idx_data (data_hora)
+);
+
+
+CREATE OR REPLACE VIEW vw_eventos_senha AS
+SELECT
+    e.id AS id_evento,
+    e.entidade_id AS id_senha,
+    e.tipo_evento,
+    e.descricao,
+    e.id_usuario,
+    e.perfil_usuario,
+    e.local,
+    e.data_hora
+FROM
+    eventos_fluxo e
+WHERE
+    e.entidade = 'SENHA'
+ORDER BY
+    e.entidade_id ASC,
+    e.data_hora ASC;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE fn_gera_senha(
+    IN p_prefixo VARCHAR(5),
+    IN p_tipo ENUM('CLINICO','PEDIATRICO','PRIORITARIO','EMERGENCIA','VISITA','EXAME'),
+    IN p_origem ENUM('TOTEM','RECEPCAO','ADMIN'),
+    OUT p_id_senha BIGINT
+)
+BEGIN
+    DECLARE v_numero INT;
+
+    -- Pega o último número para o prefixo
+    SELECT IFNULL(MAX(numero),0)+1 INTO v_numero
+    FROM senhas
+    WHERE prefixo = p_prefixo;
+
+    -- Insere a senha
+    INSERT INTO senhas(
+        numero, prefixo, tipo_atendimento, status, origem, criada_em
+    ) VALUES (
+        v_numero, p_prefixo, p_tipo, 'GERADA', p_origem, NOW()
+    );
+
+    SET p_id_senha = LAST_INSERT_ID();
+
+    -- Cria evento de auditoria
+    INSERT INTO eventos_fluxo(
+        entidade, entidade_id, tipo_evento, descricao, data_hora
+    ) VALUES (
+        'SENHA', p_id_senha, 'SENHA_GERADA', CONCAT('Senha ', p_prefixo, v_numero,' gerada'), NOW()
+    );
+END$$
+
+DELIMITER ;
+
+drop procedure sp_chamar_senha;
+DELIMITER $$
+
+CREATE PROCEDURE sp_chamar_senha(
+    IN p_id_senha BIGINT,
+    IN p_guiche VARCHAR(20),
+    IN p_id_usuario BIGINT,
+    IN p_perfil_usuario VARCHAR(50)
+)
+BEGIN
+    -- Atualiza status
+    UPDATE senhas
+    SET status = 'CHAMADA',
+        guiche_chamada = p_guiche,
+        id_usuario_chamada = p_id_usuario,
+        chamada_em = NOW()
+    WHERE id = p_id_senha;
+
+    -- Evento de auditoria
+    INSERT INTO eventos_fluxo(
+        entidade, entidade_id, tipo_evento, descricao, id_usuario, perfil_usuario, local, data_hora
+    ) VALUES (
+        'SENHA', p_id_senha, 'SENHA_CHAMADA', CONCAT('Senha chamada no guichê ', p_guiche),
+        p_id_usuario, p_perfil_usuario, p_guiche, NOW()
+    );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_atender_senha(
+    IN p_id_senha BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_perfil_usuario VARCHAR(50)
+)
+BEGIN
+    UPDATE senhas
+    SET status = 'ATENDIDA',
+        atendida_em = NOW()
+    WHERE id = p_id_senha;
+
+    INSERT INTO eventos_fluxo(
+        entidade, entidade_id, tipo_evento, descricao, id_usuario, perfil_usuario, data_hora
+    ) VALUES (
+        'SENHA', p_id_senha, 'FFA_ABERTA', 'Atendimento iniciado para a senha',
+        p_id_usuario, p_perfil_usuario, NOW()
+    );
+END$$
+
+DELIMITER ;
+
+drop procedure sp_cancelar_senha;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_cancelar_senha(
+    IN p_id_senha BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_perfil_usuario VARCHAR(50),
+    IN p_motivo VARCHAR(255)
+)
+BEGIN
+    UPDATE senhas
+    SET status = 'CANCELADA',
+        cancelada_em = NOW(),
+        observacao = p_motivo
+    WHERE id = p_id_senha;
+
+    INSERT INTO eventos_fluxo(
+        entidade, entidade_id, tipo_evento, descricao, id_usuario, perfil_usuario, data_hora
+    ) VALUES (
+        'SENHA', p_id_senha, 'SENHA_CANCELADA', p_motivo, p_id_usuario, p_perfil_usuario, NOW()
+    );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_senha_gerada
+AFTER INSERT ON senhas
+FOR EACH ROW
+BEGIN
+    INSERT INTO eventos_fluxo(
+        entidade, entidade_id, tipo_evento, descricao, data_hora
+    )
+    VALUES (
+        'SENHA',
+        NEW.id,
+        'SENHA_GERADA',
+        CONCAT('Senha ', NEW.prefixo, NEW.numero, ' gerada automaticamente'),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_senha_status_change
+AFTER UPDATE ON senhas
+FOR EACH ROW
+BEGIN
+    -- Quando a senha é chamada
+    IF OLD.status != 'CHAMADA' AND NEW.status = 'CHAMADA' THEN
+        INSERT INTO eventos_fluxo(
+            entidade, entidade_id, tipo_evento, descricao, id_usuario, perfil_usuario, local, data_hora
+        )
+        VALUES (
+            'SENHA',
+            NEW.id,
+            'SENHA_CHAMADA',
+            CONCAT('Senha chamada no guichê ', NEW.guiche_chamada),
+            NEW.id_usuario_chamada,
+            NULL,  -- perfil vai ser preenchido via procedure que chama
+            NEW.guiche_chamada,
+            NOW()
+        );
+    END IF;
+
+    -- Quando a senha é atendida → abrir FFA
+    IF OLD.status != 'ATENDIDA' AND NEW.status = 'ATENDIDA' THEN
+        INSERT INTO eventos_fluxo(
+            entidade, entidade_id, tipo_evento, descricao, id_usuario, perfil_usuario, local, data_hora
+        )
+        VALUES (
+            'SENHA',
+            NEW.id,
+            'FFA_ABERTA',
+            'Atendimento iniciado e FFA criada',
+            NEW.id_usuario_chamada,
+            NULL,
+            NEW.guiche_chamada,
+            NOW()
+        );
+    END IF;
+
+    -- Quando a senha é cancelada
+    IF OLD.status != 'CANCELADA' AND NEW.status = 'CANCELADA' THEN
+        INSERT INTO eventos_fluxo(
+            entidade, entidade_id, tipo_evento, descricao, id_usuario, perfil_usuario, local, data_hora
+        )
+        VALUES (
+            'SENHA',
+            NEW.id,
+            'SENHA_CANCELADA',
+            NEW.observacao,
+            NEW.id_usuario_chamada,
+            NULL,
+            NEW.guiche_chamada,
+            NOW()
+        );
+    END IF;
+
+END$$
+
+DELIMITER ;
+DELIMITER $$
+
+CREATE TRIGGER trg_ffa_criada
+AFTER INSERT ON ffa
+FOR EACH ROW
+BEGIN
+    INSERT INTO eventos_fluxo(
+        entidade,
+        entidade_id,
+        tipo_evento,
+        descricao,
+        id_usuario,
+        perfil_usuario,
+        local,
+        data_hora
+    )
+    VALUES (
+        'FFA',
+        NEW.id,
+        'FFA_ABERTA',
+        CONCAT('FFA criada automaticamente com layout ', NEW.layout),
+        NEW.id_usuario_criacao,
+        NULL, -- perfil do usuário se quiser adicionar
+        NEW.layout,
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+
+CREATE TABLE IF NOT EXISTS pessoa (
+    id_pessoa BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome_completo VARCHAR(200) NOT NULL,
+    nome_social VARCHAR(200),
+    cpf VARCHAR(14),
+    cns VARCHAR(20),
+    data_nascimento DATE,
+    sexo ENUM('M','F','O'),
+    nome_mae VARCHAR(200),
+    telefone VARCHAR(20),
+    email VARCHAR(150),
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_cpf (cpf),
+    UNIQUE KEY uk_cns (cns)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS usuario (
+    id_usuario BIGINT AUTO_INCREMENT PRIMARY KEY,
+    login VARCHAR(100) NOT NULL UNIQUE,
+    senha_hash VARCHAR(255) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    id_pessoa BIGINT,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE IF NOT EXISTS perfil (
+    id_perfil INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS usuario_perfil (
+    id_usuario BIGINT,
+    id_perfil INT,
+    PRIMARY KEY (id_usuario, id_perfil),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil)
+);
+
+CREATE TABLE IF NOT EXISTS especialidade (
+    id_especialidade INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    ativa BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS medico (
+    id_usuario BIGINT PRIMARY KEY,
+    crm VARCHAR(20) NOT NULL,
+    uf_crm CHAR(2) NOT NULL,
+    UNIQUE KEY uk_crm (crm, uf_crm),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS medico_especialidade (
+    id_usuario BIGINT,
+    id_especialidade INT,
+    PRIMARY KEY (id_usuario, id_especialidade),
+    FOREIGN KEY (id_usuario) REFERENCES medico(id_usuario),
+    FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
+);
+
+CREATE TABLE IF NOT EXISTS local_atendimento (
+    id_local INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS sala (
+    id_sala INT AUTO_INCREMENT PRIMARY KEY,
+    nome_exibicao VARCHAR(100) NOT NULL,
+    id_local INT NOT NULL,
+    id_especialidade INT,
+    ativa BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_local) REFERENCES local_atendimento(id_local),
+    FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
+);
+
+CREATE TABLE IF NOT EXISTS usuario_alocacao (
+    id_alocacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT NOT NULL,
+    id_sala INT NOT NULL,
+    id_especialidade INT,
+    inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fim DATETIME,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_sala) REFERENCES sala(id_sala),
+    FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
+);
+
+CREATE TABLE IF NOT EXISTS senhas (
+    id_senha BIGINT AUTO_INCREMENT PRIMARY KEY,
+    numero INT NOT NULL,
+    origem ENUM('TOTEM','RECEPCAO','TOTEM_PRI_PEDI','TOTEM_PRI_ADULTO'),
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    chamada BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS totem_feedback (
+    id_feedback BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_senha BIGINT NULL,
+    origem VARCHAR(50) NULL,
+    nota INT NULL,
+    comentario TEXT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_senha) REFERENCES senhas(id_senha)
+);
+
+CREATE TABLE IF NOT EXISTS atendimento (
+    id_atendimento BIGINT AUTO_INCREMENT PRIMARY KEY,
+    protocolo VARCHAR(30) NOT NULL UNIQUE,
+    id_pessoa BIGINT NOT NULL,
+    id_senha BIGINT,
+    status_atendimento ENUM(
+        'ABERTO','EM_ATENDIMENTO','EM_OBSERVACAO',
+        'INTERNADO','FINALIZADO','NAO_ATENDIDO','RETORNO'
+    ) NOT NULL,
+    id_local_atual INT NOT NULL,
+    id_sala_atual INT,
+    id_especialidade INT,
+    data_abertura DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_fechamento DATETIME,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
+    FOREIGN KEY (id_senha) REFERENCES senhas(id_senha),
+    FOREIGN KEY (id_local_atual) REFERENCES local_atendimento(id_local),
+    FOREIGN KEY (id_sala_atual) REFERENCES sala(id_sala),
+    FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade),
+    INDEX idx_status_local (status_atendimento, id_local_atual)
+);
+
+CREATE TABLE IF NOT EXISTS atendimento_movimentacao (
+    id_mov BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT,
+    de_local INT,
+    para_local INT,
+    id_usuario BIGINT,
+    motivo VARCHAR(255),
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS anamnese (
+    id_anamnese BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT,
+    descricao TEXT,
+    id_usuario BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS prescricao (
+    id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT,
+    tipo ENUM('INTERNA','CONTROLADA','CASA'),
+    descricao TEXT NOT NULL,
+    id_medico BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    bloqueada BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS protocolo_sequencia (
+    id INT AUTO_INCREMENT PRIMARY KEY
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS log_auditoria (
+    id_log BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT,
+    acao VARCHAR(100),
+    tabela_afetada VARCHAR(100),
+    id_registro BIGINT,
+    antes TEXT,
+    depois TEXT,
+    justificativa VARCHAR(255),
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS configuracao (
+    chave VARCHAR(100) PRIMARY KEY,
+    valor TEXT
+);
+
+CREATE TABLE IF NOT EXISTS atendimento_recepcao (
+    id_atendimento BIGINT PRIMARY KEY,
+    tipo_atendimento ENUM(
+        'CLINICO',
+        'PEDIATRICO',
+        'EMERGENCIA',
+        'EXAME_EXTERNO',
+        'MEDICACAO_EXTERNA'
+    ) NOT NULL,
+    chegada ENUM(
+        'MEIOS_PROPRIOS',
+        'AMBULANCIA',
+        'POLICIA',
+        'OUTROS'
+    ) NOT NULL,
+    prioridade ENUM(
+        'AUTISTA',
+        'CRIANCA_COLO',
+        'GESTANTE',
+        'IDOSO',
+        'PRIORITARIO_PEDI',
+        'PRIORITARIO_ADULTO',
+        'NORMAL'
+    ) DEFAULT 'NORMAL',
+    motivo_procura TEXT,
+    destino_inicial ENUM(
+        'TRIAGEM',
+        'MEDICO',
+        'EMERGENCIA',
+        'RX',
+        'MEDICACAO'
+    ) NOT NULL,
+    id_recepcionista BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_recepcionista) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS classificacao_risco (
+    id_risco INT AUTO_INCREMENT PRIMARY KEY,
+    cor ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    tempo_max INT,
+    descricao VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS triagem (
+    id_triagem BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    id_risco INT NOT NULL,
+    queixa TEXT,
+    sinais_vitais JSON,
+    observacao TEXT,
+    id_enfermeiro BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_risco) REFERENCES classificacao_risco(id_risco),
+    FOREIGN KEY (id_enfermeiro) REFERENCES usuario(id_usuario),
+    UNIQUE KEY uk_triagem_atendimento (id_atendimento)
+);
+
+CREATE TABLE IF NOT EXISTS reabertura_atendimento (
+    id_reabertura BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    id_usuario BIGINT NOT NULL,
+    motivo TEXT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS chamada_painel (
+    id_chamada BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    id_sala INT NOT NULL,
+    status ENUM('CHAMANDO','ATENDIDO','NAO_COMPARECEU') DEFAULT 'CHAMANDO',
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_sala) REFERENCES sala(id_sala),
+    INDEX idx_painel_status (status, data_hora)
+);
+
+CREATE TABLE IF NOT EXISTS exame_fisico (
+    id_exame BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT,
+    descricao TEXT,
+    id_usuario BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS hipotese_diagnostica (
+    id_hipotese BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT,
+    cid10 VARCHAR(10),
+    principal BOOLEAN DEFAULT FALSE,
+    id_medico BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS exame (
+    id_exame INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(20) UNIQUE,
+    descricao VARCHAR(255),
+    tipo ENUM('LAB','RX','OUTROS')
+);
+
+CREATE TABLE IF NOT EXISTS solicitacao_exame (
+    id_solicitacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT,
+    id_exame INT,
+    status ENUM('SOLICITADO','COLETADO','RESULTADO') DEFAULT 'SOLICITADO',
+    id_medico BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_exame) REFERENCES exame(id_exame),
+    FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS retorno_atendimento (
+    id_retorno BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento_origem BIGINT,
+    id_atendimento_retorno BIGINT,
+    motivo TEXT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento_origem) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_atendimento_retorno) REFERENCES atendimento(id_atendimento)
+);
+
+CREATE TABLE IF NOT EXISTS setor (
+    id_setor INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    tipo ENUM('OBSERVACAO','INTERNACAO','UTI') NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS leito (
+    id_leito INT AUTO_INCREMENT PRIMARY KEY,
+    id_setor INT NOT NULL,
+    identificacao VARCHAR(50) NOT NULL,
+    status ENUM('LIVRE','OCUPADO','BLOQUEADO') DEFAULT 'LIVRE',
+    FOREIGN KEY (id_setor) REFERENCES setor(id_setor),
+    UNIQUE KEY uk_setor_leito (id_setor, identificacao)
+);
+
+CREATE TABLE IF NOT EXISTS internacao (
+    id_internacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    id_leito INT NOT NULL,
+    tipo ENUM('OBSERVACAO','INTERNACAO') NOT NULL,
+    data_entrada DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_saida DATETIME,
+    status ENUM('ATIVA','ENCERRADA') DEFAULT 'ATIVA',
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_leito) REFERENCES leito(id_leito)
+);
+
+CREATE TABLE IF NOT EXISTS evolucao_medica (
+    id_evolucao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao BIGINT NOT NULL,
+    descricao TEXT NOT NULL,
+    id_medico BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao),
+    FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS prescricao_internacao (
+    id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao BIGINT NOT NULL,
+    tipo ENUM('MEDICAMENTO','CUIDADO','DIETA','OUTROS') NOT NULL,
+    descricao TEXT NOT NULL,
+    id_medico BIGINT NOT NULL,
+    ativa BOOLEAN DEFAULT TRUE,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao),
+    FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS administracao_medicacao (
+    id_admin BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_prescricao BIGINT NOT NULL,
+    id_enfermeiro BIGINT NOT NULL,
+    dose VARCHAR(50),
+    via VARCHAR(50),
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    observacao TEXT,
+    FOREIGN KEY (id_prescricao) REFERENCES prescricao_internacao(id_prescricao),
+    FOREIGN KEY (id_enfermeiro) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS evolucao_enfermagem (
+    id_evolucao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao BIGINT NOT NULL,
+    descricao TEXT NOT NULL,
+    id_enfermeiro BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao),
+    FOREIGN KEY (id_enfermeiro) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS anotacao_enfermagem (
+    id_anotacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao BIGINT NOT NULL,
+    descricao TEXT NOT NULL,
+    id_usuario BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS interconsulta (
+    id_interconsulta BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao BIGINT NOT NULL,
+    id_especialidade INT NOT NULL,
+    motivo TEXT NOT NULL,
+    status ENUM('SOLICITADA','RESPONDIDA') DEFAULT 'SOLICITADA',
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao),
+    FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
+);
+
+CREATE TABLE IF NOT EXISTS atendimento_observacao (
+    id_obs BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    tipo ENUM('OBSERVACAO','INTERNACAO') NOT NULL,
+    id_leito INT,
+    data_inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_fim DATETIME,
+    status ENUM('ATIVO','ALTA','TRANSFERIDO') DEFAULT 'ATIVO',
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_leito) REFERENCES leito(id_leito),
+    UNIQUE KEY uk_atendimento_obs (id_atendimento)
+);
+
+CREATE TABLE IF NOT EXISTS prescricao_continua (
+    id_prescricao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    tipo ENUM('MEDICAMENTOS','CUIDADOS_GERAIS') NOT NULL,
+    id_medico BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ativa BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_medico) REFERENCES medico(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS prescricao_item (
+    id_item BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_prescricao BIGINT NOT NULL,
+    descricao TEXT NOT NULL,
+    dose VARCHAR(100),
+    via VARCHAR(50),
+    posologia VARCHAR(100),
+    observacao TEXT,
+    FOREIGN KEY (id_prescricao) REFERENCES prescricao_continua(id_prescricao)
+);
+
+CREATE TABLE IF NOT EXISTS evolucao_multidisciplinar (
+    id_evolucao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    area VARCHAR(100), -- fisioterapia, nutrição, etc
+    descricao TEXT NOT NULL,
+    id_usuario BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS intercorrencia (
+    id_intercorrencia BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_atendimento BIGINT NOT NULL,
+    id_internacao BIGINT NULL,
+    descricao TEXT NOT NULL,
+    gravidade ENUM('LEVE','MODERADA','GRAVE') DEFAULT 'LEVE',
+    id_usuario BIGINT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_atendimento) REFERENCES atendimento(id_atendimento),
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    INDEX idx_intercorrencia_atendimento (id_atendimento),
+    INDEX idx_intercorrencia_internacao (id_internacao)
+);
+
+CREATE TABLE IF NOT EXISTS paciente (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_pessoa BIGINT NOT NULL,
+    -- ... Colunas restantes não definidas, mas a redefinição é a última
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+-- ... outras tabelas para o fluxo e estoque (local_usuario, fila_senha, ffa, auditoria_fila, auditoria_ffa, eventos_fluxo, fluxo_status, regra_timeout, plantao, medicos, produtos_farmacia, estoque_local, entrada_estoque, dispensacao_farmacia, auditoria_estoque)
+
+-- O script contém uma redefinição explícita de 'paciente' mais adiante, então usaremos a última estrutura válida:
+DROP TABLE IF EXISTS paciente;
+CREATE TABLE IF NOT EXISTS paciente (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_pessoa BIGINT NOT NULL,
+    prontuario VARCHAR(50) UNIQUE,
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE IF NOT EXISTS local_usuario (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT NOT NULL,
+    id_local INT NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_local) REFERENCES local_atendimento(id_local)
+);
+
+CREATE TABLE IF NOT EXISTS fila_senha (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_paciente BIGINT NOT NULL,
+    senha VARCHAR(20) NOT NULL,
+    origem ENUM('TOTEM','RECEPCAO') NOT NULL,
+    prioridade_recepcao ENUM('NORMAL','IDOSO','CRIANCA_COLO','ESPECIAL','EMERGENCIA') DEFAULT 'NORMAL',
+    status ENUM('AGUARDANDO','CHAMANDO','ATENDIDA','NAO_ATENDIDO','CANCELADA') DEFAULT 'AGUARDANDO',
+    id_ffa BIGINT NULL,
+    guiche_chamada VARCHAR(50),
+    id_usuario_chamada BIGINT,
+    id_usuario_atendimento BIGINT,
+    observacao TEXT,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_paciente) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE IF NOT EXISTS ffa ( -- Ficha de Atendimento
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    gpat VARCHAR(30) UNIQUE,
+    id_paciente BIGINT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    layout VARCHAR(50), -- Onde o paciente está (Ex: TRIAGEM, CONSULTORIO A)
+    classificacao_manchester ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    id_usuario_criacao BIGINT,
+    id_usuario_alteracao BIGINT,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_paciente) REFERENCES pessoa(id_pessoa),
+    FOREIGN KEY (id_usuario_criacao) REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS auditoria_fila (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_fila BIGINT NOT NULL,
+    id_usuario BIGINT,
+    acao VARCHAR(100) NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_fila) REFERENCES fila_senha(id)
+);
+
+CREATE TABLE IF NOT EXISTS auditoria_ffa (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    id_usuario BIGINT,
+    acao TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id)
+);
+
+CREATE TABLE IF NOT EXISTS eventos_fluxo (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    entidade VARCHAR(50), -- FFA, SENHA, etc
+    entidade_id BIGINT,
+    tipo_evento VARCHAR(50),
+    descricao TEXT,
+    id_usuario BIGINT,
+    perfil_usuario VARCHAR(50),
+    local VARCHAR(50),
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS fluxo_status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    status_origem VARCHAR(50) NOT NULL,
+    status_destino VARCHAR(50) NOT NULL,
+    origem_evento VARCHAR(50) NOT NULL,
+    permitido BOOLEAN DEFAULT TRUE,
+    UNIQUE KEY uk_fluxo (status_origem, status_destino, origem_evento)
+);
+
+CREATE TABLE IF NOT EXISTS regra_timeout (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    status_ffa VARCHAR(50) NOT NULL,
+    tempo_limite_min INT NOT NULL,
+    acao_timeout VARCHAR(50),
+    ativa BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS plantao (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_medico BIGINT NOT NULL,
+    inicio DATETIME NOT NULL,
+    fim DATETIME,
+    id_local INT,
+    FOREIGN KEY (id_medico) REFERENCES medico(id_usuario),
+    FOREIGN KEY (id_local) REFERENCES local_atendimento(id_local)
+);
+
+CREATE TABLE IF NOT EXISTS medicos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_pessoa BIGINT NOT NULL,
+    crm VARCHAR(20) UNIQUE,
+    ativo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE IF NOT EXISTS produtos_farmacia (
+    id_produto BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    principio_ativo VARCHAR(200),
+    unidade_medida VARCHAR(20),
+    tipo ENUM('MEDICAMENTO','INSUMO','OUTRO')
+);
+
+CREATE TABLE IF NOT EXISTS estoque_local (
+    id_estoque BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_produto BIGINT NOT NULL,
+    id_local INT NOT NULL,
+    quantidade_atual INT DEFAULT 0,
+    min_estoque INT DEFAULT 0,
+    FOREIGN KEY (id_produto) REFERENCES produtos_farmacia(id_produto),
+    FOREIGN KEY (id_local) REFERENCES local_atendimento(id_local),
+    UNIQUE KEY uk_produto_local (id_produto, id_local)
+);
+
+CREATE TABLE IF NOT EXISTS entrada_estoque (
+    id_entrada BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_estoque BIGINT NOT NULL,
+    id_produto BIGINT NOT NULL,
+    id_local INT NOT NULL,
+    quantidade INT NOT NULL,
+    lote VARCHAR(50),
+    validade DATE,
+    id_usuario_entrada BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_estoque) REFERENCES estoque_local(id_estoque),
+    FOREIGN KEY (id_produto) REFERENCES produtos_farmacia(id_produto),
+    FOREIGN KEY (id_local) REFERENCES local_atendimento(id_local)
+);
+
+CREATE TABLE IF NOT EXISTS dispensacao_farmacia (
+    id_dispensacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_prescricao BIGINT NULL,
+    id_produto BIGINT NOT NULL,
+    id_estoque BIGINT NOT NULL,
+    quantidade_dispensada INT NOT NULL,
+    id_usuario_farmaceutico BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_prescricao) REFERENCES prescricao(id_prescricao),
+    FOREIGN KEY (id_produto) REFERENCES produtos_farmacia(id_produto),
+    FOREIGN KEY (id_estoque) REFERENCES estoque_local(id_estoque)
+);
+
+CREATE TABLE IF NOT EXISTS auditoria_estoque (
+    id_log BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_produto BIGINT NOT NULL,
+    id_local INT NOT NULL,
+    acao VARCHAR(50) NOT NULL,
+    quantidade INT NOT NULL,
+    id_usuario BIGINT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS fila_retorno (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_fila BIGINT NOT NULL,
+    retorno_em DATETIME NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_fila) REFERENCES fila_senha(id),
+    UNIQUE KEY uk_fila_retorno (id_fila)
+
+);
+
+-- Médico
+INSERT INTO observacoes_eventos
+(entidade, id_entidade, contexto, tipo, texto, id_usuario)
+VALUES
+('FFA', 12345, 'MEDICO', 'ORIENTACAO',
+ 'Paciente aguardar 30 minutos antes da medicação', 10);
+ 
+CREATE OR REPLACE VIEW vw_observacoes_ffa AS
+SELECT
+    o.id,
+    o.tipo,
+    o.contexto,
+    o.texto,
+    o.criado_em,
+    p.nome AS autor,
+    u.login AS autor_login
+FROM observacoes_eventos o
+JOIN usuario u  ON u.id_usuario = o.id_usuario
+JOIN pessoa  p  ON p.id_pessoa  = u.id_pessoa
+WHERE o.entidade = 'FFA';
+
+
+CREATE OR REPLACE VIEW vw_observacoes_senha AS
+SELECT
+    o.id,
+    o.id_entidade AS id_senha,
+    o.tipo,
+    o.contexto,
+    o.texto,
+    o.criado_em,
+    p.nome AS autor
+FROM observacoes_eventos o
+JOIN usuario u ON u.id_usuario = o.id_usuario
+JOIN pessoa p ON p.id_pessoa = u.id_pessoa
+WHERE o.entidade = 'SENHA';
+
+CREATE OR REPLACE VIEW vw_observacoes_atendimento AS
+SELECT
+    o.id,
+    o.id_entidade AS id_atendimento,
+    o.tipo,
+    o.contexto,
+    o.texto,
+    o.criado_em,
+    p.nome AS autor
+FROM observacoes_eventos o
+JOIN usuario u ON u.id_usuario = o.id_usuario
+JOIN pessoa p ON p.id_pessoa = u.id_pessoa
+WHERE o.entidade = 'ATENDIMENTO';
+
+CREATE OR REPLACE VIEW vw_observacoes_ffa AS
+SELECT
+    o.id,
+    o.tipo,
+    o.contexto,
+    o.texto,
+    o.criado_em,
+    p.nome_completo AS autor,
+    u.login AS autor_login
+FROM observacoes_eventos o
+JOIN usuario u ON u.id_usuario = o.id_usuario
+JOIN pessoa  p ON p.id_pessoa  = u.id_pessoa
+WHERE o.entidade = 'FFA';
+
+CREATE OR REPLACE VIEW vw_usuario_identidade AS
+SELECT
+    u.id_usuario,
+    u.login,
+    p.nome_completo,
+    u.ativo
+FROM usuario u
+JOIN pessoa p ON p.id_pessoa = u.id_pessoa;
+
+CREATE OR REPLACE VIEW vw_observacoes_ffa AS
+SELECT
+    o.id,
+    o.tipo,
+    o.contexto,
+    o.texto,
+    o.criado_em,
+    COALESCE(p.nome_social, p.nome_completo) AS autor,
+    u.login AS autor_login
+FROM observacoes_eventos o
+JOIN usuario u ON u.id_usuario = o.id_usuario
+JOIN pessoa  p ON p.id_pessoa  = u.id_pessoa
+WHERE o.entidade = 'FFA';
+
