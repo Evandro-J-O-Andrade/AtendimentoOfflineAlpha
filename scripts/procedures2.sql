@@ -1592,3 +1592,1416 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_internar_paciente;
+DELIMITER $$
+
+CREATE PROCEDURE sp_internar_paciente (
+    IN p_id_ffa BIGINT,
+    IN p_tipo ENUM('OBSERVACAO','INTERNACAO'),
+    IN p_id_leito INT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM internacao
+         WHERE id_ffa = p_id_ffa
+           AND status = 'ATIVA'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Já existe internação ativa para esta FFA';
+    END IF;
+
+    INSERT INTO internacao (
+        id_ffa, id_leito, tipo, data_entrada
+    ) VALUES (
+        p_id_ffa, p_id_leito, p_tipo, NOW()
+    );
+
+    UPDATE ffa
+       SET status = 'INTERNADO'
+     WHERE id = p_id_ffa;
+
+    INSERT INTO internacao_historico
+        (id_internacao, evento, data_evento, id_usuario)
+    VALUES
+        (LAST_INSERT_ID(), 'ENTRADA', NOW(), p_id_usuario);
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_alta_internacao;
+DELIMITER $$
+
+CREATE PROCEDURE sp_alta_internacao (
+    IN p_id_ffa BIGINT,
+    IN p_motivo VARCHAR(255),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_internacao BIGINT;
+
+    SELECT id_internacao
+      INTO v_id_internacao
+      FROM internacao
+     WHERE id_ffa = p_id_ffa
+       AND status = 'ATIVA'
+     LIMIT 1;
+
+    IF v_id_internacao IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhuma internação ativa encontrada';
+    END IF;
+
+    UPDATE internacao
+       SET status = 'ENCERRADA',
+           data_saida = NOW(),
+           motivo_alta = p_motivo,
+           encerrado_em = NOW()
+     WHERE id_internacao = v_id_internacao;
+
+    UPDATE ffa
+       SET status = 'ALTA'
+     WHERE id = p_id_ffa;
+
+    INSERT INTO internacao_historico
+        (id_internacao, evento, data_evento, id_usuario)
+    VALUES
+        (v_id_internacao, 'ALTA', NOW(), p_id_usuario);
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_finalizar_atendimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_atendimento (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM internacao
+        WHERE id_ffa = p_id_ffa
+          AND status = 'ATIVA'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Internação ativa. Use alta de internação.';
+    END IF;
+
+    UPDATE ffa
+       SET status = 'FINALIZADO',
+           encerrado_em = NOW()
+     WHERE id = p_id_ffa;
+
+    INSERT INTO auditoria_ffa
+        (id_ffa, evento, data_evento, id_usuario)
+    VALUES
+        (p_id_ffa, 'FINALIZACAO', NOW(), p_id_usuario);
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_finalizar_atendimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_atendimento (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM internacao
+        WHERE id_ffa = p_id_ffa
+          AND status = 'ATIVA'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Internação ativa. Use alta de internação.';
+    END IF;
+
+    UPDATE ffa
+       SET status = 'FINALIZADO',
+           encerrado_em = NOW()
+     WHERE id = p_id_ffa;
+
+    INSERT INTO auditoria_ffa
+        (id_ffa, evento, data_evento, id_usuario)
+    VALUES
+        (p_id_ffa, 'FINALIZACAO', NOW(), p_id_usuario);
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_nao_atendido;
+DELIMITER $$
+
+CREATE PROCEDURE sp_nao_atendido (
+    IN p_id_ffa BIGINT,
+    IN p_motivo VARCHAR(255),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa
+       SET status = 'NAO_ATENDIDO',
+           encerrado_em = NOW()
+     WHERE id = p_id_ffa;
+
+    INSERT INTO auditoria_ffa
+        (id_ffa, evento, observacao, data_evento, id_usuario)
+    VALUES
+        (p_id_ffa, 'NAO_ATENDIDO', p_motivo, NOW(), p_id_usuario);
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_timeout_ffa;
+DELIMITER $$
+
+CREATE PROCEDURE sp_timeout_ffa ()
+BEGIN
+    UPDATE ffa
+       SET status = 'TIMEOUT',
+           encerrado_em = NOW()
+     WHERE status NOT IN ('FINALIZADO','NAO_ATENDIDO','ALTA')
+       AND TIMESTAMPDIFF(HOUR, criado_em, NOW()) >= 14;
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_timeout_ffa;
+DELIMITER $$
+
+CREATE PROCEDURE sp_timeout_ffa ()
+BEGIN
+    UPDATE ffa
+       SET status = 'TIMEOUT',
+           encerrado_em = NOW()
+     WHERE status NOT IN ('FINALIZADO','NAO_ATENDIDO','ALTA')
+       AND TIMESTAMPDIFF(HOUR, criado_em, NOW()) >= 14;
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_solicitar_procedimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_solicitar_procedimento (
+    IN p_id_ffa BIGINT,
+    IN p_tipo VARCHAR(20),
+    IN p_prioridade VARCHAR(20),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    INSERT INTO ffa_procedimento
+        (id_ffa, tipo, prioridade, id_usuario_solicitante)
+    VALUES
+        (p_id_ffa, p_tipo, p_prioridade, p_id_usuario);
+
+    UPDATE ffa
+       SET status = CONCAT('AGUARDANDO_', p_tipo)
+     WHERE id = p_id_ffa;
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_iniciar_procedimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_procedimento (
+    IN p_id_procedimento BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa_procedimento
+       SET status = 'EM_EXECUCAO',
+           iniciado_em = NOW(),
+           id_usuario_execucao = p_id_usuario
+     WHERE id_procedimento = p_id_procedimento;
+END$$
+DELIMITER ;
+DROP PROCEDURE IF EXISTS sp_finalizar_procedimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_procedimento (
+    IN p_id_procedimento BIGINT
+)
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+
+    SELECT id_ffa INTO v_id_ffa
+      FROM ffa_procedimento
+     WHERE id_procedimento = p_id_procedimento;
+
+    UPDATE ffa_procedimento
+       SET status = 'CONCLUIDO',
+           finalizado_em = NOW()
+     WHERE id_procedimento = p_id_procedimento;
+
+    UPDATE ffa
+       SET status = 'AGUARDANDO_RETORNO'
+     WHERE id = v_id_ffa;
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_procedimento_critico;
+DELIMITER $$
+
+CREATE PROCEDURE sp_procedimento_critico (
+    IN p_id_procedimento BIGINT,
+    IN p_observacao TEXT
+)
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+
+    SELECT id_ffa INTO v_id_ffa
+      FROM ffa_procedimento
+     WHERE id_procedimento = p_id_procedimento;
+
+    UPDATE ffa_procedimento
+       SET status = 'CRITICO',
+           observacao = p_observacao,
+           finalizado_em = NOW()
+     WHERE id_procedimento = p_id_procedimento;
+
+    UPDATE ffa
+       SET status = 'EMERGENCIA'
+     WHERE id = v_id_ffa;
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_retorno_medico;
+DELIMITER $$
+
+CREATE PROCEDURE sp_retorno_medico (
+    IN p_id_ffa BIGINT
+)
+BEGIN
+    UPDATE fila_operacional
+       SET status = 'AGUARDANDO_MEDICO'
+     WHERE id_ffa = p_id_ffa;
+
+    UPDATE ffa
+       SET status = 'AGUARDANDO_CHAMADA_MEDICO'
+     WHERE id = p_id_ffa;
+END$$
+DELIMITER ;
+
+DROP VIEW IF EXISTS vw_procedimentos_pendentes;
+
+CREATE VIEW vw_procedimentos_pendentes AS
+SELECT
+    p.id_procedimento,
+    p.id_ffa,
+    p.tipo,
+    p.status,
+    p.prioridade,
+    p.criado_em
+FROM ffa_procedimento p
+WHERE p.status IN ('SOLICITADO','EM_FILA','EM_EXECUCAO');
+
+
+DROP PROCEDURE IF EXISTS sp_internar_paciente;
+DELIMITER $$
+
+CREATE PROCEDURE sp_internar_paciente (
+    IN p_id_ffa BIGINT,
+    IN p_id_leito INT,
+    IN p_tipo VARCHAR(20),
+    IN p_motivo TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_atendimento BIGINT;
+
+    SELECT id_atendimento INTO v_id_atendimento
+      FROM atendimento
+     WHERE id_senha = (SELECT id_senha FROM ffa WHERE id = p_id_ffa)
+     ORDER BY data_abertura DESC
+     LIMIT 1;
+
+    INSERT INTO internacao
+        (id_atendimento, id_leito, tipo, motivo, data_entrada, id_usuario_entrada)
+    VALUES
+        (v_id_atendimento, p_id_leito, p_tipo, p_motivo, NOW(), p_id_usuario);
+
+    UPDATE leito
+       SET status = 'OCUPADO'
+     WHERE id_leito = p_id_leito;
+
+    UPDATE ffa
+       SET status = 'INTERNACAO'
+     WHERE id = p_id_ffa;
+
+    INSERT INTO internacao_historico
+        (id_internacao, evento, descricao, id_usuario)
+    VALUES
+        (LAST_INSERT_ID(), 'ENTRADA', p_motivo, p_id_usuario);
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_alta_internacao;
+DELIMITER $$
+
+CREATE PROCEDURE sp_alta_internacao (
+    IN p_id_internacao BIGINT,
+    IN p_observacao TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_leito INT;
+    DECLARE v_id_atendimento BIGINT;
+
+    SELECT id_leito, id_atendimento
+      INTO v_id_leito, v_id_atendimento
+      FROM internacao
+     WHERE id_internacao = p_id_internacao;
+
+    UPDATE internacao
+       SET status = 'ENCERRADA',
+           data_saida = NOW(),
+           id_usuario_saida = p_id_usuario
+     WHERE id_internacao = p_id_internacao;
+
+    UPDATE leito
+       SET status = 'LIVRE'
+     WHERE id_leito = v_id_leito;
+
+    UPDATE atendimento
+       SET status_atendimento = 'FINALIZADO',
+           data_fechamento = NOW()
+     WHERE id_atendimento = v_id_atendimento;
+
+    INSERT INTO internacao_historico
+        (id_internacao, evento, descricao, id_usuario)
+    VALUES
+        (p_id_internacao, 'ALTA', p_observacao, p_id_usuario);
+END$$
+
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_solicitar_exame_rx $$
+CREATE PROCEDURE sp_solicitar_exame_rx (
+    IN p_id_ffa        BIGINT,
+    IN p_id_usuario    BIGINT,
+    IN p_observacao    TEXT
+)
+BEGIN
+    DECLARE v_status_atual VARCHAR(50);
+
+    /* 1️⃣ Validação básica */
+    SELECT status
+      INTO v_status_atual
+      FROM ffa
+     WHERE id_ffa = p_id_ffa
+       AND ativo = 1
+     LIMIT 1;
+
+    IF v_status_atual IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'FFA inválida ou encerrada';
+    END IF;
+
+    /* 2️⃣ Registra o procedimento RX */
+    INSERT INTO ffa_procedimento (
+        id_ffa,
+        tipo_procedimento,
+        status,
+        solicitado_em,
+        id_usuario_solicitante,
+        observacao
+    ) VALUES (
+        p_id_ffa,
+        'RX',
+        'SOLICITADO',
+        NOW(),
+        p_id_usuario,
+        p_observacao
+    );
+
+    /* 3️⃣ Atualiza status assistencial */
+    UPDATE ffa
+       SET status = 'EM_PROCEDIMENTO'
+     WHERE id_ffa = p_id_ffa;
+
+    /* 4️⃣ Substatus humano */
+    INSERT INTO ffa_substatus (
+        id_ffa,
+        substatus,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'AGUARDANDO_RX',
+        NOW()
+    );
+
+    /* 5️⃣ Insere na fila paralela (RX) */
+    INSERT INTO fila_operacional (
+        id_ffa,
+        contexto,
+        prioridade,
+        status,
+        criado_em
+    )
+    SELECT
+        p_id_ffa,
+        'RX',
+        prioridade,
+        'AGUARDANDO',
+        NOW()
+    FROM fila_operacional
+    WHERE id_ffa = p_id_ffa
+      AND contexto = 'MEDICO'
+    LIMIT 1;
+
+    /* 6️⃣ Evento de auditoria de fluxo */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'SOLICITACAO_RX',
+        'RX',
+        p_id_usuario,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_iniciar_execucao_procedimento_rx $$
+CREATE PROCEDURE sp_iniciar_execucao_procedimento_rx (
+    IN p_id_ffa      BIGINT,
+    IN p_id_usuario  BIGINT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* 1️⃣ Busca procedimento RX pendente */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'RX'
+       AND status = 'SOLICITADO'
+     ORDER BY solicitado_em ASC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum procedimento RX pendente para execução';
+    END IF;
+
+    /* 2️⃣ Atualiza procedimento */
+    UPDATE ffa_procedimento
+       SET status = 'EM_EXECUCAO',
+           iniciado_em = NOW(),
+           id_usuario_executor = p_id_usuario
+     WHERE id_procedimento = v_id_proc;
+
+    /* 3️⃣ Atualiza fila RX */
+    UPDATE fila_operacional
+       SET status = 'EM_EXECUCAO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'RX'
+       AND status = 'AGUARDANDO';
+
+    /* 4️⃣ Substatus humano */
+    INSERT INTO ffa_substatus (
+        id_ffa,
+        substatus,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'EM_EXECUCAO_RX',
+        NOW()
+    );
+
+    /* 5️⃣ Evento de auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'INICIO_EXECUCAO_RX',
+        'RX',
+        p_id_usuario,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finalizar_procedimento_rx $$
+CREATE PROCEDURE sp_finalizar_procedimento_rx (
+    IN p_id_ffa        BIGINT,
+    IN p_id_usuario    BIGINT,
+    IN p_critico       TINYINT(1),
+    IN p_observacao    TEXT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* Busca RX em execucao */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'RX'
+       AND status = 'EM_EXECUCAO'
+     ORDER BY iniciado_em DESC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum RX em execucao para finalizar';
+    END IF;
+
+    /* Finaliza RX */
+    UPDATE ffa_procedimento
+       SET status = 'FINALIZADO',
+           finalizado_em = NOW(),
+           resultado = p_observacao
+     WHERE id_procedimento = v_id_proc;
+
+    /* Remove da fila RX */
+    UPDATE fila_operacional
+       SET status = 'FINALIZADO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'RX';
+
+    /* Retorno */
+    IF p_critico = 1 THEN
+
+        CALL sp_retorno_procedimento_critico(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_RX_CRITICO', NOW());
+
+    ELSE
+
+        CALL sp_retorno_procedimento_normal(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_RX_NORMAL', NOW());
+
+    END IF;
+
+    /* Auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        observacao,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'FINALIZACAO_RX',
+        'RX',
+        p_id_usuario,
+        p_observacao,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finalizar_procedimento_ecg $$
+CREATE PROCEDURE sp_finalizar_procedimento_ecg (
+    IN p_id_ffa        BIGINT,
+    IN p_id_usuario    BIGINT,
+    IN p_critico       TINYINT(1),
+    IN p_observacao    TEXT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* Busca ECG em execucao */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'ECG'
+       AND status = 'EM_EXECUCAO'
+     ORDER BY iniciado_em DESC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum ECG em execucao para finalizar';
+    END IF;
+
+    /* Finaliza ECG */
+    UPDATE ffa_procedimento
+       SET status = 'FINALIZADO',
+           finalizado_em = NOW(),
+           resultado = p_observacao
+     WHERE id_procedimento = v_id_proc;
+
+    /* Remove da fila ECG */
+    UPDATE fila_operacional
+       SET status = 'FINALIZADO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'ECG';
+
+    /* Retorno ao fluxo */
+    IF p_critico = 1 THEN
+
+        CALL sp_retorno_procedimento_critico(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_ECG_CRITICO', NOW());
+
+    ELSE
+
+        CALL sp_retorno_procedimento_normal(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_ECG_NORMAL', NOW());
+
+    END IF;
+
+    /* Auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        observacao,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'FINALIZACAO_ECG',
+        'ECG',
+        p_id_usuario,
+        p_observacao,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finalizar_procedimento_laboratorio $$
+CREATE PROCEDURE sp_finalizar_procedimento_laboratorio (
+    IN p_id_ffa        BIGINT,
+    IN p_id_usuario    BIGINT,
+    IN p_critico       TINYINT(1),
+    IN p_resultado     TEXT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* 1. Busca LAB em execucao */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'LAB'
+       AND status = 'EM_EXECUCAO'
+     ORDER BY iniciado_em DESC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum exame de laboratorio em execucao';
+    END IF;
+
+    /* 2. Finaliza LAB */
+    UPDATE ffa_procedimento
+       SET status = 'FINALIZADO',
+           finalizado_em = NOW(),
+           resultado = p_resultado
+     WHERE id_procedimento = v_id_proc;
+
+    /* 3. Remove da fila LAB */
+    UPDATE fila_operacional
+       SET status = 'FINALIZADO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'LAB';
+
+    /* 4. Retorno ao fluxo */
+    IF p_critico = 1 THEN
+
+        CALL sp_retorno_procedimento_critico(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_LAB_CRITICO', NOW());
+
+    ELSE
+
+        CALL sp_retorno_procedimento_normal(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_LAB_NORMAL', NOW());
+
+    END IF;
+
+    /* 5. Auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        observacao,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'FINALIZACAO_LAB',
+        'LAB',
+        p_id_usuario,
+        p_resultado,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_finalizar_procedimento_geral $$
+CREATE PROCEDURE sp_finalizar_procedimento_geral (
+    IN p_id_ffa        BIGINT,
+    IN p_id_usuario    BIGINT,
+    IN p_critico       TINYINT(1),
+    IN p_observacao    TEXT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* 1. Busca procedimento geral em execucao */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'GERAL'
+       AND status = 'EM_EXECUCAO'
+     ORDER BY iniciado_em DESC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum procedimento geral em execucao';
+    END IF;
+
+    /* 2. Finaliza procedimento */
+    UPDATE ffa_procedimento
+       SET status = 'FINALIZADO',
+           finalizado_em = NOW(),
+           resultado = p_observacao
+     WHERE id_procedimento = v_id_proc;
+
+    /* 3. Remove da fila */
+    UPDATE fila_operacional
+       SET status = 'FINALIZADO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'GERAL';
+
+    /* 4. Retorno */
+    IF p_critico = 1 THEN
+
+        CALL sp_retorno_procedimento_critico(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_GERAL_CRITICO', NOW());
+
+    ELSE
+
+        CALL sp_retorno_procedimento_normal(p_id_ffa, p_id_usuario);
+
+        INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+        VALUES (p_id_ffa, 'RETORNO_GERAL_NORMAL', NOW());
+
+    END IF;
+
+    /* 5. Auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        observacao,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'FINALIZACAO_GERAL',
+        'GERAL',
+        p_id_usuario,
+        p_observacao,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_iniciar_procedimento_rx $$
+CREATE PROCEDURE sp_iniciar_procedimento_rx (
+    IN p_id_ffa        BIGINT,
+    IN p_id_usuario    BIGINT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* 1. Busca RX solicitado */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'RX'
+       AND status = 'SOLICITADO'
+     ORDER BY criado_em ASC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum RX solicitado para iniciar';
+    END IF;
+
+    /* 2. Inicia execução */
+    UPDATE ffa_procedimento
+       SET status = 'EM_EXECUCAO',
+           iniciado_em = NOW()
+     WHERE id_procedimento = v_id_proc;
+
+    /* 3. Atualiza fila RX */
+    UPDATE fila_operacional
+       SET status = 'EM_ATENDIMENTO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'RX';
+
+    /* 4. Substatus assistencial */
+    INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+    VALUES (p_id_ffa, 'EM_RX', NOW());
+
+    /* 5. Auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'INICIO_RX',
+        'RX',
+        p_id_usuario,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_cancelar_procedimento_rx $$
+CREATE PROCEDURE sp_cancelar_procedimento_rx (
+    IN p_id_ffa        BIGINT,
+    IN p_id_usuario    BIGINT,
+    IN p_motivo        TEXT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* 1. Busca RX ativo */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'RX'
+       AND status IN ('SOLICITADO','EM_EXECUCAO')
+     ORDER BY criado_em DESC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum RX ativo para cancelamento';
+    END IF;
+
+    /* 2. Cancela procedimento */
+    UPDATE ffa_procedimento
+       SET status = 'CANCELADO',
+           finalizado_em = NOW(),
+           resultado = p_motivo
+     WHERE id_procedimento = v_id_proc;
+
+    /* 3. Remove da fila RX */
+    UPDATE fila_operacional
+       SET status = 'CANCELADO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'RX';
+
+    /* 4. Substatus */
+    INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+    VALUES (p_id_ffa, 'RX_CANCELADO', NOW());
+
+    /* 5. Auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        observacao,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'CANCELAMENTO_RX',
+        'RX',
+        p_id_usuario,
+        p_motivo,
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_timeout_procedimento_rx $$
+CREATE PROCEDURE sp_timeout_procedimento_rx (
+    IN p_id_ffa      BIGINT,
+    IN p_id_usuario  BIGINT
+)
+BEGIN
+    DECLARE v_id_proc BIGINT;
+
+    /* 1. RX em execução */
+    SELECT id_procedimento
+      INTO v_id_proc
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = 'RX'
+       AND status = 'EM_EXECUCAO'
+     ORDER BY iniciado_em DESC
+     LIMIT 1;
+
+    IF v_id_proc IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nenhum RX em execução para timeout';
+    END IF;
+
+    /* 2. Marca timeout */
+    UPDATE ffa_procedimento
+       SET status = 'TIMEOUT',
+           finalizado_em = NOW(),
+           resultado = 'Timeout de RX'
+     WHERE id_procedimento = v_id_proc;
+
+    /* 3. Remove da fila RX */
+    UPDATE fila_operacional
+       SET status = 'TIMEOUT'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = 'RX';
+
+    /* 4. Retorno normal */
+    CALL sp_retorno_procedimento_normal(p_id_ffa, p_id_usuario);
+
+    INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+    VALUES (p_id_ffa, 'RX_TIMEOUT', NOW());
+
+    /* 5. Auditoria */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        observacao,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'TIMEOUT_RX',
+        'RX',
+        p_id_usuario,
+        'RX não atendido dentro do tempo',
+        NOW()
+    );
+
+END $$
+
+DELIMITER ;
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP PROCEDURE IF EXISTS sp_solicitar_exame_generico;
+DELIMITER $$
+
+CREATE PROCEDURE sp_solicitar_exame_generico (
+    IN p_id_ffa BIGINT,
+    IN p_tipo VARCHAR(10),
+    IN p_id_usuario BIGINT,
+    IN p_observacao TEXT
+)
+BEGIN
+    INSERT INTO ffa_procedimento
+        (id_ffa, tipo_procedimento, status, solicitado_em)
+    VALUES
+        (p_id_ffa, p_tipo, 'AGUARDANDO', NOW());
+
+    INSERT INTO fila_operacional
+        (id_ffa, contexto, status, criado_em)
+    VALUES
+        (p_id_ffa, p_tipo, 'AGUARDANDO', NOW());
+
+    INSERT INTO eventos_fluxo
+        (id_ffa, evento, contexto, id_usuario, observacao, criado_em)
+    VALUES
+        (p_id_ffa, 'SOLICITACAO', p_tipo, p_id_usuario, p_observacao, NOW());
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_iniciar_execucao_exame;
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_execucao_exame (
+    IN p_id_ffa BIGINT,
+    IN p_tipo VARCHAR(10),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa_procedimento
+       SET status = 'EM_EXECUCAO',
+           iniciado_em = NOW()
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = p_tipo
+       AND status = 'AGUARDANDO'
+     ORDER BY solicitado_em
+     LIMIT 1;
+
+    UPDATE fila_operacional
+       SET status = 'EM_EXECUCAO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = p_tipo;
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_finalizar_exame_generico;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_exame_generico (
+    IN p_id_ffa BIGINT,
+    IN p_tipo VARCHAR(10),
+    IN p_critico TINYINT(1),
+    IN p_resultado TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa_procedimento
+       SET status = 'FINALIZADO',
+           finalizado_em = NOW(),
+           resultado = p_resultado
+     WHERE id_ffa = p_id_ffa
+       AND tipo_procedimento = p_tipo
+       AND status = 'EM_EXECUCAO'
+     ORDER BY iniciado_em DESC
+     LIMIT 1;
+
+    UPDATE fila_operacional
+       SET status = 'FINALIZADO'
+     WHERE id_ffa = p_id_ffa
+       AND contexto = p_tipo;
+
+    INSERT INTO ffa_substatus (id_ffa, substatus, criado_em)
+    VALUES (
+        p_id_ffa,
+        IF(p_critico = 1,
+           CONCAT('RETORNO_', p_tipo, '_CRITICO'),
+           CONCAT('RETORNO_', p_tipo, '_NORMAL')),
+        NOW()
+    );
+
+    INSERT INTO eventos_fluxo
+        (id_ffa, evento, contexto, id_usuario, observacao, criado_em)
+    VALUES
+        (p_id_ffa, 'FINALIZACAO', p_tipo, p_id_usuario, p_resultado, NOW());
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_reabrir_fluxo_manual;
+DELIMITER $$
+
+CREATE PROCEDURE sp_reabrir_fluxo_manual (
+    IN p_id_ffa BIGINT,
+    IN p_motivo TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa
+       SET status = 'EM_ATENDIMENTO'
+     WHERE id_ffa = p_id_ffa;
+
+    INSERT INTO eventos_fluxo
+        (id_ffa, evento, contexto, id_usuario, observacao, criado_em)
+    VALUES
+        (p_id_ffa, 'REABERTURA_MANUAL', 'SISTEMA', p_id_usuario, p_motivo, NOW());
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_rechamar_procedimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_rechamar_procedimento (
+    IN p_id_ffa BIGINT,
+    IN p_tipo VARCHAR(10),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    INSERT INTO fila_operacional
+        (id_ffa, contexto, status, criado_em)
+    VALUES
+        (p_id_ffa, p_tipo, 'AGUARDANDO', NOW());
+
+    INSERT INTO eventos_fluxo
+        (id_ffa, evento, contexto, id_usuario, criado_em)
+    VALUES
+        (p_id_ffa, 'RECHAMADA_MANUAL', p_tipo, p_id_usuario, NOW());
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_decisao_pos_timeout;
+DELIMITER $$
+
+CREATE PROCEDURE sp_decisao_pos_timeout (
+    IN p_id_ffa BIGINT,
+    IN p_acao VARCHAR(20),
+    IN p_id_usuario BIGINT,
+    IN p_obs TEXT
+)
+BEGIN
+    INSERT INTO eventos_fluxo
+        (id_ffa, evento, contexto, id_usuario, observacao, criado_em)
+    VALUES
+        (p_id_ffa, CONCAT('DECISAO_TIMEOUT_', p_acao),
+         'SISTEMA', p_id_usuario, p_obs, NOW());
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_definir_decisao_medica_final;
+DELIMITER $$
+
+CREATE PROCEDURE sp_definir_decisao_medica_final (
+    IN p_id_ffa BIGINT,
+    IN p_decisao VARCHAR(20),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa
+       SET decisao_final = p_decisao,
+           decisao_em = NOW()
+     WHERE id_ffa = p_id_ffa;
+
+    INSERT INTO eventos_fluxo
+        (id_ffa, evento, contexto, id_usuario, criado_em)
+    VALUES
+        (p_id_ffa, CONCAT('DECISAO_MEDICA_', p_decisao),
+         'MEDICO', p_id_usuario, NOW());
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_verificar_pendencias_assistenciais;
+DELIMITER $$
+
+CREATE PROCEDURE sp_verificar_pendencias_assistenciais (
+    IN p_id_ffa BIGINT,
+    OUT p_pendencias INT
+)
+BEGIN
+    SELECT COUNT(*)
+      INTO p_pendencias
+      FROM ffa_procedimento
+     WHERE id_ffa = p_id_ffa
+       AND status IN ('AGUARDANDO','EM_EXECUCAO');
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_liberar_estado_pos_execucao;
+DELIMITER $$
+
+CREATE PROCEDURE sp_liberar_estado_pos_execucao (
+    IN p_id_ffa BIGINT
+)
+BEGIN
+    UPDATE ffa
+       SET status = 'PRONTO_PARA_DECISAO'
+     WHERE id_ffa = p_id_ffa
+       AND decisao_final IS NOT NULL;
+END$$
+
+DELIMITER ;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+DROP PROCEDURE IF EXISTS sp_solicitar_laboratorio;
+DELIMITER $$
+
+CREATE PROCEDURE sp_solicitar_laboratorio (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_observacao TEXT
+)
+BEGIN
+    CALL sp_solicitar_exame_generico(p_id_ffa, 'LAB', p_id_usuario, p_observacao);
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_solicitar_ecg;
+DELIMITER $$
+
+CREATE PROCEDURE sp_solicitar_ecg (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_observacao TEXT
+)
+BEGIN
+    CALL sp_solicitar_exame_generico(p_id_ffa, 'ECG', p_id_usuario, p_observacao);
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_solicitar_usg;
+DELIMITER $$
+
+CREATE PROCEDURE sp_solicitar_usg (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_observacao TEXT
+)
+BEGIN
+    CALL sp_solicitar_exame_generico(p_id_ffa, 'USG', p_id_usuario, p_observacao);
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_iniciar_lab;
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_lab (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    CALL sp_iniciar_execucao_exame(p_id_ffa, 'LAB', p_id_usuario);
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_iniciar_ecg;
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_ecg (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    CALL sp_iniciar_execucao_exame(p_id_ffa, 'ECG', p_id_usuario);
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_iniciar_usg;
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_usg (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    CALL sp_iniciar_execucao_exame(p_id_ffa, 'USG', p_id_usuario);
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_finalizar_lab;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_lab (
+    IN p_id_ffa BIGINT,
+    IN p_critico TINYINT(1),
+    IN p_resultado TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    CALL sp_finalizar_exame_generico(p_id_ffa, 'LAB', p_critico, p_resultado, p_id_usuario);
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_finalizar_ecg;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_ecg (
+    IN p_id_ffa BIGINT,
+    IN p_critico TINYINT(1),
+    IN p_resultado TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    CALL sp_finalizar_exame_generico(p_id_ffa, 'ECG', p_critico, p_resultado, p_id_usuario);
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_finalizar_usg;
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_usg (
+    IN p_id_ffa BIGINT,
+    IN p_critico TINYINT(1),
+    IN p_resultado TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    CALL sp_finalizar_exame_generico(p_id_ffa, 'USG', p_critico, p_resultado, p_id_usuario);
+END$$
+
+DELIMITER ;

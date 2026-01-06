@@ -1147,3 +1147,112 @@ CREATE TABLE fila_operacional (
 -- ===============================
 SET FOREIGN_KEY_CHECKS = 1;
 
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS internacao_historico;
+DROP TABLE IF EXISTS internacao;
+
+CREATE TABLE internacao (
+    id_internacao      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa             BIGINT NOT NULL,
+    id_leito           INT NULL,
+    tipo               ENUM('OBSERVACAO','INTERNACAO') NOT NULL,
+    status             ENUM('ATIVA','ENCERRADA') NOT NULL DEFAULT 'ATIVA',
+    data_entrada       DATETIME NOT NULL,
+    data_saida         DATETIME NULL,
+    motivo_alta        VARCHAR(255) NULL,
+    criado_em          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    encerrado_em       DATETIME NULL,
+
+    INDEX idx_ffa (id_ffa),
+    INDEX idx_status (status),
+    INDEX idx_leito (id_leito)
+) ENGINE=InnoDB COMMENT='Internação e observação clínica';
+
+
+
+
+CREATE TABLE internacao_historico (
+    id_historico   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao  BIGINT NOT NULL,
+    evento         VARCHAR(100) NOT NULL,
+    data_evento    DATETIME NOT NULL,
+    id_usuario     BIGINT NOT NULL,
+
+    INDEX idx_internacao (id_internacao)
+) ENGINE=InnoDB COMMENT='Histórico de eventos da internação';
+
+
+ALTER TABLE internacao
+    ADD CONSTRAINT fk_internacao_ffa
+    FOREIGN KEY (id_ffa) REFERENCES ffa(id);
+
+ALTER TABLE internacao_historico
+    ADD CONSTRAINT fk_hist_internacao
+    FOREIGN KEY (id_internacao) REFERENCES internacao(id_internacao);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+DROP TABLE IF EXISTS reabertura_atendimento;
+
+CREATE TABLE reabertura_atendimento (
+    id_reabertura   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa          BIGINT NOT NULL,
+    motivo          VARCHAR(255) NOT NULL,
+    id_usuario      BIGINT NOT NULL,
+    criado_em       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ffa (id_ffa)
+) ENGINE=InnoDB COMMENT='Reabertura de episódio/atendimento';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS ffa_procedimento;
+
+CREATE TABLE ffa_procedimento (
+    id_procedimento BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_ffa BIGINT NOT NULL,
+    tipo ENUM('RX','ECG','LABORATORIO','MEDICACAO','OBSERVACAO') NOT NULL,
+    status ENUM(
+        'SOLICITADO',
+        'EM_FILA',
+        'EM_EXECUCAO',
+        'CONCLUIDO',
+        'CRITICO'
+    ) NOT NULL DEFAULT 'SOLICITADO',
+    prioridade ENUM('NORMAL','EMERGENCIA') DEFAULT 'NORMAL',
+    id_usuario_solicitante BIGINT,
+    id_usuario_execucao BIGINT,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    iniciado_em DATETIME,
+    finalizado_em DATETIME,
+    observacao TEXT,
+    INDEX idx_ffa (id_ffa),
+    INDEX idx_status (status)
+) ENGINE=InnoDB COMMENT='Procedimentos paralelos do PA';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+ALTER TABLE internacao
+ADD COLUMN motivo TEXT AFTER tipo,
+ADD COLUMN id_usuario_entrada BIGINT AFTER data_entrada,
+ADD COLUMN id_usuario_saida BIGINT AFTER data_saida,
+MODIFY status ENUM('ATIVA','ENCERRADA','TRANSFERIDA','OBITO') DEFAULT 'ATIVA';
+
+
+DROP TABLE IF EXISTS internacao_historico;
+
+CREATE TABLE internacao_historico (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_internacao BIGINT NOT NULL,
+    evento ENUM('ENTRADA','TROCA_LEITO','ALTA','TRANSFERENCIA','OBITO') NOT NULL,
+    descricao TEXT,
+    id_usuario BIGINT,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_internacao (id_internacao)
+) ENGINE=InnoDB COMMENT='Histórico imutável da internação';

@@ -42,3 +42,21 @@ JOIN estoque_local e ON e.id_produto = p.id_produto
 WHERE e.quantidade_atual < e.min_estoque;
 
 -- Totalizando cerca de 90 views únicas e úteis.
+
+
+DROP VIEW IF EXISTS vw_pacientes_internados;
+
+CREATE VIEW vw_pacientes_internados AS
+SELECT
+    i.id_internacao,
+    a.id_atendimento,
+    p.nome_completo AS paciente,
+    l.identificacao AS leito,
+    i.tipo,
+    i.data_entrada,
+    i.status
+FROM internacao i
+JOIN atendimento a ON a.id_ffa = i.id_ffa
+JOIN pessoa p ON p.id_pessoa = a.id_pessoa
+JOIN leito l ON l.id_leito = i.id_leito
+WHERE i.status = 'ATIVA';
