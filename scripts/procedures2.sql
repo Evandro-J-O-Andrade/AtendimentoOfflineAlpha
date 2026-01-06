@@ -1363,3 +1363,232 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+DELIMITER $$
+
+
+CREATE PROCEDURE sp_finalizar_procedimento (
+    IN p_id_ffa BIGINT,
+    IN p_tipo_retorno ENUM('NORMAL','EMERGENCIA'),
+    IN p_classificacao ENUM('VERMELHO','LARANJA','AMARELO','VERDE','AZUL'),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_now DATETIME DEFAULT NOW();
+
+    -- 1. Finaliza procedimento
+    UPDATE ffa_procedimento
+       SET status = 'FINALIZADO',
+           data_fim = v_now
+     WHERE id_ffa = p_id_ffa
+       AND status = 'EM_EXECUCAO';
+
+    -- 2. Evento auditável
+    INSERT INTO evento_ffa (id_ffa, evento, data_evento, id_usuario)
+    VALUES (
+        p_id_ffa,
+        CONCAT('RETORNO_PROCEDIMENTO_', p_tipo_retorno),
+        v_now,
+        p_id_usuario
+    );
+
+    -- 3. Fluxo
+    IF p_tipo_retorno = 'EMERGENCIA' THEN
+
+        UPDATE ffa
+           SET status = 'EM_EMERGENCIA'
+         WHERE id = p_id_ffa;
+
+        INSERT INTO fila_operacional (
+            id_ffa, prioridade, data_entrada, origem
+        ) VALUES (
+            p_id_ffa, 'VERMELHO', v_now, 'PROCEDIMENTO'
+        );
+
+    ELSE
+
+        UPDATE ffa
+           SET status = 'AGUARDANDO_MEDICO'
+         WHERE id = p_id_ffa;
+
+        INSERT INTO fila_retorno (
+            id_ffa, data_retorno, origem
+        ) VALUES (
+            p_id_ffa, v_now, 'PROCEDIMENTO'
+        );
+
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_execucao_assistencial (
+    IN p_id_ffa BIGINT,
+    IN p_tipo ENUM('MEDICACAO','OBSERVACAO'),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_substatus VARCHAR(50);
+    DECLARE v_now DATETIME DEFAULT NOW();
+
+    IF p_tipo = 'MEDICACAO' THEN
+        SET v_substatus = 'EM_MEDICACAO';
+    ELSE
+        SET v_substatus = 'EM_OBSERVACAO';
+    END IF;
+
+    -- Atualiza substatus
+    UPDATE ffa_substatus
+       SET status = v_substatus,
+           data_inicio = v_now
+     WHERE id_ffa = p_id_ffa
+       AND ativo = 1;
+
+    -- Evento
+    INSERT INTO evento_ffa (id_ffa, evento, data_evento, id_usuario)
+    VALUES (
+        p_id_ffa,
+        CONCAT('INICIO_', v_substatus),
+        v_now,
+        p_id_usuario
+    );
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_execucao_assistencial (
+    IN p_id_ffa BIGINT,
+    IN p_tipo ENUM('MEDICACAO','OBSERVACAO'),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_substatus VARCHAR(50);
+    DECLARE v_now DATETIME DEFAULT NOW();
+
+    IF p_tipo = 'MEDICACAO' THEN
+        SET v_substatus = 'MEDICACAO_FINALIZADA';
+    ELSE
+        SET v_substatus = 'OBSERVACAO_CONCLUIDA';
+    END IF;
+
+    UPDATE ffa_substatus
+       SET status = v_substatus,
+           data_fim = v_now,
+           ativo = 0
+     WHERE id_ffa = p_id_ffa
+       AND ativo = 1;
+
+    INSERT INTO evento_ffa (id_ffa, evento, data_evento, id_usuario)
+    VALUES (
+        p_id_ffa,
+        CONCAT('FIM_', v_substatus),
+        v_now,
+        p_id_usuario
+    );
+
+    -- Retorna automaticamente ao médico
+    UPDATE ffa
+       SET status = 'AGUARDANDO_MEDICO'
+     WHERE id = p_id_ffa;
+
+END$$
+
+DELIMITER ;
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_iniciar_procedimento (
+    IN p_id_procedimento BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    UPDATE ffa_procedimento
+       SET status = 'EM_EXECUCAO',
+           inicio_execucao = NOW()
+     WHERE id = p_id_procedimento;
+
+    INSERT INTO evento_ffa (id_ffa, evento, data_evento, id_usuario)
+    SELECT id_ffa, 'INICIO_PROCEDIMENTO', NOW(), p_id_usuario
+      FROM ffa_procedimento
+     WHERE id = p_id_procedimento;
+END$$
+
+DELIMITER ;
+
+
+
+drop procedure sp_solicitar_procedimento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_solicitar_procedimento (
+    IN p_id_ffa BIGINT,
+    IN p_tipo ENUM('RX','ECG','LAB','PROCEDIMENTO'),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    INSERT INTO ffa_procedimento (
+        id_ffa, tipo, status, criado_em
+    ) VALUES (
+        p_id_ffa, p_tipo, 'AGUARDANDO', NOW()
+    );
+
+    UPDATE ffa
+       SET status = 'AGUARDANDO_PROCEDIMENTO'
+     WHERE id = p_id_ffa;
+
+    INSERT INTO evento_ffa (id_ffa, evento, data_evento, id_usuario)
+    VALUES (
+        p_id_ffa,
+        CONCAT('SOLICITADO_', p_tipo),
+        NOW(),
+        p_id_usuario
+    );
+END$$
+
+DELIMITER ;
+
+drop procedure sp_finalizar_procedimento;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_finalizar_procedimento (
+    IN p_id_procedimento BIGINT,
+    IN p_critico TINYINT(1),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    DECLARE v_id_ffa BIGINT;
+
+    SELECT id_ffa INTO v_id_ffa
+      FROM ffa_procedimento
+     WHERE id = p_id_procedimento;
+
+    UPDATE ffa_procedimento
+       SET status = 'FINALIZADO',
+           fim_execucao = NOW()
+     WHERE id = p_id_procedimento;
+
+    IF p_critico = 1 THEN
+        UPDATE ffa SET status = 'RETORNO_EMERGENCIA' WHERE id = v_id_ffa;
+    ELSE
+        UPDATE ffa SET status = 'RETORNO_MEDICO' WHERE id = v_id_ffa;
+    END IF;
+
+    INSERT INTO evento_ffa (id_ffa, evento, data_evento, id_usuario)
+    VALUES (
+        v_id_ffa,
+        IF(p_critico=1,'RETORNO_CRITICO','RETORNO_NORMAL'),
+        NOW(),
+        p_id_usuario
+    );
+END$$
+
+DELIMITER ;
