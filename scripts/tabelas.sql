@@ -1256,3 +1256,390 @@ CREATE TABLE internacao_historico (
     criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_internacao (id_internacao)
 ) ENGINE=InnoDB COMMENT='Histórico imutável da internação';
+
+
+
+
+CREATE TABLE if not exists ordem_assistencial (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    id_ffa BIGINT NOT NULL,
+
+    tipo_ordem VARCHAR(50) NOT NULL,
+    -- MEDICACAO | DIETA | CUIDADO | SINAIS_VITAIS | OXIGENOTERAPIA | etc
+
+    status ENUM('ATIVA','SUSPENSA','ENCERRADA') NOT NULL DEFAULT 'ATIVA',
+
+    origem ENUM('MEDICO','ENFERMAGEM') NOT NULL,
+
+    payload_clinico JSON NOT NULL,
+    -- Aqui entram:
+    -- dose, via, frequência
+    -- dieta zero / branda
+    -- cabeceira elevada
+    -- oxigênio
+    -- controle de PA / FC / SAT
+    -- tudo flexível, versionável
+
+    prioridade INT DEFAULT 0,
+
+    iniciado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    suspenso_em DATETIME NULL,
+    encerrado_em DATETIME NULL,
+
+    motivo_suspensao VARCHAR(255),
+    motivo_encerramento VARCHAR(255),
+
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    criado_por BIGINT NOT NULL,
+
+    atualizado_em DATETIME NULL,
+    atualizado_por BIGINT NULL,
+
+    INDEX idx_ordem_ffa (id_ffa),
+    INDEX idx_ordem_status (status),
+    INDEX idx_ordem_tipo (tipo_ordem)
+);
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- =========================
+-- 1️⃣ FATURAMENTO_CONTA
+-- =========================
+DROP TABLE IF EXISTS faturamento_conta;
+CREATE TABLE faturamento_conta (
+  id_conta        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_ffa          BIGINT NULL,
+  id_internacao   BIGINT NULL,
+  status          ENUM('ABERTA','FECHADA','CANCELADA') DEFAULT 'ABERTA',
+  aberta_em       DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fechada_em      DATETIME NULL,
+  criada_por      BIGINT NOT NULL,
+  observacao      TEXT,
+  KEY idx_ffa (id_ffa),
+  KEY idx_internacao (id_internacao)
+) ENGINE=InnoDB COMMENT='Conta de faturamento por FFA ou internação';
+
+-- =========================
+-- 2️⃣ FATURAMENTO_ITEM
+-- =========================
+DROP TABLE IF EXISTS faturamento_item;
+CREATE TABLE faturamento_item (
+  id_item         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_conta        BIGINT NOT NULL,
+  tipo_item       ENUM(
+                    'PROCEDIMENTO',
+                    'EXAME',
+                    'MEDICACAO',
+                    'DIARIA',
+                    'INSUMO'
+                  ) NOT NULL,
+  referencia_id   BIGINT NOT NULL COMMENT 'ID do procedimento, prescrição, consumo, etc',
+  descricao       VARCHAR(255) NOT NULL,
+  quantidade      DECIMAL(10,2) DEFAULT 1,
+  valor_unitario  DECIMAL(10,2) DEFAULT 0,
+  valor_total     DECIMAL(10,2) DEFAULT 0,
+  criado_em       DATETIME DEFAULT CURRENT_TIMESTAMP,
+  criado_por      BIGINT NOT NULL,
+  KEY idx_conta (id_conta),
+  KEY idx_tipo (tipo_item)
+) ENGINE=InnoDB COMMENT='Itens faturáveis da conta';
+
+-- =========================
+-- 3️⃣ FATURAMENTO_INSUMO
+-- =========================
+DROP TABLE IF EXISTS faturamento_insumo;
+CREATE TABLE faturamento_insumo (
+  id_fat_insumo   BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_item         BIGINT NOT NULL,
+  origem          ENUM('FARMACIA','ALMOXARIFADO','MANUTENCAO') NOT NULL,
+  id_produto      BIGINT NOT NULL,
+  lote            VARCHAR(50),
+  validade        DATE,
+  KEY idx_item (id_item)
+) ENGINE=InnoDB COMMENT='Detalhe do insumo faturado';
+
+-- =========================
+-- 4️⃣ FATURAMENTO_EVENTO
+-- =========================
+DROP TABLE IF EXISTS faturamento_evento;
+CREATE TABLE faturamento_evento (
+  id_evento       BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_conta        BIGINT NOT NULL,
+  evento          ENUM('ABERTURA','FECHAMENTO','REABERTURA','CANCELAMENTO') NOT NULL,
+  id_usuario      BIGINT NOT NULL,
+  observacao      TEXT,
+  criado_em       DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_conta (id_conta)
+) ENGINE=InnoDB COMMENT='Auditoria humana do faturamento';
+
+-- =========================
+-- 5️⃣ CONSUMO_INSUMO (ASSISTENCIAL)
+-- =========================
+DROP TABLE IF EXISTS consumo_insumo;
+CREATE TABLE consumo_insumo (
+  id_consumo      BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_ffa          BIGINT NOT NULL,
+  origem          ENUM('FARMACIA','ALMOXARIFADO','MANUTENCAO') NOT NULL,
+  id_produto      BIGINT NOT NULL,
+  quantidade      DECIMAL(10,2) NOT NULL,
+  usado_em        DATETIME DEFAULT CURRENT_TIMESTAMP,
+  registrado_por BIGINT NOT NULL,
+  observacao      TEXT,
+  KEY idx_ffa (id_ffa),
+  KEY idx_origem (origem)
+) ENGINE=InnoDB COMMENT='Consumo real de insumos no paciente';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS consumo_limpeza;
+CREATE TABLE consumo_limpeza (
+  id_consumo        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_setor          INT NOT NULL COMMENT 'Setor onde ocorreu o consumo',
+  id_produto        BIGINT NOT NULL COMMENT 'Produto de limpeza',
+  quantidade        DECIMAL(10,2) NOT NULL,
+  unidade           VARCHAR(20) DEFAULT 'UN',
+  consumido_em      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  registrado_por    BIGINT NOT NULL COMMENT 'Usuário da limpeza',
+  motivo            ENUM(
+                      'ROTINA',
+                      'REPOSICAO',
+                      'CONTAMINACAO',
+                      'INTERCORRENCIA',
+                      'OUTRO'
+                    ) DEFAULT 'ROTINA',
+  observacao        TEXT,
+  KEY idx_setor (id_setor),
+  KEY idx_produto (id_produto)
+) ENGINE=InnoDB
+COMMENT='Consumo operacional de produtos de limpeza e higiene';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+DROP TABLE IF EXISTS evento_limpeza;
+CREATE TABLE evento_limpeza (
+  id_evento     BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_setor      INT NOT NULL,
+  tipo_evento   ENUM(
+                    'LIMPEZA_ROTINA',
+                    'LIMPEZA_TERMINAL',
+                    'REPOSICAO_HIGIENE',
+                    'INTERCORRENCIA',
+                    'CONTAMINACAO'
+                  ) NOT NULL,
+  registrado_por BIGINT NOT NULL,
+  observacao    TEXT,
+  criado_em     DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_setor (id_setor)
+) ENGINE=InnoDB
+COMMENT='Eventos operacionais da equipe de limpeza';
+
+
+
+DROP TABLE IF EXISTS chamado_manutencao;
+CREATE TABLE chamado_manutencao (
+  id_chamado        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_setor          INT NOT NULL,
+  origem            ENUM(
+                      'PA',
+                      'INTERNACAO',
+                      'AMBULATORIO',
+                      'ADMINISTRATIVO'
+                    ) NOT NULL,
+  tipo_problema     ENUM(
+                      'ELETRICO',
+                      'HIDRAULICO',
+                      'AR_CONDICIONADO',
+                      'EQUIPAMENTO',
+                      'ESTRUTURAL',
+                      'TI',
+                      'OUTRO'
+                    ) NOT NULL,
+  descricao         TEXT NOT NULL,
+  prioridade        ENUM('BAIXA','MEDIA','ALTA','CRITICA') DEFAULT 'MEDIA',
+  status            ENUM(
+                      'ABERTO',
+                      'EM_ATENDIMENTO',
+                      'AGUARDANDO_PECA',
+                      'RESOLVIDO',
+                      'CANCELADO'
+                    ) DEFAULT 'ABERTO',
+  aberto_por        BIGINT NOT NULL,
+  aberto_em         DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fechado_em        DATETIME
+) ENGINE=InnoDB
+COMMENT='Chamados de manutenção predial, equipamentos e TI';
+
+DROP TABLE IF EXISTS manutencao_execucao;
+CREATE TABLE manutencao_execucao (
+  id_execucao     BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_chamado      BIGINT NOT NULL,
+  tecnico         BIGINT NOT NULL,
+  descricao_servico TEXT,
+  inicio_em       DATETIME,
+  fim_em          DATETIME,
+  status          ENUM(
+                    'INICIADO',
+                    'PAUSADO',
+                    'FINALIZADO'
+                  ) DEFAULT 'INICIADO'
+) ENGINE=InnoDB
+COMMENT='Execução técnica do chamado de manutenção';
+
+DROP TABLE IF EXISTS consumo_manutencao;
+CREATE TABLE consumo_manutencao (
+  id_consumo     BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_chamado     BIGINT NOT NULL,
+  id_produto     BIGINT NOT NULL,
+  quantidade     DECIMAL(10,2) NOT NULL,
+  unidade        VARCHAR(20),
+  consumido_em  DATETIME DEFAULT CURRENT_TIMESTAMP,
+  registrado_por BIGINT NOT NULL
+) ENGINE=InnoDB
+COMMENT='Consumo de materiais em manutenção';
+
+
+DROP TABLE IF EXISTS faturamento_item;
+CREATE TABLE faturamento_item (
+  id_item           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  origem            ENUM(
+                      'PROCEDIMENTO',
+                      'EXAME',
+                      'MEDICACAO',
+                      'MATERIAL',
+                      'TAXA',
+                      'OUTRO'
+                    ) NOT NULL,
+  id_origem         BIGINT NOT NULL,
+  descricao         VARCHAR(255) NOT NULL,
+  quantidade        DECIMAL(10,2) DEFAULT 1,
+  valor_unitario    DECIMAL(10,2) NOT NULL,
+  valor_total       DECIMAL(10,2) NOT NULL,
+  id_ffa            BIGINT,
+  id_internacao     BIGINT,
+  criado_em         DATETIME DEFAULT CURRENT_TIMESTAMP,
+  criado_por        BIGINT NOT NULL,
+  status            ENUM(
+                      'ABERTO',
+                      'CONSOLIDADO',
+                      'CANCELADO'
+                    ) DEFAULT 'ABERTO'
+) ENGINE=InnoDB
+COMMENT='Itens faturáveis gerados a partir de eventos assistenciais';
+
+
+DROP TABLE IF EXISTS faturamento_conta;
+CREATE TABLE faturamento_conta (
+  id_conta        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  tipo_conta      ENUM('FFA','INTERNACAO') NOT NULL,
+  id_ffa          BIGINT,
+  id_internacao   BIGINT,
+  status          ENUM(
+                    'ABERTA',
+                    'EM_REVISAO',
+                    'FECHADA'
+                  ) DEFAULT 'ABERTA',
+  valor_total     DECIMAL(12,2) DEFAULT 0,
+  aberta_em       DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fechada_em      DATETIME,
+  fechado_por     BIGINT
+) ENGINE=InnoDB
+COMMENT='Conta financeira consolidada por atendimento';
+
+
+DROP TABLE IF EXISTS faturamento_conta_item;
+CREATE TABLE faturamento_conta_item (
+  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_conta        BIGINT NOT NULL,
+  id_item         BIGINT NOT NULL
+) ENGINE=InnoDB
+COMMENT='Relaciona itens faturáveis à conta';
+
+
+DROP TABLE IF EXISTS fornecedor;
+CREATE TABLE fornecedor (
+  id_fornecedor     BIGINT AUTO_INCREMENT PRIMARY KEY,
+  razao_social      VARCHAR(255) NOT NULL,
+  nome_fantasia     VARCHAR(255),
+  cnpj              VARCHAR(20),
+  contato           VARCHAR(255),
+  ativo              TINYINT DEFAULT 1,
+  criado_em         DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+
+ALTER TABLE entrada_estoque
+ADD COLUMN id_fornecedor BIGINT,
+ADD COLUMN numero_nota VARCHAR(50),
+ADD COLUMN valor_total DECIMAL(12,2);
+
+DROP TABLE IF EXISTS faturamento_conta;
+
+CREATE TABLE if not exists faturamento_conta (
+  id_conta        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  tipo_conta      ENUM('FFA','INTERNACAO') NOT NULL,
+  id_ffa          BIGINT,
+  id_internacao   BIGINT,
+  status          ENUM(
+                    'ABERTA',
+                    'EM_REVISAO',
+                    'FECHADA'
+                  ) DEFAULT 'ABERTA',
+  valor_total     DECIMAL(12,2) DEFAULT 0,
+  aberta_em       DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fechada_em      DATETIME,
+  fechado_por     BIGINT
+) ENGINE=InnoDB
+COMMENT='Conta financeira consolidada por atendimento';
+
+
+
+DROP TABLE IF EXISTS faturamento_item;
+CREATE TABLE faturamento_item (
+  id_item           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  origem            ENUM(
+                      'PROCEDIMENTO',
+                      'EXAME',
+                      'MEDICACAO',
+                      'MATERIAL',
+                      'TAXA',
+                      'OUTRO'
+                    ) NOT NULL,
+  id_origem         BIGINT NOT NULL,
+  descricao         VARCHAR(255) NOT NULL,
+  quantidade        DECIMAL(10,2) DEFAULT 1,
+  valor_unitario    DECIMAL(10,2) NOT NULL,
+  valor_total       DECIMAL(10,2) NOT NULL,
+  id_ffa            BIGINT,
+  id_internacao     BIGINT,
+  criado_em         DATETIME DEFAULT CURRENT_TIMESTAMP,
+  criado_por        BIGINT NOT NULL,
+  status            ENUM(
+                      'ABERTO',
+                      'CONSOLIDADO',
+                      'CANCELADO'
+                    ) DEFAULT 'ABERTO'
+) ENGINE=InnoDB
+COMMENT='Itens faturáveis gerados a partir de eventos assistenciais';
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS sala;
+
+CREATE TABLE sala (
+    id_sala         INT AUTO_INCREMENT PRIMARY KEY,
+    nome_exibicao   VARCHAR(100) NOT NULL,
+    id_local        INT NOT NULL,
+    id_especialidade INT NULL,
+    ativa           TINYINT(1) DEFAULT 1,
+    criado_em       DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB
+COMMENT='Sala física de atendimento (exibição em painel e uso assistencial)';
+
+SET FOREIGN_KEY_CHECKS = 1;

@@ -3005,3 +3005,318 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_gerar_itens_faturamento_ffa;
+DELIMITER $$
+
+CREATE PROCEDURE sp_gerar_itens_faturamento_ffa (
+    IN p_id_ffa BIGINT
+)
+BEGIN
+    /* Procedimentos executados */
+    INSERT INTO faturamento_item (
+        id_ffa,
+        origem,
+        id_origem,
+        descricao,
+        quantidade,
+        criado_em
+    )
+    SELECT
+        p_id_ffa,
+        'PROCEDIMENTO',
+        fp.id_procedimento,
+        fp.tipo_procedimento,
+        1,
+        NOW()
+    FROM ffa_procedimento fp
+    WHERE fp.id_ffa = p_id_ffa
+      AND fp.status = 'FINALIZADO'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM faturamento_item fi
+          WHERE fi.origem = 'PROCEDIMENTO'
+            AND fi.id_origem = fp.id_procedimento
+      );
+
+    /* Medicações administradas */
+    INSERT INTO faturamento_item (
+        id_ffa,
+        origem,
+        id_origem,
+        descricao,
+        quantidade,
+        criado_em
+    )
+    SELECT
+        p_id_ffa,
+        'MEDICACAO',
+        ma.id_administracao,
+        ma.medicamento,
+        ma.quantidade,
+        NOW()
+    FROM ffa_medicacao_administrada ma
+    WHERE ma.id_ffa = p_id_ffa
+      AND ma.status = 'ADMINISTRADA'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM faturamento_item fi
+          WHERE fi.origem = 'MEDICACAO'
+            AND fi.id_origem = ma.id_administracao
+      );
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_consolidar_faturamento_ffa;
+DELIMITER $$
+
+CREATE PROCEDURE sp_consolidar_faturamento_ffa (
+    IN p_id_ffa BIGINT
+)
+BEGIN
+    SELECT
+        origem,
+        descricao,
+        SUM(quantidade) AS total_quantidade
+    FROM faturamento_item
+    WHERE id_ffa = p_id_ffa
+    GROUP BY origem, descricao;
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_fechar_conta_ffa;
+DELIMITER $$
+
+CREATE PROCEDURE sp_fechar_conta_ffa (
+    IN p_id_ffa BIGINT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    /* Marca itens como consolidados */
+    UPDATE faturamento_item
+       SET status = 'CONSOLIDADO'
+     WHERE id_ffa = p_id_ffa
+       AND (status IS NULL OR status <> 'CONSOLIDADO');
+
+    /* Registra evento administrativo */
+    INSERT INTO eventos_fluxo (
+        id_ffa,
+        evento,
+        contexto,
+        id_usuario,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        'FECHAMENTO_FATURAMENTO',
+        'ADMINISTRATIVO',
+        p_id_usuario,
+        NOW()
+    );
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_registrar_ordem_assistencial;
+DELIMITER $$
+
+CREATE PROCEDURE sp_registrar_ordem_assistencial (
+    IN p_id_ffa BIGINT,
+    IN p_tipo_ordem VARCHAR(50),       -- MEDICACAO | DIETA | CUIDADO | SINAIS_VITAIS | etc
+    IN p_origem VARCHAR(30),            -- MEDICO | ENFERMAGEM
+    IN p_payload JSON,                  -- dados clínicos flexíveis
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    -- Validações mínimas
+    IF p_id_ffa IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'FFA obrigatória para ordem assistencial';
+    END IF;
+
+    IF p_tipo_ordem IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Tipo da ordem assistencial é obrigatório';
+    END IF;
+
+    -- Registro da ordem (tabela futura robusta)
+    INSERT INTO ordem_assistencial (
+        id_ffa,
+        tipo_ordem,
+        status,
+        origem,
+        payload_clinico,
+        criado_em,
+        criado_por
+    ) VALUES (
+        p_id_ffa,
+        p_tipo_ordem,
+        'ATIVA',
+        p_origem,
+        p_payload,
+        NOW(),
+        p_id_usuario
+    );
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_suspender_ordem_assistencial;
+DELIMITER $$
+
+CREATE PROCEDURE sp_suspender_ordem_assistencial (
+    IN p_id_ordem BIGINT,
+    IN p_motivo VARCHAR(255),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    -- Garante que a ordem exista e esteja ativa
+    IF NOT EXISTS (
+        SELECT 1
+        FROM ordem_assistencial
+        WHERE id = p_id_ordem
+          AND status = 'ATIVA'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ordem inexistente ou não está ativa';
+    END IF;
+
+    UPDATE ordem_assistencial
+    SET
+        status = 'SUSPENSA',
+        suspenso_em = NOW(),
+        motivo_suspensao = p_motivo,
+        atualizado_por = p_id_usuario
+    WHERE id = p_id_ordem;
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_suspender_ordem_assistencial;
+DELIMITER $$
+
+CREATE PROCEDURE sp_suspender_ordem_assistencial (
+    IN p_id_ordem BIGINT,
+    IN p_motivo VARCHAR(255),
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    -- Garante que a ordem exista e esteja ativa
+    IF NOT EXISTS (
+        SELECT 1
+        FROM ordem_assistencial
+        WHERE id = p_id_ordem
+          AND status = 'ATIVA'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ordem inexistente ou não está ativa';
+    END IF;
+
+    UPDATE ordem_assistencial
+    SET
+        status = 'SUSPENSA',
+        suspenso_em = NOW(),
+        motivo_suspensao = p_motivo,
+        atualizado_por = p_id_usuario
+    WHERE id = p_id_ordem;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_faturamento_registrar_item (
+  IN p_origem ENUM(
+      'PROCEDIMENTO','EXAME','MEDICACAO','MATERIAL','TAXA','OUTRO'
+  ),
+  IN p_id_origem BIGINT,
+  IN p_descricao VARCHAR(255),
+  IN p_quantidade DECIMAL(10,2),
+  IN p_valor_unitario DECIMAL(10,2),
+  IN p_id_ffa BIGINT,
+  IN p_id_internacao BIGINT,
+  IN p_usuario BIGINT
+)
+BEGIN
+  INSERT INTO faturamento_item (
+    origem, id_origem, descricao,
+    quantidade, valor_unitario, valor_total,
+    id_ffa, id_internacao, criado_por
+  ) VALUES (
+    p_origem, p_id_origem, p_descricao,
+    p_quantidade, p_valor_unitario,
+    p_quantidade * p_valor_unitario,
+    p_id_ffa, p_id_internacao, p_usuario
+  );
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_faturamento_consolidar_conta (
+  IN p_tipo ENUM('FFA','INTERNACAO'),
+  IN p_id BIGINT,
+  IN p_usuario BIGINT
+)
+BEGIN
+  DECLARE v_id_conta BIGINT;
+
+  INSERT INTO faturamento_conta (tipo_conta, id_ffa, id_internacao)
+  VALUES (
+    p_tipo,
+    IF(p_tipo = 'FFA', p_id, NULL),
+    IF(p_tipo = 'INTERNACAO', p_id, NULL)
+  );
+
+  SET v_id_conta = LAST_INSERT_ID();
+
+  INSERT INTO faturamento_conta_item (id_conta, id_item)
+  SELECT v_id_conta, id_item
+  FROM faturamento_item
+  WHERE status = 'ABERTO'
+    AND (
+      (p_tipo = 'FFA' AND id_ffa = p_id)
+      OR
+      (p_tipo = 'INTERNACAO' AND id_internacao = p_id)
+    );
+
+  UPDATE faturamento_item
+  SET status = 'CONSOLIDADO'
+  WHERE id_item IN (
+    SELECT id_item FROM faturamento_conta_item
+    WHERE id_conta = v_id_conta
+  );
+
+  UPDATE faturamento_conta
+  SET valor_total = (
+    SELECT SUM(valor_total)
+    FROM faturamento_item fi
+    JOIN faturamento_conta_item fci ON fci.id_item = fi.id_item
+    WHERE fci.id_conta = v_id_conta
+  );
+
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_faturamento_fechar_conta (
+  IN p_id_conta BIGINT,
+  IN p_usuario BIGINT
+)
+BEGIN
+  UPDATE faturamento_conta
+  SET status = 'FECHADA',
+      fechada_em = NOW(),
+      fechado_por = p_usuario
+  WHERE id_conta = p_id_conta;
+END$$
+
+DELIMITER ;

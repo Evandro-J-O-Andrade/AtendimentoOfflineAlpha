@@ -60,3 +60,143 @@ JOIN atendimento a ON a.id_ffa = i.id_ffa
 JOIN pessoa p ON p.id_pessoa = a.id_pessoa
 JOIN leito l ON l.id_leito = i.id_leito
 WHERE i.status = 'ATIVA';
+
+
+CREATE OR REPLACE VIEW vw_fila_farmacia AS
+SELECT
+    oa.id                    AS id_ordem,
+    oa.id_ffa,
+    oa.payload_clinico,
+    oa.prioridade,
+    oa.iniciado_em,
+    oa.status,
+    oa.criado_por,
+    f.classificacao_manchester,
+    f.status AS status_ffa
+FROM ordem_assistencial oa
+JOIN ffa f ON f.id = oa.id_ffa
+WHERE
+    oa.tipo_ordem = 'MEDICACAO'
+    AND oa.status = 'ATIVA';
+
+DROP VIEW IF EXISTS vw_ordens_assistenciais_ativas;
+
+CREATE VIEW vw_ordens_assistenciais_ativas AS
+SELECT
+    oa.id            AS id_ordem,
+    oa.id_ffa,
+    oa.tipo_ordem,
+    oa.prioridade,
+    oa.status,
+    oa.payload_clinico,
+    oa.criado_por,
+    oa.iniciado_em,
+    f.status         AS status_ffa
+FROM ordem_assistencial oa
+JOIN ffa f ON f.id = oa.id_ffa
+WHERE oa.status = 'ATIVA';
+
+
+DROP VIEW IF EXISTS vw_fila_enfermagem;
+
+CREATE VIEW vw_fila_enfermagem AS
+SELECT
+    oa.id                    AS id_ordem,
+    oa.id_ffa,
+    oa.tipo_ordem,
+    oa.prioridade,
+    JSON_UNQUOTE(JSON_EXTRACT(oa.payload_clinico, '$.descricao')) AS descricao,
+    JSON_EXTRACT(oa.payload_clinico, '$.frequencia')             AS frequencia,
+    oa.iniciado_em
+FROM ordem_assistencial oa
+WHERE oa.status = 'ATIVA'
+  AND oa.tipo_ordem IN ('MEDICACAO','CUIDADO','DIETA','OXIGENIO')
+ORDER BY oa.prioridade DESC, oa.iniciado_em;
+
+
+DROP VIEW IF EXISTS vw_ordens_medicas;
+
+CREATE VIEW vw_ordens_medicas AS
+SELECT
+    oa.id          AS id_ordem,
+    oa.id_ffa,
+    oa.tipo_ordem,
+    oa.status,
+    oa.prioridade,
+    oa.payload_clinico,
+    oa.iniciado_em,
+    oa.encerrado_em
+FROM ordem_assistencial oa;
+
+
+DROP VIEW IF EXISTS vw_fila_farmacia;
+
+CREATE VIEW vw_fila_farmacia AS
+SELECT
+    oa.id                    AS id_ordem,
+    oa.id_ffa,
+    JSON_UNQUOTE(JSON_EXTRACT(oa.payload_clinico, '$.medicamento')) AS medicamento,
+    JSON_EXTRACT(oa.payload_clinico, '$.dose')                      AS dose,
+    JSON_EXTRACT(oa.payload_clinico, '$.via')                       AS via,
+    oa.prioridade,
+    oa.iniciado_em
+FROM ordem_assistencial oa
+WHERE oa.status = 'ATIVA'
+  AND oa.tipo_ordem = 'MEDICACAO'
+ORDER BY oa.prioridade DESC, oa.iniciado_em;
+
+
+DROP VIEW IF EXISTS vw_historico_ordens_assistenciais;
+
+CREATE VIEW vw_historico_ordens_assistenciais AS
+SELECT
+    oa.id,
+    oa.id_ffa,
+    oa.tipo_ordem,
+    oa.status,
+    oa.criado_por,
+    oa.iniciado_em,
+    oa.encerrado_em
+FROM ordem_assistencial oa;
+
+DROP VIEW IF EXISTS vw_painel_chamadas_ativas;
+CREATE VIEW vw_painel_chamadas_ativas AS
+SELECT
+    cp.id_chamada,
+    a.id_atendimento,
+    s.id          AS id_senha,
+    s.numero      AS numero_senha,
+    s.prefixo,
+    sa.id_sala,
+    sa.nome_exibicao AS sala,
+    cp.data_hora  AS chamado_em
+FROM chamada_painel cp
+JOIN atendimento a  ON a.id_atendimento = cp.id_atendimento
+JOIN senhas s       ON s.id = a.id_senha
+LEFT JOIN sala sa   ON sa.id_sala = cp.id_sala
+WHERE cp.status = 'CHAMANDO'
+ORDER BY cp.data_hora DESC;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_chamar_painel$$
+CREATE PROCEDURE sp_chamar_painel (
+    IN p_id_atendimento BIGINT,
+    IN p_id_sala        INT
+)
+BEGIN
+    INSERT INTO chamada_painel (
+        id_atendimento,
+        id_sala,
+        status,
+        data_hora
+    ) VALUES (
+        p_id_atendimento,
+        p_id_sala,
+        'CHAMANDO',
+        NOW()
+    );
+END$$
+
+DELIMITER ;
