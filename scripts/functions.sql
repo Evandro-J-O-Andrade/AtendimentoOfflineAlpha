@@ -34,3 +34,70 @@ BEGIN
     END CASE;
 END$$
 DELIMITER ;;
+
+DELIMITER $$
+
+CREATE FUNCTION fn_farmaco_estoque_atual (
+    p_id_farmaco BIGINT,
+    p_id_cidade BIGINT
+)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE v_estoque INT;
+
+    SELECT IFNULL(estoque_total,0)
+    INTO v_estoque
+    FROM vw_farmaco_estoque_total
+    WHERE id_farmaco = p_id_farmaco
+      AND id_cidade  = p_id_cidade;
+
+    RETURN v_estoque;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE FUNCTION fn_farmaco_lote_valido (
+    p_id_lote BIGINT
+)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE v_validade DATE;
+
+    SELECT data_validade
+    INTO v_validade
+    FROM farmaco_lote
+    WHERE id_lote = p_id_lote;
+
+    IF v_validade < CURDATE() THEN
+        RETURN FALSE;
+    END IF;
+
+    RETURN TRUE;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE FUNCTION fn_dias_para_vencimento(p_data_validade DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN DATEDIFF(p_data_validade, CURDATE());
+END$$
+
+DELIMITER ;
+DELIMITER $$
+
+CREATE FUNCTION fn_dias_para_vencimento(p_data_validade DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN DATEDIFF(p_data_validade, CURDATE());
+END$$
+
+DELIMITER ;

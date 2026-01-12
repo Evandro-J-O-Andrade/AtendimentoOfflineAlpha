@@ -1,12 +1,11 @@
 <?php
-// scripts/seed_users.php
-// Uso: php scripts/seed_users.php
-// Popula perfis e usuários de teste para desenvolvimento local.
+// scripts/seed_his_fluxo_completo_full.php
+// Uso: php scripts/seed_his_fluxo_completo_full.php
+// Este script cria perfis e usuários de teste do fluxo completo HIS, com senha já hashada SHA-256
 
 require_once __DIR__ . '/../src/api/config.php';
 $pdo = getPDO();
 
-// Perfis do sistema
 $profiles = [
     'ADMIN_MASTER',
     'SUPORTE_MASTER',
@@ -19,19 +18,19 @@ $profiles = [
     'AUDITORIA'
 ];
 
-// Usuários de teste: login, nome, perfis[], senha inicial
+// Usuários de teste: login, perfis[], senha inicial
 $users = [
-    ['adminMaster',      'Administrador Master', ['ADMIN_MASTER','SUPORTE_MASTER'], 'adminMaster'],
-    ['admin',            'Administrador Comum',  ['ADMIN_MASTER'], 'admin'],
-    ['suporteMaster',    'Suporte Master',      ['SUPORTE_MASTER'], 'suporteMaster'],
-    ['suporte',          'Suporte Comum',       ['SUPORTE'], 'suporte'],
-    ['admRecepcao',      'ADM Recepção',        ['ADM_RECEPCAO'], 'admRecepcao'],
-    ['totem01',          'Totem Caller',        ['TOTEM_CALLER'], 'totem01'],
-    ['recepcao1',        'Recepcionista Teste', ['RECEPCAO'], 'recepcao1'],
-    ['medicoClinico',    'Médico Clínico Teste',['MEDICO'], 'medicoClinico'],
-    ['medicoPediatria',  'Médico Pediatria Teste',['MEDICO'], 'medicoPediatria'],
-    ['enfermagem1',      'Enfermeiro Teste',    ['ENFERMAGEM'], 'enfermagem1'],
-    ['paciente1',        'Paciente Teste',      [], 'paciente1']
+    ['adminMaster', ['ADMIN_MASTER','SUPORTE_MASTER'], 'adminMasterNova123!'],
+    ['admin', ['ADMIN_MASTER'], 'admin'],
+    ['suporteMaster', ['SUPORTE_MASTER'], 'Senha123!'],
+    ['suporte', ['SUPORTE'], 'Senha123!'],
+    ['admRecepcao', ['ADM_RECEPCAO'], 'Senha123!'],
+    ['totem01', ['TOTEM_CALLER'], 'Senha123!'],
+    ['recepcao1', ['RECEPCAO'], 'Senha123!'],
+    ['medicoClinico', ['MEDICO'], 'Senha123!'],
+    ['medicoPediatria', ['MEDICO'], 'Senha123!'],
+    ['enfermagem1', ['ENFERMAGEM'], 'Senha123!'],
+    ['paciente1', [], 'Senha123!']
 ];
 
 try {
@@ -51,20 +50,20 @@ try {
         }
     }
 
-    // Helper: criar/recuperar pessoa
+    // Funções auxiliares para pessoa e usuário
     $stmt_find_pessoa = $pdo->prepare('SELECT id_pessoa FROM pessoa WHERE nome_completo = ? LIMIT 1');
     $stmt_insert_pessoa = $pdo->prepare('INSERT INTO pessoa (nome_completo) VALUES (?)');
 
-    // Helper: criar usuário
     $stmt_find_user = $pdo->prepare('SELECT id_usuario FROM usuario WHERE login = ? LIMIT 1');
-    $stmt_insert_user = $pdo->prepare('INSERT INTO usuario (login, senha, senha_hash, ativo, primeiro_login, senha_expira_em, seed_password, id_pessoa) VALUES (?, ?, ?, 1, 1, ?, ?, ?)');
-    $stmt_get_perfil = $pdo->prepare('SELECT id_perfil FROM perfil WHERE nome = ? LIMIT 1');
+    $stmt_insert_user = $pdo->prepare('INSERT INTO usuario (login, senha, senha_hash, id_pessoa, ativo, primeiro_login, senha_expira_em) VALUES (?, ?, ?, ?, 1, 1, DATE_ADD(CURDATE(), INTERVAL 6 MONTH))');
     $stmt_insert_user_perfil = $pdo->prepare('INSERT INTO usuario_perfil (id_usuario, id_perfil) VALUES (?, ?)');
+    $stmt_get_perfil = $pdo->prepare('SELECT id_perfil FROM perfil WHERE nome = ? LIMIT 1');
 
     foreach ($users as $u) {
-        [$login, $nome, $u_perfis, $senha] = $u;
+        [$login, $u_perfis, $senha] = $u;
+        $nome = ucfirst($login); // Nome da pessoa baseado no login
 
-        // pessoa
+        // Cria pessoa se não existir
         $stmt_find_pessoa->execute([$nome]);
         $row = $stmt_find_pessoa->fetch(PDO::FETCH_ASSOC);
         if ($row) {
@@ -76,32 +75,19 @@ try {
             echo "Pessoa criada: $nome (id=$id_pessoa)\n";
         }
 
-        // usuário
+        // Cria usuário se não existir
         $stmt_find_user->execute([$login]);
         if ($stmt_find_user->fetch()) {
             echo "Usuário já existe: $login\n";
             continue;
         }
 
-        // Hash compatível com SHA2(., 256) do MySQL
         $senha_hash = hash('sha256', $senha);
-
-        // Define senha expira em 6 meses
-        $senha_expira_em = date('Y-m-d', strtotime('+6 months'));
-
-        $stmt_insert_user->execute([
-            $login,
-            $senha,         // senha em texto para login direto
-            $senha_hash,    // hash compatível com SP
-            $senha_expira_em,
-            $senha,         // seed_password = login
-            $id_pessoa
-        ]);
-
+        $stmt_insert_user->execute([$login, $senha, $senha_hash, $id_pessoa]);
         $id_usuario = $pdo->lastInsertId();
         echo "Usuário criado: $login (id=$id_usuario) senha: $senha\n";
 
-        // vincular perfis
+        // Atribui perfis
         foreach ($u_perfis as $pn) {
             $stmt_get_perfil->execute([$pn]);
             $pf = $stmt_get_perfil->fetch(PDO::FETCH_ASSOC);
@@ -113,9 +99,8 @@ try {
     }
 
     $pdo->commit();
-    echo "SEED: Concluído com sucesso.\n";
-    echo "Usuários criados com senha igual ao login e hash compatível com SP.\n";
-
+    echo "\nSEED COMPLETO: Usuários e perfis criados com sucesso.\n";
+    echo "Senhas SHA-256 já configuradas, prontas para login no frontend.\n";
 } catch (Exception $e) {
     $pdo->rollBack();
     echo "Erro ao semear dados: " . $e->getMessage() . "\n";

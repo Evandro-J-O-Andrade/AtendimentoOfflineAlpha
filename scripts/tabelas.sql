@@ -1643,3 +1643,119 @@ CREATE TABLE sala (
 COMMENT='Sala física de atendimento (exibição em painel e uso assistencial)';
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+ALTER TABLE farmaco
+ADD COLUMN marca VARCHAR(100),
+ADD COLUMN generico BOOLEAN;
+
+CREATE TABLE if not exists farmaco_unidade (
+    id_farmaco      BIGINT NOT NULL,
+    id_cidade       BIGINT NOT NULL,
+    cota_minima     INT NOT NULL DEFAULT 0,
+    cota_maxima     INT NULL,
+    atualizado_por  BIGINT NOT NULL,
+    atualizado_em   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_farmaco, id_cidade),
+    CONSTRAINT fk_fu_farmaco FOREIGN KEY (id_farmaco) REFERENCES farmaco(id_farmaco)
+);
+
+CREATE TABLE if not exists farmaco_lote (
+    id_lote            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_farmaco         BIGINT NOT NULL,
+    numero_lote        VARCHAR(50) NOT NULL,
+    data_fabricacao    DATE NOT NULL,
+    data_validade      DATE NOT NULL,
+    criado_por         BIGINT NOT NULL,
+    criado_em          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_lote_farmaco FOREIGN KEY (id_farmaco) REFERENCES farmaco(id_farmaco)
+);
+
+CREATE TABLE if not exists farmaco_movimentacao (
+    id_movimentacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_farmaco      BIGINT NOT NULL,
+    id_lote         BIGINT NOT NULL,
+    id_cidade       BIGINT NOT NULL,
+    tipo            ENUM('ENTRADA','SAIDA') NOT NULL,
+    quantidade      INT NOT NULL,
+    origem          ENUM('COMPRA','TRANSFERENCIA','PACIENTE','AJUSTE') NOT NULL,
+    id_ffa          BIGINT NULL,
+    observacao      VARCHAR(255),
+    realizado_por   BIGINT NOT NULL,
+    data_mov        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mov_farmaco FOREIGN KEY (id_farmaco) REFERENCES farmaco(id_farmaco),
+    CONSTRAINT fk_mov_lote FOREIGN KEY (id_lote) REFERENCES farmaco_lote(id_lote)
+);
+
+CREATE TABLE if not exists farmaco_auditoria (
+    id_auditoria BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tabela       VARCHAR(50),
+    id_registro  BIGINT,
+    acao         ENUM('INSERT','UPDATE','DELETE'),
+    dados_antes  JSON,
+    dados_depois JSON,
+    id_usuario   BIGINT,
+    data_evento  DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE if not exists farmaco_auditoria_bloqueio (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_farmaco BIGINT NOT NULL,
+    id_lote BIGINT NOT NULL,
+    id_cidade BIGINT NOT NULL,
+    quantidade INT NOT NULL,
+    id_ffa BIGINT,
+    usuario BIGINT NOT NULL,
+    motivo VARCHAR(255) NOT NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_bloq_farmaco (id_farmaco),
+    INDEX idx_bloq_lote (id_lote),
+    INDEX idx_bloq_cidade (id_cidade),
+    INDEX idx_bloq_usuario (usuario)
+);
+
+CREATE TABLE farmaco_estoque_minimo (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_farmaco BIGINT NOT NULL,
+    id_cidade BIGINT NOT NULL,
+    quantidade_minima INT NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME,
+
+    UNIQUE KEY uk_farmaco_cidade (id_farmaco, id_cidade)
+);
+
+DESCRIBE estoque_local;
+
+SET FOREIGN_KEY_CHECKS = 0;
+drop table farmaco_lote;
+
+CREATE TABLE IF NOT EXISTS farmaco_lote (
+    id_lote BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_farmaco BIGINT NOT NULL,
+    numero_lote VARCHAR(50) NOT NULL,
+    data_fabricacao DATE NOT NULL,
+    data_validade DATE NOT NULL,
+    criado_por BIGINT NOT NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_lote_farmaco
+        FOREIGN KEY (id_farmaco)
+        REFERENCES farmaco(id_farmaco)
+);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+CREATE TABLE auditoria_estoque_sanitario (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_farmaco BIGINT NOT NULL,
+    id_lote BIGINT NOT NULL,
+    id_local INT NOT NULL,
+    quantidade INT NOT NULL,
+    nivel_risco ENUM('OK','CRITICO','VENCIDO') NOT NULL,
+    criado_por BIGINT NOT NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

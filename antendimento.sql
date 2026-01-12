@@ -8000,4 +8000,8 @@ FROM observacoes_eventos o
 JOIN usuario u ON u.id_usuario = o.id_usuario
 JOIN pessoa  p ON p.id_pessoa  = u.id_pessoa
 WHERE o.entidade = 'FFA';
+-- Adiciona a coluna senha se ainda não existir
+ALTER TABLE usuario ADD COLUMN senha VARCHAR(150) NOT NULL AFTER login;
 
+-- Adiciona a coluna senha_expira_em se ainda não existir
+ALTER TABLE usuario ADD COLUMN senha_expira_em DATE DEFAULT NULL AFTER primeiro_login;
