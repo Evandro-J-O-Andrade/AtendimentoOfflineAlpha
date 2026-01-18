@@ -778,3 +778,130 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+show tables;
+
+-- 1️⃣ Procedure para criar usuário
+DELIMITER $$
+CREATE PROCEDURE sp_criar_usuario(
+    IN p_nome VARCHAR(150),
+    IN p_login VARCHAR(50),
+    IN p_senha VARCHAR(255),
+    IN p_id_perfil BIGINT,
+    IN p_id_local BIGINT,
+    OUT p_id_usuario BIGINT
+)
+BEGIN
+    START TRANSACTION;
+
+    -- Inserir usuário
+    INSERT INTO usuario (nome, login, senha, criado_em)
+    VALUES (p_nome, p_login, p_senha, NOW());
+    SET p_id_usuario = LAST_INSERT_ID();
+
+    -- Vincular perfil
+    INSERT INTO usuario_perfil (id_usuario, id_perfil)
+    VALUES (p_id_usuario, p_id_perfil);
+
+    -- Alocação em local
+    INSERT INTO usuario_alocacao (id_usuario, id_local)
+    VALUES (p_id_usuario, p_id_local);
+
+    -- Log de auditoria
+    INSERT INTO log_auditoria (id_usuario, tabela, acao, detalhe, criado_em)
+    VALUES (p_id_usuario, 'usuario', 'INSERT', CONCAT('Usuário criado: ', p_nome), NOW());
+
+    COMMIT;
+END$$
+DELIMITER ;
+
+-- 2️⃣ Procedure para reset de senha de usuário
+DELIMITER $$
+CREATE PROCEDURE sp_reset_senha_usuario(
+    IN p_id_usuario BIGINT,
+    IN p_nova_senha VARCHAR(255),
+    IN p_id_admin BIGINT
+)
+BEGIN
+    START TRANSACTION;
+
+    UPDATE usuario
+    SET senha = p_nova_senha, atualizado_em = NOW()
+    WHERE id = p_id_usuario;
+
+    -- Registrar auditoria
+    INSERT INTO log_auditoria (id_usuario, tabela, acao, detalhe, criado_em)
+    VALUES (p_id_admin, 'usuario', 'UPDATE', CONCAT('Reset de senha do usuário ', p_id_usuario), NOW());
+
+    COMMIT;
+END$$
+DELIMITER ;
+
+-- 3️⃣ Procedure para atualizar dados do paciente
+DELIMITER $$
+CREATE PROCEDURE sp_update_paciente(
+    IN p_id_paciente BIGINT,
+    IN p_nome VARCHAR(150),
+    IN p_nascimento DATE,
+    IN p_cns VARCHAR(20),
+    IN p_telefone VARCHAR(50),
+    IN p_endereco TEXT,
+    IN p_id_usuario BIGINT
+)
+BEGIN
+    START TRANSACTION;
+
+    UPDATE paciente
+    SET nome = p_nome,
+        nascimento = p_nascimento,
+        cns = p_cns,
+        telefone = p_telefone,
+        endereco = p_endereco,
+        atualizado_em = NOW()
+    WHERE id = p_id_paciente;
+
+    -- Log de auditoria
+    INSERT INTO log_auditoria (id_usuario, tabela, acao, detalhe, criado_em)
+    VALUES (p_id_usuario, 'paciente', 'UPDATE', CONCAT('Atualização de paciente ', p_id_paciente), NOW());
+
+    COMMIT;
+END$$
+DELIMITER ;
+
+-- 4️⃣ Procedure para atualizar dados de usuário
+DELIMITER $$
+CREATE PROCEDURE sp_update_usuario(
+    IN p_id_usuario BIGINT,
+    IN p_nome VARCHAR(150),
+    IN p_login VARCHAR(50),
+    IN p_id_perfil BIGINT,
+    IN p_id_local BIGINT,
+    IN p_id_admin BIGINT
+)
+BEGIN
+    START TRANSACTION;
+
+    -- Atualizar dados básicos
+    UPDATE usuario
+    SET nome = p_nome,
+        login = p_login,
+        atualizado_em = NOW()
+    WHERE id = p_id_usuario;
+
+    -- Atualizar perfil
+    UPDATE usuario_perfil
+    SET id_perfil = p_id_perfil
+    WHERE id_usuario = p_id_usuario;
+
+    -- Atualizar alocação
+    UPDATE usuario_alocacao
+    SET id_local = p_id_local
+    WHERE id_usuario = p_id_usuario;
+
+    -- Auditoria
+    INSERT INTO log_auditoria (id_usuario, tabela, acao, detalhe, criado_em)
+    VALUES (p_id_admin, 'usuario', 'UPDATE', CONCAT('Atualização de usuário ', p_id_usuario), NOW());
+
+    COMMIT;
+END$$
+DELIMITER ;

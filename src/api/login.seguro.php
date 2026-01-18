@@ -1,6 +1,6 @@
 <?php
-// login_seguro.php - Ponto de entrada crucial do sistema
-require "config.php"; // Assume config.php configura $pdo
+// login_seguro.php atualizado
+require "config.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -14,48 +14,49 @@ if (empty($login) || empty($senha_digitada)) {
     exit;
 }
 
+// Pega dados do usuário
 $stmt = $pdo->prepare("
-    SELECT 
-        u.id_usuario, 
-        u.senha_hash, 
-        p.nome_completo AS nome, 
-        pe.nome AS perfil
+    SELECT u.id_usuario, u.senha_hash, p.nome_completo AS nome
     FROM usuario u
     JOIN pessoa p ON p.id_pessoa = u.id_pessoa
-    JOIN usuario_perfil up ON up.id_usuario = u.id_usuario
-    JOIN perfil pe ON pe.id_perfil = up.id_perfil
-    WHERE u.login = ? 
-      AND u.ativo = 1
+    WHERE u.login = ? AND u.ativo = 1
 ");
-
 $stmt->execute([$login]);
-$user = $stmt->fetch();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
-    // Retorna mensagem genérica de erro (segurança)
     http_response_code(401);
     echo json_encode(["erro" => "Credenciais inválidas."]);
     exit;
 }
 
-// VALIDAÇÃO CRÍTICA: Verifica a senha criptografada
-if (password_verify($senha_digitada, $user['senha_hash'])) {
-    
-    // A SENHA É VÁLIDA. Remove o hash antes de enviar.
-    unset($user['senha_hash']); 
-    
-    // GERAÇÃO DE TOKEN SIMPLES: Em produção, substitua por JWT (JSON Web Token)
-    // Este token deve ser enviado de volta no header de TODAS as requisições.
-    $token_de_sessao = hash('sha256', microtime() . $user['id_usuario'] . $login); 
-
-    echo json_encode([
-        "ok" => true,
-        "token" => $token_de_sessao, 
-        "usuario" => $user
-    ]);
-
-} else {
-    // Senha incorreta
+// Valida senha
+if (!password_verify($senha_digitada, $user['senha_hash'])) {
     http_response_code(401);
     echo json_encode(["erro" => "Credenciais inválidas."]);
+    exit;
 }
+
+// Pega todos os perfis ativos do usuário nos sistemas
+$stmt = $pdo->prepare("
+    SELECT p.nome AS perfil
+    FROM usuario_sistema us
+    JOIN perfil p ON p.id_perfil = us.id_perfil
+    WHERE us.id_usuario = ? AND us.ativo = 1
+");
+$stmt->execute([$user['id_usuario']]);
+$perfis = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Remove hash e retorna
+unset($user['senha_hash']);
+
+echo json_encode([
+    "ok" => true,
+    "token" => hash('sha256', microtime() . $user['id_usuario'] . $login),
+    "usuario" => [
+        "id_usuario" => $user['id_usuario'],
+        "login" => $login,
+        "nome" => $user['nome'],
+        "perfis" => $perfis
+    ]
+]);

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/services/api";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import SelectLocalModal from "@/components/SelectLocalModal";
 import "./Login.css";
 
@@ -30,38 +28,26 @@ export default function Login() {
 
       if (!token || !usuario) throw new Error("Resposta inválida da API");
 
-      // Salva token + usuário
       signIn(token, usuario);
 
       const perfis = usuario.perfis || [];
 
-      // Quem precisa escolher local/contexto
-      if (perfis.some(p => ["RECEPCAO", "ADM_RECEPCAO"].includes(p))) {
+      if (perfis.includes("RECEPCAO") || perfis.includes("ADM_RECEPCAO")) {
         setPerfilSelecionado("RECEPCAO");
         setOpenLocalModal(true);
       } else if (perfis.some(p => p.includes("MEDICO"))) {
         setPerfilSelecionado("MEDICO");
         setOpenLocalModal(true);
-      } 
-      // ADM / SUPORTE / GESTÃO
-      else if (perfis.some(p => ["ADMIN_MASTER","SUPORTE_MASTER","SUPORTE"].includes(p))) {
+      } else if (perfis.includes("ADMIN_MASTER") || perfis.includes("SUPORTE")) {
         navigate("/dashboard");
-      } 
-      // Enfermagem
-      else if (perfis.includes("ENFERMAGEM")) {
+      } else if (perfis.includes("ENFERMAGEM")) {
         navigate("/triagem");
-      } 
-      // Auditoria
-      else if (perfis.includes("AUDITORIA")) {
-        navigate("/auditoria");
-      } 
-      else {
+      } else {
         setError("Usuário sem perfil autorizado.");
       }
 
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || "Login ou senha inválidos.";
-      setError(msg);
+      setError(err.response?.data?.message || err.message || "Login ou senha inválidos.");
     } finally {
       setLoading(false);
     }
@@ -78,35 +64,20 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <Header />
-
       <main className="login-main">
         <form onSubmit={handleSubmit} className="login-card">
           <h3>Acesso ao Sistema</h3>
-
           {error && <p className="error">{error}</p>}
-
-          <div className="form-group">
-            <label>Login</label>
-            <input type="text" value={login} onChange={e => setLogin(e.target.value)} required />
-          </div>
-
-          <div className="form-group">
-            <label>Senha</label>
-            <input type="password" value={senha} onChange={e => setSenha(e.target.value)} required />
-          </div>
-
-          <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
+          <input type="text" value={login} onChange={e => setLogin(e.target.value)} placeholder="Login" required />
+          <input type="password" value={senha} onChange={e => setSenha(e.target.value)} placeholder="Senha" required />
+          <button type="submit" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</button>
         </form>
       </main>
-
-      <Footer />
 
       <SelectLocalModal
         open={openLocalModal}
         perfil={perfilSelecionado}
+        usuario={user}
         onClose={() => setOpenLocalModal(false)}
         onSelect={handleSelectLocal}
       />
