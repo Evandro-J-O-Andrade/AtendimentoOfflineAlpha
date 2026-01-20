@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useContextoAtendimento } from "@/context/ContextoAtendimento";
-import "./SelecionarContexto.css";
+
 
 export default function SelecionarContexto() {
   const navigate = useNavigate();

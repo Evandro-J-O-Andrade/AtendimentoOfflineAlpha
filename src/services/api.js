@@ -1,10 +1,10 @@
 import axios from "axios";
 
+const API_BASE = "http://prontoatendimento.local/src/api";
+
 const api = axios.create({
-  baseURL: "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
@@ -12,7 +12,7 @@ let isRefreshing = false;
 let refreshSubscribers = [];
 
 function onRefreshed(token) {
-  refreshSubscribers.forEach(cb => cb(token));
+  refreshSubscribers.forEach((cb) => cb(token));
   refreshSubscribers = [];
 }
 
@@ -20,22 +20,37 @@ function addRefreshSubscriber(cb) {
   refreshSubscribers.push(cb);
 }
 
-api.interceptors.request.use(config => {
+api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 api.interceptors.response.use(
-  res => res,
-  async err => {
+  (res) => res,
+  async (err) => {
     const originalRequest = err.config;
-    if (err.response && err.response.status === 401 && !originalRequest._retry) {
+
+    // Se nem existe response (erro de rede), apenas propaga
+    if (!err.response) return Promise.reject(err);
+
+    const status = err.response.status;
+    const url = originalRequest?.url || "";
+
+    // Anti-loop: não tenta refresh em endpoints de auth
+    if (
+      url.includes("/auth/auth.php") ||
+      url.includes("/auth/refresh.php") ||
+      url.includes("/auth/me.php")
+    ) {
+      localStorage.removeItem("token");
+      return Promise.reject(err);
+    }
+
+    if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          addRefreshSubscriber(token => {
+        return new Promise((resolve) => {
+          addRefreshSubscriber((token) => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
             resolve(api(originalRequest));
           });
@@ -46,18 +61,20 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // call refresh endpoint which reads HttpOnly cookie and returns new access token
-        const resp = await axios.post('/api/auth/refresh.php', {}, { withCredentials: true });
-        const { token } = resp.data;
-        if (token) {
-          localStorage.setItem('token', token);
-        }
+        const resp = await axios.post(
+          `${API_BASE}/auth/refresh.php`,
+          {},
+          { withCredentials: true }
+        );
+
+        const { token } = resp.data || {};
+        if (token) localStorage.setItem("token", token);
+
         onRefreshed(token);
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return api(originalRequest);
       } catch (e) {
-        // refresh failed -> clear tokens
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

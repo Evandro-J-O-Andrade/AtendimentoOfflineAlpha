@@ -905,3 +905,192 @@ BEGIN
     COMMIT;
 END$$
 DELIMITER ;
+
+SELECT 
+    ROUTINE_TYPE,
+    ROUTINE_NAME
+FROM information_schema.ROUTINES
+WHERE ROUTINE_SCHEMA = 'pronto_atendimento'
+  AND ROUTINE_DEFINITION REGEXP '[^a-zA-Z_]senha[^a-zA-Z_]';
+
+SELECT 
+    TABLE_NAME
+FROM information_schema.VIEWS
+WHERE TABLE_SCHEMA = 'pronto_atendimento'
+  AND VIEW_DEFINITION REGEXP '[^a-zA-Z_]senha[^a-zA-Z_]';
+
+
+CREATE TABLE if not exists usuario_sistema (
+    id_usuario BIGINT NOT NULL,
+    id_sistema BIGINT NOT NULL,
+    id_perfil INT NOT NULL,
+    ativo TINYINT(1) DEFAULT 1,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id_usuario, id_sistema, id_perfil),
+
+    CONSTRAINT fk_us_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario),
+
+    CONSTRAINT fk_us_sistema
+        FOREIGN KEY (id_sistema)
+        REFERENCES sistema(id_sistema),
+
+    CONSTRAINT fk_us_perfil
+        FOREIGN KEY (id_perfil)
+        REFERENCES perfil(id_perfil)
+) ENGINE=InnoDB;
+
+INSERT INTO sistema (nome, descricao, ativo, criado_em) VALUES
+('PA', 'Pronto Atendimento', 1, NOW()),
+('UBS', 'Unidade Básica de Saúde', 1, NOW());
+
+
+SELECT
+    us.id_sistema,
+    s.nome AS sistema,
+    us.id_perfil
+FROM usuario_sistema us
+JOIN sistema s ON s.id_sistema = us.id_sistema
+WHERE us.id_usuario = 1
+  AND us.ativo = 1
+  AND s.ativo = 1;
+
+SELECT * FROM usuario WHERE id_usuario = 1;
+SELECT id_sistema, nome FROM sistema;
+
+
+INSERT INTO usuario_sistema (id_usuario, id_sistema, id_perfil)
+VALUES (1, 2, 1);
+
+INSERT INTO usuario_sistema (id_usuario, id_sistema, id_perfil)
+VALUES (1, 1, 1);
+SELECT * 
+FROM perfil;
+INSERT INTO perfil (nome) VALUES
+('ADMIN'),
+('RECEPCAO'),
+('ENFERMAGEM'),
+('MEDICO'),
+('PAINEL');
+
+INSERT INTO usuario_sistema (id_usuario, id_sistema, id_perfil)
+VALUES (1, 2, 1);
+
+SELECT 
+    us.id_usuario,
+    u.login,
+    s.nome   AS sistema,
+    p.nome   AS perfil
+FROM usuario_sistema us
+JOIN usuario u ON u.id_usuario = us.id_usuario
+JOIN sistema s ON s.id_sistema = us.id_sistema
+JOIN perfil p  ON p.id_perfil = us.id_perfil;
+
+
+CREATE VIEW vw_usuario_sistemas AS
+SELECT 
+    u.id_usuario,
+    u.login,
+    s.id_sistema,
+    s.nome AS sistema,
+    p.id_perfil,
+    p.nome AS perfil
+FROM usuario u
+JOIN usuario_sistema us ON us.id_usuario = u.id_usuario AND us.ativo = 1
+JOIN sistema s ON s.id_sistema = us.id_sistema AND s.ativo = 1
+JOIN perfil p ON p.id_perfil = us.id_perfil
+WHERE u.ativo = 1;
+
+SELECT 
+    us.id_usuario,
+    u.login,
+    s.nome AS sistema,
+    p.nome AS perfil
+FROM usuario_sistema us
+JOIN usuario u ON u.id_usuario = us.id_usuario
+JOIN sistema s ON s.id_sistema = us.id_sistema
+JOIN perfil p ON p.id_perfil = us.id_perfil;
+
+
+CREATE TABLE contexto_atendimento (
+  id_contexto BIGINT PRIMARY KEY AUTO_INCREMENT,
+  id_sistema BIGINT NOT NULL,
+  nome VARCHAR(100),
+  tipo ENUM('PORTA','EMERGENCIA','LEITO','EXECUCAO'),
+  usa_fila TINYINT(1),
+  usa_chamada TINYINT(1),
+  ativo TINYINT(1),
+  FOREIGN KEY (id_sistema) REFERENCES sistema(id_sistema)
+);
+
+-- 1. Desliga checagem de FK temporariamente
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 2. Ajusta todas as colunas que referenciam local_atendimento.id_local
+ALTER TABLE atendimento
+MODIFY COLUMN id_local_atual BIGINT;
+
+ALTER TABLE auditoria_almoxarifado
+MODIFY COLUMN id_local BIGINT;
+
+ALTER TABLE entrada_estoque
+MODIFY COLUMN id_local BIGINT;
+
+ALTER TABLE estoque_almoxarifado
+MODIFY COLUMN id_local BIGINT;
+
+ALTER TABLE estoque_limpeza
+MODIFY COLUMN id_local BIGINT;
+
+ALTER TABLE estoque_local
+MODIFY COLUMN id_local BIGINT;
+
+ALTER TABLE fila_operacional
+MODIFY COLUMN id_local BIGINT;
+
+-- 3. Criação ou atualização da tabela local_atendimento
+CREATE TABLE IF NOT EXISTS local_atendimento (
+    id_local BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    tipo ENUM(
+        'RECEPCAO',
+        'TRIAGEM',
+        'CONSULTORIO',
+        'EMERGENCIA',
+        'OBSERVACAO',
+        'INTERNACAO',
+        'MEDICACAO',
+        'RX',
+        'LABORATORIO',
+        'ECG',
+        'NOTIFICACAO',
+        'FARMACIA',
+        'COPA',
+        'COLETA',
+        'OUTROS'
+    ) NOT NULL,
+    ativo TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id_unidade BIGINT NOT NULL,
+    CONSTRAINT fk_local_sistema
+        FOREIGN KEY (id_unidade)
+        REFERENCES sistema(id_sistema)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+-- 4. Religa a checagem de FKs
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+SELECT 
+    ROUTINE_NAME, 
+    ROUTINE_TYPE, 
+    CREATED, 
+    LAST_ALTERED
+FROM information_schema.ROUTINES
+WHERE ROUTINE_SCHEMA = 'pronto_atendimento'
+  AND ROUTINE_TYPE = 'PROCEDURE';

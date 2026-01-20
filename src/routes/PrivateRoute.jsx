@@ -5,7 +5,9 @@ import api from "@/services/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SelectLocalModal from "@/components/SelectLocalModal";
-import "./Login.css";
+
+
+
 
 export default function Login() {
   const [login, setLogin] = useState("");

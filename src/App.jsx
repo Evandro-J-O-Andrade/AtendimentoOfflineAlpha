@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import RequireLocal from "./routes/RequireContexto";
+import SelecionarContexto from "./pages/contexto/SelecionarContexto";
+
 
 // PÁGINAS PÚBLICAS
 import Login from "./pages/login/Login";
@@ -39,6 +41,15 @@ export default function App() {
           {/* PÚBLICAS */}
           <Route path="/login" element={<Login />} />
           <Route path="/totem" element={<Totem />} />
+
+          <Route
+  path="/contexto"
+  element={
+    <PrivateRoute>
+      <SelecionarContexto />
+    </PrivateRoute>
+  }
+/>
 
           {/* OPERAÇÃO */}
           <Route

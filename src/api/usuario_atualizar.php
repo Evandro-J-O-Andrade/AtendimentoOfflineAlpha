@@ -6,12 +6,8 @@ header('Content-Type: application/json');
 $pdo = getPDO();
 $usuario = validarToken($pdo);
 
-// Permitir apenas ADMIN ou SUPORTE
-if (!usuarioTemPerfil('ADMIN') && !usuarioTemPerfil('SUPORTE')) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Acesso negado']);
-    exit;
-}
+// Permitir apenas ADMIN (alias) ou SUPORTE
+exigirAlgumPerfil(['ADMIN', 'SUPORTE']);
 
 $data = json_decode(file_get_contents('php://input'), true);
 if (empty($data['id_usuario'])) {
@@ -58,7 +54,12 @@ try {
 
     // Atualiza nome na tabela pessoa
     if (!empty($nome)) {
-        $stmt = $pdo->prepare('UPDATE pessoa p JOIN usuario u ON u.id_pessoa = p.id_pessoa SET p.nome_completo = ? WHERE u.id_usuario = ?');
+        $stmt = $pdo->prepare('
+            UPDATE pessoa p
+            JOIN usuario u ON u.id_pessoa = p.id_pessoa
+               SET p.nome_completo = ?
+             WHERE u.id_usuario = ?
+        ');
         $stmt->execute([$nome, $id_usuario]);
     }
 
