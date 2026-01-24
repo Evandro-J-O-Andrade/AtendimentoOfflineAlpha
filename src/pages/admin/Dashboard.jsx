@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import Sidebar from "../Sidebar";
-import Card from "../../components/Card";
-import api from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
+import Header from "@/components/Header";
+import Sidebar from "@/pages/Sidebar";
+import Card from "@/components/Card";
+import api from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -58,7 +58,7 @@ export default function Dashboard() {
 
       <div className="dashboard-content">
         {/* Sidebar lateral */}
-        <Sidebar usuario={user} />
+        <Sidebar />
 
         {/* Área principal */}
         <main className="main-content">

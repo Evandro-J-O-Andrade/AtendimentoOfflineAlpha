@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import Sidebar from "../Sidebar";
-import api from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import SelectLocalModal from "../../components/SelectLocalModal";
+import Header from "@/components/Header";
+import Sidebar from "@/pages/Sidebar";
+import api from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Medico() {
   const { user } = useAuth();
   const [fila, setFila] = useState([]);
-  const [openLocalModal, setOpenLocalModal] = useState(false);
 
   useEffect(() => {
     api.get("/atendimento_medico.php")
@@ -16,17 +14,11 @@ export default function Medico() {
       .catch(err => console.error(err));
   }, []);
 
-  useEffect(() => {
-    if (user && user.perfis.includes("MEDICO") && !user.localSelecionado) {
-      setOpenLocalModal(true);
-    }
-  }, [user]);
-
   return (
     <div className="medico-page">
       <Header />
       <div className="content-wrapper">
-        <Sidebar usuario={user} />
+        <Sidebar />
         <main className="main-content">
           <h2>Médico - Fila de Atendimentos</h2>
 
@@ -55,16 +47,6 @@ export default function Medico() {
         </main>
       </div>
 
-      {user && openLocalModal && (
-        <SelectLocalModal
-          open={openLocalModal}
-          onClose={() => setOpenLocalModal(false)}
-          onSelect={(local) => {
-            setOpenLocalModal(false);
-            api.post('/usuario_salvar_local.php', { id_local: local.id_local });
-          }}
-        />
-      )}
     </div>
   );
 }

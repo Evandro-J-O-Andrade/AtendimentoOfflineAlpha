@@ -2,15 +2,20 @@
 // api/config.php
 // RESPONSABILIDADE ÚNICA: conexão com o banco
 
+// JWT (use variável de ambiente em produção)
+if (!defined('JWT_SECRET')) {
+    define('JWT_SECRET', getenv('JWT_SECRET') ?: 'dev-secret-please-change');
+}
+
 function getPDO(): PDO {
     static $pdo = null;
 
     if ($pdo === null) {
-        $host = '127.0.0.1';
-        $db   = 'pronto_atendimento';
-        $user = 'root';
-        $pass = 'root'; // XAMPP padrão (ajuste se necessário)
-        $port = 3306;
+        $host = getenv('DB_HOST') ?: '127.0.0.1';
+        $db   = getenv('DB_NAME') ?: 'pronto_atendimento';
+        $user = getenv('DB_USER') ?: 'root';
+        $pass = getenv('DB_PASS') ?: 'root'; // XAMPP padrão (ajuste se necessário)
+        $port = intval(getenv('DB_PORT') ?: 3306);
 
         try {
             $pdo = new PDO(
@@ -34,3 +39,7 @@ function getPDO(): PDO {
 
     return $pdo;
 }
+
+// Compatibilidade: scripts antigos esperam $pdo global.
+// (Scripts novos podem usar getPDO() diretamente.)
+$pdo = getPDO();

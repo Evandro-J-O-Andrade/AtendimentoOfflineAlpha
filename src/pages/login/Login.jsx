@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import api from "@/services/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SelectLocalModal from "@/components/SelectLocalModal";
+import "./Login.css";
 
 export default function Login() {
   const [login, setLogin] = useState("");
@@ -12,12 +12,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [openLocalModal, setOpenLocalModal] = useState(false);
-  const [perfilSelecionado, setPerfilSelecionado] = useState(null);
-
-  const auth = useAuth();
-  const { signIn } = auth;
-  const setLocal = auth.setLocal || auth.setAuthLocal; // compat
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -26,7 +21,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Endpoint correto dentro de /src/api/auth/
+      // Endpoint de login (wrapper em /api/auth/auth.php)
       const res = await api.post("/auth/auth.php", { login, senha });
       const { token, usuario } = res.data;
 
@@ -36,20 +31,12 @@ export default function Login() {
 
       const perfis = (usuario.perfis || []).map((p) => String(p).toUpperCase());
 
-      if (perfis.some((p) => ["RECEPCAO", "ADM_RECEPCAO"].includes(p))) {
-        setPerfilSelecionado("RECEPCAO");
-        setOpenLocalModal(true);
-      } else if (perfis.some((p) => p.includes("MEDICO"))) {
-        setPerfilSelecionado("MEDICO");
-        setOpenLocalModal(true);
-      } else if (perfis.some((p) => ["ADMIN_MASTER", "SUPORTE_MASTER", "SUPORTE", "MASTER"].includes(p))) {
+      // Admin puro pode ir direto.
+      if (perfis.some((p) => ["ADMIN_MASTER", "SUPORTE_MASTER", "SUPORTE", "MASTER"].includes(p)) && perfis.length === 1) {
         navigate("/dashboard");
-      } else if (perfis.includes("ENFERMAGEM")) {
-        navigate("/triagem");
-      } else if (perfis.includes("AUDITORIA")) {
-        navigate("/auditoria");
       } else {
-        setError("Usuário sem perfil autorizado.");
+        // Fluxo padrão: seleciona perfil + local
+        navigate("/contexto");
       }
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Login ou senha inválidos.";
@@ -57,15 +44,6 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSelectLocal = (local) => {
-    if (setLocal) setLocal(local);
-    setOpenLocalModal(false);
-
-    if (perfilSelecionado === "MEDICO") navigate("/medico/fila");
-    else if (perfilSelecionado === "RECEPCAO") navigate("/recepcao");
-    else navigate("/dashboard");
   };
 
   return (
@@ -95,13 +73,6 @@ export default function Login() {
       </main>
 
       <Footer />
-
-      <SelectLocalModal
-        open={openLocalModal}
-        perfil={perfilSelecionado}
-        onClose={() => setOpenLocalModal(false)}
-        onSelect={handleSelectLocal}
-      />
     </div>
   );
 }

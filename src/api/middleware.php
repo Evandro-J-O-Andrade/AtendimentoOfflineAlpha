@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/jwt.php';
 
 /**
  * Extrai o Bearer token do header Authorization.
@@ -27,47 +28,10 @@ function validarToken(PDO $pdo): array {
         exit;
     }
 
-    $secret = JWT_SECRET; // definido no config.php
-
-    $parts = explode('.', $token);
-    if (count($parts) !== 3) {
+    $payload = jwt_decode($token);
+    if ($payload === false) {
         http_response_code(401);
-        echo json_encode(['error' => 'Token inválido']);
-        exit;
-    }
-
-    [$h64, $p64, $s64] = $parts;
-
-    $sig = rtrim(strtr($s64, '-_', '+/'), '=');
-    $payloadJson = base64_decode(strtr($p64, '-_', '+/'));
-    $headerJson  = base64_decode(strtr($h64, '-_', '+/'));
-
-    if (!$payloadJson || !$headerJson) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Token inválido']);
-        exit;
-    }
-
-    $calc = hash_hmac('sha256', "$h64.$p64", $secret, true);
-    $calc64 = rtrim(strtr(base64_encode($calc), '+/', '-_'), '=');
-
-    if (!hash_equals($calc64, $s64)) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Assinatura inválida']);
-        exit;
-    }
-
-    $payload = json_decode($payloadJson, true);
-    if (!is_array($payload)) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Payload inválido']);
-        exit;
-    }
-
-    // exp
-    if (isset($payload['exp']) && time() > (int)$payload['exp']) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Token expirado']);
+        echo json_encode(['error' => 'Token inválido ou expirado']);
         exit;
     }
 
@@ -89,9 +53,23 @@ function validarToken(PDO $pdo): array {
         exit;
     }
 
-    // Perfis do payload (normaliza array)
+    // Perfis: preferir payload; se vier vazio, buscar na fonte da verdade (usuario_sistema)
     $perfis = $payload['perfis'] ?? [];
-    if (!is_array($perfis)) $perfis = [];
+    if (!is_array($perfis) || count($perfis) === 0) {
+        try {
+            $st = $pdo->prepare(
+                "SELECT DISTINCT p.nome\n" .
+                "  FROM usuario_sistema us\n" .
+                "  JOIN perfil p ON p.id_perfil = us.id_perfil\n" .
+                " WHERE us.id_usuario = ? AND COALESCE(us.ativo,1)=1\n" .
+                " ORDER BY p.nome"
+            );
+            $st->execute([$id_usuario]);
+            $perfis = $st->fetchAll(PDO::FETCH_COLUMN) ?: [];
+        } catch (Exception $e) {
+            $perfis = [];
+        }
+    }
 
     // Normalização: uppercase/trim e remove vazios
     $perfisNorm = [];

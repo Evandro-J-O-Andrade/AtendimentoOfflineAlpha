@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_BASE = "http://prontoatendimento.local/src/api";
+// Em PRODUÇÃO: use /api (Apache Alias /api -> src/api)
+// Em DEV (vite): use /api + proxy do vite.config.js
+const API_BASE = import.meta.env.VITE_API_BASE || "/api";
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -40,6 +42,7 @@ api.interceptors.response.use(
     // Anti-loop: não tenta refresh em endpoints de auth
     if (
       url.includes("/auth/auth.php") ||
+      url.includes("/auth.php") ||
       url.includes("/auth/refresh.php") ||
       url.includes("/auth/me.php")
     ) {
@@ -61,11 +64,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const resp = await axios.post(
-          `${API_BASE}/auth/refresh.php`,
-          {},
-          { withCredentials: true }
-        );
+        const resp = await axios.post(`${API_BASE}/auth/refresh.php`, {}, { withCredentials: true });
 
         const { token } = resp.data || {};
         if (token) localStorage.setItem("token", token);
