@@ -1,5 +1,6 @@
 <?php
 require "config.php";
+$pdo = getPDO();
 
 $q = $_GET['q'] ?? '';
 

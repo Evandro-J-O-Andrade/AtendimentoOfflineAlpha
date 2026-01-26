@@ -1,6 +1,7 @@
 <?php
 // utils.php - API para listagem de dados auxiliares (dropdowns, cadastros mestres)
 require "config.php";
+$pdo = getPDO();
 require "middleware.php"; 
 
 

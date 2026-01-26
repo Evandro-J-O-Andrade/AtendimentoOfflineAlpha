@@ -8,7 +8,7 @@ const filaInicial = [
   { senha: 2, nome: "Maria Souza", prioridade: "Amarela", hora: "08:05", status: "Aguardando" },
 ];
 
-export default function Recepcao() {
+export default function Recepcao({ usuario }) {
   const [fila, setFila] = useState(filaInicial);
   const [novaSenha, setNovaSenha] = useState(filaInicial.length + 1);
   const [paciente, setPaciente] = useState({
@@ -60,7 +60,7 @@ export default function Recepcao() {
   return (
     <div className="recepcao-wrapper">
       {/* Sidebar lateral */}
-      <Sidebar />
+      <Sidebar usuario={usuario} />
 
       {/* Conteúdo principal */}
       <div className="recepcao-content">

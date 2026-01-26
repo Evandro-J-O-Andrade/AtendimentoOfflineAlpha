@@ -1,25 +1,9 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 const ContextoAtendimentoContext = createContext(null);
 
 export function ContextoAtendimentoProvider({ children }) {
-  const [contexto, setContexto] = useState(() => {
-    try {
-      const raw = localStorage.getItem("contexto_atendimento");
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      if (contexto) localStorage.setItem("contexto_atendimento", JSON.stringify(contexto));
-      else localStorage.removeItem("contexto_atendimento");
-    } catch {
-      // noop
-    }
-  }, [contexto]);
+  const [contexto, setContexto] = useState(null);
 
   function definirContexto(dados) {
     setContexto({

@@ -1,8 +1,5 @@
 <?php
 function jwt_secret(): string {
-    if (defined('JWT_SECRET') && JWT_SECRET) {
-        return JWT_SECRET;
-    }
     $s = getenv('JWT_SECRET');
     return $s ?: 'dev-secret-please-change-2025';
 }

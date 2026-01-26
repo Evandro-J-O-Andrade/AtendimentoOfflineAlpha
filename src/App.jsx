@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { ContextoAtendimentoProvider } from "./context/ContextoAtendimento";
 import PrivateRoute from "./routes/PrivateRoute";
 import RequireLocal from "./routes/RequireContexto";
 import SelecionarContexto from "./pages/contexto/SelecionarContexto";
@@ -13,8 +12,6 @@ import Totem from "./pages/painel/Totem";
 
 // OPERAÇÃO / ATENDIMENTO
 import Recepcao from "./pages/operacao/Recepcao";
-import Triagem from "./pages/operacao/Triagem";
-import Enfermagem from "./pages/operacao/Enfermagem";
 import Medico from "./pages/atendimento/Medico";
 import Atendimento from "./pages/atendimento/Atendimento";
 
@@ -38,9 +35,8 @@ import NotFound from "./pages/shared/NotFound";
 export default function App() {
   return (
     <AuthProvider>
-      <ContextoAtendimentoProvider>
-        <BrowserRouter>
-          <Routes>
+      <BrowserRouter>
+        <Routes>
 
           {/* PÚBLICAS */}
           <Route path="/login" element={<Login />} />
@@ -73,28 +69,6 @@ export default function App() {
               <PrivateRoute perfil="MEDICO">
                 <RequireLocal>
                   <Medico />
-                </RequireLocal>
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/triagem"
-            element={
-              <PrivateRoute perfil="ENFERMAGEM">
-                <RequireLocal>
-                  <Triagem />
-                </RequireLocal>
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/enfermagem"
-            element={
-              <PrivateRoute perfil="ENFERMAGEM">
-                <RequireLocal>
-                  <Enfermagem />
                 </RequireLocal>
               </PrivateRoute>
             }
@@ -212,9 +186,8 @@ export default function App() {
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
 
-          </Routes>
-        </BrowserRouter>
-      </ContextoAtendimentoProvider>
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

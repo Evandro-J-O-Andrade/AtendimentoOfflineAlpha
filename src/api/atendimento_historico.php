@@ -1,5 +1,6 @@
 <?php
 require "config.php";
+$pdo = getPDO();
 
 $id_atendimento = $_GET['id'] ?? null;
 

@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useContextoAtendimento } from "@/context/ContextoAtendimento";
-import api from "@/services/api";
-import "./SelecionarContexto.css";
 
 
 export default function SelecionarContexto() {
@@ -12,67 +10,53 @@ export default function SelecionarContexto() {
   const { contexto, definirContexto } = useContextoAtendimento();
 
   const [perfilAtivo, setPerfilAtivo] = useState("");
-  const [localId, setLocalId] = useState("");
+  const [local, setLocal] = useState("");
   const [especialidade, setEspecialidade] = useState("");
-  const [locais, setLocais] = useState([]);
-  const [erroLocais, setErroLocais] = useState("");
 
-  // Se já existe contexto definido, redireciona (ex: refresh)
+  // 🔒 Se já existe contexto definido, redireciona
   useEffect(() => {
-    if (contexto?.rotaInicial) navigate(contexto.rotaInicial, { replace: true });
+    if (contexto?.rotaInicial) {
+      navigate(contexto.rotaInicial);
+    }
   }, [contexto, navigate]);
-
-  // Carrega locais do banco
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        setErroLocais("");
-        const res = await api.get("/local_atendimento_listar.php");
-        if (!mounted) return;
-        setLocais(Array.isArray(res.data) ? res.data : []);
-      } catch (e) {
-        if (!mounted) return;
-        setErroLocais("Não foi possível carregar os locais do banco.");
-        setLocais([]);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   if (!user) return null;
 
   function iniciar() {
-    if (!perfilAtivo || !localId) return;
-
-    const userId = user.id_usuario ?? user.id ?? null;
-    const userNome = user.nome ?? user.login ?? "Usuário";
-
-    const localObj = locais.find((l) => String(l.id_local) === String(localId)) || null;
-    const rotaInicial = rotaPorPerfil(perfilAtivo);
+    if (!perfilAtivo || !local) return;
 
     definirContexto({
-      usuarioId: userId,
-      nomeUsuario: userNome,
+      usuarioId: user.id,
+      nomeUsuario: user.nome,
       perfil: perfilAtivo,
       especialidade: especialidade || null,
-      local: localObj,
+      local,
       iniciadoEm: new Date().toISOString(),
-      rotaInicial,
+      rotaInicial: rotaPorPerfil(perfilAtivo)
     });
 
-    navigate(rotaInicial);
+    // ❌ NÃO navega aqui
+    // quem navega é o useEffect acima
   }
 
   function rotaPorPerfil(perfil) {
-    const p = String(perfil || "").toUpperCase();
-    if (p === "RECEPCAO" || p === "ADM_RECEPCAO") return "/recepcao";
-    if (p.includes("MEDICO")) return "/medico/fila";
-    if (p === "TRIAGEM") return "/triagem";
-    if (p === "ENFERMAGEM" || p === "TECNICO_ENFERMAGEM") return "/enfermagem";
-    return "/";
+    switch (perfil) {
+      case "RECEPCAO":
+        return "/recepcao";
+
+      case "MEDICO":
+        return "/medico/fila";
+
+      case "ENFERMAGEM":
+      case "TECNICO_ENFERMAGEM":
+        return "/enfermagem";
+
+      case "TRIAGEM":
+        return "/triagem";
+
+      default:
+        return "/";
+    }
   }
 
   return (
@@ -87,8 +71,8 @@ export default function SelecionarContexto() {
         <h2>Selecionar Contexto de Atendimento</h2>
 
         <div className="usuario-box">
-          <strong>{user.nome ?? user.login}</strong>
-          <span>{user.login}</span>
+          <strong>{user.nome}</strong>
+          <span>{user.email}</span>
         </div>
 
         {/* PERFIL */}
@@ -98,15 +82,13 @@ export default function SelecionarContexto() {
           onChange={e => setPerfilAtivo(e.target.value)}
         >
           <option value="">Selecione</option>
-          {user.perfis?.map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
+          {user.perfis?.map(p => (
+            <option key={p} value={p}>{p}</option>
           ))}
         </select>
 
         {/* ESPECIALIDADE (somente médico) */}
-        {String(perfilAtivo || "").toUpperCase().includes("MEDICO") && (
+        {perfilAtivo === "MEDICO" && (
           <>
             <label>Especialidade</label>
             <select
@@ -124,24 +106,22 @@ export default function SelecionarContexto() {
         {/* LOCAL */}
         <label>Local de Atuação</label>
         <select
-          value={localId}
-          onChange={(e) => setLocalId(e.target.value)}
+          value={local}
+          onChange={e => setLocal(e.target.value)}
         >
           <option value="">Selecione</option>
-          {locais
-            .filter((l) => Number(l.ativo ?? 1) === 1)
-            .map((l) => (
-              <option key={l.id_local} value={l.id_local}>
-                {l.nome} {l.tipo ? `(${l.tipo})` : ""}
-              </option>
-            ))}
+          <option value="SALA_01">Sala 01</option>
+          <option value="SALA_02">Sala 02</option>
+          <option value="TRIAGEM">Triagem</option>
+          <option value="MEDICACAO">Medicação</option>
+          <option value="OBSERVACAO">Observação</option>
+          <option value="GUICHE_01">Guichê 01</option>
+          <option value="GUICHE_02">Guichê 02</option>
         </select>
-
-        {erroLocais && <p className="error">{erroLocais}</p>}
 
         <button
           className="btn-iniciar"
-          disabled={!perfilAtivo || !localId}
+          disabled={!perfilAtivo || !local}
           onClick={iniciar}
         >
           Iniciar Atendimento

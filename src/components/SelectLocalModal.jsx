@@ -9,12 +9,11 @@ export default function SelectLocalModal({ open, onClose, onSelect, usuario, per
 
   useEffect(() => {
     if (!open) return;
-    if (!usuario) return; // evita crash quando ainda não carregou
 
     setLoading(true);
 
     api
-      .get("/local_usuario_listar.php")
+      .get("/local_atendimento_listar.php")
       .then((res) => {
         let data = Array.isArray(res.data) ? res.data : [];
 

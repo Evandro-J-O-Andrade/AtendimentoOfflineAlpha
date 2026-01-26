@@ -1,6 +1,7 @@
 <?php
 // login_seguro.php atualizado
 require "config.php";
+$pdo = getPDO();
 
 header("Content-Type: application/json; charset=UTF-8");
 

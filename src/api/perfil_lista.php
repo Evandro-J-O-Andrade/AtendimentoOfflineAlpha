@@ -1,5 +1,6 @@
 <?php
 require "config.php";
+$pdo = getPDO();
 
 try {
     // Lista todos os perfis cadastrados (Médico, Recepcionista, etc.)

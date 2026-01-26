@@ -1,5 +1,6 @@
 <?php
 require "config.php";
+$pdo = getPDO();
 require "middleware.php"; 
 
 $usuario = validarToken($pdo);
