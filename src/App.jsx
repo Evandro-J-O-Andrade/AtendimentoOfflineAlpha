@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { AtendimentoProvider } from "./context/AtendimentoContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import RequireLocal from "./routes/RequireContexto";
 import SelecionarContexto from "./pages/contexto/SelecionarContexto";
@@ -35,8 +36,9 @@ import NotFound from "./pages/shared/NotFound";
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <AtendimentoProvider>
+        <BrowserRouter>
+          <Routes>
 
           {/* PÚBLICAS */}
           <Route path="/login" element={<Login />} />
@@ -187,7 +189,8 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
 
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </AtendimentoProvider>
     </AuthProvider>
   );
 }

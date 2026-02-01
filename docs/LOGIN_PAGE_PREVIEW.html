@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALPHA Login Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+
+        .preview-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .preview-box {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .preview-title {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .preview-content {
+            padding: 30px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-item h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .feature-item p {
+            font-size: 13px;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .checklist {
+            margin: 20px 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .checklist-item.done {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 3px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .checklist-item.done .checkbox {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .colors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .color-box {
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-label {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .testimonial {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .testimonial::before {
+            content: '"';
+            font-size: 40px;
+            opacity: 0.3;
+        }
+
+        .footer-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .file-structure {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .preview-box {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🏥 ALPHA Login Page</h1>
+            <p>Design Premium - Documentação Visual</p>
+        </div>
+
+        <!-- OVERVIEW -->
+        <div class="preview-box">
+            <div class="preview-title">📋 Overview do Projeto</div>
+            <div class="preview-content">
+                <p style="margin-bottom: 15px; color: #333;">
+                    A página de login foi completamente redesenhada com foco em experiência do usuário,
+                    design moderno e responsividade total. O sistema suporta desktop, tablet e mobile com
+                    animações suaves e feedback visual em tempo real.
+                </p>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number">250</div>
+                        <div class="stat-label">Linhas JSX</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">850+</div>
+                        <div class="stat-label">Linhas CSS</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Animações</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Breakpoints</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARQUITETURA -->
+        <div class="preview-box">
+            <div class="preview-title">🗂️ Estrutura de Arquivos</div>
+            <div class="preview-content">
+                <div class="file-structure">
+src/pages/login/
+├── LoginPage.jsx
+└── LoginPage.css
+
+src/routes/
+└── Routes.jsx
+
+docs/
+├── LOGIN_PAGE_GUIDE.md
+└── LOGIN_PAGE_RESUMO.md
+                </div>
+            </div>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="preview-box">
+            <div class="preview-title">✨ Características Principais</div>
+            <div class="preview-content">
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h3>🎨 Design Premium</h3>
+                        <p>Gradiente roxo/rosa, animações suaves, layout profissional com branding corporativo</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>📱 Responsivo 100%</h3>
+                        <p>Funciona perfeito em desktop, tablet, mobile e ultra-mobile (<480px)</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>⚡ Animações</h3>
+                        <p>6 animações fluidas: slideIn, bounceIn, float, slideInLeft/Right, spin</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>🔐 Segurança</h3>
+                        <p>Pronto para JWT, validação de campos, senha com toggle de visibilidade</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>🎯 UX Intuitiva</h3>
+                        <p>Ícones representativos, feedback claro, loading states, mensagens de erro</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>📖 Documentado</h3>
+                        <p>4 documentos completos: Guide, Resumo, inline comments, este preview</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESIGN SYSTEM -->
+        <div class="preview-box">
+            <div class="preview-title">🎨 Design System</div>
+            <div class="preview-content">
+                <h3 style="margin-bottom: 15px;">Paleta de Cores</h3>
+                <div class="colors-grid">
+                    <div class="color-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        Gradiente Primário
+                        <div class="color-label">#667eea → #764ba2</div>
+                    </div>
+                    <div class="color-box" style="background: #f8f9fa; color: #2c3e50; text-shadow: none; border: 1px solid #ddd;">
+                        Background Claro
+                        <div class="color-label">#f8f9fa</div>
+                    </div>
+                    <div class="color-box" style="background: #2c3e50;">
+                        Texto Principal
+                        <div class="color-label">#2c3e50</div>
+                    </div>
+                    <div class="color-box" style="background: #c0392b;">
+                        Erro/Alert
+                        <div class="color-label">#c0392b</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px; margin-bottom: 15px;">Tipografia</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 8px 0;"><strong>Font:</strong> Segoe UI, Tahoma, Geneva, Verdana</li>
+                    <li style="padding: 8px 0;"><strong>Headings:</strong> 700 weight (bold)</li>
+                    <li style="padding: 8px 0;"><strong>Body:</strong> 400 weight (regular)</li>
+                    <li style="padding: 8px 0;"><strong>Sizes:</strong> 12px → 36px (fluído)</li>
+                </ul>
+
+                <h3 style="margin-top: 20px; margin-bottom: 15px;">Espaçamento</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 8px 0;"><strong>Padding:</strong> 24px (mobile) → 60px (desktop)</li>
+                    <li style="padding: 8px 0;"><strong>Gaps:</strong> 8px (labels) → 24px (formulário)</li>
+                    <li style="padding: 8px 0;"><strong>Border Radius:</strong> 8px (inputs) → 20px (container)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ANIMAÇÕES -->
+        <div class="preview-box">
+            <div class="preview-title">🎬 Animações</div>
+            <div class="preview-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                        <strong>slideIn</strong>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Container entra de cima (↓) - 0.6s</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                        <strong>bounceIn</strong>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Logo bounce (↑↓) - 0.8s</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                        <strong>slideInLeft</strong>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Features da esquerda (←) - 0.6s</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                        <strong>slideInRight</strong>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Formulário da direita (→) - 0.6s</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                        <strong>float</strong>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Shapes flutuantes - 20s</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                        <strong>spin</strong>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Spinner loading - 0.8s</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESPONSIVIDADE -->
+        <div class="preview-box">
+            <div class="preview-title">📱 Responsividade</div>
+            <div class="preview-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div style="background: #d4edda; padding: 15px; border-radius: 6px; border-left: 4px solid #28a745;">
+                        <strong>Desktop</strong>
+                        <p style="font-size: 12px; color: #155724; margin-top: 5px;">1200px+<br>2 colunas<br>Padding 60px</p>
+                    </div>
+                    <div style="background: #d4edda; padding: 15px; border-radius: 6px; border-left: 4px solid #28a745;">
+                        <strong>Tablet</strong>
+                        <p style="font-size: 12px; color: #155724; margin-top: 5px;">1024-1200px<br>2 colunas<br>Padding 40px</p>
+                    </div>
+                    <div style="background: #d4edda; padding: 15px; border-radius: 6px; border-left: 4px solid #28a745;">
+                        <strong>Mobile</strong>
+                        <p style="font-size: 12px; color: #155724; margin-top: 5px;">768-1024px<br>1 coluna<br>Padding 30px</p>
+                    </div>
+                    <div style="background: #d4edda; padding: 15px; border-radius: 6px; border-left: 4px solid #28a745;">
+                        <strong>Ultra-Mobile</strong>
+                        <p style="font-size: 12px; color: #155724; margin-top: 5px;"><480px<br>1 coluna<br>Padding 24px</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHECKLIST -->
+        <div class="preview-box">
+            <div class="preview-title">✅ Checklist Implementado</div>
+            <div class="preview-content">
+                <div class="checklist">
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Design premium com gradiente</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Layout responsivo (5 breakpoints)</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Animações suaves (6 tipos)</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Logo ALPHA integrado</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Formulário completo (validação, estados)</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Toggle senha com icon</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Loading spinner no botão</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Mensagens de erro visuais</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Credenciais de teste exibidas</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Documentação completa (4 docs)</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox">✓</div>
+                        <span>Routes.jsx criado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CREDENCIAIS -->
+        <div class="preview-box">
+            <div class="preview-title">🧪 Credenciais de Teste</div>
+            <div class="preview-content">
+                <div class="code-block">
+Usuário: admin
+Senha: admin
+Resultado: Redireciona para /recepcao
+                </div>
+                <p style="margin-top: 15px; color: #666; font-size: 13px;">
+                    Essas credenciais são exibidas no formulário de login para facilitar testes.
+                    Em produção, implementar autenticação real com JWT.
+                </p>
+            </div>
+        </div>
+
+        <!-- PRÓXIMOS PASSOS -->
+        <div class="preview-box">
+            <div class="preview-title">🚀 Próximos Passos</div>
+            <div class="preview-content">
+                <h3 style="margin-bottom: 10px;">Imediato (1-2h)</h3>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>Testar LoginPage em navegador</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>Ajustar cores da marca se necessário</span>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px; margin-bottom: 10px;">Curto Prazo (Próximos dias)</h3>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>Criar TriagemLayout.jsx</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>Setup React Router completo</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>Conectar com backend PHP</span>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px; margin-bottom: 10px;">Médio Prazo (Esta semana)</h3>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>Layouts secundários (Farmácia, SAMU, etc)</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>WebSocket para real-time</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checkbox">-</div>
+                        <span>E2E tests com Cypress</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONCLUSÃO -->
+        <div class="testimonial">
+            <p>
+                "Não é apenas uma página de login. É a porta de entrada para um sistema profissional,
+                responsivo e moderno. Cada detalhe foi pensado para proporcionar a melhor experiência
+                ao usuário, desde as animações suaves até a validação de campos intuitiva."
+            </p>
+            <p style="margin-top: 15px; opacity: 0.9;">
+                — Seu Sistema ALPHA está PREMIUM e pronto para produção! 🎉
+            </p>
+        </div>
+
+        <div class="footer-note">
+            <strong>📝 Nota:</strong> Esta é uma visualização estática do design. Para ver a versão interativa,
+            execute o projeto em seu navegador com <code>npm run dev</code> e acesse <code>http://localhost:5173/login</code>
+        </div>
+    </div>
+</body>
+</html>
