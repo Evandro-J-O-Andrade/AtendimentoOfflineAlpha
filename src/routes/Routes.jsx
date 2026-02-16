@@ -19,6 +19,9 @@ import PainelCentralLayout from '../pages/painel/PainelCentralLayout';
 // CONTEXTO
 import { useAuth } from '../context/AuthContext';
 import PrivateRoute from './PrivateRoute';
+import AppOperacionalRouter from '@/apps/app_operacional/routes';
+import PainelRouter from '@/apps/app_painel/routes';
+import TotemRouter from '@/apps/app_totem/routes';
 
 /**
  * AppRoutes - Componente que define toda a estrutura de rotas
@@ -37,6 +40,11 @@ export function AppRoutes() {
 
   return (
     <Routes>
+      {/* NOVAS ENTRADAS DE APLICATIVOS */}
+      <Route path="/app/*" element={<AppOperacionalRouter />} />
+      <Route path="/painel/*" element={<PainelRouter />} />
+      <Route path="/totem/*" element={<TotemRouter />} />
+
       {/* ROTA PÚBLICA */}
       <Route 
         path="/login" 

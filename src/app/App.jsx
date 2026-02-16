@@ -17,11 +17,20 @@ import TotemPage from '../modules/painel/totem/TotemPage.jsx'
 import SatisfacaoPage from '../modules/painel/satisfacao/SatisfacaoPage.jsx'
 import NotFoundPage from '../shared/ui/NotFoundPage.jsx'
 
+import AppOperacionalRouter from '@/apps/app_operacional/routes'
+import PainelRouter from '@/apps/app_painel/routes'
+import TotemRouter from '@/apps/app_totem/routes'
+
 export default function App() {
   return (
     <AuthProvider>
       <ContextoProvider>
         <Routes>
+          {/* Entradas dos Apps (monorepo interno) */}
+          <Route path="/app/*" element={<AppOperacionalRouter />} />
+          <Route path="/painel/*" element={<PainelRouter />} />
+          <Route path="/totem/*" element={<TotemRouter />} />
+
           <Route path="/" element={<Navigate to="/login" replace />} />
 
           <Route path="/login" element={<LoginPage />} />
