@@ -4,7 +4,7 @@
  */
 
 import { useContext, useCallback } from 'react';
-import AtendimentoContextoV2 from '../context/AtendimentoContextoV2';
+import AtendimentoContextoV2 from '@/context/AtendimentoContextoV2.jsx';
 
 export function useLocaisAtendimento() {
   const contexto = useContext(AtendimentoContextoV2);

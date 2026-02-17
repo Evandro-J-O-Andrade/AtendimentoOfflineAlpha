@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useFFAs } from '../hooks/useFFAs';
-import { useAlertasFFAs } from '../hooks/useAlertasFFAs';
-import { useLocaisAtendimento } from '../hooks/useLocaisAtendimento';
+import { useFFAs } from '@/shared/hooks/useFFAs.js';
+import { useAlertasFFAs } from '@/shared/hooks/useAlertasFFAs.js';
+import { useLocaisAtendimento } from '@/shared/hooks/useLocaisAtendimento.js';
 import './FilaLocal.css';
 
 /**

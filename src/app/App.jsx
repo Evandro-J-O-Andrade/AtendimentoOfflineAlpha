@@ -17,9 +17,9 @@ import TotemPage from '../modules/painel/totem/TotemPage.jsx'
 import SatisfacaoPage from '../modules/painel/satisfacao/SatisfacaoPage.jsx'
 import NotFoundPage from '../shared/ui/NotFoundPage.jsx'
 
-import AppOperacionalRouter from '@/apps/app_operacional/routes'
-import PainelRouter from '@/apps/app_painel/routes'
-import TotemRouter from '@/apps/app_totem/routes'
+import AppOperacionalRouter from '../apps/app_operacional/routes.jsx'
+import PainelRouter from '../apps/app_painel/routes.jsx'
+import TotemRouter from '../apps/app_totem/routes.jsx'
 
 export default function App() {
   return (
@@ -44,34 +44,17 @@ export default function App() {
             }
           />
 
-          <Route
-            path="/operacao/recepcao"
-            element={
-              <RequireAuth>
-                <RequireContexto>
-                  <RecepcaoFilaPage />
-                </RequireContexto>
-              </RequireAuth>
-            }
-          />
+          <Route path="/operacao/recepcao" element={<Navigate to="/app/recepcao" replace />} />
 
-          <Route
-            path="/operacao/recepcao/complemento/:idSenha"
-            element={
-              <RequireAuth>
-                <RequireContexto>
-                  <RecepcaoComplementoPage />
-                </RequireContexto>
-              </RequireAuth>
-            }
-          />
+        <Route path="/operacao/recepcao/complemento/:idSenha" element={<Navigate to="/app/recepcao" replace />} />
 
-          <Route path="/painel/totem" element={<TotemPage />} />
-          <Route path="/painel/satisfacao" element={<SatisfacaoPage />} />
+        <Route path="/operacao/*" element={<Navigate to="/app" replace />} />
+        <Route path="/painel/totem" element={<Navigate to="/totem" replace />} />
+        <Route path="/painel/satisfacao" element={<Navigate to="/painel" replace />} />
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </ContextoProvider>
-    </AuthProvider>
-  )
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </ContextoProvider>
+  </AuthProvider>
+)
 }
