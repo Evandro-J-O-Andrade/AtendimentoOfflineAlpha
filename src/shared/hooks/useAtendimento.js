@@ -1,5 +1,5 @@
 import { useContext, useCallback, useMemo } from 'react';
-import AtendimentoContext from '../context/AtendimentoContext.jsx';
+import AtendimentoContext from '../../context/AtendimentoContext.jsx';
 import { api } from './api.js';
 
 /**

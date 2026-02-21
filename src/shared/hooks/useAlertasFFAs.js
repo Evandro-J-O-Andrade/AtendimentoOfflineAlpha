@@ -4,7 +4,7 @@
  */
 
 import { useContext, useCallback, useMemo } from 'react';
-import AtendimentoContextoV2 from '../context/AtendimentoContextoV2';
+import AtendimentoContextoV2 from '../../context/AtendimentoContextoV2';
 
 export function useAlertasFFAs() {
   const contexto = useContext(AtendimentoContextoV2);

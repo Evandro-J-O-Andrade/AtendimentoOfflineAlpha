@@ -1,5 +1,5 @@
 import { useContext, useCallback, useMemo } from 'react';
-import ImmutableAtendimentoContext from '../context/ImmutableAtendimentoContext.jsx';
+import ImmutableAtendimentoContext from '../../context/ImmutableAtendimentoContext.jsx';
 import { api } from './api.js';
 
 /**

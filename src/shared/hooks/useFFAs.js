@@ -5,7 +5,7 @@
 
 import { useContext, useCallback } from 'react';
 import AtendimentoContextoV2 from '@/context/AtendimentoContextoV2.jsx';
-import atendimentoService from '../services/atendimento.service';
+import atendimentoService from '../../services/atendimento.service';
 
 export function useFFAs() {
   const contexto = useContext(AtendimentoContextoV2);
