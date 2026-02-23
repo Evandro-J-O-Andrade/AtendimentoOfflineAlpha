@@ -1,0 +1,104 @@
+RELATÓRIO — LÓGICA IMUTÁVEL / TRILHA DE AUDITORIA — Dump20260218 (canônico)
+Gerado em: 2026-02-18T23:12:27
+
+1) Contagem de objetos
+- Dump16: 359 tabelas | 13 views | 81 SPs | 1 FNs | 0 TGs
+- Dump17(3): 319 tabelas | 7 views | 55 SPs | 1 FNs | 0 TGs
+- Dump18: 359 tabelas | 13 views | 86 SPs | 1 FNs | 0 TGs
+
+2) Objetos presentes em TODOS os dumps (núcleo imutável observável)
+- Tabelas comuns (interseção): 319
+- SPs comuns (interseção): 50
+- Views comuns (interseção): 7
+
+2.1) Views comuns (painéis/config/sessões)
+  - vw_admin_sessoes_ativas
+  - vw_painel_config_efetiva
+  - vw_painel_config_json
+  - vw_painel_senhas_chamando
+  - vw_painel_senhas_chamando_por_painel
+  - vw_senhas_ativas
+  - vw_usuario_permissoes
+
+2.2) Tabelas núcleo (amostra relevante) presentes em TODOS os dumps
+  - usuario
+  - pessoa
+  - usuario_sistema
+  - sessao_usuario
+  - auditoria_evento
+  - cidade
+  - unidade
+  - sistema
+  - perfil
+  - permissao
+  - perfil_permissao
+  - local_operacional
+  - local_atendimento
+  - setor
+  - sala
+  - senhas
+  - senha_eventos
+  - atendimento
+  - ffa
+  - evento_ffa
+  - fila_operacional
+  - fila_operacional_evento
+  - painel
+  - painel_config
+  - painel_local
+  - painel_grupo_local
+  - procedimento_protocolo
+  - procedimento_protocolo_evento
+  - medicacao_reavaliacao
+  - lab_protocolo_interno
+  - lab_evento
+  - estoque_produtos
+  - estoque_local
+
+2.3) Tabelas relevantes presentes no Dump16 e Dump18, mas AUSENTES no Dump17(3)
+
+3) Dump18 — aderência à regra: SP operacional recebe p_id_sessao_usuario
+- SPs no Dump18: 86
+- SPs com p_id_sessao_usuario no cabeçalho: 74
+- SPs SEM p_id_sessao_usuario no cabeçalho: 12
+  - sp_admin_sessao_revogar
+  - sp_assert_not_null
+  - sp_assert_true
+  - sp_local_operacional_seed_padrao
+  - sp_painel_seed_especialidades
+  - sp_raise
+  - sp_schema_add_column_if_missing
+  - sp_schema_add_index_if_missing
+  - sp_sequencia_proximo_numero
+  - sp_usuario_hash_gerar
+  - sp_usuario_hash_verificar
+  - sp_usuario_tem_permissao
+
+3.1) SPs operacionais SEM p_id_sessao_usuario (precisam ser corrigidas)
+  - sp_painel_seed_especialidades
+
+4) Dump18 — aderência à regra: registrar auditoria_evento (sp_auditoria_evento_registrar)
+- SPs que contêm chamada a sp_auditoria_evento_registrar: 55
+- SPs que NÃO contêm essa chamada: 31
+
+4.1) SPs operacionais SEM auditoria_evento (precisam ser corrigidas)
+  - sp_codigo_prefixo_resolver
+  - sp_ffa_gpat_garantir
+  - sp_fila_chamar_proxima
+  - sp_fila_finalizar
+  - sp_fila_tipo_por_local
+  - sp_finalizar_procedimento_ecg
+  - sp_finalizar_procedimento_laboratorio
+  - sp_medico_encaminhar
+  - sp_painel_filtro_locais_seed
+  - sp_painel_seed_especialidades
+  - sp_recepcao_encaminhar_ffa
+  - sp_recepcao_nao_compareceu
+  - sp_senha_retorno_reinserir
+  - sp_timeout_ffa
+  - sp_timeout_procedimento_rx
+
+5) Observações relevantes
+- Função comum a todos os dumps: fn_sha256i_hash
+- Dump17(3) é capado: perde módulos inteiros (ex.: RH e tabelas de códigos universais).
+- A rastreabilidade 'quem/onde/quando' hoje depende do encadeamento: auditoria_evento -> sessao_usuario -> (usuario, unidade, local_operacional).

@@ -14,7 +14,7 @@
  */
 
 import React, { useReducer, useCallback } from 'react';
-import produce from 'immer';
+import { produce } from 'immer';
 
 const AtendimentoContextoV2 = React.createContext(null);
 
