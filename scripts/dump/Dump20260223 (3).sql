@@ -1,1 +1,0 @@
-SHOW CREATE VIEW pronto_atendimento.vw_usuario_permissoes\G

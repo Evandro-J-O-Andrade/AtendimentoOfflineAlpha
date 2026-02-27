@@ -1,261 +1,68 @@
-/* ========================================================
-   Global Styles - TailwindCSS + Custom
-   ======================================================== */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
 
-/* Base Styles */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#app {
-  width: 100%;
-  height: 100%;
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Utility Classes */
-.truncate-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.truncate-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.text-ellipsis {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-/* Focus Ring */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
-}
-
-/* Animations */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+  a:hover {
+    color: #747bff;
   }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  button {
+    background-color: #f9f9f9;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-in {
-  animation: slideIn 0.3s ease-out;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out;
-}
-
-/* Loading Spinner */
-.spinner {
-  border: 3px solid #f3f4f6;
-  border-top: 3px solid #2563eb;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Badge */
-.badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
-}
-
-.badge-primary {
-  @apply badge bg-blue-100 text-blue-800;
-}
-
-.badge-success {
-  @apply badge bg-green-100 text-green-800;
-}
-
-.badge-warning {
-  @apply badge bg-yellow-100 text-yellow-800;
-}
-
-.badge-danger {
-  @apply badge bg-red-100 text-red-800;
-}
-
-.badge-gray {
-  @apply badge bg-gray-100 text-gray-800;
-}
-
-/* Card Hover Effect */
-.card-hover {
-  @apply transition-shadow duration-300 hover:shadow-lg;
-}
-
-/* Button Base */
-.btn {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
-}
-
-.btn-primary {
-  @apply btn bg-blue-600 text-white hover:bg-blue-700;
-}
-
-.btn-secondary {
-  @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300;
-}
-
-.btn-danger {
-  @apply btn bg-red-600 text-white hover:bg-red-700;
-}
-
-.btn-success {
-  @apply btn bg-green-600 text-white hover:bg-green-700;
-}
-
-.btn-outline {
-  @apply btn border-2 border-gray-300 text-gray-900 hover:border-gray-400;
-}
-
-.btn-sm {
-  @apply px-3 py-1 text-sm;
-}
-
-.btn-lg {
-  @apply px-6 py-3 text-lg;
-}
-
-/* Form Elements */
-.input-base {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors;
-}
-
-.input-base:disabled {
-  @apply bg-gray-100 cursor-not-allowed;
-}
-
-.textarea-base {
-  @apply input-base resize-vertical min-h-24;
-}
-
-.select-base {
-  @apply input-base cursor-pointer;
-}
-
-/* Table */
-.table-container {
-  @apply overflow-x-auto;
-}
-
-.table-base {
-  @apply w-full border-collapse;
-}
-
-.table-base th {
-  @apply bg-gray-50 border-b-2 border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-900;
-}
-
-.table-base td {
-  @apply border-b border-gray-200 px-4 py-3 text-sm text-gray-700;
-}
-
-.table-base tbody tr {
-  @apply hover:bg-gray-50 transition-colors;
-}
-
-/* Modal */
-.modal-overlay {
-  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
-}
-
-.modal-content {
-  @apply bg-white rounded-lg shadow-xl max-w-lg w-full;
-}
-
-.modal-header {
-  @apply px-6 py-4 border-b border-gray-200 flex items-center justify-between;
-}
-
-.modal-body {
-  @apply px-6 py-4;
-}
-
-.modal-footer {
-  @apply px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3;
-}
-
-/* Alert */
-.alert {
-  @apply rounded-lg border p-4 flex gap-3;
-}
-
-.alert-primary {
-  @apply alert bg-blue-50 border-blue-200 text-blue-800;
-}
-
-.alert-success {
-  @apply alert bg-green-50 border-green-200 text-green-800;
-}
-
-.alert-warning {
-  @apply alert bg-yellow-50 border-yellow-200 text-yellow-800;
-}
-
-.alert-danger {
-  @apply alert bg-red-50 border-red-200 text-red-800;
 }
