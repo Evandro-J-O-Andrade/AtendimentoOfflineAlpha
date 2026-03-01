@@ -1,3 +1,3 @@
-const authRoutes = require("./routes/authRoutes");
+const operacionalRoutes = require("./routes/operacionalRoutes");
 
-app.use("/api/auth", authRoutes);
+app.use("/api/operacional", operacionalRoutes);
