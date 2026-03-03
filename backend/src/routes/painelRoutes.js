@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const guardiaoRuntime = require("../middleware/guardiaoRuntime");
+const guardiaoRuntime = require("../runtime/runtimeGuard");
 
 /*
 =====================================

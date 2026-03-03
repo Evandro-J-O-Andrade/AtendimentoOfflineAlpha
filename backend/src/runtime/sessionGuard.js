@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-
-const SECRET = process.env.JWT_SECRET || "runtime_secret_dev";
+const { SECRET } = require("../config/jwt");
 
 class SessionGuard {
 

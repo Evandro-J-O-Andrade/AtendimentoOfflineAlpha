@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { SECRET } = require("../config/jwt");
 
 /*
 =====================================
@@ -42,7 +43,7 @@ module.exports = async (req, res) => {
                 id_sistema: user.id_sistema,
                 perfil: user.id_perfil
             },
-            process.env.JWT_SECRET || "runtime_assistencial_chave",
+            SECRET,
             { expiresIn: "8h" }
         );
 
