@@ -184,16 +184,16 @@ CREATE TABLE `agendamento` (
   `inicio_em` datetime(6) NOT NULL,
   `fim_em` datetime(6) NOT NULL,
   `duracao_minutos` int GENERATED ALWAYS AS (timestampdiff(MINUTE,`inicio_em`,`fim_em`)) STORED,
-  `status` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `origem` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `observacao` text COLLATE utf8mb4_unicode_ci,
+  `status` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `origem` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
   `criado_por` bigint NOT NULL,
   `id_sessao_criacao` bigint DEFAULT NULL,
-  `uuid_sync` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid_sync` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `versao_sync` bigint DEFAULT '0',
-  `hash_estado` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hash_estado` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_agendamento`),
   KEY `idx_ag_prof` (`id_profissional`,`inicio_em`),
   KEY `idx_ag_local` (`id_local_operacional`,`inicio_em`),
@@ -1017,8 +1017,7 @@ CREATE TABLE `atendimento` (
   KEY `idx_atend_pessoa` (`id_pessoa`),
   CONSTRAINT `atendimento_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`),
   CONSTRAINT `atendimento_ibfk_3` FOREIGN KEY (`id_local_atual`) REFERENCES `local_atendimento` (`id_local`),
-  CONSTRAINT `atendimento_ibfk_4` FOREIGN KEY (`id_sala_atual`) REFERENCES `sala` (`id_sala`),
-  CONSTRAINT `atendimento_ibfk_5` FOREIGN KEY (`id_especialidade`) REFERENCES `especialidade` (`id_especialidade`)
+  CONSTRAINT `atendimento_ibfk_4` FOREIGN KEY (`id_sala_atual`) REFERENCES `sala` (`id_sala`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1240,6 +1239,42 @@ CREATE TABLE `atendimento_evento` (
 LOCK TABLES `atendimento_evento` WRITE;
 /*!40000 ALTER TABLE `atendimento_evento` DISABLE KEYS */;
 /*!40000 ALTER TABLE `atendimento_evento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `atendimento_evento_ledger`
+--
+
+DROP TABLE IF EXISTS `atendimento_evento_ledger`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `atendimento_evento_ledger` (
+  `id_evento` bigint NOT NULL AUTO_INCREMENT,
+  `uuid_transacao` char(36) COLLATE utf8mb4_general_ci NOT NULL,
+  `id_usuario` bigint NOT NULL,
+  `id_perfil` bigint NOT NULL,
+  `acao` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `estado_origem` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado_destino` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  `status_evento` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'SUCESSO',
+  `mensagem` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_evento`),
+  KEY `idx_transacao` (`uuid_transacao`),
+  KEY `idx_usuario` (`id_usuario`),
+  KEY `idx_acao` (`acao`),
+  KEY `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Ledger de auditoria de todas as ações do sistema';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `atendimento_evento_ledger`
+--
+
+LOCK TABLES `atendimento_evento_ledger` WRITE;
+/*!40000 ALTER TABLE `atendimento_evento_ledger` DISABLE KEYS */;
+/*!40000 ALTER TABLE `atendimento_evento_ledger` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1562,6 +1597,35 @@ CREATE TABLE `atendimento_sumario_alta` (
 LOCK TABLES `atendimento_sumario_alta` WRITE;
 /*!40000 ALTER TABLE `atendimento_sumario_alta` DISABLE KEYS */;
 /*!40000 ALTER TABLE `atendimento_sumario_alta` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `atendimento_transicao_ledger`
+--
+
+DROP TABLE IF EXISTS `atendimento_transicao_ledger`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `atendimento_transicao_ledger` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `uuid_transacao` char(64) NOT NULL,
+  `estado_origem` varchar(60) DEFAULT NULL,
+  `estado_destino` varchar(60) DEFAULT NULL,
+  `fingerprint_hash` char(64) DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_transacao_uuid` (`uuid_transacao`),
+  KEY `idx_transicao_hash` (`fingerprint_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `atendimento_transicao_ledger`
+--
+
+LOCK TABLES `atendimento_transicao_ledger` WRITE;
+/*!40000 ALTER TABLE `atendimento_transicao_ledger` DISABLE KEYS */;
+/*!40000 ALTER TABLE `atendimento_transicao_ledger` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2256,13 +2320,16 @@ DROP TABLE IF EXISTS `cidade`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cidade` (
-  `id_cidade` int NOT NULL AUTO_INCREMENT,
-  `id_entidade` bigint NOT NULL,
-  `nome` varchar(100) NOT NULL,
-  `uf` char(2) NOT NULL,
-  `codigo_ibge` varchar(7) DEFAULT NULL,
+  `id_cidade` bigint NOT NULL AUTO_INCREMENT,
+  `nome` varchar(150) NOT NULL,
+  `estado` varchar(10) NOT NULL,
+  `codigo_ibge` varchar(10) DEFAULT NULL,
+  `id_entidade` bigint DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_cidade`),
-  KEY `fk_cidade_entidade` (`id_entidade`),
+  KEY `idx_cidade_entidade` (`id_entidade`),
   CONSTRAINT `fk_cidade_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3222,16 +3289,22 @@ DROP TABLE IF EXISTS `escala_profissional`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `escala_profissional` (
-  `id_escala` bigint NOT NULL,
-  `id_usuario` bigint NOT NULL,
-  `funcao` enum('MEDICO','ENFERMEIRO','TECNICO','RECEPCAO','TI','OUTRA') NOT NULL,
-  `inicio_real` datetime DEFAULT NULL,
-  `fim_real` datetime DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  PRIMARY KEY (`id_escala`,`id_usuario`),
-  KEY `fk_ep_usuario` (`id_usuario`),
-  CONSTRAINT `fk_ep_escala` FOREIGN KEY (`id_escala`) REFERENCES `escala_plantao` (`id_escala`),
-  CONSTRAINT `fk_ep_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  `id_escala_profissional` bigint NOT NULL AUTO_INCREMENT,
+  `id_funcionario` bigint NOT NULL,
+  `id_unidade` bigint NOT NULL,
+  `id_local` bigint DEFAULT NULL,
+  `data_inicio` datetime NOT NULL,
+  `data_fim` datetime NOT NULL,
+  `tipo_escala` enum('PLANTAO','DIURNO','NOTURNO','SOBREAVISO') DEFAULT 'PLANTAO',
+  `observacao` text,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_escala_profissional`),
+  KEY `idx_ep_funcionario` (`id_funcionario`),
+  KEY `idx_ep_unidade` (`id_unidade`),
+  KEY `idx_ep_local` (`id_local`),
+  CONSTRAINT `fk_ep_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_ep_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_ep_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3242,31 +3315,6 @@ CREATE TABLE `escala_profissional` (
 LOCK TABLES `escala_profissional` WRITE;
 /*!40000 ALTER TABLE `escala_profissional` DISABLE KEYS */;
 /*!40000 ALTER TABLE `escala_profissional` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `especialidade`
---
-
-DROP TABLE IF EXISTS `especialidade`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `especialidade` (
-  `id_especialidade` int NOT NULL AUTO_INCREMENT,
-  `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `ativa` tinyint(1) DEFAULT '1',
-  PRIMARY KEY (`id_especialidade`),
-  UNIQUE KEY `nome` (`nome`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `especialidade`
---
-
-LOCK TABLES `especialidade` WRITE;
-/*!40000 ALTER TABLE `especialidade` DISABLE KEYS */;
-/*!40000 ALTER TABLE `especialidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -4825,6 +4873,40 @@ LOCK TABLES `farmacia_atendimento_externo_item` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `farmacia_dispensacao_log`
+--
+
+DROP TABLE IF EXISTS `farmacia_dispensacao_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `farmacia_dispensacao_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `id_prescricao_item` bigint NOT NULL,
+  `id_sessao_usuario` bigint NOT NULL,
+  `id_lote` bigint DEFAULT NULL,
+  `quantidade` decimal(14,3) NOT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `idx_prescricao_item` (`id_prescricao_item`),
+  KEY `idx_sessao_usuario` (`id_sessao_usuario`),
+  KEY `idx_criado_em` (`criado_em`),
+  KEY `fk_fdl_lote` (`id_lote`),
+  CONSTRAINT `fk_fdl_lote` FOREIGN KEY (`id_lote`) REFERENCES `lote` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_fdl_prescricao_item` FOREIGN KEY (`id_prescricao_item`) REFERENCES `prescricao_item` (`id_item`) ON DELETE CASCADE,
+  CONSTRAINT `fk_fdl_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Log de dispensação de medicamentos pela farmácia';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `farmacia_dispensacao_log`
+--
+
+LOCK TABLES `farmacia_dispensacao_log` WRITE;
+/*!40000 ALTER TABLE `farmacia_dispensacao_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `farmacia_dispensacao_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `farmacia_externo_evento`
 --
 
@@ -6264,6 +6346,136 @@ LOCK TABLES `fornecedor` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `funcionario`
+--
+
+DROP TABLE IF EXISTS `funcionario`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `funcionario` (
+  `id_funcionario` bigint NOT NULL AUTO_INCREMENT,
+  `id_pessoa` bigint NOT NULL,
+  `id_entidade` bigint DEFAULT NULL,
+  `matricula` varchar(50) DEFAULT NULL,
+  `tipo_funcionario` enum('MEDICO','ENFERMEIRO','TECNICO_ENFERMAGEM','RECEPCIONISTA','FARMACEUTICO','ADMINISTRATIVO','GESTOR','SUPORTE_TI','COORDENADOR','FISIOTERAPEUTA','MANUTENCAO','COORDENADOR_ENFERMAGEM','SUPERVISOR','NUTRICIONISTA','OUTRO') DEFAULT NULL,
+  `cargo` varchar(150) DEFAULT NULL,
+  `departamento` varchar(150) DEFAULT NULL,
+  `data_admissao` date DEFAULT NULL,
+  `data_demissao` date DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_funcionario`),
+  KEY `idx_funcionario_pessoa` (`id_pessoa`),
+  KEY `idx_funcionario_entidade` (`id_entidade`),
+  KEY `idx_funcionario_matricula` (`matricula`),
+  CONSTRAINT `fk_funcionario_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_funcionario_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `funcionario`
+--
+
+LOCK TABLES `funcionario` WRITE;
+/*!40000 ALTER TABLE `funcionario` DISABLE KEYS */;
+/*!40000 ALTER TABLE `funcionario` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `funcionario_conselho_profissional`
+--
+
+DROP TABLE IF EXISTS `funcionario_conselho_profissional`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `funcionario_conselho_profissional` (
+  `id_funcionario_conselho` bigint NOT NULL AUTO_INCREMENT,
+  `id_funcionario` bigint NOT NULL,
+  `conselho` varchar(50) NOT NULL,
+  `numero_registro` varchar(50) NOT NULL,
+  `uf` char(2) NOT NULL,
+  `situacao` enum('ATIVO','SUSPENSO','CANCELADO') DEFAULT 'ATIVO',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_funcionario_conselho`),
+  KEY `idx_fcp_funcionario` (`id_funcionario`),
+  CONSTRAINT `fk_fcp_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `funcionario_conselho_profissional`
+--
+
+LOCK TABLES `funcionario_conselho_profissional` WRITE;
+/*!40000 ALTER TABLE `funcionario_conselho_profissional` DISABLE KEYS */;
+/*!40000 ALTER TABLE `funcionario_conselho_profissional` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `funcionario_especialidade`
+--
+
+DROP TABLE IF EXISTS `funcionario_especialidade`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `funcionario_especialidade` (
+  `id_funcionario_especialidade` bigint NOT NULL AUTO_INCREMENT,
+  `id_funcionario` bigint NOT NULL,
+  `especialidade` varchar(150) NOT NULL,
+  `principal` tinyint(1) DEFAULT '0',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_funcionario_especialidade`),
+  KEY `idx_fe_funcionario` (`id_funcionario`),
+  CONSTRAINT `fk_fe_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `funcionario_especialidade`
+--
+
+LOCK TABLES `funcionario_especialidade` WRITE;
+/*!40000 ALTER TABLE `funcionario_especialidade` DISABLE KEYS */;
+/*!40000 ALTER TABLE `funcionario_especialidade` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `funcionario_unidade`
+--
+
+DROP TABLE IF EXISTS `funcionario_unidade`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `funcionario_unidade` (
+  `id_funcionario_unidade` bigint NOT NULL AUTO_INCREMENT,
+  `id_funcionario` bigint NOT NULL,
+  `id_unidade` bigint NOT NULL,
+  `funcao_unidade` varchar(150) DEFAULT NULL,
+  `data_inicio` date DEFAULT NULL,
+  `data_fim` date DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_funcionario_unidade`),
+  KEY `idx_fu_funcionario` (`id_funcionario`),
+  KEY `idx_fu_unidade` (`id_unidade`),
+  CONSTRAINT `fk_fu_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`),
+  CONSTRAINT `fk_fu_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `funcionario_unidade`
+--
+
+LOCK TABLES `funcionario_unidade` WRITE;
+/*!40000 ALTER TABLE `funcionario_unidade` DISABLE KEYS */;
+/*!40000 ALTER TABLE `funcionario_unidade` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `gaso_evento`
 --
 
@@ -6591,6 +6803,37 @@ LOCK TABLES `gpat_item` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `guardiao_acl_runtime`
+--
+
+DROP TABLE IF EXISTS `guardiao_acl_runtime`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `guardiao_acl_runtime` (
+  `id_guardiao_acl` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `id_sistema` bigint NOT NULL,
+  `contexto` varchar(60) NOT NULL,
+  `recurso` varchar(120) NOT NULL,
+  `permitido` tinyint DEFAULT '0',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_guardiao_acl`),
+  KEY `idx_acl_usuario` (`id_usuario`),
+  KEY `idx_acl_contexto` (`contexto`),
+  KEY `idx_acl_recurso` (`recurso`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `guardiao_acl_runtime`
+--
+
+LOCK TABLES `guardiao_acl_runtime` WRITE;
+/*!40000 ALTER TABLE `guardiao_acl_runtime` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guardiao_acl_runtime` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `guardiao_runtime_final`
 --
 
@@ -6773,7 +7016,7 @@ DROP TABLE IF EXISTS `interconsulta`;
 CREATE TABLE `interconsulta` (
   `id_interconsulta` bigint NOT NULL AUTO_INCREMENT,
   `id_internacao` bigint NOT NULL,
-  `id_especialidade` int NOT NULL,
+  `id_especialidade` bigint NOT NULL,
   `motivo` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` enum('SOLICITADA','RESPONDIDA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'SOLICITADA',
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -6781,7 +7024,7 @@ CREATE TABLE `interconsulta` (
   KEY `id_internacao` (`id_internacao`),
   KEY `id_especialidade` (`id_especialidade`),
   CONSTRAINT `interconsulta_ibfk_1` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
-  CONSTRAINT `interconsulta_ibfk_2` FOREIGN KEY (`id_especialidade`) REFERENCES `especialidade` (`id_especialidade`)
+  CONSTRAINT `interconsulta_ibfk_2` FOREIGN KEY (`id_especialidade`) REFERENCES `especialidade` (`id_especialidade`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -7337,14 +7580,14 @@ DROP TABLE IF EXISTS `kernel_runtime_evento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `kernel_runtime_evento` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
-  `uuid_runtime` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid_runtime` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `id_saas_entidade` bigint NOT NULL,
   `id_usuario` bigint DEFAULT NULL,
-  `tipo_evento` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `entidade_alvo` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tipo_evento` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entidade_alvo` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id_referencia` bigint DEFAULT NULL,
   `payload` json DEFAULT NULL,
-  `hash_evento` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `hash_evento` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_evento`),
   KEY `idx_runtime_evento_uuid` (`uuid_runtime`),
@@ -7840,6 +8083,35 @@ LOCK TABLES `leito` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `local`
+--
+
+DROP TABLE IF EXISTS `local`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `local` (
+  `id_local` bigint NOT NULL AUTO_INCREMENT,
+  `id_unidade` bigint NOT NULL,
+  `nome` varchar(100) NOT NULL,
+  `descricao` varchar(255) DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_local`),
+  KEY `fk_local_unidade_pai` (`id_unidade`),
+  CONSTRAINT `fk_local_unidade_pai` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `local`
+--
+
+LOCK TABLES `local` WRITE;
+/*!40000 ALTER TABLE `local` DISABLE KEYS */;
+/*!40000 ALTER TABLE `local` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `local_atendimento`
 --
 
@@ -7879,24 +8151,14 @@ DROP TABLE IF EXISTS `local_operacional`;
 CREATE TABLE `local_operacional` (
   `id_local_operacional` bigint NOT NULL AUTO_INCREMENT,
   `id_unidade` bigint NOT NULL,
-  `id_sistema` bigint NOT NULL,
-  `codigo` varchar(50) NOT NULL,
-  `nome` varchar(150) NOT NULL,
-  `tipo` enum('RECEPCAO','TRIAGEM','MEDICO_CLINICO','MEDICO_PEDIATRICO','MEDICACAO','RX','LABORATORIO','ECG','OBSERVACAO','INTERNACAO','FARMACIA','TI','MANUTENCAO','ENG_CLINICA','GASOTERAPIA','ASSIST_SOCIAL','SALA_NOTIFICACAO','ADMIN','OUTRO') NOT NULL DEFAULT 'OUTRO',
-  `id_local_estoque` bigint DEFAULT NULL,
-  `sala` varchar(50) DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `exibe_em_painel_publico` tinyint(1) NOT NULL DEFAULT '1',
-  `gera_tts_publico` tinyint(1) NOT NULL DEFAULT '1',
-  `eh_nao_definida` tinyint(1) NOT NULL DEFAULT '0',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `nome` varchar(200) DEFAULT NULL,
+  `tipo` enum('RECEPCAO','TRIAGEM','CONSULTORIO','MEDICACAO','FARMACIA','PAINEL','ADMIN') DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_local_operacional`),
-  UNIQUE KEY `uk_localop` (`id_unidade`,`id_sistema`,`codigo`),
-  KEY `idx_localop_unidade` (`id_unidade`),
-  KEY `idx_localop_sistema` (`id_sistema`),
-  KEY `idx_localop_estoque` (`id_local_estoque`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_local_unidade` (`id_unidade`),
+  CONSTRAINT `fk_local_operacional_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7905,7 +8167,6 @@ CREATE TABLE `local_operacional` (
 
 LOCK TABLES `local_operacional` WRITE;
 /*!40000 ALTER TABLE `local_operacional` DISABLE KEYS */;
-INSERT INTO `local_operacional` VALUES (1,2,4,'ADM01','Administração','ADMIN',NULL,NULL,1,1,1,0,'2026-01-27 23:40:56','2026-01-27 23:40:56'),(2,2,4,'REC01','Recepção','RECEPCAO',NULL,NULL,1,1,1,0,'2026-01-27 23:40:56','2026-01-27 23:40:56'),(3,2,4,'TRI01','Triagem','TRIAGEM',NULL,NULL,1,1,1,0,'2026-01-27 23:40:56','2026-01-27 23:40:56'),(4,2,4,'MEDC1','Médico Clínico','MEDICO_CLINICO',NULL,NULL,1,1,1,0,'2026-01-27 23:40:56','2026-01-27 23:40:56'),(5,2,4,'MEDP1','Médico Pediátrico','MEDICO_PEDIATRICO',NULL,NULL,1,1,1,0,'2026-01-27 23:40:56','2026-01-27 23:40:56'),(6,2,4,'TOT01','Totem','OUTRO',NULL,NULL,1,1,1,0,'2026-01-27 23:40:56','2026-01-27 23:40:56'),(8,2,4,'RECEPCAO_ND','[NAO DEFINIDA] RECEPCAO','RECEPCAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:15'),(9,2,4,'TRIAGEM_ND','[NAO DEFINIDA] TRIAGEM','TRIAGEM',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:15'),(10,2,4,'MEDICO_CLINICO_ND','[NAO DEFINIDA] MEDICO_CLINICO','MEDICO_CLINICO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:15'),(11,2,4,'MEDICO_PEDIATRICO_ND','[NAO DEFINIDA] MEDICO_PEDIATRICO','MEDICO_PEDIATRICO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:15'),(12,2,4,'MEDICACAO_ND','[NAO DEFINIDA] MEDICACAO','MEDICACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:16'),(13,2,4,'RX_ND','[NAO DEFINIDA] RX','RX',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:16'),(14,2,4,'LABORATORIO_ND','[NAO DEFINIDA] LABORATORIO','LABORATORIO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:16'),(15,2,4,'ECG_ND','[NAO DEFINIDA] ECG','ECG',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:17'),(16,2,4,'OBSERVACAO_ND','[NAO DEFINIDA] OBSERVACAO','OBSERVACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:17'),(17,2,4,'INTERNACAO_ND','[NAO DEFINIDA] INTERNACAO','INTERNACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:17'),(18,2,4,'FARMACIA_ND','[NAO DEFINIDA] FARMACIA','FARMACIA',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:18'),(19,2,4,'TI_ND','[NAO DEFINIDA] TI','TI',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:18'),(20,2,4,'MANUTENCAO_ND','[NAO DEFINIDA] MANUTENCAO','MANUTENCAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:18'),(21,2,4,'ENG_CLINICA_ND','[NAO DEFINIDA] ENG_CLINICA','ENG_CLINICA',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:18'),(22,2,4,'GASOTERAPIA_ND','[NAO DEFINIDA] GASOTERAPIA','GASOTERAPIA',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:18'),(23,2,4,'ASSIST_SOCIAL_ND','[NAO DEFINIDA] ASSIST_SOCIAL','ASSIST_SOCIAL',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:18'),(24,2,4,'SALA_NOTIFICACAO_ND','[NAO DEFINIDA] SALA_NOTIFICACAO','SALA_NOTIFICACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:19'),(25,2,4,'ADMIN_ND','[NAO DEFINIDA] ADMIN','ADMIN',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:19'),(26,2,4,'OUTRO_ND','[NAO DEFINIDA] OUTRO','OUTRO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 05:50:01','2026-02-10 15:47:19'),(27,3,5,'RECEPCAO_ND','[NAO DEFINIDA] RECEPCAO','RECEPCAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:19'),(28,3,5,'TRIAGEM_ND','[NAO DEFINIDA] TRIAGEM','TRIAGEM',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:19'),(29,3,5,'MEDICO_CLINICO_ND','[NAO DEFINIDA] MEDICO CLINICO','MEDICO_CLINICO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:20'),(30,3,5,'MEDICO_PEDIATRICO_ND','[NAO DEFINIDA] MEDICO PEDIATRICO','MEDICO_PEDIATRICO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:20'),(31,3,5,'MEDICACAO_ND','[NAO DEFINIDA] MEDICACAO','MEDICACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:20'),(32,3,5,'RX_ND','[NAO DEFINIDA] RX','RX',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:20'),(33,3,5,'LABORATORIO_ND','[NAO DEFINIDA] LABORATORIO','LABORATORIO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:20'),(34,3,5,'OBSERVACAO_ND','[NAO DEFINIDA] OBSERVACAO','OBSERVACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:21'),(35,3,5,'INTERNACAO_ND','[NAO DEFINIDA] INTERNACAO','INTERNACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:21'),(36,3,5,'FARMACIA_ND','[NAO DEFINIDA] FARMACIA','FARMACIA',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:21'),(37,3,5,'ADMIN_ND','[NAO DEFINIDA] ADMIN','ADMIN',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:17:32','2026-02-10 15:47:23'),(38,3,5,'ECG_ND','[NAO DEFINIDA] ECG','ECG',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:20'),(39,3,5,'TI_ND','[NAO DEFINIDA] TI','TI',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:21'),(40,3,5,'MANUTENCAO_ND','[NAO DEFINIDA] MANUTENCAO','MANUTENCAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:22'),(41,3,5,'ENG_CLINICA_ND','[NAO DEFINIDA] ENG_CLINICA','ENG_CLINICA',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:22'),(42,3,5,'GASOTERAPIA_ND','[NAO DEFINIDA] GASOTERAPIA','GASOTERAPIA',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:22'),(43,3,5,'ASSIST_SOCIAL_ND','[NAO DEFINIDA] ASSIST_SOCIAL','ASSIST_SOCIAL',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:22'),(44,3,5,'SALA_NOTIFICACAO_ND','[NAO DEFINIDA] SALA_NOTIFICACAO','SALA_NOTIFICACAO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:23'),(45,3,5,'OUTRO_ND','[NAO DEFINIDA] OUTRO','OUTRO',NULL,'NAO DEFINIDA',1,0,0,1,'2026-02-09 06:38:40','2026-02-10 15:47:24');
 /*!40000 ALTER TABLE `local_operacional` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -8929,15 +9190,15 @@ DROP TABLE IF EXISTS `paciente`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `paciente` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `uuid_paciente` char(36) COLLATE utf8mb4_general_ci NOT NULL,
-  `hash_identidade` char(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `uuid_paciente` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `hash_identidade` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_pessoa` bigint NOT NULL,
   `prontuario` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_cadastro` datetime DEFAULT CURRENT_TIMESTAMP,
-  `sexo` char(1) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sexo` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_nascimento` date DEFAULT NULL,
-  `nome` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `documento_principal` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nome` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `documento_principal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `metadata_identidade` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_paciente_uuid` (`uuid_paciente`),
@@ -9769,12 +10030,10 @@ DROP TABLE IF EXISTS `perfil`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `perfil` (
   `id_perfil` bigint NOT NULL AUTO_INCREMENT,
-  `nome` varchar(50) NOT NULL,
-  `descricao` varchar(255) DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_perfil`),
-  UNIQUE KEY `uk_perfil_nome` (`nome`)
+  `nome` varchar(120) DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_perfil`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -9788,6 +10047,32 @@ LOCK TABLES `perfil` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `perfil_permissao`
+--
+
+DROP TABLE IF EXISTS `perfil_permissao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `perfil_permissao` (
+  `id_perfil` bigint NOT NULL,
+  `id_permissao` bigint NOT NULL,
+  PRIMARY KEY (`id_perfil`,`id_permissao`),
+  KEY `fk_pp_permissao` (`id_permissao`),
+  CONSTRAINT `fk_pp_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
+  CONSTRAINT `fk_pp_permissao` FOREIGN KEY (`id_permissao`) REFERENCES `permissao` (`id_permissao`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `perfil_permissao`
+--
+
+LOCK TABLES `perfil_permissao` WRITE;
+/*!40000 ALTER TABLE `perfil_permissao` DISABLE KEYS */;
+/*!40000 ALTER TABLE `perfil_permissao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `permissao`
 --
 
@@ -9795,12 +10080,12 @@ DROP TABLE IF EXISTS `permissao`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `permissao` (
-  `id_permissao` int NOT NULL AUTO_INCREMENT,
-  `codigo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`id_permissao`),
-  UNIQUE KEY `codigo` (`codigo`)
-) ENGINE=InnoDB AUTO_INCREMENT=171 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_permissao` bigint NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(120) DEFAULT NULL,
+  `descricao` varchar(200) DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_permissao`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9809,7 +10094,6 @@ CREATE TABLE `permissao` (
 
 LOCK TABLES `permissao` WRITE;
 /*!40000 ALTER TABLE `permissao` DISABLE KEYS */;
-INSERT INTO `permissao` VALUES (1,'ABRIR_ATENDIMENTO','Abrir atendimento'),(2,'REGISTRAR_TRIAGEM','Registrar triagem'),(3,'REALIZAR_ANAMNESE','Registrar anamnese'),(4,'PRESCREVER','Emitir prescrição'),(5,'FINALIZAR_ATENDIMENTO','Finalizar atendimento'),(6,'REABRIR_ATENDIMENTO','Reabrir atendimento'),(7,'ADMINISTRAR_MEDICACAO','Administrar medicação'),(8,'VER_RELATORIOS','Acessar relatórios'),(9,'VER_AUDITORIA','Visualizar auditoria'),(15,'ACESSO_TOTAL','Acesso total ao sistema'),(16,'SELECIONAR_CONTEXTO','Selecionar contexto operacional (sistema/unidade/local)'),(17,'OPERAR_FILA','Operar fila (chamar/iniciar/finalizar/não atendeu/encaminhar)'),(18,'ADMIN_USUARIOS','Administrar usuários (criar/ativar/inativar/vincular perfil)'),(20,'ADMIN_PERMISSOES','Admin: gerenciar permissões por perfil'),(21,'PRONTUARIO_LER','Ler prontuário / abrir FFA / ver evolução'),(22,'DOCUMENTO_LISTAR_PENDENTES','Listar documentos pendentes de impressão no contexto'),(23,'DOCUMENTO_MARCAR_IMPRESSO','Marcar documento como impresso (log IMPRIMIR)'),(24,'DOCUMENTO_REIMPRIMIR','Reimprimir documento (log REIMPRIMIR)'),(35,'MEDICO_INICIAR','Médico: iniciar atendimento/execução'),(36,'MEDICO_ENCAMINHAR','Médico: encaminhar paciente/fluxo'),(37,'MEDICO_DESFECHO','Médico: definir desfecho/alta/óbito/transferência'),(38,'PAINEL_MENSAGEM_CONSUMIR','Painel/TTS: consumir mensagem'),(39,'INTERNACAO_TRANSFERIR_LEITO','Internação: transferir leito'),(45,'ORDEM_ASSISTENCIAL_REGISTRAR','Criar ordem assistencial (medicação/cuidado/dieta/etc)'),(46,'ORDEM_ASSISTENCIAL_SUSPENDER','Suspender ordem assistencial'),(47,'ORDEM_ASSISTENCIAL_ENCERRAR','Encerrar ordem assistencial'),(48,'FILA_SUBSTATUS_ATUALIZAR','Atualizar substatus operacional (fila_operacional)'),(49,'EXAME_SOLICITAR','Solicitar exame genérico'),(50,'EXAME_INICIAR','Iniciar execução de exame genérico'),(51,'EXAME_FINALIZAR','Finalizar exame genérico'),(52,'RX_SOLICITAR','Solicitar RX'),(53,'RX_INICIAR','Iniciar RX'),(54,'RX_FINALIZAR','Finalizar RX'),(55,'RX_CANCELAR','Cancelar RX'),(56,'LAB_SOLICITAR','Solicitar laboratório'),(57,'LAB_INICIAR','Iniciar laboratório'),(58,'LAB_FINALIZAR','Finalizar laboratório'),(59,'LAB_RESULTADO_RECEBER','Receber resultado do laboratório'),(60,'ECG_SOLICITAR','Solicitar ECG'),(61,'ECG_INICIAR','Iniciar ECG'),(62,'ECG_FINALIZAR','Finalizar ECG'),(63,'MEDICACAO_INICIAR','Iniciar execução em Medicação'),(125,'DIAGNOSTICO_EDITAR','Prontuário: registrar/editar diagnóstico CID10'),(126,'DIAGNOSTICO_LER','Prontuário: listar diagnósticos'),(127,'DOCUMENTO_EMITIR','Gerar documento (emissão idempotente por referência)'),(129,'ORDEM_ITEM_ADICIONAR','Adicionar item em ordem assistencial'),(130,'ORDEM_ITEM_ATUALIZAR','Atualizar item em ordem assistencial'),(131,'ORDEM_ITEM_SUSPENDER','Suspender item em ordem assistencial'),(132,'ORDEM_ITEM_ENCERRAR','Encerrar item em ordem assistencial'),(133,'ORDEM_APRAZAMENTO_GERAR','Gerar aprazamento (tarefas/horários)'),(134,'ORDEM_APRAZAMENTO_EXECUTAR','Executar tarefa/aprazamento (realizar/nao realizar)'),(135,'ORDEM_APRAZAMENTO_ESTORNAR','Estornar execução registrada'),(136,'MEDICACAO_ADMINISTRAR','Registrar administração de medicação (enfermagem)'),(137,'CUIDADO_EXECUTAR','Registrar execução de cuidado'),(138,'DIETA_EXECUTAR','Registrar execução de dieta/ingestão'),(159,'INTERNACAO_ABRIR','Abrir internação/observação'),(160,'INTERNACAO_TROCAR_LEITO','Transferir paciente de leito (troca leito)'),(161,'INTERNACAO_TRANSFERIR','Marcar transferência/remoção (internação)'),(162,'INTERNACAO_ALTA','Dar alta/encerrar internação'),(163,'INTERNACAO_ATUALIZAR','Atualizar dados da internação (precaução/previsão/responsável)'),(164,'INTERNACAO_VER','Ler dados de internação (read-only)'),(165,'ADMIN_TRIGGERS','Admin: manutenção de triggers (apenas DEV/DBA)'),(166,'PAINEL_CONFIGURAR','Configurar painel/TV rotativo'),(167,'USUARIO_RESET','Reset de usuário/senha (suporte)');
 /*!40000 ALTER TABLE `permissao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9850,25 +10134,26 @@ DROP TABLE IF EXISTS `pessoa`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pessoa` (
   `id_pessoa` bigint NOT NULL AUTO_INCREMENT,
-  `nome_completo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `nome_social` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cpf` varchar(14) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cns` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `rg` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `rg_uf` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nome` varchar(200) NOT NULL,
+  `nome_social` varchar(200) DEFAULT NULL,
+  `sexo` enum('MASCULINO','FEMININO','NAO_INFORMADO') DEFAULT 'NAO_INFORMADO',
+  `identidade_genero` enum('CIS_MASCULINO','CIS_FEMININO','TRANS_MASCULINO','TRANS_FEMININO','NAO_BINARIO','NAO_INFORMADO') DEFAULT 'NAO_INFORMADO',
   `data_nascimento` date DEFAULT NULL,
-  `sexo` enum('M','F','O') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `nome_mae` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `telefone` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `email` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `rg_orgao` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `dt_nascimento` date DEFAULT NULL,
+  `nacionalidade` varchar(100) DEFAULT NULL,
+  `naturalidade` varchar(150) DEFAULT NULL,
+  `nome_mae` varchar(200) DEFAULT NULL,
+  `nome_pai` varchar(200) DEFAULT NULL,
+  `estado_civil` enum('SOLTEIRO','CASADO','DIVORCIADO','VIUVO','UNIAO_ESTAVEL','NAO_INFORMADO') DEFAULT 'NAO_INFORMADO',
+  `tipo_pessoa` enum('PACIENTE','FUNCIONARIO','PROFISSIONAL_SAUDE','ACOMPANHANTE','RESPONSAVEL','CLIENTE','FORNECEDOR','OUTRO') DEFAULT 'OUTRO',
+  `foto_url` varchar(500) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_pessoa`),
-  UNIQUE KEY `uk_pessoa_cpf` (`cpf`),
-  UNIQUE KEY `uk_pessoa_cns` (`cns`),
-  KEY `idx_pessoa_nascimento` (`data_nascimento`),
-  KEY `idx_pessoa_rg` (`rg`)
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `idx_pessoa_nome` (`nome`),
+  KEY `idx_pessoa_nome_social` (`nome_social`),
+  KEY `idx_pessoa_nascimento` (`data_nascimento`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9877,7 +10162,6 @@ CREATE TABLE `pessoa` (
 
 LOCK TABLES `pessoa` WRITE;
 /*!40000 ALTER TABLE `pessoa` DISABLE KEYS */;
-INSERT INTO `pessoa` VALUES (1,'Teste Usuario',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(2,'Yasnanakase Master','Yasnanakase',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(3,'Yasnanakase Master','Yasnanakase',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(4,'Yasnanakase Master','Yasnanakase',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(5,'Administrador do Sistema',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(6,'TOTEM (Sistema)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(7,'GESTOR EINSTEIN','ADMIN',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(8,'PACIENTE TESTE EINSTEIN',NULL,'12345678901',NULL,NULL,NULL,'1990-01-01',NULL,NULL,NULL,NULL,NULL,NULL),(9,'ADMINISTRADOR ALPHA',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(10,'PACIENTE TESTE EINSTEIN',NULL,'999.999.999-99',NULL,NULL,NULL,'1990-05-20',NULL,NULL,NULL,NULL,NULL,NULL),(11,'MARIA RECEPCAO',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(12,'JOAO ENFERMEIRO',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(13,'DR EINSTEIN MEDICO',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(14,'MARIA RECEPCAO',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15,'JOAO ENFERMEIRO',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(16,'DR EINSTEIN MEDICO',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(17,'PACIENTE TESTE EINSTEIN',NULL,'123.456.789-00',NULL,NULL,NULL,'1990-01-01',NULL,NULL,NULL,NULL,NULL,NULL),(31,'PACIENTE REAL V2',NULL,'000.000.000-00',NULL,NULL,NULL,'1995-05-05',NULL,NULL,NULL,NULL,NULL,NULL),(33,'PACIENTE TESTE EINSTEIN',NULL,'853.965.365-00',NULL,NULL,NULL,'1990-01-01',NULL,NULL,NULL,NULL,NULL,NULL),(34,'PACIENTE TESTE',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `pessoa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9983,18 +10267,23 @@ DROP TABLE IF EXISTS `pessoa_documento`;
 CREATE TABLE `pessoa_documento` (
   `id_pessoa_documento` bigint NOT NULL AUTO_INCREMENT,
   `id_pessoa` bigint NOT NULL,
-  `tipo` enum('RG','CNH','PASSAPORTE','CTPS','TITULO_ELEITOR','OUTRO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'RG',
-  `numero` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `orgao_emissor` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uf_emissor` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tipo_documento` enum('CPF','RG','CNS','CRM','COREN','CRO','CRF','CNH','PASSAPORTE','PIS','NIS','OUTRO') NOT NULL,
+  `numero` varchar(50) NOT NULL,
+  `orgao_emissor` varchar(50) DEFAULT NULL,
+  `uf_emissor` char(2) DEFAULT NULL,
   `data_emissao` date DEFAULT NULL,
   `data_validade` date DEFAULT NULL,
-  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `principal` tinyint(1) DEFAULT '0',
+  `observacao` varchar(300) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_pessoa_documento`),
-  UNIQUE KEY `uk_pd_tipo_numero` (`tipo`,`numero`),
-  KEY `idx_pd_pessoa` (`id_pessoa`),
+  KEY `idx_doc_pessoa` (`id_pessoa`),
+  KEY `idx_doc_tipo` (`tipo_documento`),
+  KEY `idx_doc_numero` (`numero`),
   CONSTRAINT `fk_pessoa_documento_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10007,6 +10296,42 @@ LOCK TABLES `pessoa_documento` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `pessoa_email`
+--
+
+DROP TABLE IF EXISTS `pessoa_email`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pessoa_email` (
+  `id_pessoa_email` bigint NOT NULL AUTO_INCREMENT,
+  `id_pessoa` bigint NOT NULL,
+  `email` varchar(200) NOT NULL,
+  `tipo` enum('PESSOAL','PROFISSIONAL','FINANCEIRO','EMERGENCIA','OUTRO') DEFAULT 'PESSOAL',
+  `principal` tinyint(1) DEFAULT '0',
+  `verificado` tinyint(1) DEFAULT '0',
+  `ativo` tinyint(1) DEFAULT '1',
+  `valido_de` date DEFAULT NULL,
+  `valido_ate` date DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id_pessoa_email`),
+  UNIQUE KEY `uk_email_unico` (`email`),
+  KEY `idx_email_pessoa` (`id_pessoa`),
+  KEY `idx_email_principal` (`principal`),
+  CONSTRAINT `fk_pessoa_email_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pessoa_email`
+--
+
+LOCK TABLES `pessoa_email` WRITE;
+/*!40000 ALTER TABLE `pessoa_email` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pessoa_email` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `pessoa_endereco`
 --
 
@@ -10016,24 +10341,29 @@ DROP TABLE IF EXISTS `pessoa_endereco`;
 CREATE TABLE `pessoa_endereco` (
   `id_pessoa_endereco` bigint NOT NULL AUTO_INCREMENT,
   `id_pessoa` bigint NOT NULL,
-  `tipo` enum('RESIDENCIAL','COMERCIAL','OUTRO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'RESIDENCIAL',
-  `principal` tinyint(1) NOT NULL DEFAULT '0',
-  `cep` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `logradouro` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `numero` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `complemento` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `bairro` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cidade` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uf` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `referencia` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `id_cidade` bigint DEFAULT NULL,
+  `tipo` enum('RESIDENCIAL','COMERCIAL','CORRESPONDENCIA','EMERGENCIA','OUTRO') DEFAULT 'RESIDENCIAL',
+  `principal` tinyint(1) DEFAULT '0',
+  `cep` varchar(10) DEFAULT NULL,
+  `logradouro` varchar(150) DEFAULT NULL,
+  `numero` varchar(20) DEFAULT NULL,
+  `complemento` varchar(100) DEFAULT NULL,
+  `bairro` varchar(120) DEFAULT NULL,
+  `referencia` varchar(200) DEFAULT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  `valido_de` date DEFAULT NULL,
+  `valido_ate` date DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_pessoa_endereco`),
-  KEY `idx_pe_pessoa` (`id_pessoa`),
-  KEY `idx_pe_principal` (`id_pessoa`,`principal`),
-  KEY `idx_pe_cep` (`cep`),
+  KEY `idx_pessoa_endereco_pessoa` (`id_pessoa`),
+  KEY `idx_pessoa_endereco_cidade` (`id_cidade`),
+  KEY `idx_pessoa_endereco_principal` (`principal`),
+  CONSTRAINT `fk_pessoa_endereco_cidade` FOREIGN KEY (`id_cidade`) REFERENCES `cidade` (`id_cidade`),
   CONSTRAINT `fk_pessoa_endereco_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10053,20 +10383,22 @@ DROP TABLE IF EXISTS `pessoa_identificador`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pessoa_identificador` (
-  `id_identificador` bigint NOT NULL AUTO_INCREMENT,
+  `id_pessoa_identificador` bigint NOT NULL AUTO_INCREMENT,
   `id_pessoa` bigint NOT NULL,
-  `tipo` enum('CPF','CNS','RG','GPAT','PASSAPORTE','OUTRO') NOT NULL,
-  `valor_bruto` varchar(60) DEFAULT NULL,
-  `valor_normalizado` varchar(60) NOT NULL,
-  `uf` char(2) DEFAULT NULL,
-  `orgao` varchar(30) DEFAULT NULL,
-  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_identificador`),
-  UNIQUE KEY `uk_pessoa_ident_tipo_val` (`tipo`,`valor_normalizado`),
-  KEY `idx_pessoa_ident_pessoa` (`id_pessoa`),
-  KEY `idx_pessoa_ident_val` (`valor_normalizado`),
-  CONSTRAINT `fk_pessoa_ident_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `tipo_identificador` enum('MRN','CODIGO_INTERNO','CODIGO_LEGADO','CODIGO_MUNICIPAL','CODIGO_ESTADUAL','CODIGO_NACIONAL','CODIGO_CONVENIO','CODIGO_LABORATORIO','CODIGO_FARMACIA','CODIGO_SAAS','OUTRO') NOT NULL,
+  `identificador` varchar(120) NOT NULL,
+  `sistema_origem` varchar(100) DEFAULT NULL,
+  `descricao` varchar(200) DEFAULT NULL,
+  `principal` tinyint(1) DEFAULT '0',
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id_pessoa_identificador`),
+  KEY `idx_pid_pessoa` (`id_pessoa`),
+  KEY `idx_pid_tipo` (`tipo_identificador`),
+  KEY `idx_pid_identificador` (`identificador`),
+  CONSTRAINT `fk_pessoa_identificador_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10075,7 +10407,6 @@ CREATE TABLE `pessoa_identificador` (
 
 LOCK TABLES `pessoa_identificador` WRITE;
 /*!40000 ALTER TABLE `pessoa_identificador` DISABLE KEYS */;
-INSERT INTO `pessoa_identificador` VALUES (1,31,'CPF','000.000.000-00','00000000000',NULL,NULL,'2026-02-13 03:42:48'),(2,17,'CPF','123.456.789-00','12345678900',NULL,NULL,'2026-02-13 03:42:48'),(3,8,'CPF','12345678901','12345678901',NULL,NULL,'2026-02-13 03:42:48'),(4,33,'CPF','853.965.365-00','85396536500',NULL,NULL,'2026-02-13 03:42:48'),(5,10,'CPF','999.999.999-99','99999999999',NULL,NULL,'2026-02-13 03:42:48');
 /*!40000 ALTER TABLE `pessoa_identificador` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10112,6 +10443,74 @@ LOCK TABLES `pessoa_logradouro` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `pessoa_telefone`
+--
+
+DROP TABLE IF EXISTS `pessoa_telefone`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pessoa_telefone` (
+  `id_pessoa_telefone` bigint NOT NULL AUTO_INCREMENT,
+  `id_pessoa` bigint NOT NULL,
+  `numero` varchar(20) NOT NULL,
+  `tipo` enum('CELULAR','RESIDENCIAL','COMERCIAL','WHATSAPP','EMERGENCIA','OUTRO') DEFAULT 'CELULAR',
+  `principal` tinyint(1) DEFAULT '0',
+  `whatsapp` tinyint(1) DEFAULT '0',
+  `ativo` tinyint(1) DEFAULT '1',
+  `valido_de` date DEFAULT NULL,
+  `valido_ate` date DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id_pessoa_telefone`),
+  KEY `idx_telefone_pessoa` (`id_pessoa`),
+  KEY `idx_telefone_principal` (`principal`),
+  CONSTRAINT `fk_pessoa_telefone_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pessoa_telefone`
+--
+
+LOCK TABLES `pessoa_telefone` WRITE;
+/*!40000 ALTER TABLE `pessoa_telefone` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pessoa_telefone` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pessoa_vinculo`
+--
+
+DROP TABLE IF EXISTS `pessoa_vinculo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pessoa_vinculo` (
+  `id_pessoa_vinculo` bigint NOT NULL AUTO_INCREMENT,
+  `id_pessoa_origem` bigint NOT NULL,
+  `id_pessoa_destino` bigint NOT NULL,
+  `tipo_vinculo` enum('RESPONSAVEL','ACOMPANHANTE','FAMILIAR','CONJUGE','PAI','MAE','FILHO','TUTOR','CUIDADOR','RESPONSAVEL_CLINICO','OUTRO') NOT NULL,
+  `observacao` text,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id_pessoa_vinculo`),
+  KEY `idx_vinculo_origem` (`id_pessoa_origem`),
+  KEY `idx_vinculo_destino` (`id_pessoa_destino`),
+  CONSTRAINT `fk_vinculo_pessoa_destino` FOREIGN KEY (`id_pessoa_destino`) REFERENCES `pessoa` (`id_pessoa`),
+  CONSTRAINT `fk_vinculo_pessoa_origem` FOREIGN KEY (`id_pessoa_origem`) REFERENCES `pessoa` (`id_pessoa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pessoa_vinculo`
+--
+
+LOCK TABLES `pessoa_vinculo` WRITE;
+/*!40000 ALTER TABLE `pessoa_vinculo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pessoa_vinculo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `plantao`
 --
 
@@ -10122,20 +10521,20 @@ CREATE TABLE `plantao` (
   `id_plantao` bigint NOT NULL AUTO_INCREMENT,
   `id_unidade` bigint NOT NULL,
   `id_local` bigint DEFAULT NULL,
-  `id_usuario_medico` bigint NOT NULL,
-  `tipo_plantao` enum('CLINICO','PEDIATRIA','EMERGENCIA') NOT NULL,
+  `id_funcionario` bigint NOT NULL,
+  `tipo_plantao` enum('CLINICO','PEDIATRIA','EMERGENCIA','ADMINISTRATIVO','OUTRO') NOT NULL,
   `inicio_plantao` datetime NOT NULL,
   `fim_plantao` datetime NOT NULL,
-  `ativo` tinyint(1) NOT NULL DEFAULT '1',
-  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_plantao`),
-  KEY `idx_plantao_unidade_ativo_periodo` (`id_unidade`,`ativo`,`inicio_plantao`,`fim_plantao`),
-  KEY `idx_plantao_medico` (`id_usuario_medico`),
+  KEY `idx_plantao_global` (`id_unidade`,`ativo`,`inicio_plantao`,`fim_plantao`),
+  KEY `idx_plantao_funcionario` (`id_funcionario`),
   KEY `idx_plantao_local` (`id_local`),
-  CONSTRAINT `fk_plantao_local` FOREIGN KEY (`id_local`) REFERENCES `local_atendimento` (`id_local`),
-  CONSTRAINT `fk_plantao_medico` FOREIGN KEY (`id_usuario_medico`) REFERENCES `medico` (`id_usuario`),
-  CONSTRAINT `fk_plantao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  CONSTRAINT `fk_plantao_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_plantao_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_plantao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10158,21 +10557,24 @@ DROP TABLE IF EXISTS `plantao_escala`;
 CREATE TABLE `plantao_escala` (
   `id_plantao_escala` bigint NOT NULL AUTO_INCREMENT,
   `id_unidade` bigint NOT NULL,
-  `id_usuario_medico` bigint NOT NULL,
+  `id_funcionario` bigint NOT NULL,
   `data` date NOT NULL,
-  `turno` enum('DIA','NOITE','24H','CUSTOM') NOT NULL,
+  `turno` varchar(30) NOT NULL,
   `hora_inicio` time DEFAULT NULL,
   `hora_fim` time DEFAULT NULL,
-  `tipo_plantao` enum('CLINICO','PEDIATRIA','EMERGENCIA') DEFAULT NULL,
-  `ativo` tinyint(1) NOT NULL DEFAULT '1',
-  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_plantao_modelo` bigint DEFAULT NULL,
+  `tipo_plantao` enum('CLINICO','PEDIATRIA','EMERGENCIA','ADMINISTRATIVO','OUTRO') DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_plantao_escala`),
-  UNIQUE KEY `uk_plantao_escala_un_med_data_turno` (`id_unidade`,`id_usuario_medico`,`data`,`turno`),
-  KEY `idx_plantao_escala_unidade_data` (`id_unidade`,`data`),
-  KEY `idx_plantao_escala_medico_data` (`id_usuario_medico`,`data`),
-  CONSTRAINT `fk_plantao_escala_medico` FOREIGN KEY (`id_usuario_medico`) REFERENCES `medico` (`id_usuario`),
-  CONSTRAINT `fk_plantao_escala_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  UNIQUE KEY `uk_plantao_escala_global` (`id_unidade`,`id_funcionario`,`data`,`turno`),
+  KEY `idx_pe_unidade_data` (`id_unidade`,`data`),
+  KEY `idx_pe_funcionario` (`id_funcionario`),
+  KEY `fk_plantao_escala_modelo` (`id_plantao_modelo`),
+  CONSTRAINT `fk_plantao_escala_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_plantao_escala_modelo` FOREIGN KEY (`id_plantao_modelo`) REFERENCES `plantao_modelo` (`id_plantao_modelo`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_plantao_escala_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10198,10 +10600,11 @@ CREATE TABLE `plantao_modelo` (
   `inicio` time NOT NULL,
   `fim` time NOT NULL,
   `atravessa_dia` tinyint(1) DEFAULT '0',
-  `horas_previstas` decimal(5,2) DEFAULT NULL,
+  `horas_previstas` decimal(6,2) DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_plantao_modelo`),
-  UNIQUE KEY `uk_pm_nome` (`nome`)
+  UNIQUE KEY `uk_plantao_modelo_nome` (`nome`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10384,6 +10787,10 @@ CREATE TABLE `prescricao_item` (
   `via` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `posologia` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_lote` bigint DEFAULT NULL,
+  `dispensado_em` datetime(6) DEFAULT NULL,
+  `id_usuario_dispensacao` bigint DEFAULT NULL,
+  `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   PRIMARY KEY (`id_item`),
   KEY `id_prescricao` (`id_prescricao`),
   CONSTRAINT `prescricao_item_ibfk_1` FOREIGN KEY (`id_prescricao`) REFERENCES `prescricao_continua` (`id_prescricao`)
@@ -10819,6 +11226,38 @@ CREATE TABLE `produto` (
 LOCK TABLES `produto` WRITE;
 /*!40000 ALTER TABLE `produto` DISABLE KEYS */;
 /*!40000 ALTER TABLE `produto` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `profissional_registro`
+--
+
+DROP TABLE IF EXISTS `profissional_registro`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `profissional_registro` (
+  `id_profissional_registro` bigint NOT NULL AUTO_INCREMENT,
+  `id_funcionario` bigint NOT NULL,
+  `tipo_conselho` enum('CRM','COREN','CRF','CREFITO','CRN','CRP','OUTRO') NOT NULL,
+  `numero_registro` varchar(50) NOT NULL,
+  `uf_registro` char(2) NOT NULL,
+  `data_emissao` date DEFAULT NULL,
+  `data_validade` date DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_profissional_registro`),
+  KEY `idx_pr_funcionario` (`id_funcionario`),
+  CONSTRAINT `fk_pr_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `profissional_registro`
+--
+
+LOCK TABLES `profissional_registro` WRITE;
+/*!40000 ALTER TABLE `profissional_registro` DISABLE KEYS */;
+/*!40000 ALTER TABLE `profissional_registro` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -11919,7 +12358,7 @@ CREATE TABLE `saas_contrato` (
   PRIMARY KEY (`id_contrato`),
   KEY `idx_contrato_entidade_status` (`id_entidade`,`status`),
   CONSTRAINT `fk_contrato_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11928,6 +12367,7 @@ CREATE TABLE `saas_contrato` (
 
 LOCK TABLES `saas_contrato` WRITE;
 /*!40000 ALTER TABLE `saas_contrato` DISABLE KEYS */;
+INSERT INTO `saas_contrato` VALUES (1,1,'2026-03-03','2027-03-03','ATIVO','2026-03-03 06:23:54');
 /*!40000 ALTER TABLE `saas_contrato` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -11940,13 +12380,14 @@ DROP TABLE IF EXISTS `saas_entidade`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `saas_entidade` (
   `id_entidade` bigint NOT NULL AUTO_INCREMENT,
-  `nome_fantasia` varchar(150) NOT NULL,
-  `razao_social` varchar(150) NOT NULL,
-  `cnpj` varchar(18) NOT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_entidade`),
-  UNIQUE KEY `uk_saas_entidade_cnpj` (`cnpj`)
+  `nome_fantasia` varchar(200) NOT NULL,
+  `razao_social` varchar(200) DEFAULT NULL,
+  `cnpj` varchar(20) DEFAULT NULL,
+  `tipo_entidade` enum('PREFEITURA','HOSPITAL','UPA','UBS','CLINICA','FARMACIA','OPERADORA') DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12066,15 +12507,15 @@ CREATE TABLE `senha` (
   `id_saas_entidade` bigint NOT NULL,
   `id_unidade` bigint NOT NULL,
   `id_local` bigint DEFAULT NULL,
-  `codigo_visual` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo_visual` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `prioridade` int NOT NULL DEFAULT '0',
   `id_fluxo_status` bigint NOT NULL,
-  `contexto_fluxo` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contexto_fluxo` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `id_atendimento` bigint DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
   `id_paciente` bigint DEFAULT NULL,
-  `origem` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `dispositivo` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `origem` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dispositivo` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `ordem_fila` bigint NOT NULL DEFAULT '0',
   `chamada_sequencial` int DEFAULT '0',
@@ -12088,9 +12529,9 @@ CREATE TABLE `senha` (
   `retorno_permitido_ate` datetime(6) DEFAULT NULL,
   `retorno_utilizado` tinyint(1) DEFAULT '0',
   `retorno_em` datetime(6) DEFAULT NULL,
-  `uuid_sync` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid_sync` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `versao_sync` bigint DEFAULT '0',
-  `hash_estado` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hash_estado` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `estado_snapshot` json DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
@@ -12305,28 +12746,31 @@ DROP TABLE IF EXISTS `sessao_usuario`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sessao_usuario` (
   `id_sessao_usuario` bigint NOT NULL AUTO_INCREMENT,
-  `id_usuario` bigint NOT NULL,
-  `id_saas_entidade` bigint NOT NULL,
-  `token_runtime` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `setor_contexto` int DEFAULT NULL,
-  `unidade_contexto` bigint DEFAULT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `agente_usuario` text COLLATE utf8mb4_unicode_ci,
-  `ativo` tinyint(1) DEFAULT '1',
-  `expiracao_em` datetime(6) NOT NULL,
-  `ultimo_heartbeat` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `tentativas_invalidas` int DEFAULT '0',
-  `bloqueado_ate` datetime(6) DEFAULT NULL,
+  `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint DEFAULT NULL,
+  `id_sistema` bigint DEFAULT NULL,
+  `id_unidade` bigint DEFAULT NULL,
+  `id_local_operacional` bigint DEFAULT NULL,
+  `token` varchar(128) DEFAULT NULL,
+  `token_runtime` char(64) DEFAULT NULL,
+  `ip_origem` varchar(45) DEFAULT NULL,
+  `user_agent` text,
+  `ativo` tinyint DEFAULT '1',
+  `iniciado_em` datetime(6) DEFAULT NULL,
+  `expiracao_em` datetime(6) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_sessao_usuario`),
-  UNIQUE KEY `token_runtime` (`token_runtime`),
   KEY `idx_sessao_usuario` (`id_usuario`),
-  KEY `idx_sessao_saas` (`id_saas_entidade`),
-  KEY `idx_sessao_ativo` (`ativo`),
-  KEY `idx_sessao_expiracao` (`expiracao_em`),
-  KEY `idx_sessao_heartbeat` (`ultimo_heartbeat`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `fk_sessao_entidade` (`id_entidade`),
+  KEY `fk_sessao_sistema` (`id_sistema`),
+  KEY `fk_sessao_unidade` (`id_unidade`),
+  KEY `fk_sessao_local` (`id_local_operacional`),
+  CONSTRAINT `fk_sessao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_sessao_local` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`),
+  CONSTRAINT `fk_sessao_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
+  CONSTRAINT `fk_sessao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_sessao_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -12335,7 +12779,6 @@ CREATE TABLE `sessao_usuario` (
 
 LOCK TABLES `sessao_usuario` WRITE;
 /*!40000 ALTER TABLE `sessao_usuario` DISABLE KEYS */;
-INSERT INTO `sessao_usuario` VALUES (1,1,1,'936f45f6df2ef6c98b3c79b85d392a4125bac6f8fa21ad38e0aefca83698cb10',NULL,NULL,'127.0.0.1','runtime-bootstrap',1,'2026-03-01 11:04:07.356926','2026-03-01 03:04:07.356926',0,NULL,'2026-03-01 03:04:07.356926',NULL);
 /*!40000 ALTER TABLE `sessao_usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12538,10 +12981,10 @@ DROP TABLE IF EXISTS `sistema`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sistema` (
   `id_sistema` bigint NOT NULL AUTO_INCREMENT,
-  `nome` varchar(100) NOT NULL,
-  `sigla` varchar(20) DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `nome` varchar(120) NOT NULL,
+  `codigo` varchar(50) DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_sistema`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -13090,21 +13533,16 @@ DROP TABLE IF EXISTS `unidade`;
 CREATE TABLE `unidade` (
   `id_unidade` bigint NOT NULL AUTO_INCREMENT,
   `id_entidade` bigint NOT NULL,
-  `id_cidade` int NOT NULL,
-  `id_sistema` bigint NOT NULL,
-  `nome` varchar(100) NOT NULL,
-  `cnpj` varchar(18) DEFAULT NULL,
-  `cnes` char(7) DEFAULT NULL,
-  `tipo` enum('UPA','HOSPITAL','PA','CLINICA') NOT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_cidade` bigint DEFAULT NULL,
+  `nome` varchar(200) DEFAULT NULL,
+  `tipo` varchar(100) DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_unidade`),
-  KEY `fk_unidade_entidade` (`id_entidade`),
-  KEY `fk_unidade_cidade` (`id_cidade`),
-  KEY `fk_unidade_sistema` (`id_sistema`),
+  KEY `idx_unidade_entidade` (`id_entidade`),
+  KEY `idx_unidade_cidade` (`id_cidade`),
   CONSTRAINT `fk_unidade_cidade` FOREIGN KEY (`id_cidade`) REFERENCES `cidade` (`id_cidade`),
-  CONSTRAINT `fk_unidade_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
-  CONSTRAINT `fk_unidade_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`)
+  CONSTRAINT `fk_unidade_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13126,22 +13564,19 @@ DROP TABLE IF EXISTS `usuario`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuario` (
   `id_usuario` bigint NOT NULL AUTO_INCREMENT,
-  `id_pessoa` bigint NOT NULL,
-  `id_entidade` bigint NOT NULL,
-  `login` varchar(50) NOT NULL,
-  `email` varchar(100) DEFAULT NULL,
+  `id_pessoa` bigint DEFAULT NULL,
+  `login` varchar(80) NOT NULL,
   `senha_hash` varchar(255) NOT NULL,
+  `ativo` tinyint DEFAULT '1',
   `tentativas_login` int DEFAULT '0',
-  `bloqueado_ate` datetime DEFAULT NULL,
-  `ultimo_login` datetime DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `bloqueado_ate` datetime(6) DEFAULT NULL,
+  `ultimo_login` datetime(6) DEFAULT NULL,
+  `ultimo_ip` varchar(45) DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `uk_usuario_login` (`login`),
   KEY `idx_usuario_pessoa` (`id_pessoa`),
-  KEY `idx_usuario_entidade` (`id_entidade`),
-  CONSTRAINT `fk_usuario_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_usuario_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -13189,48 +13624,6 @@ LOCK TABLES `usuario_alocacao` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `usuario_contexto`
---
-
-DROP TABLE IF EXISTS `usuario_contexto`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `usuario_contexto` (
-  `id_contexto` bigint NOT NULL AUTO_INCREMENT,
-  `id_entidade` bigint NOT NULL,
-  `id_usuario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
-  `id_sistema` bigint NOT NULL,
-  `id_perfil` bigint NOT NULL,
-  `id_local_operacional` bigint DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_contexto`),
-  UNIQUE KEY `uk_usuario_contexto` (`id_usuario`,`id_unidade`,`id_sistema`),
-  KEY `fk_uc_unidade` (`id_unidade`),
-  KEY `fk_uc_sistema` (`id_sistema`),
-  KEY `fk_uc_perfil` (`id_perfil`),
-  KEY `idx_uc_usuario` (`id_usuario`),
-  KEY `fk_uc_entidade` (`id_entidade`),
-  CONSTRAINT `fk_uc_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
-  CONSTRAINT `fk_uc_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
-  CONSTRAINT `fk_uc_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_uc_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
-  CONSTRAINT `fk_uc_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuario_contexto`
---
-
-LOCK TABLES `usuario_contexto` WRITE;
-/*!40000 ALTER TABLE `usuario_contexto` DISABLE KEYS */;
-/*!40000 ALTER TABLE `usuario_contexto` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `usuario_historico_senha`
 --
 
@@ -13240,7 +13633,7 @@ DROP TABLE IF EXISTS `usuario_historico_senha`;
 CREATE TABLE `usuario_historico_senha` (
   `id_historico` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `senha_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `senha_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_historico`),
   KEY `fk_hist_senha_usuario` (`id_usuario`),
@@ -13255,35 +13648,6 @@ CREATE TABLE `usuario_historico_senha` (
 LOCK TABLES `usuario_historico_senha` WRITE;
 /*!40000 ALTER TABLE `usuario_historico_senha` DISABLE KEYS */;
 /*!40000 ALTER TABLE `usuario_historico_senha` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `usuario_local_operacional`
---
-
-DROP TABLE IF EXISTS `usuario_local_operacional`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `usuario_local_operacional` (
-  `id_usuario` bigint NOT NULL,
-  `id_local_operacional` bigint NOT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_usuario`,`id_local_operacional`),
-  KEY `idx_ulo_local` (`id_local_operacional`),
-  CONSTRAINT `fk_ulo_localop` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`),
-  CONSTRAINT `fk_ulo_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuario_local_operacional`
---
-
-LOCK TABLES `usuario_local_operacional` WRITE;
-/*!40000 ALTER TABLE `usuario_local_operacional` DISABLE KEYS */;
-INSERT INTO `usuario_local_operacional` VALUES (5,1,1,'2026-01-27 23:40:56'),(5,2,1,'2026-01-27 23:40:56'),(5,3,1,'2026-01-27 23:40:56'),(5,4,1,'2026-01-27 23:40:56'),(5,5,1,'2026-01-27 23:40:56'),(5,6,1,'2026-01-27 23:40:56'),(6,6,1,'2026-01-27 23:40:56');
-/*!40000 ALTER TABLE `usuario_local_operacional` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -13354,10 +13718,10 @@ DROP TABLE IF EXISTS `usuario_profissional_registro`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuario_profissional_registro` (
   `id_usuario` bigint NOT NULL,
-  `conselho` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `numero_registro` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `uf_registro` char(2) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `especialidade_principal` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `conselho` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `numero_registro` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uf_registro` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `especialidade_principal` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_usuario`),
   CONSTRAINT `fk_prof_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -13580,16 +13944,22 @@ CREATE TABLE `usuario_sistema` (
   `id_usuario` bigint NOT NULL,
   `id_sistema` bigint NOT NULL,
   `id_perfil` bigint NOT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_unidade` bigint DEFAULT NULL,
+  `id_local` bigint DEFAULT NULL,
+  `id_setor` bigint DEFAULT NULL,
+  `id_dispositivo` bigint DEFAULT NULL,
+  `data_vinculo` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `ativo` tinyint DEFAULT '1',
   PRIMARY KEY (`id_usuario_sistema`),
-  UNIQUE KEY `uk_usuario_sistema` (`id_usuario`,`id_sistema`),
-  KEY `fk_usuario_sistema_sistema` (`id_sistema`),
-  KEY `fk_usuario_sistema_perfil` (`id_perfil`),
-  CONSTRAINT `fk_usuario_sistema_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
-  CONSTRAINT `fk_usuario_sistema_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`) ON DELETE CASCADE,
-  CONSTRAINT `fk_usuario_sistema_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+  UNIQUE KEY `uk_us_usuario_sistema` (`id_usuario`,`id_sistema`,`id_unidade`,`id_local`,`id_dispositivo`),
+  KEY `idx_us_perfil` (`id_perfil`),
+  KEY `idx_us_unidade` (`id_unidade`),
+  KEY `idx_us_local` (`id_local`),
+  KEY `idx_us_dispositivo` (`id_dispositivo`),
+  CONSTRAINT `fk_us_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_us_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_us_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_us_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13600,6 +13970,38 @@ CREATE TABLE `usuario_sistema` (
 LOCK TABLES `usuario_sistema` WRITE;
 /*!40000 ALTER TABLE `usuario_sistema` DISABLE KEYS */;
 /*!40000 ALTER TABLE `usuario_sistema` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `usuario_sistema_acl_evento`
+--
+
+DROP TABLE IF EXISTS `usuario_sistema_acl_evento`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `usuario_sistema_acl_evento` (
+  `id_acl_evento` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `id_sistema` bigint NOT NULL,
+  `id_perfil` bigint NOT NULL,
+  `evento` varchar(50) NOT NULL,
+  `sucesso` tinyint DEFAULT '1',
+  `origem_dispositivo` varchar(100) DEFAULT NULL,
+  `origem_ip` varchar(50) DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_acl_evento`),
+  KEY `idx_acl_usuario` (`id_usuario`),
+  KEY `idx_acl_evento_data` (`criado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `usuario_sistema_acl_evento`
+--
+
+LOCK TABLES `usuario_sistema_acl_evento` WRITE;
+/*!40000 ALTER TABLE `usuario_sistema_acl_evento` DISABLE KEYS */;
+/*!40000 ALTER TABLE `usuario_sistema_acl_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -13629,54 +14031,6 @@ LOCK TABLES `usuario_sistema_perfil` WRITE;
 /*!40000 ALTER TABLE `usuario_sistema_perfil` DISABLE KEYS */;
 /*!40000 ALTER TABLE `usuario_sistema_perfil` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `usuario_unidade`
---
-
-DROP TABLE IF EXISTS `usuario_unidade`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `usuario_unidade` (
-  `id_usuario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_usuario`,`id_unidade`),
-  KEY `idx_uu_unidade` (`id_unidade`),
-  CONSTRAINT `fk_uu_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
-  CONSTRAINT `fk_uu_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuario_unidade`
---
-
-LOCK TABLES `usuario_unidade` WRITE;
-/*!40000 ALTER TABLE `usuario_unidade` DISABLE KEYS */;
-/*!40000 ALTER TABLE `usuario_unidade` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Temporary view structure for view `usuarios`
---
-
-DROP TABLE IF EXISTS `usuarios`;
-/*!50001 DROP VIEW IF EXISTS `usuarios`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `usuarios` AS SELECT 
- 1 AS `id_usuario`,
- 1 AS `id_pessoa`,
- 1 AS `id_entidade`,
- 1 AS `login`,
- 1 AS `email`,
- 1 AS `senha_hash`,
- 1 AS `ativo`,
- 1 AS `criado_em`,
- 1 AS `atualizado_em`*/;
-SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `venda`
@@ -13840,28 +14194,6 @@ LOCK TABLES `viatura` WRITE;
 /*!40000 ALTER TABLE `viatura` DISABLE KEYS */;
 /*!40000 ALTER TABLE `viatura` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Temporary view structure for view `vw_admin_sessoes_ativas`
---
-
-DROP TABLE IF EXISTS `vw_admin_sessoes_ativas`;
-/*!50001 DROP VIEW IF EXISTS `vw_admin_sessoes_ativas`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_admin_sessoes_ativas` AS SELECT 
- 1 AS `id_sessao_usuario`,
- 1 AS `id_usuario`,
- 1 AS `login`,
- 1 AS `id_saas_entidade`,
- 1 AS `setor_contexto`,
- 1 AS `unidade_contexto`,
- 1 AS `ip_origem`,
- 1 AS `agente_usuario`,
- 1 AS `iniciado_em`,
- 1 AS `expira_em`,
- 1 AS `ultimo_heartbeat`*/;
-SET character_set_client = @saved_cs_client;
 
 --
 -- Temporary view structure for view `vw_conciliacao_faturamento`
@@ -14103,12 +14435,15 @@ DROP TABLE IF EXISTS `vw_usuario_permissoes`;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
 /*!50001 CREATE VIEW `vw_usuario_permissoes` AS SELECT 
+ 1 AS `id_sessao_usuario`,
  1 AS `id_usuario`,
  1 AS `id_sistema`,
  1 AS `id_perfil`,
  1 AS `perfil_nome`,
  1 AS `nome_procedure`,
- 1 AS `permitido`*/;
+ 1 AS `permitido`,
+ 1 AS `id_unidade`,
+ 1 AS `id_entidade`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -14240,6 +14575,125 @@ BEGIN
     END WHILE;
 
     RETURN v_hash;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `seed_usuarios_teste` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `seed_usuarios_teste`()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE nome VARCHAR(100);
+    DECLARE login_valor VARCHAR(50);
+    DECLARE perfil_id INT;
+    
+    -- Limpar usuários de teste anteriores (manter admin)
+    DELETE FROM usuario WHERE login != 'admin';
+    DELETE FROM usuario_perfil WHERE id_usuario > 1;
+    DELETE FROM usuario_unidade WHERE id_usuario > 1;
+    DELETE FROM usuario_sistema WHERE id_usuario > 1;
+    DELETE FROM usuario_local_operacional WHERE id_usuario > 1;
+    DELETE FROM usuario_contexto WHERE id_usuario > 1;
+    
+    -- Loop para criar 500 usuários
+    WHILE i <= 500 DO
+        -- Gerar nome aleatório
+        SET nome = CONCAT(
+            ELT(FLOOR(1 + RAND() * 10), 'João', 'Maria', 'José', 'Ana', 'Pedro', 'Paulo', 'Lucas', 'Fernanda', 'Carla', 'Roberto'),
+            ' ',
+            ELT(FLOOR(1 + RAND() * 15), 'Silva', 'Santos', 'Oliveira', 'Souza', 'Lima', 'Pereira', 'Almeida', 'Nascimento', 'Melo', 'Costa', 'Rodrigues', 'Ferreira', 'Araujo', 'Cardoso', 'Teixeira')
+        );
+        
+        -- Gerar login
+        SET login_valor = CONCAT(
+            ELT(FLOOR(1 + RAND() * 6), 'medico', 'enfermeiro', 'recepcionista', 'tecnico', 'farmaceutico', 'admin'),
+            LPAD(i, 4, '0')
+        );
+        
+        -- Atribuir perfil baseado no tipo
+        SET perfil_id = ELT(FLOOR(1 + RAND() * 6), 2, 3, 4, 5, 6, 1); -- MEDICO, ENFERMEIRO, RECEPCIONISTA, TECNICO, FARMACEUTICO, ADMIN
+        
+        -- Inserir usuário
+        INSERT INTO usuario (id_usuario, nome, login, senha_hash, email, ativo, criado_em)
+        VALUES (
+            i + 1,
+            nome,
+            login_valor,
+            '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlC8kCXVvXtHjXMqqGNmuprJf0a', -- senha: admin123
+            CONCAT(login_valor, '@hospital.com'),
+            1,
+            NOW()
+        );
+        
+        -- Vincular a unidade 1 (UPA)
+        INSERT IGNORE INTO usuario_unidade (id_usuario, id_unidade, ativo)
+        VALUES (i + 1, 1, 1);
+        
+        -- Vincular ao sistema 1
+        INSERT IGNORE INTO usuario_sistema (id_usuario_sistema, id_usuario, id_sistema, id_perfil, ativo)
+        VALUES (i + 1, i + 1, 1, perfil_id, 1);
+        
+        -- Vincular a um local operacional
+        INSERT IGNORE INTO usuario_local_operacional (id_usuario, id_local_operacional)
+        VALUES (i + 1, FLOOR(1 + RAND() * 20));
+        
+        SET i = i + 1;
+    END WHILE;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_acl_registrar_evento` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_acl_registrar_evento`(
+    IN p_id_usuario BIGINT,
+    IN p_id_sistema BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_evento VARCHAR(50),
+    IN p_sucesso TINYINT
+)
+    SQL SECURITY INVOKER
+BEGIN
+
+    INSERT INTO usuario_sistema_acl_evento
+    (
+        id_usuario,
+        id_sistema,
+        id_perfil,
+        evento,
+        sucesso
+    )
+    VALUES
+    (
+        p_id_usuario,
+        p_id_sistema,
+        p_id_perfil,
+        p_evento,
+        p_sucesso
+    );
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -14471,116 +14925,75 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_atendimento_transicionar`(
     IN p_id_sessao_usuario BIGINT,
-    IN p_id_ffa BIGINT,
-    IN p_novo_estado VARCHAR(60),
-    IN p_origem VARCHAR(60),
-    IN p_detalhe TEXT
+    IN p_estado_destino VARCHAR(60),
+    IN p_uuid_transacao CHAR(64)
 )
-main: BEGIN
+    SQL SECURITY INVOKER
+proc_main: BEGIN
 
-    DECLARE v_sqlstate VARCHAR(10);
-    DECLARE v_errno INT;
-    DECLARE v_msg TEXT;
-    DECLARE v_estado_anterior VARCHAR(60);
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1 
-            v_sqlstate = RETURNED_SQLSTATE,
-            v_errno = MYSQL_ERRNO,
-            v_msg = MESSAGE_TEXT;
-
-        ROLLBACK;
-
-        CALL sp_auditar_erro_sql(
-            p_id_sessao_usuario,
-            'sp_atendimento_transicionar',
-            CONCAT('SQLSTATE=', v_sqlstate, ' | MSG=', v_msg)
-        );
-
-        CALL sp_raise(
-            'ERRO_SQL',
-            CONCAT('Falha na transição: ', v_msg)
-        );
-    END;
+    DECLARE v_estado_origem VARCHAR(60);
+    DECLARE v_hash CHAR(64);
 
     CALL sp_sessao_assert(p_id_sessao_usuario);
-    CALL sp_assert_true(p_id_ffa IS NOT NULL, 'PARAM', 'ID FFA obrigatório.');
-    CALL sp_assert_true(p_novo_estado IS NOT NULL, 'PARAM', 'Novo estado obrigatório.');
 
     START TRANSACTION;
 
-    SELECT estado_atual
-    INTO v_estado_anterior
+    /* ===============================
+       Idempotência runtime
+    =============================== */
+
+    IF EXISTS (
+        SELECT 1
+        FROM atendimento_transicao_ledger
+        WHERE uuid_transacao = p_uuid_transacao
+        LIMIT 1
+    ) THEN
+
+        COMMIT;
+
+        LEAVE proc_main;
+
+    END IF;
+
+    /* Estado atual */
+    SELECT estado
+    INTO v_estado_origem
     FROM atendimento_estado_ativo
-    WHERE id_ffa = p_id_ffa
-    FOR UPDATE;
+    WHERE id_sessao_usuario = p_id_sessao_usuario
+    LIMIT 1;
 
-    CALL sp_assert_true(
-        v_estado_anterior IS NOT NULL,
-        'ESTADO_INVALIDO',
-        'FFA não possui estado atual registrado.'
-    );
-
-    CALL sp_assert_true(
-        EXISTS (
-            SELECT 1
-            FROM fluxo_transicao_matriz ftm
-            JOIN sessao_usuario su 
-                ON su.id_sessao_usuario = p_id_sessao_usuario
-            WHERE ftm.estado_origem = v_estado_anterior
-              AND ftm.estado_destino = p_novo_estado
-              AND ftm.perfil_requerido = su.perfil
-              AND ftm.ativo = 1
-        ),
-        'TRANSICAO_INVALIDA',
+    /* Fingerprint da decisão */
+    SET v_hash = SHA2(
         CONCAT(
-            'Transição não permitida de ',
-            v_estado_anterior,
-            ' para ',
-            p_novo_estado
-        )
+            IFNULL(v_estado_origem,''),
+            IFNULL(p_estado_destino,''),
+            IFNULL(p_id_sessao_usuario,''),
+            IFNULL(p_uuid_transacao,'')
+        ),
+        256
     );
 
-    INSERT INTO workflow_ffa_evento (
-        id_ffa,
-        origem,
-        tipo_evento,
-        detalhe,
-        de_estado,
-        para_estado,
-        id_sessao_usuario
+    /* Ledger clínico */
+    INSERT INTO atendimento_transicao_ledger
+    (
+        uuid_transacao,
+        estado_origem,
+        estado_destino,
+        fingerprint_hash
     )
-    VALUES (
-        p_id_ffa,
-        p_origem,
-        'TRANSICAO_ESTADO',
-        p_detalhe,
-        v_estado_anterior,
-        p_novo_estado,
-        p_id_sessao_usuario
+    VALUES
+    (
+        p_uuid_transacao,
+        v_estado_origem,
+        p_estado_destino,
+        v_hash
     );
 
-    INSERT INTO atendimento_estado_ativo (
-        id_ffa,
-        estado_atual,
-        atualizado_em
-    )
-    VALUES (
-        p_id_ffa,
-        p_novo_estado,
-        NOW()
-    )
-    ON DUPLICATE KEY UPDATE
-        estado_atual = p_novo_estado,
-        atualizado_em = NOW();
-
-    CALL sp_auditoria_evento_registrar(
-        p_id_sessao_usuario,
-        'FFA_TRANSICAO',
-        'ffa',
-        p_id_ffa
-    );
+    /* Estado assistencial */
+    UPDATE atendimento_estado_ativo
+    SET estado = p_estado_destino,
+        atualizado_em = NOW(6)
+    WHERE id_sessao_usuario = p_id_sessao_usuario;
 
     COMMIT;
 
@@ -17865,6 +18278,84 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_guardiao_runtime_assert` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_guardiao_runtime_assert`(
+    IN p_id_usuario BIGINT,
+    IN p_contexto VARCHAR(60),
+    IN p_recurso VARCHAR(120)
+)
+    SQL SECURITY INVOKER
+BEGIN
+
+    DECLARE v_ok TINYINT DEFAULT 0;
+
+    SELECT COUNT(1)
+    INTO v_ok
+    FROM guardiao_acl_runtime gac
+    WHERE gac.id_usuario = p_id_usuario
+      AND gac.contexto = p_contexto
+      AND gac.recurso = p_recurso
+      AND gac.permitido = 1;
+
+    IF IFNULL(v_ok,0) = 0 THEN
+        CALL sp_raise(
+            'SEM_PERMISSAO_RUNTIME',
+            CONCAT('Usuario sem permissao para recurso: ', p_contexto, ' | ', p_recurso)
+        );
+    END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_guardiao_runtime_decidir` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_guardiao_runtime_decidir`(
+    IN p_id_usuario BIGINT,
+    IN p_contexto VARCHAR(60),
+    IN p_recurso VARCHAR(120),
+    OUT p_permitido TINYINT
+)
+    SQL SECURITY INVOKER
+BEGIN
+
+    DECLARE v_count INT DEFAULT 0;
+
+    SELECT COUNT(*)
+    INTO v_count
+    FROM guardiao_acl_runtime
+    WHERE id_usuario = p_id_usuario
+      AND contexto = p_contexto
+      AND recurso = p_recurso
+      AND permitido = 1;
+
+    SET p_permitido = IF(v_count > 0, 1, 0);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_guardiao_runtime_final` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -18398,6 +18889,43 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_ledger_evento_log` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ledger_evento_log`(
+    IN p_uuid_transacao CHAR(36),
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_acao VARCHAR(100),
+    IN p_estado_origem VARCHAR(50),
+    IN p_estado_destino VARCHAR(50),
+    IN p_payload JSON,
+    IN p_status VARCHAR(20),
+    IN p_mensagem VARCHAR(500)
+)
+BEGIN
+    INSERT INTO atendimento_evento_ledger (
+        uuid_transacao, id_usuario, id_perfil, acao,
+        estado_origem, estado_destino, payload,
+        status_evento, mensagem, created_at
+    ) VALUES (
+        p_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+        p_estado_origem, p_estado_destino, p_payload,
+        p_status, p_mensagem, NOW(6)
+    );
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_local_operacional_seed_padrao` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -18925,6 +19453,325 @@ BEGIN
             SET MESSAGE_TEXT = 'Domínio runtime não suportado';
 
     END CASE;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_dispatcher_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_dispatcher_runtime`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_acao VARCHAR(100),
+    IN p_contexto VARCHAR(50),
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_estado_origem VARCHAR(50) DEFAULT NULL;
+    DECLARE v_estado_destino VARCHAR(50) DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_id_senha BIGINT DEFAULT NULL;
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        
+        -- Log do erro no ledger
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+            v_estado_origem, v_estado_destino, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- Iniciar transação
+    START TRANSACTION;
+
+    -- Validar sessão
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida');
+        ROLLBACK;
+    END IF;
+
+    -- Validar permissão por contexto
+    IF NOT EXISTS (
+        SELECT 1 FROM fluxo_transicao ft
+        WHERE ft.id_perfil_requerido = p_id_perfil
+          AND ft.ativo = 1
+          AND EXISTS (
+            SELECT 1 FROM fluxo_status fs_origem
+            WHERE fs_origem.id_fluxo_status = ft.id_status_origem
+              AND fs_origem.codigo LIKE CONCAT(p_contexto, '%')
+          )
+    ) AND p_acao != 'SESSION_HEARTBEAT' THEN
+        -- Não bloquear, apenas logar aviso
+        SET p_mensagem = CONCAT('AVISO: Perfil ', p_id_perfil, ' pode não ter permissão para ', p_acao);
+    END IF;
+
+    -- Processar ação específica
+    CASE p_acao
+        -- ==================== SESSÃO ====================
+        WHEN 'SESSION_HEARTBEAT' THEN
+            UPDATE sessao_usuario 
+            SET ultimo_heartbeat = NOW(6) 
+            WHERE id_sessao_usuario = p_id_sessao;
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Heartbeat registrado';
+            SET p_resultado = JSON_OBJECT('id_sessao', p_id_sessao, 'timestamp', NOW(6));
+
+        -- ==================== ATENDIMENTO ====================
+        WHEN 'ATENDIMENTO_INICIAR' THEN
+            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+            
+            -- Log do evento
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                NULL, 'INICIADO', p_payload, 'SUCESSO', 'Atendimento iniciado'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Atendimento iniciado';
+            SET p_resultado = JSON_OBJECT(
+                'id_atendimento', v_id_atendimento,
+                'uuid_transacao', v_uuid_transacao
+            );
+
+        WHEN 'ATENDIMENTO_TRANSICIONAR' THEN
+            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+            SET v_estado_destino = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
+            
+            -- Buscar estado atual
+            SELECT MAX(id_fluxo_status) INTO v_estado_origem
+            FROM senha 
+            WHERE id_atendimento = v_id_atendimento 
+            ORDER BY criado_em DESC LIMIT 1;
+            
+            -- Atualizar senha com novo status
+            UPDATE senha SET
+                id_fluxo_status = (
+                    SELECT id_fluxo_status FROM fluxo_status 
+                    WHERE codigo = v_estado_destino LIMIT 1
+                )
+            WHERE id_atendimento = v_id_atendimento;
+            
+            -- Log do evento
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                v_estado_origem, v_estado_destino, p_payload, 'SUCESSO', 
+                CONCAT('Transição: ', v_estado_origem, ' -> ', v_estado_destino)
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = CONCAT('Atendimento transicionado para ', v_estado_destino);
+            SET p_resultado = JSON_OBJECT(
+                'id_atendimento', v_id_atendimento,
+                'status_anterior', v_estado_origem,
+                'status_novo', v_estado_destino,
+                'uuid_transacao', v_uuid_transacao
+            );
+
+        -- ==================== SENHA ====================
+        WHEN 'SENHA_CRIAR' THEN
+            SET v_id_senha = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_senha'));
+            
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                NULL, 'CRIADA', p_payload, 'SUCESSO', 'Senha criada'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Senha criada';
+            SET p_resultado = JSON_OBJECT('id_senha', v_id_senha);
+
+        WHEN 'SENHA_CHAMAR' THEN
+            SET v_id_senha = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_senha'));
+            
+            UPDATE senha SET
+                chamada_em = NOW(6),
+                chamada_sequencial = chamada_sequencial + 1
+            WHERE id_senha = v_id_senha;
+            
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                'AGUARDANDO', 'CHAMADA', p_payload, 'SUCESSO', 'Senha chamada'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Senha chamada';
+            SET p_resultado = JSON_OBJECT('id_senha', v_id_senha);
+
+        WHEN 'SENHA_ATENDER' THEN
+            SET v_id_senha = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_senha'));
+            
+            UPDATE senha SET
+                executado_em = NOW(6)
+            WHERE id_senha = v_id_senha;
+            
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                'CHAMADA', 'ATENDIDA', p_payload, 'SUCESSO', 'Senha atendida'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Senha atendida';
+            SET p_resultado = JSON_OBJECT('id_senha', v_id_senha);
+
+        -- ==================== TRIAGEM ====================
+        WHEN 'TRIAGEM_REGISTRAR' THEN
+            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+            
+            -- Registrar sinais vitais
+            INSERT INTO atendimento_sinais_vitais (
+                id_atendimento, id_usuario_registro,
+                pa_sistolica, pa_diastolica, frequencia_cardiaca,
+                temperatura, respiracao, spo2, peso, altura,
+                created_at
+            ) VALUES (
+                v_id_atendimento, p_id_usuario,
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.pa_sistolica')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.pa_diastolica')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.frequencia_cardiaca')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.temperatura')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.respiracao')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.spo2')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.peso')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.altura')),
+                NOW(6)
+            );
+            
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                NULL, 'REGISTRADA', p_payload, 'SUCESSO', 'Triagem registrada'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Triagem registrada';
+            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento);
+
+        -- ==================== PRESCRIÇÃO ====================
+        WHEN 'PRESCRICAO_CRIAR' THEN
+            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+            
+            INSERT INTO atendimento_prescricao (
+                id_atendimento, id_medico, medicamento, dose, via, frequencia,
+                observacao, data_prescricao, status
+            ) VALUES (
+                v_id_atendimento, p_id_usuario,
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.medicamento')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.dose')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.via')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.frequencia')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.observacao')),
+                NOW(6), 'ATIVO'
+            );
+            
+            SET p_resultado = JSON_OBJECT(
+                'id_atendimento', v_id_atendimento,
+                'last_insert_id', LAST_INSERT_ID()
+            );
+            
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                NULL, 'ATIVO', p_payload, 'SUCESSO', 'Prescrição criada'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Prescrição criada';
+
+        -- ==================== FARMÁCIA ====================
+        WHEN 'FARMACIA_DISPENSAR' THEN
+            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+            
+            -- Atualizar status da prescrição
+            UPDATE atendimento_prescricao SET
+                status = 'CONCLUIDO'
+            WHERE id = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_prescricao'))
+              AND id_atendimento = v_id_atendimento;
+            
+            -- Registrar dispensação
+            INSERT INTO dispensacao_medicacao (
+                id_ordem, id_item, id_farmaco, quantidade,
+                id_usuario_dispensador, data_hora, status, observacao
+            ) VALUES (
+                v_id_atendimento,
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_prescricao')),
+                NULL, 1, p_id_usuario, NOW(6), 'ENTREGUE',
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.observacao'))
+            );
+            
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                'ATIVO', 'CONCLUIDO', p_payload, 'SUCESSO', 'Medicamento dispensado'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Medicamento dispensado';
+            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento);
+
+        -- ==================== ENFERMAGEM ====================
+        WHEN 'ENFERMAGEM_REGISTRAR' THEN
+            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+            
+            INSERT INTO atendimento_procedimento_enfermagem (
+                id_atendimento, id_usuario_enfermeiro,
+                procedimento, observacao, data_hora, status
+            ) VALUES (
+                v_id_atendimento, p_id_usuario,
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.procedimento')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.observacao')),
+                NOW(6), 'REALIZADO'
+            );
+            
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                NULL, 'REALIZADO', p_payload, 'SUCESSO', 'Procedimento registrado'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = 'Procedimento registrado';
+            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento);
+
+        -- ==================== DEFAULT ====================
+        ELSE
+            -- Ação genérica - apenas log
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+                NULL, NULL, p_payload, 'SUCESSO', 'Ação genérica executada'
+            );
+            
+            SET p_sucesso = TRUE;
+            SET p_mensagem = CONCAT('Ação ', p_acao, ' executada');
+            SET p_resultado = JSON_OBJECT('acao', p_acao, 'contexto', p_contexto);
+    END CASE;
+
+    -- Commit da transação
+    COMMIT;
+    
+    -- Adicionar uuid_transacao ao resultado
+    IF p_resultado IS NOT NULL THEN
+        SET p_resultado = JSON_INSERT(p_resultado, '$.uuid_transacao', v_uuid_transacao);
+    END IF;
 
 END ;;
 DELIMITER ;
@@ -20633,6 +21480,38 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_permissao_validar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_permissao_validar`(
+    IN p_id_perfil BIGINT,
+    IN p_acao VARCHAR(100),
+    IN p_contexto VARCHAR(50),
+    OUT p_tem_permissao BOOLEAN
+)
+BEGIN
+    SET p_tem_permissao = EXISTS (
+        SELECT 1 FROM fluxo_transicao ft
+        JOIN fluxo_status fs_origem ON fs_origem.id_fluxo_status = ft.id_status_origem
+        JOIN fluxo_status fs_destino ON fs_destino.id_fluxo_status = ft.id_status_destino
+        WHERE ft.id_perfil_requerido = p_id_perfil
+          AND ft.ativo = 1
+          AND (fs_origem.codigo LIKE CONCAT(p_contexto, '%') 
+               OR fs_destino.codigo LIKE CONCAT(p_contexto, '%'))
+    );
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_procedimento_protocolo_criar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -21271,6 +22150,62 @@ BEGIN
 
     END IF;
 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_runtime_decision_engine` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_runtime_decision_engine`(
+    IN p_id_sessao_usuario BIGINT,
+    IN p_transicao_solicitada VARCHAR(60),
+    IN p_payload_json JSON
+)
+BEGIN
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_estado_atual VARCHAR(60);
+    DECLARE v_fingerprint CHAR(64);
+    
+    -- LAYER 1: GATEKEEPER (Rápido/No-Lock)
+    CALL sp_sessao_assert(p_id_sessao_usuario);
+    SELECT id_usuario INTO v_id_usuario FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao_usuario;
+    
+    -- LAYER 2: ORCHESTRATOR (Lógica de Workflow)
+    -- Busca estado atual no Core Imutável
+    SELECT estado_atual INTO v_estado_atual 
+    FROM atendimento_estado_ativo 
+    WHERE id_ffa = JSON_UNQUOTE(JSON_EXTRACT(p_payload_json, '$.id_ffa'));
+
+    -- LAYER 3: SEMANTIC WORKER (Escrita e Fingerprint)
+    -- Gerar o Fingerprint Determinístico
+    SET v_fingerprint = SHA2(CONCAT(v_id_usuario, v_estado_atual, p_transicao_solicitada, NOW(6)), 256);
+
+    -- Gravação no Ledger (Append-Only)
+    INSERT INTO atendimento_evento_ledger (
+        id_sessao_usuario, 
+        evento, 
+        estado_de, 
+        estado_para, 
+        decision_fingerprint,
+        payload
+    ) VALUES (
+        p_id_sessao_usuario, 
+        p_transicao_solicitada, 
+        v_estado_atual, 
+        'ESTADO_DESTINO_RESOLVIDO', -- vindo da matriz
+        v_fingerprint,
+        p_payload_json
+    );
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -22890,6 +23825,81 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_usuario_login` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_login`(
+    IN p_login VARCHAR(100)
+)
+    SQL SECURITY INVOKER
+BEGIN
+
+SELECT
+    u.id_usuario,
+    u.nome,
+    u.login,
+    u.email,
+    u.ativo,
+
+    p.id_perfil,
+    p.nome AS perfil,
+
+    s.id_sistema,
+    s.nome AS sistema,
+
+    un.id_unidade,
+    un.nome AS unidade,
+
+    c.id_cidade,
+    c.nome AS cidade,
+    c.uf,
+
+    lo.id_local,
+    lo.nome AS local_operacional
+
+FROM usuario u
+
+LEFT JOIN perfil p
+    ON p.id_perfil = u.id_perfil
+
+LEFT JOIN usuario_unidade uu
+    ON uu.id_usuario = u.id_usuario
+
+LEFT JOIN unidade un
+    ON un.id_unidade = uu.id_unidade
+
+LEFT JOIN cidade c
+    ON c.id_cidade = un.id_cidade
+
+LEFT JOIN usuario_contexto uc
+    ON uc.id_usuario = u.id_usuario
+
+LEFT JOIN sistema s
+    ON s.id_sistema = uc.id_sistema
+
+LEFT JOIN usuario_local_operacional ulo
+    ON ulo.id_usuario = u.id_usuario
+
+LEFT JOIN local_operacional lo
+    ON lo.id_local = ulo.id_local
+
+WHERE
+    u.login = p_login
+    AND u.ativo = 1;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_usuario_log_acesso_registrar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -23297,42 +24307,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Final view structure for view `usuarios`
---
-
-/*!50001 DROP VIEW IF EXISTS `usuarios`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `usuarios` AS select `u`.`id_usuario` AS `id_usuario`,`u`.`id_pessoa` AS `id_pessoa`,`u`.`id_entidade` AS `id_entidade`,`u`.`login` AS `login`,`u`.`email` AS `email`,`u`.`senha_hash` AS `senha_hash`,`u`.`ativo` AS `ativo`,`u`.`criado_em` AS `criado_em`,`u`.`atualizado_em` AS `atualizado_em` from `usuario` `u` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_admin_sessoes_ativas`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_admin_sessoes_ativas`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_admin_sessoes_ativas` AS select `su`.`id_sessao_usuario` AS `id_sessao_usuario`,`su`.`id_usuario` AS `id_usuario`,`u`.`login` AS `login`,`su`.`id_saas_entidade` AS `id_saas_entidade`,`su`.`setor_contexto` AS `setor_contexto`,`su`.`unidade_contexto` AS `unidade_contexto`,`su`.`ip_origem` AS `ip_origem`,`su`.`agente_usuario` AS `agente_usuario`,`su`.`criado_em` AS `iniciado_em`,`su`.`expiracao_em` AS `expira_em`,`su`.`ultimo_heartbeat` AS `ultimo_heartbeat` from (`sessao_usuario` `su` join `usuario` `u` on((`u`.`id_usuario` = `su`.`id_usuario`))) where ((`su`.`ativo` = true) and ((`su`.`expiracao_em` is null) or (`su`.`expiracao_em` > now(6)))) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
 -- Final view structure for view `vw_conciliacao_faturamento`
 --
 
@@ -23558,10 +24532,10 @@ DELIMITER ;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb3_general_ci */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_usuario_permissoes` AS select `us`.`id_usuario` AS `id_usuario`,`us`.`id_sistema` AS `id_sistema`,`us`.`id_perfil` AS `id_perfil`,`p`.`nome` AS `perfil_nome`,`pp`.`nome_procedure` AS `nome_procedure`,`pp`.`permitido` AS `permitido` from ((`usuario_sistema` `us` join `perfil` `p` on(((`p`.`id_perfil` = `us`.`id_perfil`) and (`p`.`ativo` = 1)))) left join `permissao_procedure` `pp` on(((`pp`.`id_perfil` = `us`.`id_perfil`) and (`pp`.`permitido` = 1)))) where (`us`.`ativo` = 1) */;
+/*!50001 VIEW `vw_usuario_permissoes` AS select `su`.`id_sessao_usuario` AS `id_sessao_usuario`,`su`.`id_usuario` AS `id_usuario`,`su`.`id_sistema` AS `id_sistema`,`us`.`id_perfil` AS `id_perfil`,`p`.`nome` AS `perfil_nome`,`pp`.`nome_procedure` AS `nome_procedure`,`pp`.`permitido` AS `permitido`,`su`.`id_unidade` AS `id_unidade`,`su`.`id_entidade` AS `id_entidade` from (((`sessao_usuario` `su` join `usuario_sistema` `us` on(((`us`.`id_usuario` = `su`.`id_usuario`) and (`us`.`ativo` = 1)))) join `perfil` `p` on(((`p`.`id_perfil` = `us`.`id_perfil`) and (`p`.`ativo` = 1)))) left join `permissao_procedure` `pp` on(((`pp`.`id_perfil` = `us`.`id_perfil`) and (`pp`.`permitido` = 1)))) where (`su`.`ativo` = 1) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -23611,4 +24585,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-03  5:07:56
+-- Dump completed on 2026-03-05  5:15:19

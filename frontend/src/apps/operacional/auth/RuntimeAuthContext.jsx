@@ -1,36 +1,70 @@
-import { createContext, useContext, useState, useEffect } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from "react";
 import * as jwtDecodeLib from "jwt-decode";
 const jwtDecode = jwtDecodeLib.default || jwtDecodeLib;
 
 const RuntimeAuthContext = createContext();
 
+const REQUIRED_CONTEXT_FIELDS = [
+    "id_usuario",
+    "id_sessao_usuario",
+    "id_sistema",
+    "id_unidade",
+    "id_local_operacional"
+];
+
+function hasOperationalContext(user) {
+    if (!user || typeof user !== "object") return false;
+    return REQUIRED_CONTEXT_FIELDS.every((field) => user[field] !== undefined && user[field] !== null);
+}
+
+function buildSessionFromToken(token) {
+    if (!token) return null;
+
+    try {
+        const user = jwtDecode(token);
+        return {
+            token,
+            user,
+            hasContext: hasOperationalContext(user)
+        };
+    } catch {
+        return {
+            token,
+            user: null,
+            hasContext: false
+        };
+    }
+}
+
 export function RuntimeAuthProvider({ children }) {
 
-    const [session, setSession] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
+    const [session, setSession] = useState(() => {
         const token = localStorage.getItem("runtime_token");
         if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setSession({ token, user: decoded });
-            } catch {
-                setSession({ token });
+            const builtSession = buildSessionFromToken(token);
+            if (builtSession?.hasContext) {
+                return builtSession;
             }
+            localStorage.removeItem("runtime_token");
         }
-        setLoading(false);
-    }, []);
+        return null;
+    });
+    const [loading] = useState(false);
 
     // helper to login by setting token
     function loginWithToken(token) {
         localStorage.setItem("runtime_token", token);
-        try {
-            const decoded = jwtDecode(token);
-            setSession({ token, user: decoded });
-        } catch {
-            setSession({ token });
+        const builtSession = buildSessionFromToken(token);
+
+        if (!builtSession?.hasContext) {
+            localStorage.removeItem("runtime_token");
+            setSession(null);
+            return false;
         }
+
+        setSession(builtSession);
+        return true;
     }
 
     function logout() {
@@ -38,12 +72,31 @@ export function RuntimeAuthProvider({ children }) {
         setSession(null);
     }
 
+    async function authFetch(input, init = {}) {
+        const token = session?.token || localStorage.getItem("runtime_token");
+        const headers = new Headers(init.headers || {});
+
+        if (token) {
+            headers.set("Authorization", `Bearer ${token}`);
+        }
+
+        const response = await fetch(input, { ...init, headers });
+
+        if (response.status === 401) {
+            logout();
+        }
+
+        return response;
+    }
+
     return (
         <RuntimeAuthContext.Provider value={{
             session,
             setSession: loginWithToken,
             logout,
-            loading
+            loading,
+            hasOperationalContext: Boolean(session?.hasContext),
+            authFetch
         }}>
             {children}
         </RuntimeAuthContext.Provider>

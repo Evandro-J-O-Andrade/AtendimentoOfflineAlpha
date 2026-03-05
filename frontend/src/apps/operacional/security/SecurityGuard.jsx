@@ -3,13 +3,13 @@ import { Navigate } from "react-router-dom";
 
 export default function SecurityGuard({ children }) {
 
-    const { session, loading } = useRuntimeAuth();
+    const { session, loading, hasOperationalContext } = useRuntimeAuth();
 
     if (loading) {
         return <div>Carregando...</div>;
     }
 
-    if (!session) {
+    if (!session || !hasOperationalContext) {
         return <Navigate to="/login" replace />;
     }
 

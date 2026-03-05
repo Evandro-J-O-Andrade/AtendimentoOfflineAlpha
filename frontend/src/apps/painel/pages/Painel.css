@@ -1,0 +1,260 @@
+/* Painel de Chamada */
+.painel-container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.painel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(0,0,0,0.3);
+}
+
+.painel-logo {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.painel-logo img {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    background: white;
+    padding: 8px;
+}
+
+.painel-logo h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #60a5fa;
+}
+
+.painel-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.clock-date {
+    font-size: 20px;
+    color: #94a3b8;
+}
+
+.clock-time {
+    font-size: 48px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: white;
+}
+
+/* Content */
+.painel-content {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.painel-loading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 24px;
+    color: #94a3b8;
+}
+
+.painel-loading .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Current Call */
+.current-call {
+    text-align: center;
+}
+
+.current-call h2 {
+    font-size: 24px;
+    color: #94a3b8;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+}
+
+.call-cards {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.call-card {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    padding: 40px 60px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 40px rgba(5,150,105,0.4);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.call-ticket {
+    font-size: 96px;
+    font-weight: 800;
+    letter-spacing: 8px;
+}
+
+.call-location {
+    font-size: 28px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 32px;
+    border-radius: 30px;
+}
+
+.no-call {
+    font-size: 36px;
+    color: #64748b;
+    padding: 60px;
+}
+
+/* Waiting Queue */
+.waiting-queue h2 {
+    font-size: 20px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.queue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 16px;
+}
+
+.queue-card {
+    background: #334155;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.queue-card.priority-1 {
+    border: 3px solid #dc2626;
+    background: rgba(220,38,38,0.2);
+}
+
+.queue-card.priority-2 {
+    border: 3px solid #f97316;
+    background: rgba(249,115,22,0.2);
+}
+
+.queue-card.priority-3 {
+    border: 3px solid #eab308;
+    background: rgba(234,179,8,0.2);
+}
+
+.queue-card.priority-4 {
+    border: 3px solid #22c55e;
+    background: rgba(34,197,94,0.2);
+}
+
+.queue-card.priority-5 {
+    border: 3px solid #3b82f6;
+    background: rgba(59,130,246,0.2);
+}
+
+.queue-ticket {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.queue-name {
+    font-size: 12px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.queue-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    font-size: 18px;
+}
+
+/* Footer */
+.painel-footer {
+    padding: 20px;
+    text-align: center;
+    background: rgba(0,0,0,0.3);
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .painel-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .painel-logo {
+        flex-direction: column;
+    }
+
+    .painel-logo h1 {
+        font-size: 24px;
+    }
+
+    .painel-clock {
+        align-items: center;
+    }
+
+    .clock-time {
+        font-size: 36px;
+    }
+
+    .call-ticket {
+        font-size: 64px;
+    }
+
+    .call-card {
+        padding: 30px 40px;
+    }
+
+    .queue-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+}

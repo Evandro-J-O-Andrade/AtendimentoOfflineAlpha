@@ -1,0 +1,311 @@
+/* Triagem Page */
+.triagem-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.triagem-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 24px;
+}
+
+.queue-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.btn-call-next {
+    width: 100%;
+    padding: 16px;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-call-next:hover {
+    background: #047857;
+}
+
+.btn-call-next:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Triage Form */
+.triage-form h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Patient Header */
+.patient-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.ticket {
+    background: #1e3a5f;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.patient-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Vital Signs */
+.vital-signs {
+    margin-bottom: 24px;
+}
+
+.vital-signs h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.vital-input {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vital-input label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.vital-input input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.vital-input input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.vital-input .unit {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+/* Risk Classification */
+.risk-classification {
+    margin-bottom: 24px;
+}
+
+.risk-classification h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.risk-options {
+    display: flex;
+    gap: 12px;
+}
+
+.risk-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.risk-option:hover {
+    border-color: #d1d5db;
+    transform: translateY(-2px);
+}
+
+.risk-option.selected {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.risk-icon {
+    font-size: 28px;
+}
+
+.risk-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Observations */
+.observations {
+    margin-bottom: 24px;
+}
+
+.observations h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.observations textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.observations textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* Triage Actions */
+.triage-actions {
+    display: flex;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-finish {
+    flex: 1;
+    padding: 14px 24px;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-finish:hover {
+    background: #047857;
+}
+
+.btn-finish:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.btn-forward {
+    flex: 1;
+    padding: 14px 24px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-forward:hover {
+    background: #2563eb;
+}
+
+.btn-forward:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* No Patient */
+.no-patient {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.no-patient p {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.no-patient .hint {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .triagem-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .vitals-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .risk-options {
+        flex-wrap: wrap;
+    }
+    
+    .risk-option {
+        min-width: calc(50% - 6px);
+    }
+}

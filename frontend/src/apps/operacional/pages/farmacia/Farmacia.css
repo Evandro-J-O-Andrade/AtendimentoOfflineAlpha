@@ -1,0 +1,323 @@
+/* Farmácia Page */
+.farmacia-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.farmacia-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Search Card */
+.search-card {
+    grid-column: 1 / -1;
+}
+
+.search-form {
+    display: flex;
+    gap: 12px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.btn-search {
+    padding: 12px 24px;
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-search:hover {
+    background: #7c3aed;
+}
+
+.btn-search:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Alerts */
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 16px;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Prescription Card */
+.prescription-card {
+    grid-column: 1;
+}
+
+.prescription-header {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.patient-info p {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #374151;
+}
+
+.patient-info strong {
+    color: #1f2937;
+    margin-right: 8px;
+}
+
+/* Prescription Items */
+.prescription-items h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.prescription-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.prescription-item.dispended {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.item-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.item-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 15px;
+}
+
+.item-dosage,
+.item-frequency {
+    color: #6b7280;
+    font-size: 13px;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.item-dispense {
+    display: flex;
+    gap: 8px;
+}
+
+.lote-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.lote-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.btn-dispense {
+    padding: 8px 16px;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-dispense:hover {
+    background: #047857;
+}
+
+.btn-dispense:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.dispended-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    background: #10b981;
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-finish {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-finish:hover {
+    background: #047857;
+}
+
+.btn-finish:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* History Card */
+.history-card {
+    grid-column: 2;
+}
+
+.history-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.history-item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.history-senha {
+    font-weight: 600;
+    color: #8b5cf6;
+    font-size: 13px;
+}
+
+.history-date {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.history-item-body {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.history-medicamento {
+    font-weight: 500;
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.history-quantidade {
+    color: #6b7280;
+    font-size: 12px;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.history-lote {
+    color: #6b7280;
+    font-size: 12px;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.history-patient {
+    color: #6b7280;
+    font-size: 12px;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 6px;
+}
+
+.empty-message {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .farmacia-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-card,
+    .prescription-card,
+    .history-card {
+        grid-column: 1;
+    }
+}

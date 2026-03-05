@@ -47,7 +47,11 @@ module.exports = async function guardiaoRuntime(req, res, next) {
         try {
             await pool.query("CALL sp_sessao_assert(?)", [decoded.id_sessao_usuario]);
         } catch (err) {
-            console.log("Procedure sp_sessao_assert not found, skipping session validation:", err.message);
+            if (err && (err.code === "ER_SP_DOES_NOT_EXIST" || String(err.message || "").includes("does not exist"))) {
+                console.log("Procedure sp_sessao_assert not found, skipping session validation:", err.message);
+            } else {
+                throw err;
+            }
         }
 
         // optionally fetch session data for heartbeat or metadata if needed
@@ -55,7 +59,11 @@ module.exports = async function guardiaoRuntime(req, res, next) {
             const [[rows]] = await pool.query("CALL sp_sessao_contexto_get(?)", [decoded.id_sessao_usuario]);
             runtime = rows[0];
         } catch (err) {
-            console.log("Procedure sp_sessao_contexto_get not found:", err.message);
+            if (err && (err.code === "ER_SP_DOES_NOT_EXIST" || String(err.message || "").includes("does not exist"))) {
+                console.log("Procedure sp_sessao_contexto_get not found:", err.message);
+            } else {
+                throw err;
+            }
         }
 
         /*
@@ -70,7 +78,8 @@ module.exports = async function guardiaoRuntime(req, res, next) {
             }
         }
 
-        req.runtime = decoded;
+        req.runtime = runtime || decoded;
+        req.user = decoded; // Compatibilidade com authMiddleware
 
         next();
 
