@@ -1219,17 +1219,28 @@ DROP TABLE IF EXISTS `atendimento_evento`;
 CREATE TABLE `atendimento_evento` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
   `id_saas_entidade` bigint NOT NULL,
-  `id_ffa` bigint NOT NULL,
-  `tipo_evento` varchar(60) NOT NULL,
-  `contexto_fluxo` varchar(40) NOT NULL,
+  `id_unidade` bigint DEFAULT NULL,
+  `id_ffa` bigint DEFAULT NULL,
+  `id_atendimento` bigint DEFAULT NULL,
+  `id_paciente` bigint DEFAULT NULL,
+  `dominio` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo_evento` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `estado_origem` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado_destino` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contexto_fluxo` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `payload` json DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
+  `id_usuario` bigint DEFAULT NULL,
+  `hash_evento` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_evento`),
   KEY `idx_evento_ffa` (`id_ffa`),
+  KEY `idx_evento_atendimento` (`id_atendimento`),
+  KEY `idx_evento_paciente` (`id_paciente`),
+  KEY `idx_evento_dominio` (`dominio`),
   KEY `idx_evento_tipo` (`tipo_evento`),
-  KEY `idx_evento_saas` (`id_saas_entidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_evento_tempo` (`criado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1251,21 +1262,42 @@ DROP TABLE IF EXISTS `atendimento_evento_ledger`;
 CREATE TABLE `atendimento_evento_ledger` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
   `uuid_transacao` char(36) COLLATE utf8mb4_general_ci NOT NULL,
+  `uuid_transacao_pai` char(36) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sequencia_evento` int NOT NULL,
   `id_usuario` bigint NOT NULL,
+  `id_sessao` bigint NOT NULL,
   `id_perfil` bigint NOT NULL,
+  `nome_usuario` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `acao` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `modulo` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `sub_modulo` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `estado_origem` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `estado_destino` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `payload` json DEFAULT NULL,
-  `status_evento` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'SUCESSO',
-  `mensagem` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `estado_anterior` json DEFAULT NULL,
+  `estado_novo` json DEFAULT NULL,
+  `payload_original` json DEFAULT NULL,
+  `payload_processado` json DEFAULT NULL,
+  `id_atendimento` bigint GENERATED ALWAYS AS (json_unquote(json_extract(`payload_original`,_utf8mb4'$.id_atendimento'))) STORED,
+  `status_evento` enum('SUCESSO','ERRO','AVISO','CANCELADO','ROLLBACK') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SUCESSO',
+  `codigo_erro` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `mensagem` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip_origem` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_agent` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `hostname` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `processing_time_ms` int DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_evento`),
-  KEY `idx_transacao` (`uuid_transacao`),
+  UNIQUE KEY `uk_chain_evento` (`uuid_transacao`,`sequencia_evento`),
+  KEY `idx_chain_pai` (`uuid_transacao_pai`),
   KEY `idx_usuario` (`id_usuario`),
+  KEY `idx_sessao` (`id_sessao`),
+  KEY `idx_perfil` (`id_perfil`),
+  KEY `idx_modulo` (`modulo`),
   KEY `idx_acao` (`acao`),
-  KEY `idx_created` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Ledger de auditoria de todas as ações do sistema';
+  KEY `idx_created` (`created_at`),
+  KEY `idx_atendimento` (`id_atendimento`),
+  KEY `idx_status` (`status_evento`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Kernel Clinical Decision Ledger Append Only';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1970,6 +2002,402 @@ LOCK TABLES `auditoria_visualizacao_prontuario` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `auth_audit`
+--
+
+DROP TABLE IF EXISTS `auth_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_audit` (
+  `id_audit` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint DEFAULT NULL,
+  `id_sessao` bigint DEFAULT NULL,
+  `acao` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `recurso` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `detalhes` json DEFAULT NULL,
+  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `sucesso` tinyint(1) DEFAULT '1',
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_audit`),
+  KEY `idx_audit_usuario` (`id_usuario`),
+  KEY `idx_audit_sessao` (`id_sessao`),
+  KEY `idx_audit_acao` (`acao`),
+  KEY `idx_audit_data` (`criado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_audit`
+--
+
+LOCK TABLES `auth_audit` WRITE;
+/*!40000 ALTER TABLE `auth_audit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_audit` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_bloqueio`
+--
+
+DROP TABLE IF EXISTS `auth_bloqueio`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_bloqueio` (
+  `id_bloqueio` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `tipo_bloqueio` enum('SENHA_EXPIRADA','TENTATIVAS_EXCEDIDAS','ADMINISTRATIVO','INATIVIDADE','FRAUDE') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `motivo` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `bloqueado_por` bigint DEFAULT NULL,
+  `expira_em` datetime DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `desbloqueado_por` bigint DEFAULT NULL,
+  `desbloqueado_em` datetime DEFAULT NULL,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_bloqueio`),
+  KEY `idx_bloqueio_usuario` (`id_usuario`),
+  KEY `idx_bloqueio_expira` (`expira_em`),
+  CONSTRAINT `fk_bloqueio_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_bloqueio`
+--
+
+LOCK TABLES `auth_bloqueio` WRITE;
+/*!40000 ALTER TABLE `auth_bloqueio` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_bloqueio` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_grupo`
+--
+
+DROP TABLE IF EXISTS `auth_grupo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_grupo` (
+  `id_grupo` bigint NOT NULL AUTO_INCREMENT,
+  `nome` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` text COLLATE utf8mb4_unicode_ci,
+  `tipo_grupo` enum('SETOR','EQUIPE','PROJETO','REGIONAL') COLLATE utf8mb4_unicode_ci DEFAULT 'SETOR',
+  `id_unidade` bigint DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_por` bigint DEFAULT NULL,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_grupo`),
+  KEY `idx_grupo_unidade` (`id_unidade`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_grupo`
+--
+
+LOCK TABLES `auth_grupo` WRITE;
+/*!40000 ALTER TABLE `auth_grupo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_grupo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_grupo_permissao`
+--
+
+DROP TABLE IF EXISTS `auth_grupo_permissao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_grupo_permissao` (
+  `id_grupo_permissao` bigint NOT NULL AUTO_INCREMENT,
+  `id_grupo` bigint NOT NULL,
+  `recurso` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `acao` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_grupo_permissao`),
+  UNIQUE KEY `uk_grupo_recurso` (`id_grupo`,`recurso`,`acao`),
+  CONSTRAINT `fk_gp_grupo` FOREIGN KEY (`id_grupo`) REFERENCES `auth_grupo` (`id_grupo`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_grupo_permissao`
+--
+
+LOCK TABLES `auth_grupo_permissao` WRITE;
+/*!40000 ALTER TABLE `auth_grupo_permissao` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_grupo_permissao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_grupo_usuario`
+--
+
+DROP TABLE IF EXISTS `auth_grupo_usuario`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_grupo_usuario` (
+  `id_grupo_usuario` bigint NOT NULL AUTO_INCREMENT,
+  `id_grupo` bigint NOT NULL,
+  `id_usuario` bigint NOT NULL,
+  `papel` enum('MEMBRO','COORDENADOR','SUBCOORDENADOR') COLLATE utf8mb4_unicode_ci DEFAULT 'MEMBRO',
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_grupo_usuario`),
+  UNIQUE KEY `uk_grupo_usuario` (`id_grupo`,`id_usuario`),
+  KEY `idx_grupo_usuario_usuario` (`id_usuario`),
+  CONSTRAINT `fk_gu_grupo` FOREIGN KEY (`id_grupo`) REFERENCES `auth_grupo` (`id_grupo`) ON DELETE CASCADE,
+  CONSTRAINT `fk_gu_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_grupo_usuario`
+--
+
+LOCK TABLES `auth_grupo_usuario` WRITE;
+/*!40000 ALTER TABLE `auth_grupo_usuario` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_grupo_usuario` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_log`
+--
+
+DROP TABLE IF EXISTS `auth_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_log` (
+  `id_log` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint DEFAULT NULL,
+  `tipo_evento` enum('LOGIN_SUCESSO','LOGIN_FALHA','LOGOUT','SENHA_TROCA','SENHA_RESET','TOKEN_REFRESH','BLOQUEIO','DESBLOQUEIO','SESSAO_EXPIRADA') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `dispositivo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `localizacao` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mensagem` text COLLATE utf8mb4_unicode_ci,
+  `dados_extras` json DEFAULT NULL,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_log`),
+  KEY `idx_log_usuario` (`id_usuario`),
+  KEY `idx_log_tipo` (`tipo_evento`),
+  KEY `idx_log_data` (`criado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_log`
+--
+
+LOCK TABLES `auth_log` WRITE;
+/*!40000 ALTER TABLE `auth_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_notificacao`
+--
+
+DROP TABLE IF EXISTS `auth_notificacao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_notificacao` (
+  `id_notificacao` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `tipo_notificacao` enum('LOGIN_NOVO_DISPOSITIVO','LOGIN_SUSPEITO','SENHA_EXPIRANDO','BLOQUUEIO_CONTA','SEGURANCA_ALERTA') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `titulo` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mensagem` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lido` tinyint(1) DEFAULT '0',
+  `lido_em` datetime DEFAULT NULL,
+  `dados_extras` json DEFAULT NULL,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_notificacao`),
+  KEY `idx_notif_usuario` (`id_usuario`),
+  KEY `idx_notif_lido` (`lido`),
+  KEY `idx_notif_data` (`criado_em`),
+  CONSTRAINT `fk_notif_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_notificacao`
+--
+
+LOCK TABLES `auth_notificacao` WRITE;
+/*!40000 ALTER TABLE `auth_notificacao` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_notificacao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_parametro`
+--
+
+DROP TABLE IF EXISTS `auth_parametro`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_parametro` (
+  `id_parametro` bigint NOT NULL AUTO_INCREMENT,
+  `chave` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `valor` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` text COLLATE utf8mb4_unicode_ci,
+  `tipo_parametro` enum('SENHA','SESSAO','TOKEN','BLOQUEIO','GERAL') COLLATE utf8mb4_unicode_ci DEFAULT 'GERAL',
+  `ativo` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id_parametro`),
+  UNIQUE KEY `uk_parametro_chave` (`chave`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_parametro`
+--
+
+LOCK TABLES `auth_parametro` WRITE;
+/*!40000 ALTER TABLE `auth_parametro` DISABLE KEYS */;
+INSERT INTO `auth_parametro` VALUES (1,'senha_tamanho_minimo','6','Tamanho mínimo da senha','SENHA',1),(2,'senha_tamanho_maximo','20','Tamanho máximo da senha','SENHA',1),(3,'senha_exige_maiuscula','1','Exige letra maiúscula na senha','SENHA',1),(4,'senha_exige_minuscula','1','Exige letra minúscula na senha','SENHA',1),(5,'senha_exige_numero','1','Exige número na senha','SENHA',1),(6,'senha_exige_especial','0','Exige caractere especial na senha','SENHA',1),(7,'senha_dias_expiracao','90','Dias até expiração da senha','SENHA',1),(8,'senha_historico_tamanho','5','Quantidade de senhas no histórico','SENHA',1),(9,'login_tentativas_maximas','5','Máximo de tentativas de login','BLOQUEIO',1),(10,'login_bloqueio_minutos','30','Minutos de bloqueio após tentativas','BLOQUEIO',1),(11,'sessao_duracao_horas','8','Duração máxima da sessão em horas','SESSAO',1),(12,'token_refresh_dias','30','Dias de validade do token de refresh','TOKEN',1),(13,'token_recovery_minutos','15','Minutos de validade do token de recuperação','TOKEN',1);
+/*!40000 ALTER TABLE `auth_parametro` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_sessao`
+--
+
+DROP TABLE IF EXISTS `auth_sessao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_sessao` (
+  `id_sessao` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `id_unidade` bigint DEFAULT NULL,
+  `id_local_operacional` bigint DEFAULT NULL,
+  `id_perfil` bigint DEFAULT NULL,
+  `token_sessao` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `dispositivo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `geo_localizacao` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `expira_em` datetime NOT NULL,
+  `ultima_atividade` datetime DEFAULT CURRENT_TIMESTAMP,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_sessao`),
+  KEY `idx_sessao_usuario` (`id_usuario`),
+  KEY `idx_sessao_token` (`token_sessao`),
+  KEY `idx_sessao_expira` (`expira_em`),
+  CONSTRAINT `fk_sessao_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_sessao`
+--
+
+LOCK TABLES `auth_sessao` WRITE;
+/*!40000 ALTER TABLE `auth_sessao` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_sessao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_sessao_dispositivo`
+--
+
+DROP TABLE IF EXISTS `auth_sessao_dispositivo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_sessao_dispositivo` (
+  `id_dispositivo_confiavel` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `dispositivo_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nome_dispositivo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sistema_operacional` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `navegador` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ultimo_ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ultimo_acesso` datetime DEFAULT CURRENT_TIMESTAMP,
+  `primeiro_acesso` datetime DEFAULT CURRENT_TIMESTAMP,
+  `confiavel` tinyint(1) DEFAULT '0',
+  `ativo` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id_dispositivo_confiavel`),
+  KEY `idx_dispositivo_usuario` (`id_usuario`),
+  KEY `idx_dispositivo_hash` (`dispositivo_hash`),
+  CONSTRAINT `fk_dispositivo_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_sessao_dispositivo`
+--
+
+LOCK TABLES `auth_sessao_dispositivo` WRITE;
+/*!40000 ALTER TABLE `auth_sessao_dispositivo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_sessao_dispositivo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_tentativa_login`
+--
+
+DROP TABLE IF EXISTS `auth_tentativa_login`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_tentativa_login` (
+  `id_tentativa` bigint NOT NULL AUTO_INCREMENT,
+  `login` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `sucesso` tinyint(1) NOT NULL DEFAULT '0',
+  `motivo_falha` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_tentativa`),
+  KEY `idx_tentativa_login` (`login`),
+  KEY `idx_tentativa_ip` (`ip_origem`),
+  KEY `idx_tentativa_data` (`criado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_tentativa_login`
+--
+
+LOCK TABLES `auth_tentativa_login` WRITE;
+/*!40000 ALTER TABLE `auth_tentativa_login` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_tentativa_login` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_token`
+--
+
+DROP TABLE IF EXISTS `auth_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_token` (
+  `id_token` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `tipo_token` enum('ACCESS','REFRESH','RECOVERY','VERIFICATION') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `ativo` tinyint(1) DEFAULT '1',
+  `expira_em` datetime NOT NULL,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `utilizado_em` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_token`),
+  KEY `idx_token_usuario` (`id_usuario`),
+  KEY `idx_token_hash` (`token_hash`),
+  KEY `idx_token_expira` (`expira_em`),
+  CONSTRAINT `fk_token_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_token`
+--
+
+LOCK TABLES `auth_token` WRITE;
+/*!40000 ALTER TABLE `auth_token` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `caixa`
 --
 
@@ -2331,7 +2759,7 @@ CREATE TABLE `cidade` (
   PRIMARY KEY (`id_cidade`),
   KEY `idx_cidade_entidade` (`id_entidade`),
   CONSTRAINT `fk_cidade_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2340,6 +2768,7 @@ CREATE TABLE `cidade` (
 
 LOCK TABLES `cidade` WRITE;
 /*!40000 ALTER TABLE `cidade` DISABLE KEYS */;
+INSERT INTO `cidade` VALUES (1,'São Paulo','SP',NULL,1,1,'2026-03-05 06:59:15.266813',NULL);
 /*!40000 ALTER TABLE `cidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2929,6 +3358,64 @@ CREATE TABLE `dispensacao_medicacao` (
 LOCK TABLES `dispensacao_medicacao` WRITE;
 /*!40000 ALTER TABLE `dispensacao_medicacao` DISABLE KEYS */;
 /*!40000 ALTER TABLE `dispensacao_medicacao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `dispositivo`
+--
+
+DROP TABLE IF EXISTS `dispositivo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `dispositivo` (
+  `id_dispositivo` bigint NOT NULL AUTO_INCREMENT,
+  `identificador` varchar(120) NOT NULL,
+  `descricao` varchar(120) DEFAULT NULL,
+  `tipo` varchar(50) DEFAULT NULL,
+  `ip_registro` varchar(45) DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_dispositivo`),
+  UNIQUE KEY `uk_dispositivo_identificador` (`identificador`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dispositivo`
+--
+
+LOCK TABLES `dispositivo` WRITE;
+/*!40000 ALTER TABLE `dispositivo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dispositivo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `dispositivo_tipo`
+--
+
+DROP TABLE IF EXISTS `dispositivo_tipo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `dispositivo_tipo` (
+  `id_dispositivo_tipo` bigint NOT NULL AUTO_INCREMENT,
+  `nome` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `permite_login_usuario` tinyint(1) DEFAULT '1',
+  `requer_autenticacao` tinyint(1) DEFAULT '1',
+  `usa_tts` tinyint(1) DEFAULT '0',
+  `exibe_painel` tinyint(1) DEFAULT '0',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_dispositivo_tipo`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dispositivo_tipo`
+--
+
+LOCK TABLES `dispositivo_tipo` WRITE;
+/*!40000 ALTER TABLE `dispositivo_tipo` DISABLE KEYS */;
+INSERT INTO `dispositivo_tipo` VALUES (1,'PAINEL','Painel de chamadas',0,1,1,1,'2026-03-06 22:19:47.151708'),(2,'TOTEM','Totem auto atendimento',1,1,0,0,'2026-03-06 22:19:47.151708'),(3,'TERMINAL','Terminal fixo atendimento',1,1,0,0,'2026-03-06 22:19:47.151708'),(4,'TABLET','Tablet assistencial',1,1,0,0,'2026-03-06 22:19:47.151708'),(5,'MOBILE','Dispositivo mobile profissional',1,1,0,0,'2026-03-06 22:19:47.151708'),(6,'DESKTOP','Computador administrativo',1,1,0,0,'2026-03-06 22:19:47.151708');
+/*!40000 ALTER TABLE `dispositivo_tipo` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -6371,7 +6858,7 @@ CREATE TABLE `funcionario` (
   KEY `idx_funcionario_matricula` (`matricula`),
   CONSTRAINT `fk_funcionario_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_funcionario_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=501 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6380,6 +6867,7 @@ CREATE TABLE `funcionario` (
 
 LOCK TABLES `funcionario` WRITE;
 /*!40000 ALTER TABLE `funcionario` DISABLE KEYS */;
+INSERT INTO `funcionario` VALUES (1,1,NULL,'MAT_000001','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.812711',NULL),(2,2,NULL,'MAT_000002','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.814436',NULL),(3,3,NULL,'MAT_000003','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.814797',NULL),(4,4,NULL,'MAT_000004','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.814908',NULL),(5,5,NULL,'MAT_000005','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.815159',NULL),(6,6,NULL,'MAT_000006','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.815239',NULL),(7,7,NULL,'MAT_000007','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.815317',NULL),(8,8,NULL,'MAT_000008','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.815395',NULL),(9,9,NULL,'MAT_000009','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.815480',NULL),(10,10,NULL,'MAT_000010','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.815544',NULL),(11,11,NULL,'MAT_000011','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.815612',NULL),(12,12,NULL,'MAT_000012','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.815678',NULL),(13,13,NULL,'MAT_000013','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.815745',NULL),(14,14,NULL,'MAT_000014','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.815814',NULL),(15,15,NULL,'MAT_000015','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.815887',NULL),(16,16,NULL,'MAT_000016','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.815968',NULL),(17,17,NULL,'MAT_000017','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.816041',NULL),(18,18,NULL,'MAT_000018','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.816120',NULL),(19,19,NULL,'MAT_000019','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.816194',NULL),(20,20,NULL,'MAT_000020','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.816257',NULL),(21,21,NULL,'MAT_000021','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.816369',NULL),(22,22,NULL,'MAT_000022','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.816457',NULL),(23,23,NULL,'MAT_000023','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.816537',NULL),(24,24,NULL,'MAT_000024','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.816616',NULL),(25,25,NULL,'MAT_000025','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.816690',NULL),(26,26,NULL,'MAT_000026','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.816769',NULL),(27,27,NULL,'MAT_000027','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.816846',NULL),(28,28,NULL,'MAT_000028','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.816929',NULL),(29,29,NULL,'MAT_000029','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.817017',NULL),(30,30,NULL,'MAT_000030','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.817158',NULL),(31,31,NULL,'MAT_000031','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.817248',NULL),(32,32,NULL,'MAT_000032','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.817322',NULL),(33,33,NULL,'MAT_000033','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.817414',NULL),(34,34,NULL,'MAT_000034','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.817486',NULL),(35,35,NULL,'MAT_000035','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.817567',NULL),(36,36,NULL,'MAT_000036','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.817640',NULL),(37,37,NULL,'MAT_000037','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.817718',NULL),(38,38,NULL,'MAT_000038','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.817794',NULL),(39,39,NULL,'MAT_000039','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.817867',NULL),(40,40,NULL,'MAT_000040','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.817947',NULL),(41,41,NULL,'MAT_000041','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.818018',NULL),(42,42,NULL,'MAT_000042','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.818083',NULL),(43,43,NULL,'MAT_000043','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.818149',NULL),(44,44,NULL,'MAT_000044','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.818218',NULL),(45,45,NULL,'MAT_000045','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.818293',NULL),(46,46,NULL,'MAT_000046','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.818365',NULL),(47,47,NULL,'MAT_000047','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.818440',NULL),(48,48,NULL,'MAT_000048','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.818517',NULL),(49,49,NULL,'MAT_000049','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.818599',NULL),(50,50,NULL,'MAT_000050','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.818664',NULL),(51,51,NULL,'MAT_000051','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.818727',NULL),(52,52,NULL,'MAT_000052','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.818793',NULL),(53,53,NULL,'MAT_000053','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.818862',NULL),(54,54,NULL,'MAT_000054','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.818941',NULL),(55,55,NULL,'MAT_000055','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.819016',NULL),(56,56,NULL,'MAT_000056','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.819087',NULL),(57,57,NULL,'MAT_000057','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.819161',NULL),(58,58,NULL,'MAT_000058','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.819234',NULL),(59,59,NULL,'MAT_000059','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.819314',NULL),(60,60,NULL,'MAT_000060','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.819378',NULL),(61,61,NULL,'MAT_000061','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.819447',NULL),(62,62,NULL,'MAT_000062','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.819513',NULL),(63,63,NULL,'MAT_000063','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.819615',NULL),(64,64,NULL,'MAT_000064','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.819711',NULL),(65,65,NULL,'MAT_000065','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.819791',NULL),(66,66,NULL,'MAT_000066','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.819868',NULL),(67,67,NULL,'MAT_000067','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.819978',NULL),(68,68,NULL,'MAT_000068','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.820094',NULL),(69,69,NULL,'MAT_000069','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.820183',NULL),(70,70,NULL,'MAT_000070','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.820259',NULL),(71,71,NULL,'MAT_000071','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.820337',NULL),(72,72,NULL,'MAT_000072','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.820408',NULL),(73,73,NULL,'MAT_000073','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.820492',NULL),(74,74,NULL,'MAT_000074','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.820564',NULL),(75,75,NULL,'MAT_000075','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.820634',NULL),(76,76,NULL,'MAT_000076','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.820706',NULL),(77,77,NULL,'MAT_000077','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.820780',NULL),(78,78,NULL,'MAT_000078','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.820854',NULL),(79,79,NULL,'MAT_000079','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.821022',NULL),(80,80,NULL,'MAT_000080','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.821129',NULL),(81,81,NULL,'MAT_000081','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.821205',NULL),(82,82,NULL,'MAT_000082','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.821282',NULL),(83,83,NULL,'MAT_000083','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.821357',NULL),(84,84,NULL,'MAT_000084','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.821430',NULL),(85,85,NULL,'MAT_000085','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.821554',NULL),(86,86,NULL,'MAT_000086','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.821641',NULL),(87,87,NULL,'MAT_000087','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.821765',NULL),(88,88,NULL,'MAT_000088','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.821849',NULL),(89,89,NULL,'MAT_000089','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.821942',NULL),(90,90,NULL,'MAT_000090','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.822012',NULL),(91,91,NULL,'MAT_000091','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.822095',NULL),(92,92,NULL,'MAT_000092','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.822170',NULL),(93,93,NULL,'MAT_000093','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.822238',NULL),(94,94,NULL,'MAT_000094','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.822306',NULL),(95,95,NULL,'MAT_000095','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.822376',NULL),(96,96,NULL,'MAT_000096','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.822447',NULL),(97,97,NULL,'MAT_000097','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.822595',NULL),(98,98,NULL,'MAT_000098','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.822682',NULL),(99,99,NULL,'MAT_000099','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.822760',NULL),(100,100,NULL,'MAT_000100','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.822823',NULL),(101,101,NULL,'MAT_000101','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.822888',NULL),(102,102,NULL,'MAT_000102','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.822974',NULL),(103,103,NULL,'MAT_000103','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.823044',NULL),(104,104,NULL,'MAT_000104','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.823115',NULL),(105,105,NULL,'MAT_000105','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.823199',NULL),(106,106,NULL,'MAT_000106','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.823273',NULL),(107,107,NULL,'MAT_000107','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.823347',NULL),(108,108,NULL,'MAT_000108','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.823475',NULL),(109,109,NULL,'MAT_000109','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.823560',NULL),(110,110,NULL,'MAT_000110','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.823623',NULL),(111,111,NULL,'MAT_000111','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.823689',NULL),(112,112,NULL,'MAT_000112','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.823755',NULL),(113,113,NULL,'MAT_000113','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.823836',NULL),(114,114,NULL,'MAT_000114','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.823908',NULL),(115,115,NULL,'MAT_000115','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.824001',NULL),(116,116,NULL,'MAT_000116','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.824118',NULL),(117,117,NULL,'MAT_000117','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.824213',NULL),(118,118,NULL,'MAT_000118','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.824290',NULL),(119,119,NULL,'MAT_000119','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.824365',NULL),(120,120,NULL,'MAT_000120','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.824429',NULL),(121,121,NULL,'MAT_000121','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.824501',NULL),(122,122,NULL,'MAT_000122','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.824567',NULL),(123,123,NULL,'MAT_000123','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.824638',NULL),(124,124,NULL,'MAT_000124','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.824709',NULL),(125,125,NULL,'MAT_000125','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.824823',NULL),(126,126,NULL,'MAT_000126','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.824950',NULL),(127,127,NULL,'MAT_000127','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.825027',NULL),(128,128,NULL,'MAT_000128','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.825101',NULL),(129,129,NULL,'MAT_000129','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.825175',NULL),(130,130,NULL,'MAT_000130','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.825238',NULL),(131,131,NULL,'MAT_000131','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.825302',NULL),(132,132,NULL,'MAT_000132','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.825367',NULL),(133,133,NULL,'MAT_000133','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.825621',NULL),(134,134,NULL,'MAT_000134','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.825895',NULL),(135,135,NULL,'MAT_000135','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.826132',NULL),(136,136,NULL,'MAT_000136','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.826247',NULL),(137,137,NULL,'MAT_000137','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.826333',NULL),(138,138,NULL,'MAT_000138','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.826423',NULL),(139,139,NULL,'MAT_000139','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.826502',NULL),(140,140,NULL,'MAT_000140','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.826567',NULL),(141,141,NULL,'MAT_000141','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.826667',NULL),(142,142,NULL,'MAT_000142','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.826787',NULL),(143,143,NULL,'MAT_000143','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.826862',NULL),(144,144,NULL,'MAT_000144','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.826942',NULL),(145,145,NULL,'MAT_000145','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.827019',NULL),(146,146,NULL,'MAT_000146','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.827101',NULL),(147,147,NULL,'MAT_000147','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.827177',NULL),(148,148,NULL,'MAT_000148','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.827255',NULL),(149,149,NULL,'MAT_000149','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.827330',NULL),(150,150,NULL,'MAT_000150','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.827393',NULL),(151,151,NULL,'MAT_000151','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.827457',NULL),(152,152,NULL,'MAT_000152','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.827521',NULL),(153,153,NULL,'MAT_000153','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.827589',NULL),(154,154,NULL,'MAT_000154','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.827662',NULL),(155,155,NULL,'MAT_000155','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.827731',NULL),(156,156,NULL,'MAT_000156','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.827802',NULL),(157,157,NULL,'MAT_000157','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.827874',NULL),(158,158,NULL,'MAT_000158','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.827981',NULL),(159,159,NULL,'MAT_000159','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.828114',NULL),(160,160,NULL,'MAT_000160','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.828190',NULL),(161,161,NULL,'MAT_000161','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.828273',NULL),(162,162,NULL,'MAT_000162','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.828344',NULL),(163,163,NULL,'MAT_000163','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.828415',NULL),(164,164,NULL,'MAT_000164','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.828490',NULL),(165,165,NULL,'MAT_000165','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.829009',NULL),(166,166,NULL,'MAT_000166','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.829124',NULL),(167,167,NULL,'MAT_000167','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.829208',NULL),(168,168,NULL,'MAT_000168','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.829289',NULL),(169,169,NULL,'MAT_000169','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.829366',NULL),(170,170,NULL,'MAT_000170','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.831521',NULL),(171,171,NULL,'MAT_000171','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.831632',NULL),(172,172,NULL,'MAT_000172','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.831709',NULL),(173,173,NULL,'MAT_000173','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.831785',NULL),(174,174,NULL,'MAT_000174','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.831900',NULL),(175,175,NULL,'MAT_000175','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.831996',NULL),(176,176,NULL,'MAT_000176','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.832073',NULL),(177,177,NULL,'MAT_000177','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.832207',NULL),(178,178,NULL,'MAT_000178','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.832336',NULL),(179,179,NULL,'MAT_000179','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.832426',NULL),(180,180,NULL,'MAT_000180','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.832500',NULL),(181,181,NULL,'MAT_000181','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.832575',NULL),(182,182,NULL,'MAT_000182','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.832651',NULL),(183,183,NULL,'MAT_000183','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.832726',NULL),(184,184,NULL,'MAT_000184','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.832806',NULL),(185,185,NULL,'MAT_000185','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.832916',NULL),(186,186,NULL,'MAT_000186','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.833016',NULL),(187,187,NULL,'MAT_000187','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.833129',NULL),(188,188,NULL,'MAT_000188','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.833238',NULL),(189,189,NULL,'MAT_000189','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.833327',NULL),(190,190,NULL,'MAT_000190','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.833398',NULL),(191,191,NULL,'MAT_000191','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.833475',NULL),(192,192,NULL,'MAT_000192','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.833546',NULL),(193,193,NULL,'MAT_000193','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.833619',NULL),(194,194,NULL,'MAT_000194','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.833690',NULL),(195,195,NULL,'MAT_000195','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.833764',NULL),(196,196,NULL,'MAT_000196','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.833837',NULL),(197,197,NULL,'MAT_000197','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.833911',NULL),(198,198,NULL,'MAT_000198','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.833993',NULL),(199,199,NULL,'MAT_000199','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.834068',NULL),(200,200,NULL,'MAT_000200','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.834134',NULL),(201,201,NULL,'MAT_000201','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.834198',NULL),(202,202,NULL,'MAT_000202','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.834271',NULL),(203,203,NULL,'MAT_000203','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.834338',NULL),(204,204,NULL,'MAT_000204','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.834409',NULL),(205,205,NULL,'MAT_000205','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.834480',NULL),(206,206,NULL,'MAT_000206','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.835202',NULL),(207,207,NULL,'MAT_000207','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.835331',NULL),(208,208,NULL,'MAT_000208','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.835415',NULL),(209,209,NULL,'MAT_000209','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.835495',NULL),(210,210,NULL,'MAT_000210','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.835572',NULL),(211,211,NULL,'MAT_000211','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.835643',NULL),(212,212,NULL,'MAT_000212','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.835710',NULL),(213,213,NULL,'MAT_000213','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.835814',NULL),(214,214,NULL,'MAT_000214','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.835895',NULL),(215,215,NULL,'MAT_000215','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.836017',NULL),(216,216,NULL,'MAT_000216','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.836117',NULL),(217,217,NULL,'MAT_000217','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.836200',NULL),(218,218,NULL,'MAT_000218','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.836285',NULL),(219,219,NULL,'MAT_000219','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.836364',NULL),(220,220,NULL,'MAT_000220','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.836429',NULL),(221,221,NULL,'MAT_000221','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.836496',NULL),(222,222,NULL,'MAT_000222','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.836567',NULL),(223,223,NULL,'MAT_000223','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.836635',NULL),(224,224,NULL,'MAT_000224','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.836705',NULL),(225,225,NULL,'MAT_000225','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.836779',NULL),(226,226,NULL,'MAT_000226','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.836854',NULL),(227,227,NULL,'MAT_000227','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.836943',NULL),(228,228,NULL,'MAT_000228','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.837024',NULL),(229,229,NULL,'MAT_000229','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.837206',NULL),(230,230,NULL,'MAT_000230','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.837319',NULL),(231,231,NULL,'MAT_000231','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.837424',NULL),(232,232,NULL,'MAT_000232','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.837507',NULL),(233,233,NULL,'MAT_000233','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.837585',NULL),(234,234,NULL,'MAT_000234','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.837685',NULL),(235,235,NULL,'MAT_000235','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.837775',NULL),(236,236,NULL,'MAT_000236','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.837861',NULL),(237,237,NULL,'MAT_000237','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.837981',NULL),(238,238,NULL,'MAT_000238','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.838062',NULL),(239,239,NULL,'MAT_000239','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.838138',NULL),(240,240,NULL,'MAT_000240','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.838227',NULL),(241,241,NULL,'MAT_000241','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.838293',NULL),(242,242,NULL,'MAT_000242','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.838363',NULL),(243,243,NULL,'MAT_000243','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.838433',NULL),(244,244,NULL,'MAT_000244','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.838504',NULL),(245,245,NULL,'MAT_000245','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.838577',NULL),(246,246,NULL,'MAT_000246','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.838743',NULL),(247,247,NULL,'MAT_000247','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.838840',NULL),(248,248,NULL,'MAT_000248','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.839073',NULL),(249,249,NULL,'MAT_000249','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.839224',NULL),(250,250,NULL,'MAT_000250','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.839307',NULL),(251,251,NULL,'MAT_000251','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.839389',NULL),(252,252,NULL,'MAT_000252','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.839458',NULL),(253,253,NULL,'MAT_000253','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.839529',NULL),(254,254,NULL,'MAT_000254','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.840645',NULL),(255,255,NULL,'MAT_000255','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.840769',NULL),(256,256,NULL,'MAT_000256','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.840858',NULL),(257,257,NULL,'MAT_000257','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.840945',NULL),(258,258,NULL,'MAT_000258','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.841022',NULL),(259,259,NULL,'MAT_000259','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.841105',NULL),(260,260,NULL,'MAT_000260','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.841169',NULL),(261,261,NULL,'MAT_000261','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.841233',NULL),(262,262,NULL,'MAT_000262','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.841301',NULL),(263,263,NULL,'MAT_000263','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.841371',NULL),(264,264,NULL,'MAT_000264','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.841440',NULL),(265,265,NULL,'MAT_000265','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.841511',NULL),(266,266,NULL,'MAT_000266','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.841581',NULL),(267,267,NULL,'MAT_000267','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.841661',NULL),(268,268,NULL,'MAT_000268','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.841735',NULL),(269,269,NULL,'MAT_000269','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.841810',NULL),(270,270,NULL,'MAT_000270','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.841873',NULL),(271,271,NULL,'MAT_000271','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.841944',NULL),(272,272,NULL,'MAT_000272','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.842010',NULL),(273,273,NULL,'MAT_000273','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.842077',NULL),(274,274,NULL,'MAT_000274','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.842147',NULL),(275,275,NULL,'MAT_000275','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.842318',NULL),(276,276,NULL,'MAT_000276','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.842413',NULL),(277,277,NULL,'MAT_000277','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.842499',NULL),(278,278,NULL,'MAT_000278','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.842642',NULL),(279,279,NULL,'MAT_000279','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.842769',NULL),(280,280,NULL,'MAT_000280','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.842844',NULL),(281,281,NULL,'MAT_000281','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.842919',NULL),(282,282,NULL,'MAT_000282','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.842999',NULL),(283,283,NULL,'MAT_000283','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.843072',NULL),(284,284,NULL,'MAT_000284','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.843152',NULL),(285,285,NULL,'MAT_000285','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.843225',NULL),(286,286,NULL,'MAT_000286','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.843311',NULL),(287,287,NULL,'MAT_000287','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.843387',NULL),(288,288,NULL,'MAT_000288','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.843460',NULL),(289,289,NULL,'MAT_000289','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.843535',NULL),(290,290,NULL,'MAT_000290','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.843599',NULL),(291,291,NULL,'MAT_000291','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.843663',NULL),(292,292,NULL,'MAT_000292','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.843734',NULL),(293,293,NULL,'MAT_000293','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.843803',NULL),(294,294,NULL,'MAT_000294','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.843872',NULL),(295,295,NULL,'MAT_000295','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.843946',NULL),(296,296,NULL,'MAT_000296','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.844018',NULL),(297,297,NULL,'MAT_000297','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.844091',NULL),(298,298,NULL,'MAT_000298','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.844166',NULL),(299,299,NULL,'MAT_000299','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.844238',NULL),(300,300,NULL,'MAT_000300','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.844314',NULL),(301,301,NULL,'MAT_000301','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.844380',NULL),(302,302,NULL,'MAT_000302','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.844445',NULL),(303,303,NULL,'MAT_000303','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.844510',NULL),(304,304,NULL,'MAT_000304','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.844583',NULL),(305,305,NULL,'MAT_000305','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.844653',NULL),(306,306,NULL,'MAT_000306','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.844729',NULL),(307,307,NULL,'MAT_000307','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.844803',NULL),(308,308,NULL,'MAT_000308','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.844875',NULL),(309,309,NULL,'MAT_000309','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.844955',NULL),(310,310,NULL,'MAT_000310','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.845019',NULL),(311,311,NULL,'MAT_000311','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.845084',NULL),(312,312,NULL,'MAT_000312','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.845156',NULL),(313,313,NULL,'MAT_000313','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.845225',NULL),(314,314,NULL,'MAT_000314','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.845293',NULL),(315,315,NULL,'MAT_000315','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.845365',NULL),(316,316,NULL,'MAT_000316','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.845435',NULL),(317,317,NULL,'MAT_000317','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.845515',NULL),(318,318,NULL,'MAT_000318','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.845591',NULL),(319,319,NULL,'MAT_000319','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.845672',NULL),(320,320,NULL,'MAT_000320','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.845737',NULL),(321,321,NULL,'MAT_000321','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.845802',NULL),(322,322,NULL,'MAT_000322','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.845868',NULL),(323,323,NULL,'MAT_000323','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.845941',NULL),(324,324,NULL,'MAT_000324','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.846069',NULL),(325,325,NULL,'MAT_000325','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.846165',NULL),(326,326,NULL,'MAT_000326','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.846241',NULL),(327,327,NULL,'MAT_000327','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.846315',NULL),(328,328,NULL,'MAT_000328','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.846391',NULL),(329,329,NULL,'MAT_000329','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.846504',NULL),(330,330,NULL,'MAT_000330','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.846573',NULL),(331,331,NULL,'MAT_000331','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.846639',NULL),(332,332,NULL,'MAT_000332','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.846704',NULL),(333,333,NULL,'MAT_000333','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.846777',NULL),(334,334,NULL,'MAT_000334','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.846846',NULL),(335,335,NULL,'MAT_000335','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.846968',NULL),(336,336,NULL,'MAT_000336','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.847057',NULL),(337,337,NULL,'MAT_000337','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.847134',NULL),(338,338,NULL,'MAT_000338','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.847209',NULL),(339,339,NULL,'MAT_000339','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.847286',NULL),(340,340,NULL,'MAT_000340','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.847351',NULL),(341,341,NULL,'MAT_000341','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.847416',NULL),(342,342,NULL,'MAT_000342','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.847483',NULL),(343,343,NULL,'MAT_000343','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.847553',NULL),(344,344,NULL,'MAT_000344','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.847621',NULL),(345,345,NULL,'MAT_000345','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.847691',NULL),(346,346,NULL,'MAT_000346','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.847764',NULL),(347,347,NULL,'MAT_000347','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.847838',NULL),(348,348,NULL,'MAT_000348','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.847916',NULL),(349,349,NULL,'MAT_000349','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.848008',NULL),(350,350,NULL,'MAT_000350','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.848078',NULL),(351,351,NULL,'MAT_000351','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.848145',NULL),(352,352,NULL,'MAT_000352','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.848211',NULL),(353,353,NULL,'MAT_000353','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.848278',NULL),(354,354,NULL,'MAT_000354','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.848347',NULL),(355,355,NULL,'MAT_000355','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.848419',NULL),(356,356,NULL,'MAT_000356','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.848497',NULL),(357,357,NULL,'MAT_000357','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.848571',NULL),(358,358,NULL,'MAT_000358','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.848646',NULL),(359,359,NULL,'MAT_000359','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.848720',NULL),(360,360,NULL,'MAT_000360','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.848785',NULL),(361,361,NULL,'MAT_000361','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.848849',NULL),(362,362,NULL,'MAT_000362','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.848914',NULL),(363,363,NULL,'MAT_000363','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.848993',NULL),(364,364,NULL,'MAT_000364','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.849063',NULL),(365,365,NULL,'MAT_000365','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.849134',NULL),(366,366,NULL,'MAT_000366','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.849213',NULL),(367,367,NULL,'MAT_000367','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.849286',NULL),(368,368,NULL,'MAT_000368','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.849360',NULL),(369,369,NULL,'MAT_000369','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.849437',NULL),(370,370,NULL,'MAT_000370','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.849500',NULL),(371,371,NULL,'MAT_000371','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.849579',NULL),(372,372,NULL,'MAT_000372','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.849645',NULL),(373,373,NULL,'MAT_000373','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.849713',NULL),(374,374,NULL,'MAT_000374','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.849782',NULL),(375,375,NULL,'MAT_000375','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.849854',NULL),(376,376,NULL,'MAT_000376','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.849930',NULL),(377,377,NULL,'MAT_000377','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.850005',NULL),(378,378,NULL,'MAT_000378','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.850080',NULL),(379,379,NULL,'MAT_000379','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.850155',NULL),(380,380,NULL,'MAT_000380','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.850218',NULL),(381,381,NULL,'MAT_000381','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.850283',NULL),(382,382,NULL,'MAT_000382','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.850352',NULL),(383,383,NULL,'MAT_000383','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.850581',NULL),(384,384,NULL,'MAT_000384','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.850658',NULL),(385,385,NULL,'MAT_000385','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.850728',NULL),(386,386,NULL,'MAT_000386','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.850805',NULL),(387,387,NULL,'MAT_000387','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.850884',NULL),(388,388,NULL,'MAT_000388','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.851032',NULL),(389,389,NULL,'MAT_000389','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.851140',NULL),(390,390,NULL,'MAT_000390','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.851243',NULL),(391,391,NULL,'MAT_000391','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.851321',NULL),(392,392,NULL,'MAT_000392','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.851426',NULL),(393,393,NULL,'MAT_000393','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.851506',NULL),(394,394,NULL,'MAT_000394','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.851578',NULL),(395,395,NULL,'MAT_000395','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.851649',NULL),(396,396,NULL,'MAT_000396','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.851727',NULL),(397,397,NULL,'MAT_000397','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.851802',NULL),(398,398,NULL,'MAT_000398','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.851877',NULL),(399,399,NULL,'MAT_000399','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.851962',NULL),(400,400,NULL,'MAT_000400','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.852031',NULL),(401,401,NULL,'MAT_000401','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.852097',NULL),(402,402,NULL,'MAT_000402','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.852163',NULL),(403,403,NULL,'MAT_000403','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.852234',NULL),(404,404,NULL,'MAT_000404','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.852308',NULL),(405,405,NULL,'MAT_000405','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.852378',NULL),(406,406,NULL,'MAT_000406','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.852449',NULL),(407,407,NULL,'MAT_000407','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.852521',NULL),(408,408,NULL,'MAT_000408','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.852595',NULL),(409,409,NULL,'MAT_000409','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.852670',NULL),(410,410,NULL,'MAT_000410','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.852738',NULL),(411,411,NULL,'MAT_000411','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.852802',NULL),(412,412,NULL,'MAT_000412','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.852867',NULL),(413,413,NULL,'MAT_000413','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.852939',NULL),(414,414,NULL,'MAT_000414','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.853008',NULL),(415,415,NULL,'MAT_000415','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.853079',NULL),(416,416,NULL,'MAT_000416','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.853159',NULL),(417,417,NULL,'MAT_000417','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.853234',NULL),(418,418,NULL,'MAT_000418','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.853307',NULL),(419,419,NULL,'MAT_000419','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.853381',NULL),(420,420,NULL,'MAT_000420','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.853444',NULL),(421,421,NULL,'MAT_000421','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.853508',NULL),(422,422,NULL,'MAT_000422','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.854586',NULL),(423,423,NULL,'MAT_000423','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.854700',NULL),(424,424,NULL,'MAT_000424','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.854776',NULL),(425,425,NULL,'MAT_000425','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.854857',NULL),(426,426,NULL,'MAT_000426','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.854938',NULL),(427,427,NULL,'MAT_000427','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.855016',NULL),(428,428,NULL,'MAT_000428','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.855147',NULL),(429,429,NULL,'MAT_000429','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.855234',NULL),(430,430,NULL,'MAT_000430','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.855305',NULL),(431,431,NULL,'MAT_000431','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.855374',NULL),(432,432,NULL,'MAT_000432','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.855448',NULL),(433,433,NULL,'MAT_000433','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.855519',NULL),(434,434,NULL,'MAT_000434','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.855591',NULL),(435,435,NULL,'MAT_000435','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.855660',NULL),(436,436,NULL,'MAT_000436','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.855731',NULL),(437,437,NULL,'MAT_000437','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.855806',NULL),(438,438,NULL,'MAT_000438','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.855882',NULL),(439,439,NULL,'MAT_000439','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.855964',NULL),(440,440,NULL,'MAT_000440','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.856027',NULL),(441,441,NULL,'MAT_000441','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.856092',NULL),(442,442,NULL,'MAT_000442','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.856158',NULL),(443,443,NULL,'MAT_000443','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.856225',NULL),(444,444,NULL,'MAT_000444','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.856293',NULL),(445,445,NULL,'MAT_000445','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.856362',NULL),(446,446,NULL,'MAT_000446','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.856434',NULL),(447,447,NULL,'MAT_000447','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.856505',NULL),(448,448,NULL,'MAT_000448','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.856589',NULL),(449,449,NULL,'MAT_000449','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.856731',NULL),(450,450,NULL,'MAT_000450','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.856806',NULL),(451,451,NULL,'MAT_000451','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.856871',NULL),(452,452,NULL,'MAT_000452','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.856941',NULL),(453,453,NULL,'MAT_000453','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.857010',NULL),(454,454,NULL,'MAT_000454','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.857078',NULL),(455,455,NULL,'MAT_000455','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.857146',NULL),(456,456,NULL,'MAT_000456','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.857217',NULL),(457,457,NULL,'MAT_000457','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.857290',NULL),(458,458,NULL,'MAT_000458','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.857363',NULL),(459,459,NULL,'MAT_000459','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.857438',NULL),(460,460,NULL,'MAT_000460','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.857506',NULL),(461,461,NULL,'MAT_000461','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.857569',NULL),(462,462,NULL,'MAT_000462','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.857634',NULL),(463,463,NULL,'MAT_000463','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.857700',NULL),(464,464,NULL,'MAT_000464','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.857768',NULL),(465,465,NULL,'MAT_000465','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.857843',NULL),(466,466,NULL,'MAT_000466','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.857913',NULL),(467,467,NULL,'MAT_000467','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.857992',NULL),(468,468,NULL,'MAT_000468','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.858066',NULL),(469,469,NULL,'MAT_000469','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.858140',NULL),(470,470,NULL,'MAT_000470','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.858203',NULL),(471,471,NULL,'MAT_000471','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.858268',NULL),(472,472,NULL,'MAT_000472','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.858332',NULL),(473,473,NULL,'MAT_000473','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.858399',NULL),(474,474,NULL,'MAT_000474','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.858467',NULL),(475,475,NULL,'MAT_000475','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.858537',NULL),(476,476,NULL,'MAT_000476','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.858606',NULL),(477,477,NULL,'MAT_000477','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.858678',NULL),(478,478,NULL,'MAT_000478','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.858751',NULL),(479,479,NULL,'MAT_000479','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.858823',NULL),(480,480,NULL,'MAT_000480','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.859073',NULL),(481,481,NULL,'MAT_000481','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.859170',NULL),(482,482,NULL,'MAT_000482','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.859246',NULL),(483,483,NULL,'MAT_000483','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.859317',NULL),(484,484,NULL,'MAT_000484','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.859389',NULL),(485,485,NULL,'MAT_000485','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.859517',NULL),(486,486,NULL,'MAT_000486','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.859637',NULL),(487,487,NULL,'MAT_000487','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.859724',NULL),(488,488,NULL,'MAT_000488','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.859808',NULL),(489,489,NULL,'MAT_000489','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.859890',NULL),(490,490,NULL,'MAT_000490','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.859968',NULL),(491,491,NULL,'MAT_000491','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.860037',NULL),(492,492,NULL,'MAT_000492','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.860108',NULL),(493,493,NULL,'MAT_000493','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.860220',NULL),(494,494,NULL,'MAT_000494','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.860296',NULL),(495,495,NULL,'MAT_000495','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.860371',NULL),(496,496,NULL,'MAT_000496','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.860449',NULL),(497,497,NULL,'MAT_000497','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.860527',NULL),(498,498,NULL,'MAT_000498','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.860612',NULL),(499,499,NULL,'MAT_000499','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.860690',NULL),(500,500,NULL,'MAT_000500','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.860754',NULL);
 /*!40000 ALTER TABLE `funcionario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7572,6 +8060,134 @@ LOCK TABLES `internacao_turno_registro` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `kernel_authz_policy`
+--
+
+DROP TABLE IF EXISTS `kernel_authz_policy`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `kernel_authz_policy` (
+  `id_policy` bigint NOT NULL AUTO_INCREMENT,
+  `id_tenant` bigint NOT NULL,
+  `id_perfil` bigint NOT NULL,
+  `id_usuario` bigint DEFAULT NULL,
+  `contexto` varchar(60) NOT NULL,
+  `recurso` varchar(120) NOT NULL,
+  `estado_origem` varchar(60) DEFAULT '*',
+  `estado_destino` varchar(60) DEFAULT '*',
+  `id_dispositivo` bigint DEFAULT NULL,
+  `id_dispositivo_norm` bigint GENERATED ALWAYS AS (ifnull(`id_dispositivo`,0)) STORED,
+  `permitido` tinyint DEFAULT '0',
+  `decision_fingerprint` char(64) DEFAULT NULL,
+  `ativo` tinyint DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_policy`),
+  UNIQUE KEY `uk_policy_runtime` (`id_tenant`,`id_perfil`,`contexto`,`recurso`,`estado_origem`,`estado_destino`,`id_dispositivo_norm`),
+  KEY `idx_policy_lookup` (`id_tenant`,`contexto`,`recurso`,`ativo`,`permitido`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `kernel_authz_policy`
+--
+
+LOCK TABLES `kernel_authz_policy` WRITE;
+/*!40000 ALTER TABLE `kernel_authz_policy` DISABLE KEYS */;
+INSERT INTO `kernel_authz_policy` (`id_policy`, `id_tenant`, `id_perfil`, `id_usuario`, `contexto`, `recurso`, `estado_origem`, `estado_destino`, `id_dispositivo`, `permitido`, `decision_fingerprint`, `ativo`, `criado_em`) VALUES (1,1,2,NULL,'ATENDIMENTO','ATENDIMENTO_INICIAR','*','*',NULL,1,'5659b2b8bf643b502db844a6221bb923a75455d366aac478646ab063c5fc3dd7',1,'2026-03-05 06:01:17.130764');
+/*!40000 ALTER TABLE `kernel_authz_policy` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `kernel_identity_trust_chain`
+--
+
+DROP TABLE IF EXISTS `kernel_identity_trust_chain`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `kernel_identity_trust_chain` (
+  `id_chain` bigint NOT NULL AUTO_INCREMENT,
+  `id_tenant` bigint NOT NULL,
+  `id_usuario` bigint NOT NULL,
+  `id_sessao` bigint DEFAULT NULL,
+  `id_dispositivo` bigint DEFAULT NULL,
+  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fingerprint_runtime` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fingerprint_behavior` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fingerprint_device` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado_runtime` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `score_risco` int DEFAULT '0',
+  `limite_risco` int DEFAULT '80',
+  `tentativas` int DEFAULT '0',
+  `janela_tentativa` int DEFAULT '15',
+  `bloqueado` tinyint DEFAULT '0',
+  `ativo` tinyint DEFAULT '1',
+  `nonce_runtime` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lineage_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_chain`),
+  UNIQUE KEY `uk_nonce_runtime` (`nonce_runtime`),
+  KEY `idx_runtime_fp` (`fingerprint_runtime`),
+  KEY `idx_behavior_fp` (`fingerprint_behavior`),
+  KEY `idx_device_fp` (`fingerprint_device`),
+  KEY `idx_usuario` (`id_usuario`),
+  KEY `idx_tenant_usuario` (`id_tenant`,`id_usuario`),
+  KEY `idx_sessao` (`id_sessao`),
+  KEY `idx_dispositivo` (`id_dispositivo`),
+  KEY `idx_bloqueio` (`bloqueado`,`ativo`),
+  KEY `idx_score` (`score_risco`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `kernel_identity_trust_chain`
+--
+
+LOCK TABLES `kernel_identity_trust_chain` WRITE;
+/*!40000 ALTER TABLE `kernel_identity_trust_chain` DISABLE KEYS */;
+/*!40000 ALTER TABLE `kernel_identity_trust_chain` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `kernel_ledger`
+--
+
+DROP TABLE IF EXISTS `kernel_ledger`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `kernel_ledger` (
+  `id_transacao` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_sessao` bigint DEFAULT NULL,
+  `id_usuario` bigint NOT NULL,
+  `id_perfil` bigint NOT NULL,
+  `acao` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contexto` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT 'DEFAULT',
+  `payload` json DEFAULT NULL,
+  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `duracao_ms` int DEFAULT NULL,
+  `mensagem` text COLLATE utf8mb4_unicode_ci,
+  `id_tenant` bigint DEFAULT '1',
+  `registrado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_transacao`),
+  KEY `idx_usuario` (`id_usuario`,`registrado_em`),
+  KEY `idx_acao` (`acao`,`registrado_em`),
+  KEY `idx_contexto` (`contexto`,`registrado_em`),
+  KEY `idx_status` (`status`,`registrado_em`),
+  KEY `idx_tenant` (`id_tenant`,`registrado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `kernel_ledger`
+--
+
+LOCK TABLES `kernel_ledger` WRITE;
+/*!40000 ALTER TABLE `kernel_ledger` DISABLE KEYS */;
+/*!40000 ALTER TABLE `kernel_ledger` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `kernel_runtime_evento`
 --
 
@@ -8158,7 +8774,7 @@ CREATE TABLE `local_operacional` (
   PRIMARY KEY (`id_local_operacional`),
   KEY `idx_local_unidade` (`id_unidade`),
   CONSTRAINT `fk_local_operacional_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8167,6 +8783,7 @@ CREATE TABLE `local_operacional` (
 
 LOCK TABLES `local_operacional` WRITE;
 /*!40000 ALTER TABLE `local_operacional` DISABLE KEYS */;
+INSERT INTO `local_operacional` VALUES (1,1,'Recepção','RECEPCAO',1,'2026-03-05 07:02:00.254477');
 /*!40000 ALTER TABLE `local_operacional` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -8280,6 +8897,34 @@ CREATE TABLE `log_leitura_prontuario` (
 LOCK TABLES `log_leitura_prontuario` WRITE;
 /*!40000 ALTER TABLE `log_leitura_prontuario` DISABLE KEYS */;
 /*!40000 ALTER TABLE `log_leitura_prontuario` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `login_tentativa`
+--
+
+DROP TABLE IF EXISTS `login_tentativa`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `login_tentativa` (
+  `id_tentativa` bigint NOT NULL AUTO_INCREMENT,
+  `login` varchar(80) NOT NULL,
+  `ip_origem` varchar(45) DEFAULT NULL,
+  `sucesso` tinyint(1) DEFAULT '0',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_tentativa`),
+  KEY `idx_login_tentativa_login` (`login`),
+  KEY `idx_login_tentativa_ip` (`ip_origem`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `login_tentativa`
+--
+
+LOCK TABLES `login_tentativa` WRITE;
+/*!40000 ALTER TABLE `login_tentativa` DISABLE KEYS */;
+/*!40000 ALTER TABLE `login_tentativa` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -9207,7 +9852,7 @@ CREATE TABLE `paciente` (
   KEY `id_pessoa` (`id_pessoa`),
   KEY `idx_paciente_nome` (`nome`),
   CONSTRAINT `paciente_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10019 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9216,7 +9861,7 @@ CREATE TABLE `paciente` (
 
 LOCK TABLES `paciente` WRITE;
 /*!40000 ALTER TABLE `paciente` DISABLE KEYS */;
-INSERT INTO `paciente` VALUES (1,'3540a7ee-154a-11f1-abdf-c8d3ff00effc','6f00a19174b72156a9c519e0445127368652b30c78bf7c0816cc3db17994a9d9',8,NULL,'2026-01-28 06:00:49',NULL,NULL,'TESTE',NULL,NULL),(2,'3540cba3-154a-11f1-abdf-c8d3ff00effc','c4c2f940b0d69540d552325a4b3983a3259f75d08f3f93ca21ad44e671c24c6f',8,NULL,'2026-01-28 06:01:27',NULL,NULL,NULL,NULL,NULL),(3,'3540cdf3-154a-11f1-abdf-c8d3ff00effc','7e3a03bf3c5be1812cf882bf79280d6d93cf971288ee279ef74581a2f9ecfe6c',8,NULL,'2026-01-28 06:07:06',NULL,NULL,NULL,NULL,NULL),(4,'3540cf75-154a-11f1-abdf-c8d3ff00effc','32699b7c0c4a61fb4fa373d4fa0c6cf1ea66bc2170897eb1f26d446ecefce519',8,NULL,'2026-01-28 06:09:09',NULL,NULL,NULL,NULL,NULL),(5,'3540d0bb-154a-11f1-abdf-c8d3ff00effc','81eb04f50076da158e3cc16b98eb27d6fe945b080599933ac3e5bfecc41b647f',8,NULL,'2026-01-28 06:16:01',NULL,NULL,NULL,NULL,NULL),(6,'3540d1fc-154a-11f1-abdf-c8d3ff00effc','fb924f3a6f1ba171394e9326ae9f556080157919baa2ae437d18ecf93298d50e',8,NULL,'2026-01-28 06:17:10',NULL,NULL,NULL,NULL,NULL),(7,'3540d35d-154a-11f1-abdf-c8d3ff00effc','59aba0bf02b6c785bf15a67de0f10d90a08aa3bb47016c5e90e2074db1690c5b',8,NULL,'2026-01-28 06:17:37',NULL,NULL,NULL,NULL,NULL),(8,'3540d4c2-154a-11f1-abdf-c8d3ff00effc','aaf09fc84e80f821da31b6a1d69510d2a80043fe381dbe25edbb32fbcac0bd04',8,NULL,'2026-01-28 06:19:55',NULL,NULL,NULL,NULL,NULL),(9,'3540d605-154a-11f1-abdf-c8d3ff00effc','2e922d7cda1328dc80e39bfaa1f738d3590823c37b70e5883b07ef65302142ba',8,NULL,'2026-01-28 06:20:16',NULL,NULL,NULL,NULL,NULL),(10,'3540d763-154a-11f1-abdf-c8d3ff00effc','0c69d946277d431fe54dbb99e0bf01b0ed7367541ae1c97995cfac7b410d3857',8,NULL,'2026-01-28 06:20:42',NULL,NULL,NULL,NULL,NULL),(11,'3540d8a2-154a-11f1-abdf-c8d3ff00effc','6405a7ce224fa6b378c91de8b867274f9b72efc8f56479e6f91d8530a5128c32',8,NULL,'2026-01-28 06:21:25',NULL,NULL,NULL,NULL,NULL),(12,'3540dbf4-154a-11f1-abdf-c8d3ff00effc','6b13e200b10df223256c59210812fb428b7b64268021ddb016f1e45fc9bae3f3',8,NULL,'2026-01-28 06:21:35',NULL,NULL,NULL,NULL,NULL),(13,'3540dd8f-154a-11f1-abdf-c8d3ff00effc','b5235f1cc6a6a9ca2c614f1c90b503f5cf425389f17883548d2fb500f0a6c296',8,NULL,'2026-01-28 06:21:57',NULL,NULL,NULL,NULL,NULL),(14,'3540ded1-154a-11f1-abdf-c8d3ff00effc','220d8c202df304e6c5bcace3f3ee71479f15eeb5e001f144ddcdd3f960c381d2',8,NULL,'2026-01-28 06:22:20',NULL,NULL,NULL,NULL,NULL),(15,'3540e5a3-154a-11f1-abdf-c8d3ff00effc','1815a53be31364a7c9538f98d70f43834bcdebfd589982f6cc98770295fb8729',8,NULL,'2026-01-28 06:22:54',NULL,NULL,NULL,NULL,NULL),(16,'3540e76d-154a-11f1-abdf-c8d3ff00effc','09278e3c626417cf45d3ef63bd9fe75f90911c8580488014ae362adacc41a274',8,NULL,'2026-01-28 06:26:06',NULL,NULL,NULL,NULL,NULL),(17,'3540e8d9-154a-11f1-abdf-c8d3ff00effc','5123b2a65d60b642b00e1416dd89e14af52ce9e45a2d343c3d598f333b4856f1',33,NULL,'2026-01-28 06:30:19',NULL,NULL,NULL,NULL,NULL),(18,'3540ea31-154a-11f1-abdf-c8d3ff00effc','4c5a6785ab78eda67f576fe5265d9b9e58e25466ada56b5e1110e1bda4e97b8e',33,NULL,'2026-01-28 06:31:19',NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `paciente` VALUES (1,'3540a7ee-154a-11f1-abdf-c8d3ff00effc','6f00a19174b72156a9c519e0445127368652b30c78bf7c0816cc3db17994a9d9',8,NULL,'2026-01-28 06:00:49',NULL,NULL,'TESTE',NULL,NULL),(2,'3540cba3-154a-11f1-abdf-c8d3ff00effc','c4c2f940b0d69540d552325a4b3983a3259f75d08f3f93ca21ad44e671c24c6f',8,NULL,'2026-01-28 06:01:27',NULL,NULL,NULL,NULL,NULL),(3,'3540cdf3-154a-11f1-abdf-c8d3ff00effc','7e3a03bf3c5be1812cf882bf79280d6d93cf971288ee279ef74581a2f9ecfe6c',8,NULL,'2026-01-28 06:07:06',NULL,NULL,NULL,NULL,NULL),(4,'3540cf75-154a-11f1-abdf-c8d3ff00effc','32699b7c0c4a61fb4fa373d4fa0c6cf1ea66bc2170897eb1f26d446ecefce519',8,NULL,'2026-01-28 06:09:09',NULL,NULL,NULL,NULL,NULL),(5,'3540d0bb-154a-11f1-abdf-c8d3ff00effc','81eb04f50076da158e3cc16b98eb27d6fe945b080599933ac3e5bfecc41b647f',8,NULL,'2026-01-28 06:16:01',NULL,NULL,NULL,NULL,NULL),(6,'3540d1fc-154a-11f1-abdf-c8d3ff00effc','fb924f3a6f1ba171394e9326ae9f556080157919baa2ae437d18ecf93298d50e',8,NULL,'2026-01-28 06:17:10',NULL,NULL,NULL,NULL,NULL),(7,'3540d35d-154a-11f1-abdf-c8d3ff00effc','59aba0bf02b6c785bf15a67de0f10d90a08aa3bb47016c5e90e2074db1690c5b',8,NULL,'2026-01-28 06:17:37',NULL,NULL,NULL,NULL,NULL),(8,'3540d4c2-154a-11f1-abdf-c8d3ff00effc','aaf09fc84e80f821da31b6a1d69510d2a80043fe381dbe25edbb32fbcac0bd04',8,NULL,'2026-01-28 06:19:55',NULL,NULL,NULL,NULL,NULL),(9,'3540d605-154a-11f1-abdf-c8d3ff00effc','2e922d7cda1328dc80e39bfaa1f738d3590823c37b70e5883b07ef65302142ba',8,NULL,'2026-01-28 06:20:16',NULL,NULL,NULL,NULL,NULL),(10,'3540d763-154a-11f1-abdf-c8d3ff00effc','0c69d946277d431fe54dbb99e0bf01b0ed7367541ae1c97995cfac7b410d3857',8,NULL,'2026-01-28 06:20:42',NULL,NULL,NULL,NULL,NULL),(11,'3540d8a2-154a-11f1-abdf-c8d3ff00effc','6405a7ce224fa6b378c91de8b867274f9b72efc8f56479e6f91d8530a5128c32',8,NULL,'2026-01-28 06:21:25',NULL,NULL,NULL,NULL,NULL),(12,'3540dbf4-154a-11f1-abdf-c8d3ff00effc','6b13e200b10df223256c59210812fb428b7b64268021ddb016f1e45fc9bae3f3',8,NULL,'2026-01-28 06:21:35',NULL,NULL,NULL,NULL,NULL),(13,'3540dd8f-154a-11f1-abdf-c8d3ff00effc','b5235f1cc6a6a9ca2c614f1c90b503f5cf425389f17883548d2fb500f0a6c296',8,NULL,'2026-01-28 06:21:57',NULL,NULL,NULL,NULL,NULL),(14,'3540ded1-154a-11f1-abdf-c8d3ff00effc','220d8c202df304e6c5bcace3f3ee71479f15eeb5e001f144ddcdd3f960c381d2',8,NULL,'2026-01-28 06:22:20',NULL,NULL,NULL,NULL,NULL),(15,'3540e5a3-154a-11f1-abdf-c8d3ff00effc','1815a53be31364a7c9538f98d70f43834bcdebfd589982f6cc98770295fb8729',8,NULL,'2026-01-28 06:22:54',NULL,NULL,NULL,NULL,NULL),(16,'3540e76d-154a-11f1-abdf-c8d3ff00effc','09278e3c626417cf45d3ef63bd9fe75f90911c8580488014ae362adacc41a274',8,NULL,'2026-01-28 06:26:06',NULL,NULL,NULL,NULL,NULL),(17,'3540e8d9-154a-11f1-abdf-c8d3ff00effc','5123b2a65d60b642b00e1416dd89e14af52ce9e45a2d343c3d598f333b4856f1',33,NULL,'2026-01-28 06:30:19',NULL,NULL,NULL,NULL,NULL),(18,'3540ea31-154a-11f1-abdf-c8d3ff00effc','4c5a6785ab78eda67f576fe5265d9b9e58e25466ada56b5e1110e1bda4e97b8e',33,NULL,'2026-01-28 06:31:19',NULL,NULL,NULL,NULL,NULL),(19,'','',0,NULL,'2026-03-05 05:24:08',NULL,NULL,'PACIENTE_CLINICO_SYN_000001',NULL,NULL);
 /*!40000 ALTER TABLE `paciente` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10030,11 +10675,15 @@ DROP TABLE IF EXISTS `perfil`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `perfil` (
   `id_perfil` bigint NOT NULL AUTO_INCREMENT,
-  `nome` varchar(120) DEFAULT NULL,
-  `ativo` tinyint DEFAULT '1',
+  `codigo` varchar(60) NOT NULL,
+  `nome` varchar(120) NOT NULL,
+  `descricao` text,
+  `contexto` varchar(40) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  PRIMARY KEY (`id_perfil`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`id_perfil`),
+  UNIQUE KEY `uk_perfil_codigo` (`codigo`)
+) ENGINE=InnoDB AUTO_INCREMENT=124 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10043,6 +10692,7 @@ CREATE TABLE `perfil` (
 
 LOCK TABLES `perfil` WRITE;
 /*!40000 ALTER TABLE `perfil` DISABLE KEYS */;
+INSERT INTO `perfil` VALUES (1,'MEDICO','Médico',NULL,'CLINICO',1,'2026-03-07 02:40:08.109565'),(2,'ENFERMEIRO','Enfermeiro',NULL,'CLINICO',1,'2026-03-07 02:40:08.109565'),(3,'TRIAGEM','Triagem',NULL,'CLINICO',1,'2026-03-07 02:40:08.109565'),(4,'RECEPCAO','Recepção',NULL,'ATENDIMENTO',1,'2026-03-07 02:40:08.109565'),(5,'FARMACIA','Farmácia',NULL,'FARMACIA',1,'2026-03-07 02:40:08.109565'),(6,'FARMACIA_UBS','Farmácia UBS',NULL,'FARMACIA',1,'2026-03-07 02:40:08.109565'),(7,'FARMACIA_UPA','Farmácia UPA',NULL,'FARMACIA',1,'2026-03-07 02:40:08.109565'),(8,'FARMACIA_HIS','Farmácia Hospitalar',NULL,'FARMACIA',1,'2026-03-07 02:40:08.109565'),(9,'FARMACIA_SAAS','Farmácia SaaS',NULL,'FARMACIA',1,'2026-03-07 02:40:08.109565'),(10,'LABORATORIO','Laboratório',NULL,'CLINICO',1,'2026-03-07 02:40:08.109565'),(11,'FISIOTERAPIA','Fisioterapia',NULL,'CLINICO',1,'2026-03-07 02:40:08.109565'),(12,'GASOTERAPIA','Gasoterapia',NULL,'CLINICO',1,'2026-03-07 02:40:08.109565'),(13,'PAINEL','Painel de Chamadas',NULL,'DISPLAY',1,'2026-03-07 02:40:08.109565'),(14,'TOTEM','Totem Autoatendimento',NULL,'DISPOSITIVO',1,'2026-03-07 02:40:08.109565'),(15,'TI','Tecnologia da Informação',NULL,'ADMIN',1,'2026-03-07 02:40:08.109565'),(16,'MANUTENCAO','Manutenção',NULL,'ADMIN',1,'2026-03-07 02:40:08.109565'),(17,'GLPI','Sistema GLPI',NULL,'ADMIN',1,'2026-03-07 02:40:08.109565'),(37,'TECNICO_ENFERMAGEM','Técnico de Enfermagem',NULL,'CLINICO',1,'2026-03-07 02:43:54.173069'),(38,'FISIOTERAPEUTA','Fisioterapia',NULL,'CLINICO',1,'2026-03-07 02:43:54.173069'),(39,'LABORATORISTA','Laboratório',NULL,'CLINICO',1,'2026-03-07 02:43:54.173069'),(40,'CADASTRO','Cadastro de Paciente',NULL,'ATENDIMENTO',1,'2026-03-07 02:43:54.173069'),(41,'FARMACIA_HOSPITAL','Farmácia Hospital',NULL,'FARMACIA',1,'2026-03-07 02:43:54.173069'),(42,'ADMIN','Administrador',NULL,'ADMIN',1,'2026-03-07 02:43:54.173069'),(43,'SUPORTE','Suporte Técnico',NULL,'ADMIN',1,'2026-03-07 02:43:54.173069'),(56,'FARMACIA_RUA','Farmácia Rua',NULL,NULL,1,'2026-03-07 02:51:01.325653'),(57,'FARMACIA_PA','Farmácia Pronto Atendimento',NULL,NULL,1,'2026-03-07 02:51:01.325653');
 /*!40000 ALTER TABLE `perfil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10056,10 +10706,11 @@ DROP TABLE IF EXISTS `perfil_permissao`;
 CREATE TABLE `perfil_permissao` (
   `id_perfil` bigint NOT NULL,
   `id_permissao` bigint NOT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_perfil`,`id_permissao`),
-  KEY `fk_pp_permissao` (`id_permissao`),
-  CONSTRAINT `fk_pp_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
-  CONSTRAINT `fk_pp_permissao` FOREIGN KEY (`id_permissao`) REFERENCES `permissao` (`id_permissao`)
+  KEY `fk_perfil_perm_permissao` (`id_permissao`),
+  CONSTRAINT `fk_perfil_perm_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
+  CONSTRAINT `fk_perfil_perm_permissao` FOREIGN KEY (`id_permissao`) REFERENCES `permissao` (`id_permissao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10081,11 +10732,17 @@ DROP TABLE IF EXISTS `permissao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `permissao` (
   `id_permissao` bigint NOT NULL AUTO_INCREMENT,
-  `codigo` varchar(120) DEFAULT NULL,
-  `descricao` varchar(200) DEFAULT NULL,
+  `codigo` varchar(80) NOT NULL,
+  `nome` varchar(120) NOT NULL,
+  `descricao` text,
+  `nome_procedure` varchar(120) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  PRIMARY KEY (`id_permissao`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `dominio` varchar(40) DEFAULT 'GERAL',
+  `metadata` json DEFAULT NULL,
+  PRIMARY KEY (`id_permissao`),
+  UNIQUE KEY `uk_permissao_codigo` (`codigo`)
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10094,6 +10751,7 @@ CREATE TABLE `permissao` (
 
 LOCK TABLES `permissao` WRITE;
 /*!40000 ALTER TABLE `permissao` DISABLE KEYS */;
+INSERT INTO `permissao` VALUES (1,'PACIENTE_CADASTRAR','Cadastrar paciente','Cadastrar paciente',NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(2,'PACIENTE_ATUALIZAR','Atualizar paciente',NULL,NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(3,'TRIAGEM_REALIZAR','Realizar triagem','Realizar triagem',NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(4,'CONSULTA_ATENDER','Atender consulta',NULL,NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(5,'FARMACIA_DISPENSAR','Dispensar medicamento',NULL,NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(6,'LAB_RESULTADO','Registrar resultado exame',NULL,NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(7,'PAINEL_CHAMAR','Chamar paciente',NULL,NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(8,'ADMIN_USUARIO','Gerenciar usuários',NULL,NULL,1,'2026-03-07 02:40:20.653576','GERAL',NULL),(9,'PACIENTE_VISUALIZAR','PACIENTE_VISUALIZAR','Visualizar paciente',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(10,'PACIENTE_EDITAR','PACIENTE_EDITAR','Editar paciente',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(11,'CONSULTA_INICIAR','CONSULTA_INICIAR','Iniciar consulta',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(12,'CONSULTA_FINALIZAR','CONSULTA_FINALIZAR','Finalizar consulta',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(13,'CONSULTA_VISUALIZAR','CONSULTA_VISUALIZAR','Visualizar consulta',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(14,'TRIAGEM_VISUALIZAR','TRIAGEM_VISUALIZAR','Visualizar triagem',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(15,'EXAME_SOLICITAR','EXAME_SOLICITAR','Solicitar exame',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(16,'EXAME_RESULTADO_VISUALIZAR','EXAME_RESULTADO_VISUALIZAR','Visualizar resultado exame',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(17,'EXAME_RESULTADO_LANCAR','EXAME_RESULTADO_LANCAR','Lançar resultado exame',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(18,'MEDICAMENTO_PRESCREVER','MEDICAMENTO_PRESCREVER','Prescrever medicamento',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(19,'MEDICAMENTO_DISPENSAR','MEDICAMENTO_DISPENSAR','Dispensar medicamento',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(20,'FARMACIA_ESTOQUE_VER','FARMACIA_ESTOQUE_VER','Ver estoque',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(21,'FARMACIA_ESTOQUE_MOVIMENTAR','FARMACIA_ESTOQUE_MOVIMENTAR','Movimentar estoque',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(22,'PAINEL_CHAMAR_PACIENTE','PAINEL_CHAMAR_PACIENTE','Chamar paciente no painel',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(23,'MANUTENCAO_ABRIR_CHAMADO','MANUTENCAO_ABRIR_CHAMADO','Abrir chamado manutenção',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(24,'MANUTENCAO_EXECUTAR','MANUTENCAO_EXECUTAR','Executar manutenção',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(25,'TI_ADMIN_SISTEMA','TI_ADMIN_SISTEMA','Administrar sistema',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(26,'USUARIO_GERENCIAR','USUARIO_GERENCIAR','Gerenciar usuários',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL),(27,'PERFIL_GERENCIAR','PERFIL_GERENCIAR','Gerenciar perfis',NULL,1,'2026-03-07 02:56:39.327770','GERAL',NULL);
 /*!40000 ALTER TABLE `permissao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10152,8 +10810,9 @@ CREATE TABLE `pessoa` (
   PRIMARY KEY (`id_pessoa`),
   KEY `idx_pessoa_nome` (`nome`),
   KEY `idx_pessoa_nome_social` (`nome_social`),
-  KEY `idx_pessoa_nascimento` (`data_nascimento`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_pessoa_nascimento` (`data_nascimento`),
+  KEY `idx_pessoa_tipo` (`tipo_pessoa`,`ativo`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10162,6 +10821,7 @@ CREATE TABLE `pessoa` (
 
 LOCK TABLES `pessoa` WRITE;
 /*!40000 ALTER TABLE `pessoa` DISABLE KEYS */;
+INSERT INTO `pessoa` VALUES (1,'Administrador Sistema',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(2,'Recepcionista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(3,'Enfermeira Triagem',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(4,'Medico Plantonista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(5,'Farmaceutico',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL);
 /*!40000 ALTER TABLE `pessoa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12017,6 +12677,41 @@ LOCK TABLES `rh_registro_profissional` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `runtime_api_session_token`
+--
+
+DROP TABLE IF EXISTS `runtime_api_session_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `runtime_api_session_token` (
+  `id_token` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `uuid_runtime` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expira_em` datetime NOT NULL,
+  `device_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tenant_id` bigint DEFAULT '1',
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `ultimo_acesso` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_token`),
+  UNIQUE KEY `uk_uuid_runtime` (`uuid_runtime`),
+  KEY `idx_token_hash` (`token_hash`),
+  KEY `idx_id_usuario` (`id_usuario`),
+  KEY `idx_expira` (`expira_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `runtime_api_session_token`
+--
+
+LOCK TABLES `runtime_api_session_token` WRITE;
+/*!40000 ALTER TABLE `runtime_api_session_token` DISABLE KEYS */;
+/*!40000 ALTER TABLE `runtime_api_session_token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `runtime_concurrency_guard`
 --
 
@@ -12046,6 +12741,73 @@ CREATE TABLE `runtime_concurrency_guard` (
 LOCK TABLES `runtime_concurrency_guard` WRITE;
 /*!40000 ALTER TABLE `runtime_concurrency_guard` DISABLE KEYS */;
 /*!40000 ALTER TABLE `runtime_concurrency_guard` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `runtime_contexto`
+--
+
+DROP TABLE IF EXISTS `runtime_contexto`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `runtime_contexto` (
+  `id_runtime_contexto` bigint NOT NULL AUTO_INCREMENT,
+  `id_sessao_usuario` bigint NOT NULL,
+  `id_unidade` bigint DEFAULT NULL,
+  `id_local_operacional` bigint DEFAULT NULL,
+  `id_paciente` bigint DEFAULT NULL,
+  `id_ffa` bigint DEFAULT NULL,
+  `contexto_clinico` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado_fluxo` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `iniciado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `finalizado_em` datetime(6) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id_runtime_contexto`),
+  KEY `idx_runtime_sessao` (`id_sessao_usuario`),
+  CONSTRAINT `fk_runtime_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `runtime_contexto`
+--
+
+LOCK TABLES `runtime_contexto` WRITE;
+/*!40000 ALTER TABLE `runtime_contexto` DISABLE KEYS */;
+/*!40000 ALTER TABLE `runtime_contexto` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `runtime_dispositivo`
+--
+
+DROP TABLE IF EXISTS `runtime_dispositivo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `runtime_dispositivo` (
+  `id_runtime_dispositivo` bigint NOT NULL AUTO_INCREMENT,
+  `id_dispositivo` bigint NOT NULL,
+  `uuid_runtime` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo_runtime` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `versao_runtime` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_runtime` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status_runtime` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT 'ONLINE',
+  `ultimo_heartbeat` datetime(6) DEFAULT NULL,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_runtime_dispositivo`),
+  UNIQUE KEY `uk_runtime_uuid` (`uuid_runtime`),
+  KEY `fk_runtime_dispositivo` (`id_dispositivo`),
+  CONSTRAINT `fk_runtime_dispositivo` FOREIGN KEY (`id_dispositivo`) REFERENCES `dispositivo` (`id_dispositivo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `runtime_dispositivo`
+--
+
+LOCK TABLES `runtime_dispositivo` WRITE;
+/*!40000 ALTER TABLE `runtime_dispositivo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `runtime_dispositivo` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -12154,6 +12916,45 @@ LOCK TABLES `runtime_evento_provisional` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `runtime_execution_queue`
+--
+
+DROP TABLE IF EXISTS `runtime_execution_queue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `runtime_execution_queue` (
+  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_sessao` bigint NOT NULL,
+  `id_usuario` bigint NOT NULL,
+  `id_perfil` bigint NOT NULL,
+  `acao` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contexto` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT 'DEFAULT',
+  `payload` json DEFAULT NULL,
+  `status` enum('PENDENTE','PROCESSANDO','CONCLUIDO','ERRO','CANCELADO') COLLATE utf8mb4_unicode_ci DEFAULT 'PENDENTE',
+  `prioridade` int DEFAULT '0',
+  `retry_count` int DEFAULT '0',
+  `ultimo_erro` text COLLATE utf8mb4_unicode_ci,
+  `duracao_ms` int DEFAULT NULL,
+  `resultado` text COLLATE utf8mb4_unicode_ci,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `atualizado_em` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_status` (`status`,`criado_em`),
+  KEY `idx_usuario` (`id_usuario`),
+  KEY `idx_sessao` (`id_sessao`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `runtime_execution_queue`
+--
+
+LOCK TABLES `runtime_execution_queue` WRITE;
+/*!40000 ALTER TABLE `runtime_execution_queue` DISABLE KEYS */;
+/*!40000 ALTER TABLE `runtime_execution_queue` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `runtime_invariant_log`
 --
 
@@ -12184,6 +12985,33 @@ CREATE TABLE `runtime_invariant_log` (
 LOCK TABLES `runtime_invariant_log` WRITE;
 /*!40000 ALTER TABLE `runtime_invariant_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `runtime_invariant_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `runtime_kernel_locks`
+--
+
+DROP TABLE IF EXISTS `runtime_kernel_locks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `runtime_kernel_locks` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `uuid_runtime` char(36) NOT NULL,
+  `locked_by` int NOT NULL,
+  `acquired_at` datetime(6) NOT NULL,
+  `expires_at` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_runtime` (`uuid_runtime`,`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `runtime_kernel_locks`
+--
+
+LOCK TABLES `runtime_kernel_locks` WRITE;
+/*!40000 ALTER TABLE `runtime_kernel_locks` DISABLE KEYS */;
+/*!40000 ALTER TABLE `runtime_kernel_locks` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -12388,7 +13216,7 @@ CREATE TABLE `saas_entidade` (
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_entidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -12397,6 +13225,7 @@ CREATE TABLE `saas_entidade` (
 
 LOCK TABLES `saas_entidade` WRITE;
 /*!40000 ALTER TABLE `saas_entidade` DISABLE KEYS */;
+INSERT INTO `saas_entidade` VALUES (1,'Empresa Exemplo','Empresa Exemplo Ltda','00.000.000/0001-00',NULL,1,'2026-03-05 06:48:18.139795',NULL);
 /*!40000 ALTER TABLE `saas_entidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12746,30 +13575,28 @@ DROP TABLE IF EXISTS `sessao_usuario`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sessao_usuario` (
   `id_sessao_usuario` bigint NOT NULL AUTO_INCREMENT,
-  `id_usuario` bigint DEFAULT NULL,
-  `id_entidade` bigint DEFAULT NULL,
-  `id_sistema` bigint DEFAULT NULL,
+  `id_usuario` bigint NOT NULL,
+  `id_sistema` bigint NOT NULL,
   `id_unidade` bigint DEFAULT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
-  `token` varchar(128) DEFAULT NULL,
-  `token_runtime` char(64) DEFAULT NULL,
+  `id_perfil` bigint DEFAULT NULL,
+  `id_dispositivo` bigint DEFAULT NULL,
+  `token_jwt` varchar(512) NOT NULL,
+  `refresh_token` varchar(512) DEFAULT NULL,
   `ip_origem` varchar(45) DEFAULT NULL,
-  `user_agent` text,
-  `ativo` tinyint DEFAULT '1',
-  `iniciado_em` datetime(6) DEFAULT NULL,
-  `expiracao_em` datetime(6) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `iniciado_em` datetime(6) NOT NULL,
+  `expira_em` datetime(6) NOT NULL,
+  `finalizado_em` datetime(6) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `revogado` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_sessao_usuario`),
-  KEY `idx_sessao_usuario` (`id_usuario`),
-  KEY `fk_sessao_entidade` (`id_entidade`),
-  KEY `fk_sessao_sistema` (`id_sistema`),
-  KEY `fk_sessao_unidade` (`id_unidade`),
-  KEY `fk_sessao_local` (`id_local_operacional`),
-  CONSTRAINT `fk_sessao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
-  CONSTRAINT `fk_sessao_local` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`),
-  CONSTRAINT `fk_sessao_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_sessao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
-  CONSTRAINT `fk_sessao_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  KEY `idx_sessao_usuario_usuario` (`id_usuario`),
+  KEY `idx_sessao_usuario_token` (`token_jwt`(255)),
+  KEY `idx_sessao_usuario_expira` (`expira_em`),
+  CONSTRAINT `fk_sessao_usuario_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12986,7 +13813,7 @@ CREATE TABLE `sistema` (
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_sistema`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -12995,6 +13822,7 @@ CREATE TABLE `sistema` (
 
 LOCK TABLES `sistema` WRITE;
 /*!40000 ALTER TABLE `sistema` DISABLE KEYS */;
+INSERT INTO `sistema` VALUES (1,'operacional','OPE',1,'2026-03-05 06:50:02.459027'),(2,'assistencial','ASI',1,'2026-03-05 06:50:02.471044'),(3,'Hospitalar','HIS',1,'2026-03-07 00:37:53.840236'),(4,'Pronto Atendimento','PA',1,'2026-03-07 00:37:53.840236'),(5,'UPA','UPA',1,'2026-03-07 00:37:53.840236'),(6,'Unidade Básica','UBS',1,'2026-03-07 00:37:53.840236'),(7,'Farmácia','FARMACIA',1,'2026-03-07 00:37:53.840236'),(8,'Administrativo','ADMIN',1,'2026-03-07 00:37:53.840236');
 /*!40000 ALTER TABLE `sistema` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13211,6 +14039,43 @@ CREATE TABLE `tabela_tuss` (
 LOCK TABLES `tabela_tuss` WRITE;
 /*!40000 ALTER TABLE `tabela_tuss` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tabela_tuss` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tenant_registry`
+--
+
+DROP TABLE IF EXISTS `tenant_registry`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tenant_registry` (
+  `id_tenant` bigint NOT NULL AUTO_INCREMENT,
+  `uuid_tenant` char(36) NOT NULL DEFAULT (uuid()),
+  `nome_fantasia` varchar(200) NOT NULL,
+  `razao_social` varchar(300) NOT NULL,
+  `cnpj` varchar(20) DEFAULT NULL,
+  `cnes` varchar(20) DEFAULT NULL,
+  `instancia_primary` tinyint(1) DEFAULT '1',
+  `regiao` varchar(50) DEFAULT NULL,
+  `pais` varchar(50) DEFAULT 'BR',
+  `status` enum('ATIVO','SUSPENSO','MIGRANDO','INATIVO') DEFAULT 'ATIVO',
+  `created_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id_tenant`),
+  UNIQUE KEY `uk_uuid` (`uuid_tenant`),
+  UNIQUE KEY `uk_cnes` (`cnes`),
+  KEY `idx_status` (`status`),
+  KEY `idx_regiao` (`regiao`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tenant_registry`
+--
+
+LOCK TABLES `tenant_registry` WRITE;
+/*!40000 ALTER TABLE `tenant_registry` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tenant_registry` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -13543,7 +14408,7 @@ CREATE TABLE `unidade` (
   KEY `idx_unidade_cidade` (`id_cidade`),
   CONSTRAINT `fk_unidade_cidade` FOREIGN KEY (`id_cidade`) REFERENCES `cidade` (`id_cidade`),
   CONSTRAINT `fk_unidade_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13552,6 +14417,7 @@ CREATE TABLE `unidade` (
 
 LOCK TABLES `unidade` WRITE;
 /*!40000 ALTER TABLE `unidade` DISABLE KEYS */;
+INSERT INTO `unidade` VALUES (1,1,1,'UPA Principal','UPA',1,'2026-03-05 06:59:15.269884');
 /*!40000 ALTER TABLE `unidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13578,7 +14444,7 @@ CREATE TABLE `usuario` (
   UNIQUE KEY `uk_usuario_login` (`login`),
   KEY `idx_usuario_pessoa` (`id_pessoa`),
   CONSTRAINT `fk_usuario_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13587,6 +14453,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
+INSERT INTO `usuario` VALUES (1,NULL,'evandro.andrade','085ede55dd908b161d5651af23c4f705174cb0bde1a130ef31db0c7aadfb361b',1,2,NULL,NULL,NULL,'2026-03-05 05:45:25.517051',NULL),(3,1,'admin','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(4,2,'recepcao','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(5,3,'triagem','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(6,4,'medico','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(7,5,'farmacia','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL);
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13624,6 +14491,39 @@ LOCK TABLES `usuario_alocacao` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `usuario_contexto`
+--
+
+DROP TABLE IF EXISTS `usuario_contexto`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `usuario_contexto` (
+  `id_usuario_contexto` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `id_sistema` bigint NOT NULL,
+  `id_unidade` bigint DEFAULT NULL,
+  `id_local_operacional` bigint DEFAULT NULL,
+  `id_perfil` bigint NOT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_usuario_contexto`),
+  KEY `idx_usuario_contexto_usuario` (`id_usuario`),
+  KEY `fk_uc_perfil` (`id_perfil`),
+  CONSTRAINT `fk_uc_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
+  CONSTRAINT `fk_uc_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `usuario_contexto`
+--
+
+LOCK TABLES `usuario_contexto` WRITE;
+/*!40000 ALTER TABLE `usuario_contexto` DISABLE KEYS */;
+/*!40000 ALTER TABLE `usuario_contexto` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `usuario_historico_senha`
 --
 
@@ -13648,6 +14548,36 @@ CREATE TABLE `usuario_historico_senha` (
 LOCK TABLES `usuario_historico_senha` WRITE;
 /*!40000 ALTER TABLE `usuario_historico_senha` DISABLE KEYS */;
 /*!40000 ALTER TABLE `usuario_historico_senha` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `usuario_local_operacional`
+--
+
+DROP TABLE IF EXISTS `usuario_local_operacional`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `usuario_local_operacional` (
+  `id_usuario_local` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `id_local_operacional` bigint NOT NULL,
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_usuario_local`),
+  UNIQUE KEY `uk_usuario_local` (`id_usuario`,`id_local_operacional`),
+  KEY `fk_ulo_usuario` (`id_usuario`),
+  KEY `fk_ulo_local` (`id_local_operacional`),
+  CONSTRAINT `fk_ulo_local` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ulo_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `usuario_local_operacional`
+--
+
+LOCK TABLES `usuario_local_operacional` WRITE;
+/*!40000 ALTER TABLE `usuario_local_operacional` DISABLE KEYS */;
+/*!40000 ALTER TABLE `usuario_local_operacional` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -13944,23 +14874,17 @@ CREATE TABLE `usuario_sistema` (
   `id_usuario` bigint NOT NULL,
   `id_sistema` bigint NOT NULL,
   `id_perfil` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
-  `id_local` bigint DEFAULT NULL,
-  `id_setor` bigint DEFAULT NULL,
-  `id_dispositivo` bigint DEFAULT NULL,
-  `data_vinculo` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `ativo` tinyint DEFAULT '1',
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_usuario_sistema`),
-  UNIQUE KEY `uk_us_usuario_sistema` (`id_usuario`,`id_sistema`,`id_unidade`,`id_local`,`id_dispositivo`),
-  KEY `idx_us_perfil` (`id_perfil`),
-  KEY `idx_us_unidade` (`id_unidade`),
-  KEY `idx_us_local` (`id_local`),
-  KEY `idx_us_dispositivo` (`id_dispositivo`),
-  CONSTRAINT `fk_us_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_us_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_us_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_us_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `uk_usuario_sistema` (`id_usuario`,`id_sistema`),
+  KEY `idx_us_usuario` (`id_usuario`),
+  KEY `idx_us_sistema` (`id_sistema`),
+  KEY `fk_us_perfil` (`id_perfil`),
+  CONSTRAINT `fk_us_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
+  CONSTRAINT `fk_us_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
+  CONSTRAINT `fk_us_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13969,6 +14893,7 @@ CREATE TABLE `usuario_sistema` (
 
 LOCK TABLES `usuario_sistema` WRITE;
 /*!40000 ALTER TABLE `usuario_sistema` DISABLE KEYS */;
+INSERT INTO `usuario_sistema` VALUES (1,1,1,1,1,'2026-03-07 03:17:31.335031');
 /*!40000 ALTER TABLE `usuario_sistema` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14030,6 +14955,37 @@ CREATE TABLE `usuario_sistema_perfil` (
 LOCK TABLES `usuario_sistema_perfil` WRITE;
 /*!40000 ALTER TABLE `usuario_sistema_perfil` DISABLE KEYS */;
 /*!40000 ALTER TABLE `usuario_sistema_perfil` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `usuario_unidade`
+--
+
+DROP TABLE IF EXISTS `usuario_unidade`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `usuario_unidade` (
+  `id_usuario_unidade` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `id_unidade` bigint NOT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_usuario_unidade`),
+  UNIQUE KEY `uk_usuario_unidade` (`id_usuario`,`id_unidade`),
+  KEY `fk_uu_usuario` (`id_usuario`),
+  KEY `fk_uu_unidade` (`id_unidade`),
+  CONSTRAINT `fk_uu_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE CASCADE,
+  CONSTRAINT `fk_uu_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `usuario_unidade`
+--
+
+LOCK TABLES `usuario_unidade` WRITE;
+/*!40000 ALTER TABLE `usuario_unidade` DISABLE KEYS */;
+/*!40000 ALTER TABLE `usuario_unidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -14427,6 +15383,23 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary view structure for view `vw_usuario_contextos`
+--
+
+DROP TABLE IF EXISTS `vw_usuario_contextos`;
+/*!50001 DROP VIEW IF EXISTS `vw_usuario_contextos`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_usuario_contextos` AS SELECT 
+ 1 AS `id_usuario`,
+ 1 AS `id_sistema`,
+ 1 AS `id_unidade`,
+ 1 AS `id_local_operacional`,
+ 1 AS `id_perfil`,
+ 1 AS `perfil_nome`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary view structure for view `vw_usuario_permissoes`
 --
 
@@ -14440,10 +15413,10 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `id_sistema`,
  1 AS `id_perfil`,
  1 AS `perfil_nome`,
+ 1 AS `codigo_permissao`,
+ 1 AS `nome_permissao`,
  1 AS `nome_procedure`,
- 1 AS `permitido`,
- 1 AS `id_unidade`,
- 1 AS `id_entidade`*/;
+ 1 AS `perfil_permissao_criado`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -14530,6 +15503,76 @@ UNLOCK TABLES;
 --
 -- Dumping routines for database 'pronto_atendimento'
 --
+/*!50003 DROP FUNCTION IF EXISTS `fn_decision_fingerprint` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fn_decision_fingerprint`(
+    p_acao VARCHAR(100),
+    p_id_tenant BIGINT,
+    p_id_usuario BIGINT,
+    p_payload JSON
+) RETURNS char(64) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+    RETURN SHA2(
+        CONCAT(
+            IFNULL(p_acao,''),
+            '|',
+            IFNULL(p_id_tenant,0),
+            '|',
+            IFNULL(p_id_usuario,0),
+            '|',
+            JSON_UNQUOTE(JSON_SORT(IFNULL(p_payload,'{}')))
+        ),
+    256);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fn_runtime_chain_fingerprint` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fn_runtime_chain_fingerprint`(
+    p_id_tenant BIGINT,
+    p_id_usuario BIGINT,
+    p_id_sessao BIGINT,
+    p_id_dispositivo BIGINT,
+    p_estado VARCHAR(60)
+) RETURNS char(64) CHARSET utf8mb4
+    DETERMINISTIC
+RETURN SHA2(
+    CONCAT(
+        IFNULL(p_id_tenant,''),
+        '|',
+        IFNULL(p_id_usuario,''),
+        '|',
+        IFNULL(p_id_sessao,''),
+        '|',
+        IFNULL(p_id_dispositivo,''),
+        '|',
+        IFNULL(p_estado,'')
+    ),256) ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP FUNCTION IF EXISTS `fn_sha256i_hash` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -15133,6 +16176,252 @@ BEGIN
     VALUES
         (p_id_sessao_usuario, p_entidade, p_id_entidade, p_acao, p_detalhe, v_id_usuario, p_tabela,
          COALESCE(p_id_usuario_espelho, v_id_usuario));
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_assert_permission_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_assert_permission_runtime`(
+    IN p_id_usuario BIGINT,
+    IN p_procedure VARCHAR(120)
+)
+BEGIN
+
+    DECLARE v_permitido INT DEFAULT 0;
+
+    SELECT COUNT(*) INTO v_permitido
+    FROM vw_usuario_permissoes
+    WHERE id_usuario = p_id_usuario
+    AND nome_procedure = p_procedure
+    AND permitido = 1;
+
+    IF v_permitido = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'PERMISSAO_NEGADA';
+    END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_criar_sessao` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_criar_sessao`(
+
+    IN p_id_usuario BIGINT,
+    IN p_id_sistema BIGINT,
+    IN p_id_unidade BIGINT,
+    IN p_id_local BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_token VARCHAR(512)
+
+)
+BEGIN
+
+    INSERT INTO sessao_usuario(
+
+        id_usuario,
+        id_sistema,
+        id_unidade,
+        id_local_operacional,
+        id_perfil,
+        token_jwt,
+        iniciado_em,
+        expira_em,
+        ativo
+
+    )
+    VALUES(
+
+        p_id_usuario,
+        p_id_sistema,
+        p_id_unidade,
+        p_id_local,
+        p_id_perfil,
+        p_token,
+        NOW(),
+        DATE_ADD(NOW(),INTERVAL 8 HOUR),
+        1
+
+    );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_permissoes` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_permissoes`(
+
+    IN p_token_runtime VARCHAR(120)
+
+)
+BEGIN
+
+SELECT
+
+    vup.id_usuario,
+    vup.id_sistema,
+
+    vup.perfil_nome,
+
+    vup.codigo,
+    vup.nome,
+    vup.nome_procedure,
+    vup.rota_api
+
+FROM vw_usuario_permissoes vup
+
+JOIN sessao_usuario su
+    ON su.id_usuario = vup.id_usuario
+    AND su.id_sistema = vup.id_sistema
+
+WHERE su.token_runtime = p_token_runtime
+AND su.ativo = 1;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_registrar_tentativa` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_registrar_tentativa`(
+
+    IN p_login VARCHAR(80),
+    IN p_ip VARCHAR(45),
+    IN p_sucesso TINYINT
+
+)
+BEGIN
+
+    INSERT INTO login_tentativa (
+        login,
+        ip_origem,
+        sucesso
+    )
+    VALUES (
+        p_login,
+        p_ip,
+        p_sucesso
+    );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_validar_sessao` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_validar_sessao`(
+
+    IN p_token_runtime VARCHAR(120)
+
+)
+BEGIN
+
+SELECT
+
+    id_sessao_usuario,
+    id_usuario,
+    id_sistema,
+    id_unidade,
+    id_local_operacional
+
+FROM sessao_usuario
+
+WHERE token_runtime = p_token_runtime
+AND ativo = 1
+AND expira_em > NOW()
+
+LIMIT 1;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_verificar_bloqueio` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_verificar_bloqueio`(
+
+    IN p_login VARCHAR(80)
+
+)
+BEGIN
+
+    DECLARE v_tentativas INT;
+
+    SELECT COUNT(*)
+    INTO v_tentativas
+    FROM login_tentativa
+    WHERE login = p_login
+    AND sucesso = 0
+    AND criado_em > DATE_SUB(NOW(), INTERVAL 15 MINUTE);
+
+    IF v_tentativas >= 5 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'LOGIN_BLOQUEADO';
+    END IF;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -15975,6 +17264,87 @@ BEGIN
         hash_estado = VALUES(hash_estado),
         payload_snapshot = VALUES(payload_snapshot),
         atualizado_em = CURRENT_TIMESTAMP(6);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_dispatcher_kernel` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_dispatcher_kernel`(
+    IN p_id_tenant BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_sessao BIGINT,
+    IN p_worker_type VARCHAR(50),
+    IN p_acao VARCHAR(100),
+    IN p_payload JSON,
+    OUT p_uuid_execution CHAR(36),
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+BEGIN
+
+    DECLARE v_uuid CHAR(36);
+    DECLARE v_lock BIGINT;
+    DECLARE v_fingerprint CHAR(64);
+
+    SET v_uuid = UUID();
+
+    SET v_fingerprint =
+        fn_decision_fingerprint(
+            p_acao,
+            p_id_tenant,
+            p_id_usuario,
+            p_payload
+        );
+
+    CALL sp_kernel_writer_lock(v_uuid,v_lock);
+
+    INSERT INTO runtime_execution_queue
+    (
+        uuid_transacao,
+        uuid_execution,
+        id_tenant,
+        id_usuario,
+        id_perfil,
+        id_sessao,
+        worker_type,
+        acao,
+        payload,
+        decision_fingerprint,
+        status
+    )
+    VALUES
+    (
+        v_uuid,
+        v_uuid,
+        p_id_tenant,
+        p_id_usuario,
+        p_id_perfil,
+        p_id_sessao,
+        p_worker_type,
+        p_acao,
+        p_payload,
+        v_fingerprint,
+        'PENDENTE'
+    );
+
+    CALL sp_kernel_writer_unlock(v_lock);
+
+    SET p_uuid_execution = v_uuid;
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'EXEC_ENFILEIRADA';
 
 END ;;
 DELIMITER ;
@@ -18595,6 +19965,243 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_kernel_authenticate_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_authenticate_runtime`(
+    IN p_login VARCHAR(80),
+    IN p_senha VARCHAR(255),
+    IN p_id_dispositivo BIGINT,
+    OUT p_sucesso BOOLEAN,
+    OUT p_id_sessao BIGINT,
+    OUT p_token_runtime VARCHAR(255)
+)
+BEGIN
+
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_hash_senha VARCHAR(255);
+
+    SET p_sucesso = FALSE;
+
+    SELECT id_usuario, senha_hash
+    INTO v_id_usuario, v_hash_senha
+    FROM usuario
+    WHERE login = p_login
+    AND ativo = 1
+    LIMIT 1;
+
+    IF v_id_usuario IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'USUARIO_INVALIDO';
+    END IF;
+
+    IF v_hash_senha <> SHA2(p_senha,256) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'SENHA_INVALIDA';
+    END IF;
+
+    -- Criar sessão runtime
+    INSERT INTO sessao_usuario
+    (
+        id_usuario,
+        id_dispositivo,
+        token_runtime,
+        ativo,
+        criado_em
+    )
+    VALUES
+    (
+        v_id_usuario,
+        p_id_dispositivo,
+        UUID(),
+        1,
+        NOW(6)
+    );
+
+    SET p_id_sessao = LAST_INSERT_ID();
+
+    SELECT token_runtime
+    INTO p_token_runtime
+    FROM sessao_usuario
+    WHERE id_sessao_usuario = p_id_sessao;
+
+    SET p_sucesso = TRUE;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_kernel_authz_assert` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_authz_assert`(
+    IN p_id_tenant BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_contexto VARCHAR(60),
+    IN p_recurso VARCHAR(120),
+    IN p_estado_origem VARCHAR(60),
+    IN p_estado_destino VARCHAR(60),
+    IN p_id_dispositivo BIGINT
+)
+    SQL SECURITY INVOKER
+BEGIN
+
+    DECLARE v_ok INT DEFAULT 0;
+    DECLARE v_fingerprint CHAR(64);
+
+    SET p_estado_origem = IFNULL(p_estado_origem,'*');
+    SET p_estado_destino = IFNULL(p_estado_destino,'*');
+
+    SET v_fingerprint = SHA2(
+        CONCAT(
+            p_id_tenant,
+            p_id_perfil,
+            p_contexto,
+            p_recurso,
+            p_estado_origem,
+            p_estado_destino,
+            IFNULL(p_id_dispositivo,'0')
+        ),
+        256
+    );
+
+    SELECT COUNT(1)
+    INTO v_ok
+    FROM kernel_authz_policy kp
+    WHERE kp.id_tenant = p_id_tenant
+      AND kp.id_perfil = p_id_perfil
+      AND kp.contexto = p_contexto
+      AND kp.recurso = p_recurso
+      AND kp.ativo = 1
+      AND kp.permitido = 1
+      AND kp.decision_fingerprint = v_fingerprint;
+
+    IF v_ok = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'AUTHZ_RUNTIME_EXCEPTION';
+    END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_kernel_cleanup_expired` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_cleanup_expired`()
+    SQL SECURITY INVOKER
+BEGIN
+    DECLARE v_sessoes_removidas INT DEFAULT 0;
+    DECLARE v_tokens_removidos INT DEFAULT 0;
+    
+    -- Remover sessões expiradas
+    DELETE FROM sessao_usuario WHERE expira_em < NOW();
+    SET v_sessoes_removidas = ROW_COUNT();
+    
+    -- Remover tokens expirados
+    DELETE FROM runtime_api_session_token WHERE expira_em < NOW();
+    SET v_tokens_removidos = ROW_COUNT();
+    
+    -- Limpar filas antigas
+    DELETE FROM runtime_execution_queue 
+    WHERE status IN ('CONCLUIDO', 'ERRO') 
+    AND atualizado_em < DATE_SUB(NOW(), INTERVAL 7 DAY);
+    
+    SELECT 
+        v_sessoes_removidas AS sessoes_removidas,
+        v_tokens_removidos AS tokens_removidos,
+        NOW() AS cleanup_at;
+    
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_kernel_identity_chain_register` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_identity_chain_register`(
+    IN p_id_tenant BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_sessao BIGINT,
+    IN p_id_dispositivo BIGINT,
+    IN p_estado VARCHAR(60),
+    IN p_ip VARCHAR(45)
+)
+    SQL SECURITY INVOKER
+BEGIN
+
+    DECLARE v_fingerprint CHAR(64);
+
+    SET v_fingerprint = SHA2(
+        CONCAT_WS('|',
+            IFNULL(p_id_tenant,''),
+            IFNULL(p_id_usuario,''),
+            IFNULL(p_id_sessao,''),
+            IFNULL(p_id_dispositivo,''),
+            IFNULL(p_estado,'')
+        ),
+    256);
+
+    INSERT IGNORE INTO kernel_identity_trust_chain (
+        id_tenant,
+        id_usuario,
+        id_sessao,
+        id_dispositivo,
+        ip_origem,
+        fingerprint_runtime,
+        estado_runtime
+    )
+    VALUES (
+        p_id_tenant,
+        p_id_usuario,
+        p_id_sessao,
+        p_id_dispositivo,
+        p_ip,
+        v_fingerprint,
+        p_estado
+    );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_kernel_runtime_heartbeat` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -18606,23 +20213,59 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_runtime_heartbeat`(
-    IN p_uuid_runtime CHAR(36),
-    IN p_estado VARCHAR(80)
+    IN p_id_sessao BIGINT,
+    IN p_uuid_runtime VARCHAR(36),
+    IN p_id_dispositivo BIGINT
 )
     SQL SECURITY INVOKER
 BEGIN
-
-    INSERT INTO kernel_runtime_heartbeat
-    (uuid_runtime, estado_runtime, ultimo_ping, ativo)
-
-    VALUES
-    (p_uuid_runtime, p_estado, NOW(6), TRUE)
-
-    ON DUPLICATE KEY UPDATE
-        estado_runtime = VALUES(estado_runtime),
-        ultimo_ping = NOW(6),
-        ativo = TRUE;
-
+    DECLARE v_expira_em DATETIME;
+    DECLARE v_id_usuario BIGINT;
+    
+    -- Validar parâmetros
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ID_SESSAO_OBRIGATORIO';
+    END IF;
+    
+    -- Buscar informações da sessão
+    SELECT id_usuario, expira_em INTO v_id_usuario, v_expira_em
+    FROM sessao_usuario
+    WHERE id_sessao_usuario = p_id_sessao;
+    
+    IF v_id_usuario IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'SESSAO_NAO_ENCONTRADA';
+    END IF;
+    
+    -- Verificar se expirou
+    IF v_expira_em < NOW() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'SESSAO_EXPIRADA';
+    END IF;
+    
+    -- Atualizar último acesso na sessão
+    UPDATE sessao_usuario
+    SET ultimo_acesso = NOW()
+    WHERE id_sessao_usuario = p_id_sessao;
+    
+    -- Atualizar heartbeat no token API se existir
+    IF p_uuid_runtime IS NOT NULL THEN
+        UPDATE runtime_api_session_token
+        SET ultimo_acesso = NOW()
+        WHERE uuid_runtime = p_uuid_runtime
+        AND ativo = 1;
+    END IF;
+    
+    -- Retornar status
+    SELECT 
+        p_id_sessao AS id_sessao,
+        v_id_usuario AS id_usuario,
+        v_expira_em AS expira_em,
+        'ATIVO' AS status,
+        TIMESTAMPDIFF(SECOND, NOW(), v_expira_em) AS segundos_restantes,
+        NOW() AS heartbeat_at;
+    
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -18640,17 +20283,31 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_writer_lock`(
-    IN p_uuid_runtime CHAR(36)
+    IN p_uuid_runtime CHAR(36),
+    OUT p_lock_id BIGINT
 )
-    SQL SECURITY INVOKER
 BEGIN
+    DECLARE v_lock_exists INT;
 
-    INSERT INTO kernel_single_writer_lock
-    (uuid_runtime, bloqueado)
-    VALUES (p_uuid_runtime, TRUE)
-    ON DUPLICATE KEY UPDATE
-        bloqueado = TRUE;
+    SELECT COUNT(*)
+    INTO v_lock_exists
+    FROM runtime_kernel_locks
+    WHERE uuid_runtime = p_uuid_runtime
+      AND expires_at > NOW(6);
 
+    IF v_lock_exists > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT='RUNTIME_LOCK_ALREADY_HELD';
+    END IF;
+
+    INSERT INTO runtime_kernel_locks
+    (uuid_runtime,locked_by,acquired_at,expires_at)
+    VALUES
+    (p_uuid_runtime,CONNECTION_ID(),
+     NOW(6),
+     DATE_ADD(NOW(6),INTERVAL 60 SECOND));
+
+    SET p_lock_id = LAST_INSERT_ID();
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -18668,15 +20325,11 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_writer_unlock`(
-    IN p_uuid_runtime CHAR(36)
+    IN p_lock_id BIGINT
 )
-    SQL SECURITY INVOKER
 BEGIN
-
-    UPDATE kernel_single_writer_lock
-    SET bloqueado = FALSE
-    WHERE uuid_runtime = p_uuid_runtime;
-
+    DELETE FROM runtime_kernel_locks
+    WHERE id = p_lock_id;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -18920,6 +20573,100 @@ BEGIN
         p_estado_origem, p_estado_destino, p_payload,
         p_status, p_mensagem, NOW(6)
     );
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_ledger_registrar_evento` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ledger_registrar_evento`(
+    IN p_uuid_transacao_pai CHAR(36),
+    IN p_id_usuario BIGINT,
+    IN p_id_sessao BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_nome_usuario VARCHAR(100),
+    IN p_acao VARCHAR(100),
+    IN p_modulo VARCHAR(50),
+    IN p_sub_modulo VARCHAR(50),
+    IN p_estado_origem VARCHAR(50),
+    IN p_estado_destino VARCHAR(50),
+    IN p_estado_anterior JSON,
+    IN p_estado_novo JSON,
+    IN p_payload_original JSON,
+    IN p_status_evento ENUM('SUCESSO', 'ERRO', 'AVISO', 'CANCELADO', 'ROLLBACK'),
+    IN p_codigo_erro VARCHAR(50),
+    IN p_mensagem VARCHAR(1000),
+    IN p_processing_time_ms INT,
+    OUT p_uuid_transacao CHAR(36),
+    OUT p_id_evento BIGINT
+)
+BEGIN
+    DECLARE v_uuid CHAR(36) DEFAULT UUID();
+    DECLARE v_sequencia INT DEFAULT 1;
+    
+    -- Obter próxima sequência
+    SELECT COALESCE(MAX(sequencia_evento), 0) + 1 INTO v_sequencia
+    FROM atendimento_evento_ledger
+    WHERE uuid_transacao = v_uuid;
+    
+    INSERT INTO atendimento_evento_ledger (
+        uuid_transacao,
+        uuid_transacao_pai,
+        sequencia_evento,
+        id_usuario,
+        id_sessao,
+        id_perfil,
+        nome_usuario,
+        acao,
+        modulo,
+        sub_modulo,
+        estado_origem,
+        estado_destino,
+        estado_anterior,
+        estado_novo,
+        payload_original,
+        payload_processado,
+        status_evento,
+        codigo_erro,
+        mensagem,
+        processing_time_ms,
+        created_at
+    ) VALUES (
+        v_uuid,
+        p_uuid_transacao_pai,
+        v_sequencia,
+        p_id_usuario,
+        p_id_sessao,
+        p_id_perfil,
+        p_nome_usuario,
+        p_acao,
+        p_modulo,
+        p_sub_modulo,
+        p_estado_origem,
+        p_estado_destino,
+        p_estado_anterior,
+        p_estado_novo,
+        p_payload_original,
+        NULL,
+        p_status_evento,
+        p_codigo_erro,
+        p_mensagem,
+        p_processing_time_ms,
+        NOW(6)
+    );
+    
+    SET p_uuid_transacao = v_uuid;
+    SET p_id_evento = LAST_INSERT_ID();
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -21203,6 +22950,193 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_patch_master_auth_core` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_master_auth_core`()
+BEGIN
+
+DECLARE v_exists INT DEFAULT 0;
+
+#--------------------------------------------------
+-- AUTH AUDIT (CORE)
+#--------------------------------------------------
+
+SELECT COUNT(*) INTO v_exists
+FROM information_schema.TABLES
+WHERE table_schema = DATABASE()
+AND table_name = 'auth_audit';
+
+IF v_exists = 0 THEN
+
+CREATE TABLE auth_audit (
+    id_audit BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario BIGINT NULL,
+    id_sessao BIGINT NULL,
+    acao VARCHAR(100) NOT NULL,
+    recurso VARCHAR(100),
+    sucesso TINYINT DEFAULT 1,
+    ip_origem VARCHAR(45),
+    user_agent TEXT,
+    detalhes JSON,
+    criado_em DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+
+    INDEX idx_auth_audit_usuario(id_usuario),
+    INDEX idx_auth_audit_data(criado_em),
+    INDEX idx_auth_audit_acao(acao)
+
+) ENGINE=InnoDB;
+
+END IF;
+
+#--------------------------------------------------
+-- FK pessoa → usuario (se não existir)
+#--------------------------------------------------
+
+SELECT COUNT(*) INTO v_exists
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE table_schema = DATABASE()
+AND table_name = 'usuario'
+AND constraint_name = 'fk_usuario_pessoa';
+
+IF v_exists = 0 THEN
+
+ALTER TABLE usuario
+ADD CONSTRAINT fk_usuario_pessoa
+FOREIGN KEY (id_pessoa)
+REFERENCES pessoa(id_pessoa)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+END IF;
+
+#--------------------------------------------------
+-- UNIQUE LOGIN
+#--------------------------------------------------
+
+SELECT COUNT(*) INTO v_exists
+FROM information_schema.STATISTICS
+WHERE table_schema = DATABASE()
+AND table_name = 'usuario'
+AND index_name = 'uk_usuario_login';
+
+IF v_exists = 0 THEN
+
+ALTER TABLE usuario
+ADD UNIQUE INDEX uk_usuario_login(login);
+
+END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_patch_permissao` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_permissao`()
+BEGIN
+    -- Variáveis de controle
+    DECLARE idx_existe INT DEFAULT 0;
+
+    -- Drop seguro do índice
+    SELECT COUNT(*) INTO idx_existe
+    FROM information_schema.statistics
+    WHERE table_schema = DATABASE()
+      AND table_name = 'permissao'
+      AND index_name = 'uk_permissao_codigo';
+
+    IF idx_existe > 0 THEN
+        ALTER TABLE permissao DROP INDEX uk_permissao_codigo;
+    END IF;
+
+    -- Adiciona colunas idempotentes
+    IF NOT EXISTS (
+        SELECT * FROM information_schema.COLUMNS 
+        WHERE table_name = 'permissao' AND column_name = 'dominio'
+    ) THEN
+        ALTER TABLE permissao ADD COLUMN dominio VARCHAR(40) DEFAULT 'GERAL';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT * FROM information_schema.COLUMNS 
+        WHERE table_name = 'permissao' AND column_name = 'metadata'
+    ) THEN
+        ALTER TABLE permissao ADD COLUMN metadata JSON NULL;
+    END IF;
+
+    -- Criação de índice seguro
+    ALTER TABLE permissao ADD UNIQUE INDEX uk_permissao_codigo (codigo);
+
+    -- Auditoria de patch
+    INSERT INTO auth_audit (acao, recurso, detalhes, criado_em)
+    VALUES ('PATCH_EXECUTADO', 'permissao', JSON_OBJECT('procedimento','sp_patch_permissao','executado_em',NOW()), NOW());
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_patch_usuario_fk_idx` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_usuario_fk_idx`()
+BEGIN
+    -- FK idempotente
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.TABLE_CONSTRAINTS
+        WHERE CONSTRAINT_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'usuario'
+          AND CONSTRAINT_NAME = 'fk_usuario_pessoa'
+    ) THEN
+        ALTER TABLE usuario
+        ADD CONSTRAINT fk_usuario_pessoa
+        FOREIGN KEY (id_pessoa)
+        REFERENCES pessoa(id_pessoa)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE;
+    END IF;
+
+    -- Índice idempotente
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.statistics
+        WHERE table_schema = DATABASE()
+          AND table_name = 'usuario'
+          AND index_name = 'uk_usuario_login'
+    ) THEN
+        CREATE UNIQUE INDEX uk_usuario_login ON usuario(login);
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_pdv_venda_criar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -22580,6 +24514,606 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_admin_root_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_admin_root_runtime`()
+BEGIN
+
+    DECLARE v_login VARCHAR(80) DEFAULT 'evandro.andrade';
+    DECLARE v_senha VARCHAR(255) DEFAULT '@An29070818';
+
+    -- Criar usuário root
+    INSERT IGNORE INTO usuario
+    (
+        login,
+        senha_hash,
+        ativo,
+        criado_em
+    )
+    VALUES
+    (
+        v_login,
+        SHA2(v_senha,256),
+        1,
+        NOW(6)
+    );
+
+    -- Criar perfil root global
+    INSERT IGNORE INTO perfil
+    (
+        nome,
+        ativo,
+        criado_em
+    )
+    VALUES
+    (
+        'ROOT_ADMIN',
+        1,
+        NOW(6)
+    );
+
+    -- Vincular usuário ao perfil root
+    INSERT IGNORE INTO usuario_sistema
+    (
+        id_usuario,
+        id_sistema,
+        id_perfil,
+        ativo,
+        data_vinculo
+    )
+    SELECT
+        u.id_usuario,
+        1,
+        p.id_perfil,
+        1,
+        NOW(6)
+    FROM usuario u
+    CROSS JOIN perfil p
+    WHERE u.login = v_login
+    AND p.nome = 'ROOT_ADMIN';
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_clinico_sintetico_hardcore` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_clinico_sintetico_hardcore`()
+BEGIN
+
+    DECLARE v_i INT DEFAULT 1;
+    DECLARE v_sql TEXT;
+
+    START TRANSACTION;
+
+    WHILE v_i <= 10000 DO
+
+        SET v_sql = CONCAT(
+            'INSERT IGNORE INTO paciente (nome) VALUES (',
+            QUOTE(CONCAT('PACIENTE_CLINICO_SYN_', LPAD(v_i,6,'0'))),
+            ')'
+        );
+
+        SET @stmt = v_sql;
+
+        PREPARE stmt FROM @stmt;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_dummy_funcionario_500` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_dummy_funcionario_500`()
+BEGIN
+
+    DECLARE v_i INT DEFAULT 1;
+
+    START TRANSACTION;
+
+    WHILE v_i <= 500 DO
+
+        INSERT INTO funcionario
+        (
+            nome,
+            ativo,
+            criado_em
+        )
+        VALUES
+        (
+            CONCAT('FUNCIONARIO_SEED_', v_i),
+            1,
+            NOW(6)
+        )
+        ON DUPLICATE KEY UPDATE
+            nome = VALUES(nome);
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_dummy_paciente_500` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_dummy_paciente_500`()
+BEGIN
+
+    DECLARE v_i INT DEFAULT 1;
+
+    START TRANSACTION;
+
+    WHILE v_i <= 500 DO
+
+        INSERT INTO paciente
+        (
+            nome,
+            ativo,
+            criado_em
+        )
+        VALUES
+        (
+            CONCAT('PACIENTE_SEED_', v_i),
+            1,
+            NOW(6)
+        )
+        ON DUPLICATE KEY UPDATE
+        nome = VALUES(nome);
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_dummy_senha_fila_500` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_dummy_senha_fila_500`()
+BEGIN
+
+    DECLARE v_i INT DEFAULT 1;
+
+    START TRANSACTION;
+
+    WHILE v_i <= 500 DO
+
+        INSERT INTO senha
+        (
+            numero,
+            prefixo,
+            status,
+            ativo,
+            criado_em
+        )
+        VALUES
+        (
+            v_i,
+            'TMP',
+            'AGUARDANDO',
+            1,
+            NOW(6)
+        )
+        ON DUPLICATE KEY UPDATE
+            numero = VALUES(numero);
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_dummy_usuarios_500` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_dummy_usuarios_500`()
+BEGIN
+    DECLARE v_i INT DEFAULT 1;
+
+    START TRANSACTION;
+
+    WHILE v_i <= 500 DO
+
+        INSERT INTO usuario
+        (
+            login,
+            senha_hash,
+            ativo,
+            criado_em
+        )
+        VALUES
+        (
+            CONCAT('seed_user_', v_i),
+            '',
+            1,
+            NOW(6)
+        )
+        ON DUPLICATE KEY UPDATE login = login;
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_funcionario_login_setores` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_funcionario_login_setores`()
+BEGIN
+
+    DECLARE v_i INT DEFAULT 1;
+
+    START TRANSACTION;
+
+    WHILE v_i <= 500 DO
+
+        INSERT IGNORE INTO funcionario
+        (
+            nome,
+            ativo,
+            criado_em
+        )
+        VALUES
+        (
+            CONCAT('FUNC_SECTOR_TEST_', LPAD(v_i,6,'0')),
+            1,
+            NOW(6)
+        );
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_login_setores_testes` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_login_setores_testes`()
+BEGIN
+
+    INSERT INTO usuario
+    (
+        login,
+        senha_hash,
+        ativo,
+        criado_em
+    )
+    VALUES
+    (
+        'recepcao@test',
+        '',
+        1,
+        NOW(6)
+    ),
+    (
+        'medico@test',
+        '',
+        1,
+        NOW(6)
+    ),
+    (
+        'enfermagem@test',
+        '',
+        1,
+        NOW(6)
+    ),
+    (
+        'farmacia@test',
+        '',
+        1,
+        NOW(6)
+    )
+    ON DUPLICATE KEY UPDATE
+        login = VALUES(login);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_runtime_assistencial` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_runtime_assistencial`()
+BEGIN
+
+    INSERT INTO runtime_estado_sobrevivencia
+    (
+        runtime_device_id,
+        modo_operacao,
+        estado_runtime,
+        ultimo_ping,
+        ativo
+    )
+    VALUES
+    (
+        UUID(),
+        'TESTE_CARGA',
+        'ONLINE',
+        NOW(6),
+        1
+    )
+    ON DUPLICATE KEY UPDATE
+        ultimo_ping = NOW(6);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_runtime_funcionario_full` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_runtime_funcionario_full`()
+BEGIN
+
+    DECLARE v_i INT DEFAULT 1;
+    DECLARE v_tipo VARCHAR(50);
+
+    START TRANSACTION;
+
+    WHILE v_i <= 500 DO
+
+        CASE (v_i MOD 10)
+            WHEN 0 THEN SET v_tipo = 'MEDICO';
+            WHEN 1 THEN SET v_tipo = 'ENFERMEIRO';
+            WHEN 2 THEN SET v_tipo = 'TECNICO_ENFERMAGEM';
+            WHEN 3 THEN SET v_tipo = 'RECEPCIONISTA';
+            WHEN 4 THEN SET v_tipo = 'FARMACEUTICO';
+            WHEN 5 THEN SET v_tipo = 'ADMINISTRATIVO';
+            WHEN 6 THEN SET v_tipo = 'GESTOR';
+            WHEN 7 THEN SET v_tipo = 'SUPORTE_TI';
+            WHEN 8 THEN SET v_tipo = 'COORDENADOR';
+            ELSE SET v_tipo = 'OUTRO';
+        END CASE;
+
+        INSERT IGNORE INTO funcionario
+        (
+            id_pessoa,
+            tipo_funcionario,
+            cargo,
+            departamento,
+            matricula,
+            ativo,
+            criado_em
+        )
+        VALUES
+        (
+            v_i,
+            v_tipo,
+            CONCAT('CARGO_', v_tipo),
+            CONCAT('DEP_', v_tipo),
+            CONCAT('MAT_', LPAD(v_i,6,'0')),
+            1,
+            NOW(6)
+        );
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_runtime_login_funcionario` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_runtime_login_funcionario`()
+BEGIN
+
+    DECLARE v_i INT DEFAULT 1;
+
+    START TRANSACTION;
+
+    WHILE v_i <= 500 DO
+
+        INSERT IGNORE INTO usuario
+        (
+            login,
+            senha_hash,
+            ativo,
+            criado_em
+        )
+        VALUES
+        (
+            CONCAT('func_', LPAD(v_i,6,'0')),
+            '',
+            1,
+            NOW(6)
+        );
+
+        -- Vincular usuário ao funcionário se existir a coluna id_funcionario em usuario
+        IF EXISTS (
+            SELECT 1 
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+            AND table_name = 'usuario'
+            AND column_name = 'id_funcionario'
+        ) THEN
+
+            UPDATE usuario
+            SET id_funcionario = v_i
+            WHERE login = CONCAT('func_', LPAD(v_i,6,'0'));
+
+        END IF;
+
+        SET v_i = v_i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_seed_saas_federado` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_saas_federado`()
+BEGIN
+
+    INSERT INTO saas_entidade
+    (
+        nome,
+        ativo,
+        criado_em
+    )
+    VALUES
+    (
+        'ENTIDADE_TESTE_GLOBAL',
+        1,
+        NOW(6)
+    )
+    ON DUPLICATE KEY UPDATE
+        nome = VALUES(nome);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_senha_cancelar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -23267,23 +25801,25 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_sessao_assert`(
-    IN p_id_sessao_usuario BIGINT
+
+    IN p_id_sessao BIGINT
+
 )
-    SQL SECURITY INVOKER
 BEGIN
 
-    DECLARE v_ativo BOOLEAN;
+    DECLARE v_ativo INT;
 
     SELECT ativo
     INTO v_ativo
     FROM sessao_usuario
-    WHERE id_sessao_usuario = p_id_sessao_usuario
-    AND expiracao_em > NOW(6)
-    LIMIT 1;
+    WHERE id_sessao_usuario = p_id_sessao
+    AND expira_em > NOW();
 
-    IF v_ativo IS NULL OR v_ativo = FALSE THEN
+    IF v_ativo IS NULL OR v_ativo = 0 THEN
+
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Sessao runtime invalida';
+        SET MESSAGE_TEXT = 'SESSAO_INVALIDA';
+
     END IF;
 
 END ;;
@@ -24253,6 +26789,70 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_worker_atendimento` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_worker_atendimento`(
+    IN p_id_queue BIGINT,
+    IN p_uuid_execution CHAR(36),
+    IN p_id_tenant BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN
+)
+BEGIN
+    DECLARE v_id BIGINT;
+    DECLARE v_acao VARCHAR(50);
+
+    SET v_id = JSON_UNQUOTE(JSON_EXTRACT(p_payload,'$.id_atendimento'));
+    SET v_acao = JSON_UNQUOTE(JSON_EXTRACT(p_payload,'$.acao'));
+
+    IF v_acao = 'INICIAR' THEN
+
+        UPDATE atendimento
+        SET status='EM_ANDAMENTO',
+            updated_at=NOW(6)
+        WHERE id_atendimento=v_id;
+
+        SET p_resultado=JSON_OBJECT('status','INICIADO');
+        SET p_sucesso=TRUE;
+
+    ELSEIF v_acao='TRANSICIONAR' THEN
+
+        UPDATE atendimento
+        SET status=JSON_UNQUOTE(JSON_EXTRACT(p_payload,'$.novo_status')),
+            updated_at=NOW(6)
+        WHERE id_atendimento=v_id;
+
+        SET p_resultado=JSON_OBJECT('status','TRANSICIONADO');
+        SET p_sucesso=TRUE;
+
+    ELSE
+        SET p_resultado=JSON_OBJECT('erro','ACAO_DESCONHECIDA');
+        SET p_sucesso=FALSE;
+    END IF;
+
+    UPDATE runtime_execution_queue
+    SET status=IF(p_sucesso,'CONCLUIDO','FALHOU'),
+        finished_at=NOW(6),
+        result_payload=p_resultado
+    WHERE id_queue=p_id_queue;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_workflow_ffa_rebuild` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -24523,6 +27123,24 @@ DELIMITER ;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `vw_usuario_contextos`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_usuario_contextos`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_usuario_contextos` AS select `uc`.`id_usuario` AS `id_usuario`,`uc`.`id_sistema` AS `id_sistema`,`uc`.`id_unidade` AS `id_unidade`,`uc`.`id_local_operacional` AS `id_local_operacional`,`uc`.`id_perfil` AS `id_perfil`,`p`.`nome` AS `perfil_nome` from (`usuario_contexto` `uc` join `perfil` `p` on((`p`.`id_perfil` = `uc`.`id_perfil`))) where (`uc`.`ativo` = 1) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vw_usuario_permissoes`
 --
 
@@ -24535,7 +27153,7 @@ DELIMITER ;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_usuario_permissoes` AS select `su`.`id_sessao_usuario` AS `id_sessao_usuario`,`su`.`id_usuario` AS `id_usuario`,`su`.`id_sistema` AS `id_sistema`,`us`.`id_perfil` AS `id_perfil`,`p`.`nome` AS `perfil_nome`,`pp`.`nome_procedure` AS `nome_procedure`,`pp`.`permitido` AS `permitido`,`su`.`id_unidade` AS `id_unidade`,`su`.`id_entidade` AS `id_entidade` from (((`sessao_usuario` `su` join `usuario_sistema` `us` on(((`us`.`id_usuario` = `su`.`id_usuario`) and (`us`.`ativo` = 1)))) join `perfil` `p` on(((`p`.`id_perfil` = `us`.`id_perfil`) and (`p`.`ativo` = 1)))) left join `permissao_procedure` `pp` on(((`pp`.`id_perfil` = `us`.`id_perfil`) and (`pp`.`permitido` = 1)))) where (`su`.`ativo` = 1) */;
+/*!50001 VIEW `vw_usuario_permissoes` AS select `su`.`id_sessao_usuario` AS `id_sessao_usuario`,`su`.`id_usuario` AS `id_usuario`,`su`.`id_sistema` AS `id_sistema`,`p`.`id_perfil` AS `id_perfil`,`p`.`nome` AS `perfil_nome`,`pm`.`codigo` AS `codigo_permissao`,`pm`.`nome` AS `nome_permissao`,`pm`.`nome_procedure` AS `nome_procedure`,`pp`.`criado_em` AS `perfil_permissao_criado` from ((((`sessao_usuario` `su` join `usuario_perfil` `up` on((`up`.`id_usuario` = `su`.`id_usuario`))) join `perfil` `p` on(((`p`.`id_perfil` = `up`.`id_perfil`) and (`p`.`ativo` = 1)))) join `perfil_permissao` `pp` on((`pp`.`id_perfil` = `p`.`id_perfil`))) join `permissao` `pm` on(((`pm`.`id_permissao` = `pp`.`id_permissao`) and (`pm`.`ativo` = 1)))) where (`su`.`ativo` = 1) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -24585,4 +27203,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-05  5:15:19
+-- Dump completed on 2026-03-07  5:11:55

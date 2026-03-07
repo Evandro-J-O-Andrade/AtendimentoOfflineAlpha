@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from "react";
-import * as jwtDecodeLib from "jwt-decode";
-const jwtDecode = jwtDecodeLib.default || jwtDecodeLib;
+import { jwtDecode } from "jwt-decode";
 
 const RuntimeAuthContext = createContext();
 
@@ -18,11 +17,23 @@ function hasOperationalContext(user) {
     return REQUIRED_CONTEXT_FIELDS.every((field) => user[field] !== undefined && user[field] !== null);
 }
 
+function normalizeTokenPayload(user) {
+    if (!user || typeof user !== "object") return user;
+
+    return {
+        ...user,
+        // Compatibilidade com tokens legados que usam nomes alternativos.
+        id_sessao_usuario: user.id_sessao_usuario ?? user.id_sessao ?? null,
+        id_local_operacional: user.id_local_operacional ?? user.id_local ?? null
+    };
+}
+
 function buildSessionFromToken(token) {
     if (!token) return null;
 
     try {
-        const user = jwtDecode(token);
+        const decoded = jwtDecode(token);
+        const user = normalizeTokenPayload(decoded);
         return {
             token,
             user,

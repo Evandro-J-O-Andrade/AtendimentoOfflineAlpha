@@ -13,6 +13,20 @@ export default function Login() {
     const [error, setError] = useState("");
     const [contextsWithNames, setContextsWithNames] = useState({});
 
+    function extractToken(data) {
+        if (!data) return null;
+        if (typeof data === "string") return data;
+        return data.token || data.token_jwt || data.access_token || null;
+    }
+
+    function normalizeChoice(ctx) {
+        if (!ctx || typeof ctx !== "object") return ctx;
+        return {
+            ...ctx,
+            id_local_operacional: ctx.id_local_operacional ?? ctx.id_local ?? null
+        };
+    }
+
     // Buscar nomes dos contextos (unidades, sistemas, perfis)
     useEffect(() => {
         async function fetchContextNames() {
@@ -55,13 +69,12 @@ export default function Login() {
 
             // multiple contexts -> present choices to user
             if (data && data.choices) {
-                setChoices(data.choices);
+                setChoices(Array.isArray(data.choices) ? data.choices.map(normalizeChoice) : []);
                 setLoading(false);
                 return;
             }
 
-            // token may be returned as a plain string or as { token: '...' }
-            const token = typeof data === "string" ? data : data.token;
+            const token = extractToken(data);
             if (token) {
                 const ok = setSession(token);
                 if (!ok) {
@@ -75,7 +88,12 @@ export default function Login() {
             }
 
             // if we get here, login failed
-            setError(data.error || (res.ok ? "Credenciais inválidas" : "Falha ao autenticar"));
+            const apiError = data?.error;
+            if (apiError === "SEM_CONTEXTO" || apiError === "USUARIO_SEM_CONTEXTO") {
+                setError("Seu usuário não possui contexto de acesso (sistema/unidade/local).");
+            } else {
+                setError(apiError || (res.ok ? "Credenciais inválidas" : "Falha ao autenticar"));
+            }
             setLoading(false);
 
         } catch {
@@ -87,20 +105,20 @@ export default function Login() {
     async function handleSelectContext(ctx) {
         setLoading(true);
         try {
+            const nctx = normalizeChoice(ctx);
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     login,
                     senha,
-                    id_cidade: ctx.id_cidade,
-                    id_unidade: ctx.id_unidade,
-                    id_sistema: ctx.id_sistema,
-                    id_local_operacional: ctx.id_local_operacional
+                    id_unidade: nctx.id_unidade,
+                    id_sistema: nctx.id_sistema,
+                    id_local_operacional: nctx.id_local_operacional
                 })
             });
             const data = await res.json();
-            const token = typeof data === "string" ? data : data.token;
+            const token = extractToken(data);
             if (token) {
                 const ok = setSession(token);
                 if (!ok) {
