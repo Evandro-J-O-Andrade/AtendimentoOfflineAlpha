@@ -1223,15 +1223,15 @@ CREATE TABLE `atendimento_evento` (
   `id_ffa` bigint DEFAULT NULL,
   `id_atendimento` bigint DEFAULT NULL,
   `id_paciente` bigint DEFAULT NULL,
-  `dominio` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tipo_evento` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `estado_origem` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `estado_destino` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `contexto_fluxo` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dominio` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo_evento` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `estado_origem` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado_destino` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contexto_fluxo` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `payload` json DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
-  `hash_evento` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hash_evento` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_evento`),
   KEY `idx_evento_ffa` (`id_ffa`),
@@ -1261,29 +1261,29 @@ DROP TABLE IF EXISTS `atendimento_evento_ledger`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_evento_ledger` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
-  `uuid_transacao` char(36) COLLATE utf8mb4_general_ci NOT NULL,
-  `uuid_transacao_pai` char(36) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `uuid_transacao` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `uuid_transacao_pai` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `sequencia_evento` int NOT NULL,
   `id_usuario` bigint NOT NULL,
   `id_sessao` bigint NOT NULL,
   `id_perfil` bigint NOT NULL,
-  `nome_usuario` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `acao` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `modulo` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `sub_modulo` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `estado_origem` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `estado_destino` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nome_usuario` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `acao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `modulo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `sub_modulo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado_origem` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado_destino` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `estado_anterior` json DEFAULT NULL,
   `estado_novo` json DEFAULT NULL,
   `payload_original` json DEFAULT NULL,
   `payload_processado` json DEFAULT NULL,
   `id_atendimento` bigint GENERATED ALWAYS AS (json_unquote(json_extract(`payload_original`,_utf8mb4'$.id_atendimento'))) STORED,
-  `status_evento` enum('SUCESSO','ERRO','AVISO','CANCELADO','ROLLBACK') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SUCESSO',
-  `codigo_erro` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `mensagem` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `user_agent` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `hostname` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status_evento` enum('SUCESSO','ERRO','AVISO','CANCELADO','ROLLBACK') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SUCESSO',
+  `codigo_erro` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `mensagem` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_agent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `hostname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `processing_time_ms` int DEFAULT NULL,
   `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_evento`),
@@ -1749,7 +1749,7 @@ CREATE TABLE `auditoria_erro` (
   KEY `idx_aud_erro_criado` (`criado_em`),
   KEY `idx_aud_erro_rotina` (`rotina`),
   KEY `idx_aud_erro_sessao` (`id_sessao_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1758,7 +1758,7 @@ CREATE TABLE `auditoria_erro` (
 
 LOCK TABLES `auditoria_erro` WRITE;
 /*!40000 ALTER TABLE `auditoria_erro` DISABLE KEYS */;
-INSERT INTO `auditoria_erro` VALUES (1,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:08:14'),(2,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:15:18'),(3,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'inicio_complementacao_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-13 06:37:56'),(4,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'s.tipo\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-13 06:38:13'),(5,3,'sp_operacao_encaminhar','45000',1644,'[NOT_FOUND] Falha de asserção.','Falha ao encaminhar (fila_operacional)','2026-02-13 06:38:31'),(6,123,'sp_recepcao_iniciar_complementacao','45000',1644,'[SESSAO] Sessão inválida/inativa/expirada.','Falha ao iniciar complementação','2026-02-15 03:13:12'),(7,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'criado_em\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-15 03:58:23'),(8,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:00'),(9,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:21'),(10,3,'sp_operacao_encaminhar','42S22',1054,'Unknown column \'fo.status\' in \'where clause\'','Falha ao encaminhar','2026-02-15 04:56:44'),(11,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:12'),(12,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:20');
+INSERT INTO `auditoria_erro` VALUES (1,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:08:14'),(2,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:15:18'),(3,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'inicio_complementacao_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-13 06:37:56'),(4,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'s.tipo\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-13 06:38:13'),(5,3,'sp_operacao_encaminhar','45000',1644,'[NOT_FOUND] Falha de asserção.','Falha ao encaminhar (fila_operacional)','2026-02-13 06:38:31'),(6,123,'sp_recepcao_iniciar_complementacao','45000',1644,'[SESSAO] Sessão inválida/inativa/expirada.','Falha ao iniciar complementação','2026-02-15 03:13:12'),(7,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'criado_em\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-15 03:58:23'),(8,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:00'),(9,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:21'),(10,3,'sp_operacao_encaminhar','42S22',1054,'Unknown column \'fo.status\' in \'where clause\'','Falha ao encaminhar','2026-02-15 04:56:44'),(11,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:12'),(12,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:20'),(13,52,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 05:28:24'),(14,52,'sp_triagem_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-09 05:28:24'),(15,53,'sp_operacao_encaminhar','HY000',1267,'Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\'','Falha na rotina','2026-03-09 05:50:35'),(16,53,'sp_medico_encaminhar','45000',1644,'[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI','Falha na rotina','2026-03-09 05:50:35'),(17,53,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 05:51:00'),(18,54,'sp_operacao_encaminhar','HY000',1267,'Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\'','Falha na rotina','2026-03-09 06:17:54'),(19,54,'sp_medico_encaminhar','45000',1644,'[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI','Falha na rotina','2026-03-09 06:17:54'),(20,54,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 06:17:56'),(21,54,'sp_medico_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-09 06:17:56');
 /*!40000 ALTER TABLE `auditoria_erro` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1843,7 +1843,7 @@ CREATE TABLE `auditoria_evento` (
   KEY `idx_auditoria_sessao_data` (`id_sessao_usuario`,`criado_em`),
   KEY `idx_auditoria_entidade` (`entidade`,`id_entidade`,`criado_em`),
   CONSTRAINT `fk_aud_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1852,7 +1852,7 @@ CREATE TABLE `auditoria_evento` (
 
 LOCK TABLES `auditoria_evento` WRITE;
 /*!40000 ALTER TABLE `auditoria_evento` DISABLE KEYS */;
-INSERT INTO `auditoria_evento` VALUES (5,NULL,'sessao_usuario',123,'SESSAO_REVOGADA','Logout forçado via SQL (sem sessão ativa)','2026-02-13 04:23:51',7,'sessao_usuario',7),(6,2,'sessao_usuario',2,'SESSAO_ABERTA','Sessão aberta para usuario=5 sistema=1 unidade=2 local=1','2026-02-13 05:10:01',5,'sessao_usuario',5),(7,2,'sql',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=(n/a) | ERRNO=(n/a) | MSG=(n/a) | CTX=Falha ao emitir senha','2026-02-13 05:34:23',5,'auditoria_evento',5),(8,2,'SQL',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=42000 | ERRNO=1305 | MSG=PROCEDURE pronto_atendimento.sp_assert_true does not exist | CTX=Falha ao emitir senha','2026-02-13 06:08:14',NULL,NULL,NULL),(9,2,'SQL',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=42000 | ERRNO=1305 | MSG=PROCEDURE pronto_atendimento.sp_assert_true does not exist | CTX=Falha ao emitir senha','2026-02-13 06:15:18',NULL,NULL,NULL),(10,2,'SENHA',3,'EMITIR','codigo=A001 | origem=TOTEM | tipo=CLINICO | lane=ADULTO | local=1','2026-02-13 06:17:42',5,'senhas',5),(11,3,'sessao_usuario',3,'SESSAO_ABERTA','Sessão aberta para usuario=5 sistema=1 unidade=2 local=1','2026-02-13 06:19:13',5,'sessao_usuario',5),(12,3,'SENHA',4,'EMITIR','codigo=A002 | origem=TOTEM | tipo=CLINICO | lane=ADULTO | local=1','2026-02-13 06:19:25',5,'senhas',5),(13,3,'SENHA',3,'CHAMAR','codigo=A001 | local=1 | lane=ADULTO','2026-02-13 06:19:40',5,'senhas',5),(14,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'inicio_complementacao_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-13 06:37:56',NULL,NULL,NULL),(15,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_complementar_e_abrir_ffa | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'s.tipo\' in \'field list\' | CTX=Falha ao complementar e abrir FFA','2026-02-13 06:38:13',NULL,NULL,NULL),(16,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=45000 | ERRNO=1644 | MSG=[NOT_FOUND] Falha de asserção. | CTX=Falha ao encaminhar (fila_operacional)','2026-02-13 06:38:31',NULL,NULL,NULL),(18,3,'SENHA',4,'INICIAR_COMPLEMENTACAO','codigo=A002 | local_operacional=1','2026-02-15 03:36:47',5,'senhas',5),(19,3,'SENHA',3,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 03:38:24',5,'senhas',5),(20,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_complementar_e_abrir_ffa | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'criado_em\' in \'field list\' | CTX=Falha ao complementar e abrir FFA','2026-02-15 03:58:23',NULL,NULL,NULL),(21,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'atualizado_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-15 04:11:00',NULL,NULL,NULL),(22,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'atualizado_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-15 04:11:21',NULL,NULL,NULL),(23,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:24:39',5,'senhas',5),(24,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:27:57',5,'senhas',5),(25,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:30:13',5,'senhas',5),(26,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:31:10',5,'senhas',5),(27,3,'PESSOA',34,'CRIAR','nome=PACIENTE TESTE','2026-02-15 04:31:10',5,'pessoa',5),(28,3,'ATENDIMENTO',13,'ABRIR','protocolo=GPAT-20260215-0000000001|id_pessoa=34|id_senha=1','2026-02-15 04:31:10',5,'atendimento',5),(29,3,'FFA',12,'ABRIR','gpat=GPAT-20260215-0000000001|id_paciente=8|id_senha=1','2026-02-15 04:31:10',5,'ffa',5),(30,3,'SENHA',1,'COMPLEMENTAR_E_ABRIR_FFA','codigo=A001|id_ffa=12|id_paciente=8','2026-02-15 04:31:10',5,'senhas',5),(31,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'fo.status\' in \'where clause\' | CTX=Falha ao encaminhar','2026-02-15 04:56:44',NULL,NULL,NULL),(32,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_painel_filtro_locais_seed | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao seedar filtro de locais do painel','2026-02-15 05:49:12',NULL,NULL,NULL),(33,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_painel_filtro_locais_seed | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao seedar filtro de locais do painel','2026-02-15 05:49:20',NULL,NULL,NULL),(34,3,'PAINEL',1,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(35,3,'PAINEL',2,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(36,3,'PAINEL',78,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(37,3,'PAINEL',150,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(38,3,'PAINEL',1,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(39,3,'PAINEL',2,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(40,3,'PAINEL',23,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(41,3,'PAINEL',247,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(42,3,'PAINEL',24,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(43,3,'PAINEL',7,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(44,3,'PAINEL',221,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(45,3,'PAINEL',78,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(46,3,'PAINEL',79,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(47,3,'PAINEL',150,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5);
+INSERT INTO `auditoria_evento` VALUES (5,NULL,'sessao_usuario',123,'SESSAO_REVOGADA','Logout forçado via SQL (sem sessão ativa)','2026-02-13 04:23:51',7,'sessao_usuario',7),(6,2,'sessao_usuario',2,'SESSAO_ABERTA','Sessão aberta para usuario=5 sistema=1 unidade=2 local=1','2026-02-13 05:10:01',5,'sessao_usuario',5),(7,2,'sql',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=(n/a) | ERRNO=(n/a) | MSG=(n/a) | CTX=Falha ao emitir senha','2026-02-13 05:34:23',5,'auditoria_evento',5),(8,2,'SQL',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=42000 | ERRNO=1305 | MSG=PROCEDURE pronto_atendimento.sp_assert_true does not exist | CTX=Falha ao emitir senha','2026-02-13 06:08:14',NULL,NULL,NULL),(9,2,'SQL',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=42000 | ERRNO=1305 | MSG=PROCEDURE pronto_atendimento.sp_assert_true does not exist | CTX=Falha ao emitir senha','2026-02-13 06:15:18',NULL,NULL,NULL),(10,2,'SENHA',3,'EMITIR','codigo=A001 | origem=TOTEM | tipo=CLINICO | lane=ADULTO | local=1','2026-02-13 06:17:42',5,'senhas',5),(11,3,'sessao_usuario',3,'SESSAO_ABERTA','Sessão aberta para usuario=5 sistema=1 unidade=2 local=1','2026-02-13 06:19:13',5,'sessao_usuario',5),(12,3,'SENHA',4,'EMITIR','codigo=A002 | origem=TOTEM | tipo=CLINICO | lane=ADULTO | local=1','2026-02-13 06:19:25',5,'senhas',5),(13,3,'SENHA',3,'CHAMAR','codigo=A001 | local=1 | lane=ADULTO','2026-02-13 06:19:40',5,'senhas',5),(14,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'inicio_complementacao_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-13 06:37:56',NULL,NULL,NULL),(15,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_complementar_e_abrir_ffa | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'s.tipo\' in \'field list\' | CTX=Falha ao complementar e abrir FFA','2026-02-13 06:38:13',NULL,NULL,NULL),(16,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=45000 | ERRNO=1644 | MSG=[NOT_FOUND] Falha de asserção. | CTX=Falha ao encaminhar (fila_operacional)','2026-02-13 06:38:31',NULL,NULL,NULL),(18,3,'SENHA',4,'INICIAR_COMPLEMENTACAO','codigo=A002 | local_operacional=1','2026-02-15 03:36:47',5,'senhas',5),(19,3,'SENHA',3,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 03:38:24',5,'senhas',5),(20,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_complementar_e_abrir_ffa | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'criado_em\' in \'field list\' | CTX=Falha ao complementar e abrir FFA','2026-02-15 03:58:23',NULL,NULL,NULL),(21,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'atualizado_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-15 04:11:00',NULL,NULL,NULL),(22,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'atualizado_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-15 04:11:21',NULL,NULL,NULL),(23,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:24:39',5,'senhas',5),(24,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:27:57',5,'senhas',5),(25,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:30:13',5,'senhas',5),(26,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:31:10',5,'senhas',5),(27,3,'PESSOA',34,'CRIAR','nome=PACIENTE TESTE','2026-02-15 04:31:10',5,'pessoa',5),(28,3,'ATENDIMENTO',13,'ABRIR','protocolo=GPAT-20260215-0000000001|id_pessoa=34|id_senha=1','2026-02-15 04:31:10',5,'atendimento',5),(29,3,'FFA',12,'ABRIR','gpat=GPAT-20260215-0000000001|id_paciente=8|id_senha=1','2026-02-15 04:31:10',5,'ffa',5),(30,3,'SENHA',1,'COMPLEMENTAR_E_ABRIR_FFA','codigo=A001|id_ffa=12|id_paciente=8','2026-02-15 04:31:10',5,'senhas',5),(31,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'fo.status\' in \'where clause\' | CTX=Falha ao encaminhar','2026-02-15 04:56:44',NULL,NULL,NULL),(32,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_painel_filtro_locais_seed | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao seedar filtro de locais do painel','2026-02-15 05:49:12',NULL,NULL,NULL),(33,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_painel_filtro_locais_seed | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao seedar filtro de locais do painel','2026-02-15 05:49:20',NULL,NULL,NULL),(34,3,'PAINEL',1,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(35,3,'PAINEL',2,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(36,3,'PAINEL',78,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(37,3,'PAINEL',150,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(38,3,'PAINEL',1,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(39,3,'PAINEL',2,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(40,3,'PAINEL',23,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(41,3,'PAINEL',247,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(42,3,'PAINEL',24,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(43,3,'PAINEL',7,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(44,3,'PAINEL',221,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(45,3,'PAINEL',78,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(46,3,'PAINEL',79,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(47,3,'PAINEL',150,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(48,52,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`)) | CTX=Falha na rotina','2026-03-09 05:28:24',NULL,NULL,NULL),(49,52,'SQL',NULL,'ERRO_SQL','ROTINA=sp_triagem_finalizar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai | CTX=Falha na rotina','2026-03-09 05:28:24',NULL,NULL,NULL),(50,53,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\' | CTX=Falha na rotina','2026-03-09 05:50:35',NULL,NULL,NULL),(51,53,'SQL',NULL,'ERRO_SQL','ROTINA=sp_medico_encaminhar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI | CTX=Falha na rotina','2026-03-09 05:50:35',NULL,NULL,NULL),(52,53,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`)) | CTX=Falha na rotina','2026-03-09 05:51:00',NULL,NULL,NULL),(53,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\' | CTX=Falha na rotina','2026-03-09 06:17:54',NULL,NULL,NULL),(54,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_medico_encaminhar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI | CTX=Falha na rotina','2026-03-09 06:17:54',NULL,NULL,NULL),(55,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`)) | CTX=Falha na rotina','2026-03-09 06:17:56',NULL,NULL,NULL),(56,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_medico_finalizar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai | CTX=Falha na rotina','2026-03-09 06:17:56',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `auditoria_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2012,11 +2012,11 @@ CREATE TABLE `auth_audit` (
   `id_audit` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint DEFAULT NULL,
   `id_sessao` bigint DEFAULT NULL,
-  `acao` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `recurso` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `acao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `recurso` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `detalhes` json DEFAULT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `sucesso` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_audit`),
@@ -2046,8 +2046,8 @@ DROP TABLE IF EXISTS `auth_bloqueio`;
 CREATE TABLE `auth_bloqueio` (
   `id_bloqueio` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `tipo_bloqueio` enum('SENHA_EXPIRADA','TENTATIVAS_EXCEDIDAS','ADMINISTRATIVO','INATIVIDADE','FRAUDE') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `motivo` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo_bloqueio` enum('SENHA_EXPIRADA','TENTATIVAS_EXCEDIDAS','ADMINISTRATIVO','INATIVIDADE','FRAUDE') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `motivo` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `bloqueado_por` bigint DEFAULT NULL,
   `expira_em` datetime DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
@@ -2079,9 +2079,9 @@ DROP TABLE IF EXISTS `auth_grupo`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_grupo` (
   `id_grupo` bigint NOT NULL AUTO_INCREMENT,
-  `nome` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descricao` text COLLATE utf8mb4_unicode_ci,
-  `tipo_grupo` enum('SETOR','EQUIPE','PROJETO','REGIONAL') COLLATE utf8mb4_unicode_ci DEFAULT 'SETOR',
+  `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `tipo_grupo` enum('SETOR','EQUIPE','PROJETO','REGIONAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'SETOR',
   `id_unidade` bigint DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_por` bigint DEFAULT NULL,
@@ -2110,8 +2110,8 @@ DROP TABLE IF EXISTS `auth_grupo_permissao`;
 CREATE TABLE `auth_grupo_permissao` (
   `id_grupo_permissao` bigint NOT NULL AUTO_INCREMENT,
   `id_grupo` bigint NOT NULL,
-  `recurso` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `acao` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `recurso` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `acao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_grupo_permissao`),
@@ -2140,7 +2140,7 @@ CREATE TABLE `auth_grupo_usuario` (
   `id_grupo_usuario` bigint NOT NULL AUTO_INCREMENT,
   `id_grupo` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
-  `papel` enum('MEMBRO','COORDENADOR','SUBCOORDENADOR') COLLATE utf8mb4_unicode_ci DEFAULT 'MEMBRO',
+  `papel` enum('MEMBRO','COORDENADOR','SUBCOORDENADOR') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'MEMBRO',
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_grupo_usuario`),
@@ -2170,12 +2170,12 @@ DROP TABLE IF EXISTS `auth_log`;
 CREATE TABLE `auth_log` (
   `id_log` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint DEFAULT NULL,
-  `tipo_evento` enum('LOGIN_SUCESSO','LOGIN_FALHA','LOGOUT','SENHA_TROCA','SENHA_RESET','TOKEN_REFRESH','BLOQUEIO','DESBLOQUEIO','SESSAO_EXPIRADA') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
-  `dispositivo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `localizacao` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `mensagem` text COLLATE utf8mb4_unicode_ci,
+  `tipo_evento` enum('LOGIN_SUCESSO','LOGIN_FALHA','LOGOUT','SENHA_TROCA','SENHA_RESET','TOKEN_REFRESH','BLOQUEIO','DESBLOQUEIO','SESSAO_EXPIRADA') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `dispositivo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `localizacao` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mensagem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `dados_extras` json DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_log`),
@@ -2204,9 +2204,9 @@ DROP TABLE IF EXISTS `auth_notificacao`;
 CREATE TABLE `auth_notificacao` (
   `id_notificacao` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `tipo_notificacao` enum('LOGIN_NOVO_DISPOSITIVO','LOGIN_SUSPEITO','SENHA_EXPIRANDO','BLOQUUEIO_CONTA','SEGURANCA_ALERTA') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `titulo` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mensagem` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo_notificacao` enum('LOGIN_NOVO_DISPOSITIVO','LOGIN_SUSPEITO','SENHA_EXPIRANDO','BLOQUUEIO_CONTA','SEGURANCA_ALERTA') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `titulo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mensagem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `lido` tinyint(1) DEFAULT '0',
   `lido_em` datetime DEFAULT NULL,
   `dados_extras` json DEFAULT NULL,
@@ -2237,10 +2237,10 @@ DROP TABLE IF EXISTS `auth_parametro`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_parametro` (
   `id_parametro` bigint NOT NULL AUTO_INCREMENT,
-  `chave` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `valor` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descricao` text COLLATE utf8mb4_unicode_ci,
-  `tipo_parametro` enum('SENHA','SESSAO','TOKEN','BLOQUEIO','GERAL') COLLATE utf8mb4_unicode_ci DEFAULT 'GERAL',
+  `chave` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `valor` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `tipo_parametro` enum('SENHA','SESSAO','TOKEN','BLOQUEIO','GERAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'GERAL',
   `ativo` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id_parametro`),
   UNIQUE KEY `uk_parametro_chave` (`chave`)
@@ -2270,11 +2270,11 @@ CREATE TABLE `auth_sessao` (
   `id_unidade` bigint DEFAULT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `id_perfil` bigint DEFAULT NULL,
-  `token_sessao` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
-  `dispositivo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `geo_localizacao` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `token_sessao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `dispositivo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `geo_localizacao` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `expira_em` datetime NOT NULL,
   `ultima_atividade` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -2306,11 +2306,11 @@ DROP TABLE IF EXISTS `auth_sessao_dispositivo`;
 CREATE TABLE `auth_sessao_dispositivo` (
   `id_dispositivo_confiavel` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `dispositivo_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nome_dispositivo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sistema_operacional` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `navegador` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ultimo_ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dispositivo_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nome_dispositivo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sistema_operacional` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `navegador` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ultimo_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ultimo_acesso` datetime DEFAULT CURRENT_TIMESTAMP,
   `primeiro_acesso` datetime DEFAULT CURRENT_TIMESTAMP,
   `confiavel` tinyint(1) DEFAULT '0',
@@ -2340,11 +2340,11 @@ DROP TABLE IF EXISTS `auth_tentativa_login`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_tentativa_login` (
   `id_tentativa` bigint NOT NULL AUTO_INCREMENT,
-  `login` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `login` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `sucesso` tinyint(1) NOT NULL DEFAULT '0',
-  `motivo_falha` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `motivo_falha` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_tentativa`),
   KEY `idx_tentativa_login` (`login`),
@@ -2372,10 +2372,10 @@ DROP TABLE IF EXISTS `auth_token`;
 CREATE TABLE `auth_token` (
   `id_token` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `tipo_token` enum('ACCESS','REFRESH','RECOVERY','VERIFICATION') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `tipo_token` enum('ACCESS','REFRESH','RECOVERY','VERIFICATION') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `ativo` tinyint(1) DEFAULT '1',
   `expira_em` datetime NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -3397,8 +3397,8 @@ DROP TABLE IF EXISTS `dispositivo_tipo`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `dispositivo_tipo` (
   `id_dispositivo_tipo` bigint NOT NULL AUTO_INCREMENT,
-  `nome` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descricao` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nome` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `permite_login_usuario` tinyint(1) DEFAULT '1',
   `requer_autenticacao` tinyint(1) DEFAULT '1',
   `usa_tts` tinyint(1) DEFAULT '0',
@@ -6544,7 +6544,7 @@ CREATE TABLE `fila_operacional_evento` (
   KEY `idx_filaop_evt_sessao` (`id_sessao_usuario`),
   CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`),
   CONSTRAINT `fk_filaop_evt_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8110,20 +8110,20 @@ CREATE TABLE `kernel_identity_trust_chain` (
   `id_usuario` bigint NOT NULL,
   `id_sessao` bigint DEFAULT NULL,
   `id_dispositivo` bigint DEFAULT NULL,
-  `ip_origem` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `fingerprint_runtime` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `fingerprint_behavior` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `fingerprint_device` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `estado_runtime` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fingerprint_runtime` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fingerprint_behavior` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fingerprint_device` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado_runtime` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `score_risco` int DEFAULT '0',
   `limite_risco` int DEFAULT '80',
   `tentativas` int DEFAULT '0',
   `janela_tentativa` int DEFAULT '15',
   `bloqueado` tinyint DEFAULT '0',
   `ativo` tinyint DEFAULT '1',
-  `nonce_runtime` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `lineage_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nonce_runtime` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lineage_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_chain`),
@@ -8157,16 +8157,16 @@ DROP TABLE IF EXISTS `kernel_ledger`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `kernel_ledger` (
-  `id_transacao` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_transacao` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `id_sessao` bigint DEFAULT NULL,
   `id_usuario` bigint NOT NULL,
   `id_perfil` bigint NOT NULL,
-  `acao` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contexto` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT 'DEFAULT',
+  `acao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contexto` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'DEFAULT',
   `payload` json DEFAULT NULL,
-  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `duracao_ms` int DEFAULT NULL,
-  `mensagem` text COLLATE utf8mb4_unicode_ci,
+  `mensagem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `id_tenant` bigint DEFAULT '1',
   `registrado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_transacao`),
@@ -8323,12 +8323,18 @@ CREATE TABLE `lab_amostra` (
   `id_usuario_coleta` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_ffa` bigint NOT NULL,
   PRIMARY KEY (`id_amostra`),
   UNIQUE KEY `uk_lab_codigo` (`codigo_amostra`),
-  UNIQUE KEY `uk_lab_proto` (`id_protocolo`),
   KEY `idx_lab_status` (`status`,`criado_em`),
   KEY `fk_lab_sessao_col` (`id_sessao_coleta`),
   KEY `fk_lab_user_col` (`id_usuario_coleta`),
+  KEY `idx_lab_amostra_protocolo_ffa` (`id_protocolo`,`id_ffa`),
+  KEY `idx_lab_amostra_ffa` (`id_ffa`),
+  KEY `idx_lab_amostra_protocolo` (`id_protocolo`),
+  CONSTRAINT `fk_lab_amostra_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_lab_amostra_ffa_v1` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_lab_amostra_protocolo` FOREIGN KEY (`id_protocolo`) REFERENCES `lab_protocolo` (`id_protocolo`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_lab_proto` FOREIGN KEY (`id_protocolo`) REFERENCES `procedimento_protocolo` (`id_protocolo`),
   CONSTRAINT `fk_lab_user_col` FOREIGN KEY (`id_usuario_coleta`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -9845,14 +9851,18 @@ CREATE TABLE `paciente` (
   `nome` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `documento_principal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `metadata_identidade` json DEFAULT NULL,
+  `id_entidade` bigint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_paciente_uuid` (`uuid_paciente`),
   UNIQUE KEY `uk_paciente_hash` (`hash_identidade`),
   UNIQUE KEY `prontuario` (`prontuario`),
   KEY `id_pessoa` (`id_pessoa`),
   KEY `idx_paciente_nome` (`nome`),
+  KEY `idx_paciente_entidade` (`id_entidade`),
+  KEY `idx_paciente_prontuario` (`id_entidade`,`prontuario`),
+  CONSTRAINT `fk_paciente_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `paciente_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB AUTO_INCREMENT=10019 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10029 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9861,7 +9871,7 @@ CREATE TABLE `paciente` (
 
 LOCK TABLES `paciente` WRITE;
 /*!40000 ALTER TABLE `paciente` DISABLE KEYS */;
-INSERT INTO `paciente` VALUES (1,'3540a7ee-154a-11f1-abdf-c8d3ff00effc','6f00a19174b72156a9c519e0445127368652b30c78bf7c0816cc3db17994a9d9',8,NULL,'2026-01-28 06:00:49',NULL,NULL,'TESTE',NULL,NULL),(2,'3540cba3-154a-11f1-abdf-c8d3ff00effc','c4c2f940b0d69540d552325a4b3983a3259f75d08f3f93ca21ad44e671c24c6f',8,NULL,'2026-01-28 06:01:27',NULL,NULL,NULL,NULL,NULL),(3,'3540cdf3-154a-11f1-abdf-c8d3ff00effc','7e3a03bf3c5be1812cf882bf79280d6d93cf971288ee279ef74581a2f9ecfe6c',8,NULL,'2026-01-28 06:07:06',NULL,NULL,NULL,NULL,NULL),(4,'3540cf75-154a-11f1-abdf-c8d3ff00effc','32699b7c0c4a61fb4fa373d4fa0c6cf1ea66bc2170897eb1f26d446ecefce519',8,NULL,'2026-01-28 06:09:09',NULL,NULL,NULL,NULL,NULL),(5,'3540d0bb-154a-11f1-abdf-c8d3ff00effc','81eb04f50076da158e3cc16b98eb27d6fe945b080599933ac3e5bfecc41b647f',8,NULL,'2026-01-28 06:16:01',NULL,NULL,NULL,NULL,NULL),(6,'3540d1fc-154a-11f1-abdf-c8d3ff00effc','fb924f3a6f1ba171394e9326ae9f556080157919baa2ae437d18ecf93298d50e',8,NULL,'2026-01-28 06:17:10',NULL,NULL,NULL,NULL,NULL),(7,'3540d35d-154a-11f1-abdf-c8d3ff00effc','59aba0bf02b6c785bf15a67de0f10d90a08aa3bb47016c5e90e2074db1690c5b',8,NULL,'2026-01-28 06:17:37',NULL,NULL,NULL,NULL,NULL),(8,'3540d4c2-154a-11f1-abdf-c8d3ff00effc','aaf09fc84e80f821da31b6a1d69510d2a80043fe381dbe25edbb32fbcac0bd04',8,NULL,'2026-01-28 06:19:55',NULL,NULL,NULL,NULL,NULL),(9,'3540d605-154a-11f1-abdf-c8d3ff00effc','2e922d7cda1328dc80e39bfaa1f738d3590823c37b70e5883b07ef65302142ba',8,NULL,'2026-01-28 06:20:16',NULL,NULL,NULL,NULL,NULL),(10,'3540d763-154a-11f1-abdf-c8d3ff00effc','0c69d946277d431fe54dbb99e0bf01b0ed7367541ae1c97995cfac7b410d3857',8,NULL,'2026-01-28 06:20:42',NULL,NULL,NULL,NULL,NULL),(11,'3540d8a2-154a-11f1-abdf-c8d3ff00effc','6405a7ce224fa6b378c91de8b867274f9b72efc8f56479e6f91d8530a5128c32',8,NULL,'2026-01-28 06:21:25',NULL,NULL,NULL,NULL,NULL),(12,'3540dbf4-154a-11f1-abdf-c8d3ff00effc','6b13e200b10df223256c59210812fb428b7b64268021ddb016f1e45fc9bae3f3',8,NULL,'2026-01-28 06:21:35',NULL,NULL,NULL,NULL,NULL),(13,'3540dd8f-154a-11f1-abdf-c8d3ff00effc','b5235f1cc6a6a9ca2c614f1c90b503f5cf425389f17883548d2fb500f0a6c296',8,NULL,'2026-01-28 06:21:57',NULL,NULL,NULL,NULL,NULL),(14,'3540ded1-154a-11f1-abdf-c8d3ff00effc','220d8c202df304e6c5bcace3f3ee71479f15eeb5e001f144ddcdd3f960c381d2',8,NULL,'2026-01-28 06:22:20',NULL,NULL,NULL,NULL,NULL),(15,'3540e5a3-154a-11f1-abdf-c8d3ff00effc','1815a53be31364a7c9538f98d70f43834bcdebfd589982f6cc98770295fb8729',8,NULL,'2026-01-28 06:22:54',NULL,NULL,NULL,NULL,NULL),(16,'3540e76d-154a-11f1-abdf-c8d3ff00effc','09278e3c626417cf45d3ef63bd9fe75f90911c8580488014ae362adacc41a274',8,NULL,'2026-01-28 06:26:06',NULL,NULL,NULL,NULL,NULL),(17,'3540e8d9-154a-11f1-abdf-c8d3ff00effc','5123b2a65d60b642b00e1416dd89e14af52ce9e45a2d343c3d598f333b4856f1',33,NULL,'2026-01-28 06:30:19',NULL,NULL,NULL,NULL,NULL),(18,'3540ea31-154a-11f1-abdf-c8d3ff00effc','4c5a6785ab78eda67f576fe5265d9b9e58e25466ada56b5e1110e1bda4e97b8e',33,NULL,'2026-01-28 06:31:19',NULL,NULL,NULL,NULL,NULL),(19,'','',0,NULL,'2026-03-05 05:24:08',NULL,NULL,'PACIENTE_CLINICO_SYN_000001',NULL,NULL);
+INSERT INTO `paciente` VALUES (1,'3540a7ee-154a-11f1-abdf-c8d3ff00effc','6f00a19174b72156a9c519e0445127368652b30c78bf7c0816cc3db17994a9d9',8,NULL,'2026-01-28 06:00:49',NULL,NULL,'TESTE',NULL,NULL,1),(2,'3540cba3-154a-11f1-abdf-c8d3ff00effc','c4c2f940b0d69540d552325a4b3983a3259f75d08f3f93ca21ad44e671c24c6f',8,NULL,'2026-01-28 06:01:27',NULL,NULL,NULL,NULL,NULL,1),(3,'3540cdf3-154a-11f1-abdf-c8d3ff00effc','7e3a03bf3c5be1812cf882bf79280d6d93cf971288ee279ef74581a2f9ecfe6c',8,NULL,'2026-01-28 06:07:06',NULL,NULL,NULL,NULL,NULL,1),(4,'3540cf75-154a-11f1-abdf-c8d3ff00effc','32699b7c0c4a61fb4fa373d4fa0c6cf1ea66bc2170897eb1f26d446ecefce519',8,NULL,'2026-01-28 06:09:09',NULL,NULL,NULL,NULL,NULL,1),(5,'3540d0bb-154a-11f1-abdf-c8d3ff00effc','81eb04f50076da158e3cc16b98eb27d6fe945b080599933ac3e5bfecc41b647f',8,NULL,'2026-01-28 06:16:01',NULL,NULL,NULL,NULL,NULL,1),(6,'3540d1fc-154a-11f1-abdf-c8d3ff00effc','fb924f3a6f1ba171394e9326ae9f556080157919baa2ae437d18ecf93298d50e',8,NULL,'2026-01-28 06:17:10',NULL,NULL,NULL,NULL,NULL,1),(7,'3540d35d-154a-11f1-abdf-c8d3ff00effc','59aba0bf02b6c785bf15a67de0f10d90a08aa3bb47016c5e90e2074db1690c5b',8,NULL,'2026-01-28 06:17:37',NULL,NULL,NULL,NULL,NULL,1),(8,'3540d4c2-154a-11f1-abdf-c8d3ff00effc','aaf09fc84e80f821da31b6a1d69510d2a80043fe381dbe25edbb32fbcac0bd04',8,NULL,'2026-01-28 06:19:55',NULL,NULL,NULL,NULL,NULL,1),(9,'3540d605-154a-11f1-abdf-c8d3ff00effc','2e922d7cda1328dc80e39bfaa1f738d3590823c37b70e5883b07ef65302142ba',8,NULL,'2026-01-28 06:20:16',NULL,NULL,NULL,NULL,NULL,1),(10,'3540d763-154a-11f1-abdf-c8d3ff00effc','0c69d946277d431fe54dbb99e0bf01b0ed7367541ae1c97995cfac7b410d3857',8,NULL,'2026-01-28 06:20:42',NULL,NULL,NULL,NULL,NULL,1),(11,'3540d8a2-154a-11f1-abdf-c8d3ff00effc','6405a7ce224fa6b378c91de8b867274f9b72efc8f56479e6f91d8530a5128c32',8,NULL,'2026-01-28 06:21:25',NULL,NULL,NULL,NULL,NULL,1),(12,'3540dbf4-154a-11f1-abdf-c8d3ff00effc','6b13e200b10df223256c59210812fb428b7b64268021ddb016f1e45fc9bae3f3',8,NULL,'2026-01-28 06:21:35',NULL,NULL,NULL,NULL,NULL,1),(13,'3540dd8f-154a-11f1-abdf-c8d3ff00effc','b5235f1cc6a6a9ca2c614f1c90b503f5cf425389f17883548d2fb500f0a6c296',8,NULL,'2026-01-28 06:21:57',NULL,NULL,NULL,NULL,NULL,1),(14,'3540ded1-154a-11f1-abdf-c8d3ff00effc','220d8c202df304e6c5bcace3f3ee71479f15eeb5e001f144ddcdd3f960c381d2',8,NULL,'2026-01-28 06:22:20',NULL,NULL,NULL,NULL,NULL,1),(15,'3540e5a3-154a-11f1-abdf-c8d3ff00effc','1815a53be31364a7c9538f98d70f43834bcdebfd589982f6cc98770295fb8729',8,NULL,'2026-01-28 06:22:54',NULL,NULL,NULL,NULL,NULL,1),(16,'3540e76d-154a-11f1-abdf-c8d3ff00effc','09278e3c626417cf45d3ef63bd9fe75f90911c8580488014ae362adacc41a274',8,NULL,'2026-01-28 06:26:06',NULL,NULL,NULL,NULL,NULL,1),(17,'3540e8d9-154a-11f1-abdf-c8d3ff00effc','5123b2a65d60b642b00e1416dd89e14af52ce9e45a2d343c3d598f333b4856f1',33,NULL,'2026-01-28 06:30:19',NULL,NULL,NULL,NULL,NULL,1),(18,'3540ea31-154a-11f1-abdf-c8d3ff00effc','4c5a6785ab78eda67f576fe5265d9b9e58e25466ada56b5e1110e1bda4e97b8e',33,NULL,'2026-01-28 06:31:19',NULL,NULL,NULL,NULL,NULL,1),(19,'','',0,NULL,'2026-03-05 05:24:08',NULL,NULL,'PACIENTE_CLINICO_SYN_000001',NULL,NULL,1),(10019,'1d6583ce-1b7c-11f1-9fe3-c8d3ff00effc','7b8b53453be2c255c778da0fd05079bf20d0988197093f10548ab6b4b38a00f0',1001,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10020,'1d659947-1b7c-11f1-9fe3-c8d3ff00effc','f63b525e3c1c1e158ebeb88f0f091d0a14d5550728fde16b9be1eddd1a2fa4e7',1002,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10021,'1d659b9e-1b7c-11f1-9fe3-c8d3ff00effc','ba406fa9a39b56f78d3314b698e601c9b0ce4d8d1ba2dffc313223db90b5eafb',1003,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10022,'1d659d53-1b7c-11f1-9fe3-c8d3ff00effc','c02f4ef64586a453025736541704fefb2f2c2f0317e889b90275676a16eff33f',1004,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10023,'1d659f26-1b7c-11f1-9fe3-c8d3ff00effc','59fb1134bf8959778a280c34471bd70b160043195f3d96fdb76a5689c050a27c',1005,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10024,'1d65a0ba-1b7c-11f1-9fe3-c8d3ff00effc','534f510a966adfd41c12cb6e770e4cd3df2ac1b183e873057a8936f7eaa06c55',1006,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10025,'1d65a227-1b7c-11f1-9fe3-c8d3ff00effc','7e813450871ace474c48f121f3c5e59fe5587710112ea96e79e19631b467ab46',1007,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10026,'1d65a420-1b7c-11f1-9fe3-c8d3ff00effc','e621cc1777150086bb591b65fe333e7f2fc1a4e9e7c71e6f917dc2b54b83643a',1008,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10027,'1d65a87c-1b7c-11f1-9fe3-c8d3ff00effc','add413c42b9c83a2d446def9d3a60d553dd8f099f239d2534364ca731994705c',1009,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1),(10028,'1d65aada-1b7c-11f1-9fe3-c8d3ff00effc','54bb53351922b00c2ba0851ecf23cec7be58aae1cacb8ae3d5384a21462469c1',1010,NULL,'2026-03-09 02:52:10',NULL,NULL,NULL,NULL,NULL,1);
 /*!40000 ALTER TABLE `paciente` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10683,7 +10693,7 @@ CREATE TABLE `perfil` (
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_perfil`),
   UNIQUE KEY `uk_perfil_codigo` (`codigo`)
-) ENGINE=InnoDB AUTO_INCREMENT=124 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10807,12 +10817,15 @@ CREATE TABLE `pessoa` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint NOT NULL,
   PRIMARY KEY (`id_pessoa`),
   KEY `idx_pessoa_nome` (`nome`),
   KEY `idx_pessoa_nome_social` (`nome_social`),
   KEY `idx_pessoa_nascimento` (`data_nascimento`),
-  KEY `idx_pessoa_tipo` (`tipo_pessoa`,`ativo`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_pessoa_tipo` (`tipo_pessoa`,`ativo`),
+  KEY `idx_pessoa_entidade` (`id_entidade`),
+  CONSTRAINT `fk_pessoa_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
+) ENGINE=InnoDB AUTO_INCREMENT=1011 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10821,7 +10834,7 @@ CREATE TABLE `pessoa` (
 
 LOCK TABLES `pessoa` WRITE;
 /*!40000 ALTER TABLE `pessoa` DISABLE KEYS */;
-INSERT INTO `pessoa` VALUES (1,'Administrador Sistema',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(2,'Recepcionista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(3,'Enfermeira Triagem',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(4,'Medico Plantonista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL),(5,'Farmaceutico',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL);
+INSERT INTO `pessoa` VALUES (1,'Administrador Sistema',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(2,'Recepcionista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(3,'Enfermeira Triagem',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(4,'Medico Plantonista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(5,'Farmaceutico',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(1001,'Paciente Teste 01',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1002,'Paciente Teste 02',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1003,'Paciente Teste 03',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1004,'Paciente Teste 04',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1005,'Paciente Teste 05',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1006,'Paciente Teste 06',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1007,'Paciente Teste 07',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1008,'Paciente Teste 08',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1009,'Paciente Teste 09',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1010,'Paciente Teste 10',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1);
 /*!40000 ALTER TABLE `pessoa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -11450,7 +11463,7 @@ CREATE TABLE `prescricao_item` (
   `id_lote` bigint DEFAULT NULL,
   `dispensado_em` datetime(6) DEFAULT NULL,
   `id_usuario_dispensacao` bigint DEFAULT NULL,
-  `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   PRIMARY KEY (`id_item`),
   KEY `id_prescricao` (`id_prescricao`),
   CONSTRAINT `prescricao_item_ibfk_1` FOREIGN KEY (`id_prescricao`) REFERENCES `prescricao_continua` (`id_prescricao`)
@@ -12686,10 +12699,10 @@ DROP TABLE IF EXISTS `runtime_api_session_token`;
 CREATE TABLE `runtime_api_session_token` (
   `id_token` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `uuid_runtime` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid_runtime` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expira_em` datetime NOT NULL,
-  `device_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `device_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `tenant_id` bigint DEFAULT '1',
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -12757,8 +12770,8 @@ CREATE TABLE `runtime_contexto` (
   `id_local_operacional` bigint DEFAULT NULL,
   `id_paciente` bigint DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
-  `contexto_clinico` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `estado_fluxo` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contexto_clinico` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado_fluxo` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `iniciado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `finalizado_em` datetime(6) DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
@@ -12787,11 +12800,11 @@ DROP TABLE IF EXISTS `runtime_dispositivo`;
 CREATE TABLE `runtime_dispositivo` (
   `id_runtime_dispositivo` bigint NOT NULL AUTO_INCREMENT,
   `id_dispositivo` bigint NOT NULL,
-  `uuid_runtime` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tipo_runtime` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `versao_runtime` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ip_runtime` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status_runtime` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT 'ONLINE',
+  `uuid_runtime` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo_runtime` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `versao_runtime` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_runtime` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status_runtime` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'ONLINE',
   `ultimo_heartbeat` datetime(6) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_runtime_dispositivo`),
@@ -12923,19 +12936,19 @@ DROP TABLE IF EXISTS `runtime_execution_queue`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `runtime_execution_queue` (
-  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `id_sessao` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
   `id_perfil` bigint NOT NULL,
-  `acao` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contexto` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT 'DEFAULT',
+  `acao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contexto` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'DEFAULT',
   `payload` json DEFAULT NULL,
-  `status` enum('PENDENTE','PROCESSANDO','CONCLUIDO','ERRO','CANCELADO') COLLATE utf8mb4_unicode_ci DEFAULT 'PENDENTE',
+  `status` enum('PENDENTE','PROCESSANDO','CONCLUIDO','ERRO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'PENDENTE',
   `prioridade` int DEFAULT '0',
   `retry_count` int DEFAULT '0',
-  `ultimo_erro` text COLLATE utf8mb4_unicode_ci,
+  `ultimo_erro` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `duracao_ms` int DEFAULT NULL,
-  `resultado` text COLLATE utf8mb4_unicode_ci,
+  `resultado` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -13325,6 +13338,34 @@ LOCK TABLES `sala_notificacao_evento` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `schema_patch_execucao`
+--
+
+DROP TABLE IF EXISTS `schema_patch_execucao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `schema_patch_execucao` (
+  `id_patch_execucao` bigint NOT NULL AUTO_INCREMENT,
+  `patch_nome` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `hash_patch` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status_execucao` enum('SUCESSO','ERRO') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `detalhes` json DEFAULT NULL,
+  `executado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_patch_execucao`),
+  KEY `idx_patch_nome_data` (`patch_nome`,`executado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `schema_patch_execucao`
+--
+
+LOCK TABLES `schema_patch_execucao` WRITE;
+/*!40000 ALTER TABLE `schema_patch_execucao` DISABLE KEYS */;
+/*!40000 ALTER TABLE `schema_patch_execucao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `senha`
 --
 
@@ -13372,7 +13413,7 @@ CREATE TABLE `senha` (
   KEY `idx_senha_atendimento` (`id_atendimento`),
   KEY `idx_senha_uuid_sync` (`uuid_sync`),
   KEY `idx_senha_data_dia` ((cast(`criado_em` as date)))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1011 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13381,6 +13422,7 @@ CREATE TABLE `senha` (
 
 LOCK TABLES `senha` WRITE;
 /*!40000 ALTER TABLE `senha` DISABLE KEYS */;
+INSERT INTO `senha` VALUES (1001,1,1,NULL,'CLI-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1002,1,1,NULL,'CLI-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1003,1,1,NULL,'PED-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1004,1,1,NULL,'CLI-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1005,1,1,NULL,'PED-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1006,1,1,NULL,'CLI-004',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1007,1,1,NULL,'CLI-005',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1008,1,1,NULL,'PED-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1009,1,1,NULL,'CLI-006',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1010,1,1,NULL,'CLI-007',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL);
 /*!40000 ALTER TABLE `senha` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13597,7 +13639,7 @@ CREATE TABLE `sessao_usuario` (
   KEY `idx_sessao_usuario_token` (`token_jwt`(255)),
   KEY `idx_sessao_usuario_expira` (`expira_em`),
   CONSTRAINT `fk_sessao_usuario_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13606,6 +13648,7 @@ CREATE TABLE `sessao_usuario` (
 
 LOCK TABLES `sessao_usuario` WRITE;
 /*!40000 ALTER TABLE `sessao_usuario` DISABLE KEYS */;
+INSERT INTO `sessao_usuario` VALUES (1,1,1,1,1,1,NULL,'fd2aea2fadd06b6e37f3db0efaf6f492dc01f37f23d0ebdcb2a3fc5a9a5b497a',NULL,NULL,NULL,'2026-03-07 06:52:43.000000','2026-03-07 14:52:43.804000',NULL,1,0,'2026-03-07 06:52:43.806722',NULL),(2,1,1,1,1,1,NULL,'a679999055f865ed41b784930cc22a921e4026179118df0eccd1c899188da6c3',NULL,NULL,NULL,'2026-03-07 06:52:46.000000','2026-03-07 14:52:46.633000',NULL,1,0,'2026-03-07 06:52:46.634171',NULL),(3,1,1,1,1,1,NULL,'f8aa72baa7725f35164fe665b096e22d58e0f7477b8dbc5eaed613db13c4e134',NULL,NULL,NULL,'2026-03-07 06:53:03.000000','2026-03-07 14:53:03.066000',NULL,1,0,'2026-03-07 06:53:03.067528',NULL),(4,1,1,1,1,1,NULL,'282ce5ad51fd148f7fec6af95c14a940a8ab9199b679c031b13676519a1345da',NULL,NULL,NULL,'2026-03-07 06:54:12.000000','2026-03-07 14:54:12.199000',NULL,1,0,'2026-03-07 06:54:12.201165',NULL),(5,1,1,1,1,1,NULL,'47a6f67ff2f9ebac445f40b80796c59075530ad36583cb4124597ef5ae496615',NULL,NULL,NULL,'2026-03-08 20:25:01.000000','2026-03-09 04:25:01.118000',NULL,1,0,'2026-03-08 20:25:01.120139',NULL),(6,1,1,1,1,1,NULL,'dad282976fa2ce7ca7432d1f5abfd93f715cf4077a47675b729f61dc6d848e59',NULL,NULL,NULL,'2026-03-08 20:26:13.000000','2026-03-09 04:26:13.238000',NULL,1,0,'2026-03-08 20:26:13.239401',NULL),(7,1,1,1,1,1,NULL,'247eefad7cee48fe0cfa64ddd2c4d9322d943aacde946319e0513bb57bc1bff3',NULL,NULL,NULL,'2026-03-08 20:44:55.000000','2026-03-09 04:44:55.405000',NULL,1,0,'2026-03-08 20:44:55.406634',NULL),(8,1,1,1,1,1,NULL,'f0fcc0c1f95e266e482eafcfe73fd09addaf980007f958007a49d338a75139b7',NULL,NULL,NULL,'2026-03-08 20:50:20.000000','2026-03-09 04:50:20.496000',NULL,1,0,'2026-03-08 20:50:20.497682',NULL),(9,1,1,1,1,1,NULL,'ee27bcadb23951370c58749da400d13dc788cfe201334e8033838b2202d20348',NULL,NULL,NULL,'2026-03-08 21:10:45.000000','2026-03-09 05:10:45.825000',NULL,1,0,'2026-03-08 21:10:45.828448',NULL),(10,1,1,1,1,1,NULL,'52ee31ee7091d7b7dc783bd0eb5950ee04b3d31a7235b0ca317e29f5192ed088',NULL,NULL,NULL,'2026-03-08 21:27:36.000000','2026-03-09 05:27:36.033000',NULL,1,0,'2026-03-08 21:27:36.034744',NULL),(11,1,1,1,1,1,NULL,'9fb6030c54406dd8425beb426fcff7c26c8b5e23086a5c0d994e779ceee8f09b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 00:38:21.000000','2026-03-09 08:38:21.977000',NULL,1,0,'2026-03-09 00:38:21.979757',NULL),(12,1,1,1,1,1,NULL,'f15858eb17d03a27f82adadd128a4717a386ceaa5332ac44713fc7a72ae39674',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 00:38:38.000000','2026-03-09 08:38:38.140000',NULL,1,0,'2026-03-09 00:38:38.141315',NULL),(13,1,1,1,1,1,NULL,'cf8e9650d7a6072c2f3b94db1b2a17e8ebc7fc6d577d9e082f75372fc34abcec',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 00:38:45.000000','2026-03-09 08:38:45.444000',NULL,1,0,'2026-03-09 00:38:45.444544',NULL),(14,1,1,1,1,1,NULL,'6aa31c75a7d968abfcca1b00d7dfab1afdf129092027d7d1c977261a8b324f62',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 00:38:52.000000','2026-03-09 08:38:52.478000',NULL,1,0,'2026-03-09 00:38:52.479814',NULL),(15,1,1,1,1,1,NULL,'0892b16a2bb87587d18b20a845b7df5e7119262153db2936b478b46f60ff69f8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 00:38:56.000000','2026-03-09 08:38:56.808000',NULL,1,0,'2026-03-09 00:38:56.808922',NULL),(16,1,1,1,1,1,NULL,'26ccad7ff911fe080cbb2e5435d1113ea5f4af35cd89659f6a3c194f535dd7d1',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 00:50:16.000000','2026-03-09 08:50:16.880000',NULL,1,0,'2026-03-09 00:50:16.881768',NULL),(17,1,1,1,1,1,NULL,'d55e3f4eeec4f461957951dd86970bfd008a499b592143fefae3a1ae02813f16',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 00:58:54.000000','2026-03-09 08:58:54.921000',NULL,1,0,'2026-03-09 00:58:54.922555',NULL),(18,1,1,1,1,1,NULL,'f0f1968dcb88c01938712aca3c08b480e213fbde539a7d1d5a29dd1ef473b60f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 01:02:25.000000','2026-03-09 09:02:25.805000',NULL,1,0,'2026-03-09 01:02:25.807097',NULL),(19,1,1,1,1,42,NULL,'2de846fb4e5800773e9d20cc30c8aa70a0d4fd29c43892c0262473f897cccbb0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 01:08:57.000000','2026-03-09 09:08:57.641000',NULL,1,0,'2026-03-09 01:08:57.642157',NULL),(20,1,1,1,1,42,NULL,'5ec308a901c5e1895f8220fe884b8140ba228533b8ae6e9762c3ba1c58fc8aae',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 01:28:11.000000','2026-03-09 09:28:11.902000',NULL,1,0,'2026-03-09 01:28:11.904731',NULL),(21,1,1,1,1,42,NULL,'306c48171f9cce63787747b98519267f8a1853797aacf8d70126fb0ae4a091bb',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 01:48:17.000000','2026-03-09 09:48:17.761000',NULL,1,0,'2026-03-09 01:48:17.763839',NULL),(22,1,1,1,1,42,NULL,'4b8cb315721389f9301c0877313da2c50ffc4623f2d631b5f884d45b2df7cc38',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 01:50:48.000000','2026-03-09 09:50:48.080000',NULL,1,0,'2026-03-09 01:50:48.083098',NULL),(23,1,1,1,1,42,NULL,'8aea989b04ded29172f91e4eee2ebab73c806483b6ac107f16ff49fca2db24ea',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 01:51:29.000000','2026-03-09 09:51:29.099000',NULL,1,0,'2026-03-09 01:51:29.100312',NULL),(24,1,1,1,1,42,NULL,'1538d33e7a46e1eba0edcc67fadb657875077c200bf6a8c1049e4dcc7f14b1e1',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:02:48.000000','2026-03-09 10:02:48.919000',NULL,1,0,'2026-03-09 02:02:48.919389',NULL),(25,1,1,1,1,42,NULL,'3532d546ff0d6094ee78ab92cabd0e12dd64f854258ed1cfa4053f60cbf351b5',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:04:57.000000','2026-03-09 10:04:57.877000',NULL,1,0,'2026-03-09 02:04:57.878849',NULL),(26,1,1,1,1,42,NULL,'9a6355c5c2fff4db07a85d3928456896968282c007620dfc8be54717d005c16c',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:18:37.000000','2026-03-09 10:18:37.344000',NULL,1,0,'2026-03-09 02:18:37.345009',NULL),(27,1,1,1,1,42,NULL,'f4adcdeea5848639c15c1cf45a077e2ef138459bbf571a9e9c3c43580c52022c',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:19:31.000000','2026-03-09 10:19:31.405000',NULL,1,0,'2026-03-09 02:19:31.406687',NULL),(28,1,1,1,1,42,NULL,'b911991c17df1402f16f45927feececcbc33f3c7a1036cc203a9123844b2fd17',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:19:50.000000','2026-03-09 10:19:50.571000',NULL,1,0,'2026-03-09 02:19:50.572465',NULL),(29,1,1,1,1,42,NULL,'1d04cef1d3d2838b187b6f5bb61767ab1e723f77568ab2309fee2fdfeb8b5859',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 02:20:49.000000','2026-03-09 10:20:49.920000',NULL,1,0,'2026-03-09 02:20:49.921006',NULL),(30,1,1,1,1,42,NULL,'e7aeeaca48e821fabc4c75f08aa7621c68702ed2b364d4d4c705198d2d495f64',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:21:26.000000','2026-03-09 10:21:26.155000',NULL,1,0,'2026-03-09 02:21:26.156335',NULL),(31,1,1,1,1,42,NULL,'f61ddc3af5e4e2bb8867bf85212f8d5c5e0a26d313a7c24c01e82b74e2ade015',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 02:21:43.000000','2026-03-09 10:21:43.925000',NULL,1,0,'2026-03-09 02:21:43.926093',NULL),(32,1,1,1,1,42,NULL,'1b4362fd2d2fbe3ea614117d09e2bc550715c452ea70cb8a591b255bce6f7c1a',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 02:22:18.000000','2026-03-09 10:22:18.443000',NULL,1,0,'2026-03-09 02:22:18.445076',NULL),(33,1,1,1,1,42,NULL,'608c76f7f2d53afad9b18945d2e7e2551db7bb09659725f77179f89a58719320',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; pt-BR) PowerShell/7.5.4','2026-03-09 02:22:41.000000','2026-03-09 10:22:41.323000',NULL,1,0,'2026-03-09 02:22:41.324445',NULL),(34,1,1,1,1,42,NULL,'7873bfc285742ff71c61d581fe4818fe2a679f83adc1e8be683e9cfffb499e91',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:24:30.000000','2026-03-09 10:24:30.449000',NULL,1,0,'2026-03-09 02:24:30.450063',NULL),(35,3,1,1,1,1,NULL,'a0a1fe1ae66ac6f7ed0be8395bfeba397bbf1b882f3bdde8ec7b4cf80463fcf2',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:32:59.000000','2026-03-09 10:32:59.658000',NULL,1,0,'2026-03-09 02:32:59.659743',NULL),(36,1,1,1,1,42,NULL,'bf6a223bfcbd0148e167940ef012f469fc440a122896ac19b50a1cb5ef3fead8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:43:21.000000','2026-03-09 10:43:21.878000',NULL,1,0,'2026-03-09 02:43:21.878603',NULL),(37,3,1,1,1,1,NULL,'9e5eab3d461e105d738c6df72c8adb01aaf248c079db7bf16ecaadb1b68d7e44',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:43:35.000000','2026-03-09 10:43:35.935000',NULL,1,0,'2026-03-09 02:43:35.936005',NULL),(38,1,1,1,1,42,NULL,'2fa4747ad578af020d2db9df34c810896da8c0860f1284ffeca7670e2481ac1f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:49:12.000000','2026-03-09 10:49:12.862000',NULL,1,0,'2026-03-09 02:49:12.862498',NULL),(39,1,1,1,1,42,NULL,'ab6816452ed1d29ef6f1a90099caa7678b33a887a48768cf304f48163db90b55',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:52:55.000000','2026-03-09 10:52:55.499000',NULL,1,0,'2026-03-09 02:52:55.500504',NULL),(40,1,1,1,1,42,NULL,'517dde13e2de941694b7acc60a036340a73aed09ca1172e7e5565b325d76009c',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:53:41.000000','2026-03-09 10:53:41.144000',NULL,1,0,'2026-03-09 02:53:41.145491',NULL),(41,1,1,1,1,42,NULL,'b482deca9357e179b1300768ee0a3a1d4e9f5b13cee9d227e3028693c813f541',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 02:57:25.000000','2026-03-09 10:57:25.134000',NULL,1,0,'2026-03-09 02:57:25.135348',NULL),(42,1,1,1,1,42,NULL,'a63d4a27409a95d82e887ac927580da2b943d17eeb227dd83bfe5c72ffc540aa',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 03:11:46.000000','2026-03-09 11:11:46.816000',NULL,1,0,'2026-03-09 03:11:46.818478',NULL),(43,1,1,1,1,42,NULL,'f35cb30e043fde1a194e8041fa085d0e9b6d40130b1cf1198d9d793fdf2e6a50',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 03:28:18.000000','2026-03-09 11:28:18.316000',NULL,1,0,'2026-03-09 03:28:18.317927',NULL),(44,1,1,1,1,42,NULL,'1f504108dc9ef9c49cc7b0636b0255f2db75d7003e61d23ed0966360bdcd475b',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 03:41:08.000000','2026-03-09 11:41:08.649000',NULL,1,0,'2026-03-09 03:41:08.652051',NULL),(45,3,1,1,1,1,NULL,'4577e2c4a9388b94889b50b46afd519cd699aada9a16c7bb142052dd3be2df89',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 03:42:51.000000','2026-03-09 11:42:51.014000',NULL,1,0,'2026-03-09 03:42:51.014795',NULL),(46,5,1,1,1,1,NULL,'2b318eee3f93eb9059bd075121a299f6b491e2561e0cfea3990a78f49e627f54',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 03:43:17.000000','2026-03-09 11:43:17.788000',NULL,1,0,'2026-03-09 03:43:17.788969',NULL),(47,1,1,1,1,42,NULL,'bd8a531dd54897604a3aef6ea984e1de16ef0099959def0de4607cd4a6b5230e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 03:54:36.000000','2026-03-09 11:54:36.075000',NULL,1,0,'2026-03-09 03:54:36.076370',NULL),(48,3,1,1,1,1,NULL,'9d42372e6850db679b400463bf9b499ecd859e2ac3975ba58ddebdd456ca8bfc',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 04:59:17.000000','2026-03-09 12:59:17.907000',NULL,1,0,'2026-03-09 04:59:17.909441',NULL),(49,5,1,1,1,1,NULL,'00ff1c96caff6008758d46f0976edf9126648ab6030dd6b19d46883e245a7c97',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 04:59:41.000000','2026-03-09 12:59:41.790000',NULL,1,0,'2026-03-09 04:59:41.792421',NULL),(50,4,1,1,1,1,NULL,'a1e3b6254288166b3140e15cebc7f8c9d3308f32ba32f49295808f9f87cd33a9',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 05:00:02.000000','2026-03-09 13:00:02.590000',NULL,1,0,'2026-03-09 05:00:02.591937',NULL),(51,1,1,1,1,42,NULL,'3af65fb14267707405264119e7eaa896bafb841ef454ed8de4e01db46e753dcd',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 05:00:18.000000','2026-03-09 13:00:18.169000',NULL,1,0,'2026-03-09 05:00:18.170003',NULL),(52,1,1,1,1,42,NULL,'1d52ac8e658f3dd6fc95da93ef3e6c185e496b1aa9f848d4962b321aa920e9a9',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 05:27:44.000000','2026-03-09 13:27:44.516000',NULL,1,0,'2026-03-09 05:27:44.517673',NULL),(53,1,1,1,1,42,NULL,'03fd61b30e517beafcefba1eaab1d08cf3da5104b54ab03d117a4911022c3877',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 05:50:28.000000','2026-03-09 13:50:28.545000',NULL,1,0,'2026-03-09 05:50:28.546052',NULL),(54,1,1,1,1,42,NULL,'7b339f4cddadac29a0ef8e9a3ad9b76ae3ab31b756c160bc9babc3aae1d0cad5',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 05:55:14.000000','2026-03-09 13:55:14.911000',NULL,1,0,'2026-03-09 05:55:14.912285',NULL),(55,3,1,1,1,1,NULL,'156e83a956677a225b894fd0982acb629b431c0c261373d31caa0800cb8691d2',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 06:32:57.000000','2026-03-09 14:32:57.711000',NULL,1,0,'2026-03-09 06:32:57.712547',NULL),(56,1,1,1,1,42,NULL,'722136b3d78b985f23095f4f6a58dd94f61e67b8d598f5e4699979cd5f45e414',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-09 06:33:14.000000','2026-03-09 14:33:14.536000',NULL,1,0,'2026-03-09 06:33:14.536953',NULL);
 /*!40000 ALTER TABLE `sessao_usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14125,7 +14168,7 @@ CREATE TABLE `totem` (
   PRIMARY KEY (`id_totem`),
   UNIQUE KEY `uk_totem` (`id_unidade`,`codigo`),
   CONSTRAINT `fk_totem_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14134,6 +14177,7 @@ CREATE TABLE `totem` (
 
 LOCK TABLES `totem` WRITE;
 /*!40000 ALTER TABLE `totem` DISABLE KEYS */;
+INSERT INTO `totem` VALUES (1,1,'TOTEM_PRINCIPAL_01','Totem Entrada Principal','192.168.1.100',1,'2026-03-09 02:52:10');
 /*!40000 ALTER TABLE `totem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14444,7 +14488,7 @@ CREATE TABLE `usuario` (
   UNIQUE KEY `uk_usuario_login` (`login`),
   KEY `idx_usuario_pessoa` (`id_pessoa`),
   CONSTRAINT `fk_usuario_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=504 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14453,7 +14497,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,NULL,'evandro.andrade','085ede55dd908b161d5651af23c4f705174cb0bde1a130ef31db0c7aadfb361b',1,2,NULL,NULL,NULL,'2026-03-05 05:45:25.517051',NULL),(3,1,'admin','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(4,2,'recepcao','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(5,3,'triagem','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(6,4,'medico','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(7,5,'farmacia','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL);
+INSERT INTO `usuario` VALUES (1,NULL,'evandro.andrade','085ede55dd908b161d5651af23c4f705174cb0bde1a130ef31db0c7aadfb361b',1,2,NULL,NULL,NULL,'2026-03-05 05:45:25.517051',NULL),(3,1,'admin','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,1,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(4,2,'recepcao','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(5,3,'triagem','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,1,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(6,4,'medico','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(7,5,'farmacia','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-07 00:50:36.000000',NULL),(201,NULL,'rec01','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.835441',NULL),(202,NULL,'rec02','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.835441',NULL),(203,NULL,'rec03','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.835441',NULL),(301,NULL,'enf01','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.842464',NULL),(302,NULL,'enf02','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.842464',NULL),(303,NULL,'enf03','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.842464',NULL),(401,NULL,'med01','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.855342',NULL),(402,NULL,'med02','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.855342',NULL),(403,NULL,'med03','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.855342',NULL),(501,NULL,'farm01','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.943390',NULL),(502,NULL,'farm02','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.943390',NULL),(503,NULL,'farm03','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',1,0,NULL,NULL,NULL,'2026-03-09 02:52:10.943390',NULL);
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14511,7 +14555,7 @@ CREATE TABLE `usuario_contexto` (
   KEY `fk_uc_perfil` (`id_perfil`),
   CONSTRAINT `fk_uc_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
   CONSTRAINT `fk_uc_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14520,6 +14564,7 @@ CREATE TABLE `usuario_contexto` (
 
 LOCK TABLES `usuario_contexto` WRITE;
 /*!40000 ALTER TABLE `usuario_contexto` DISABLE KEYS */;
+INSERT INTO `usuario_contexto` VALUES (1,1,1,1,1,42,1,'2026-03-09 00:38:21.976238'),(2,3,1,1,1,1,1,'2026-03-09 02:32:59.658880'),(3,201,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(4,202,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(5,203,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(6,301,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(7,302,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(8,303,4,1,NULL,2,1,'2026-03-09 02:52:10.848236'),(9,401,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(10,402,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(11,403,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(12,501,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(13,502,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(14,503,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(15,5,1,1,1,1,1,'2026-03-09 03:43:17.787827'),(16,4,1,1,1,1,1,'2026-03-09 05:00:02.591093');
 /*!40000 ALTER TABLE `usuario_contexto` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14636,6 +14681,7 @@ CREATE TABLE `usuario_perfil` (
 
 LOCK TABLES `usuario_perfil` WRITE;
 /*!40000 ALTER TABLE `usuario_perfil` DISABLE KEYS */;
+INSERT INTO `usuario_perfil` VALUES (1,42,'2026-03-09 01:08:42.701991');
 /*!40000 ALTER TABLE `usuario_perfil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14884,7 +14930,7 @@ CREATE TABLE `usuario_sistema` (
   CONSTRAINT `fk_us_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
   CONSTRAINT `fk_us_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
   CONSTRAINT `fk_us_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14893,7 +14939,7 @@ CREATE TABLE `usuario_sistema` (
 
 LOCK TABLES `usuario_sistema` WRITE;
 /*!40000 ALTER TABLE `usuario_sistema` DISABLE KEYS */;
-INSERT INTO `usuario_sistema` VALUES (1,1,1,1,1,'2026-03-07 03:17:31.335031');
+INSERT INTO `usuario_sistema` VALUES (1,1,1,42,1,'2026-03-07 03:17:31.335031');
 /*!40000 ALTER TABLE `usuario_sistema` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15956,6 +16002,103 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_atendimento_senha_nao_compareceu` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_atendimento_senha_nao_compareceu`(
+    IN p_id_sessao_usuario BIGINT,
+    IN p_id_senha BIGINT
+)
+    SQL SECURITY INVOKER
+main: BEGIN
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_unidade BIGINT;
+    DECLARE v_id_perfil BIGINT;
+    DECLARE v_nome_usuario VARCHAR(100);
+    DECLARE v_payload_old JSON;
+    DECLARE v_uuid_transacao CHAR(36);
+    DECLARE v_id_evento BIGINT;
+
+    -- 1. Validação de Contexto (Sessão Ativa e Dados do Usuário)
+    -- Colunas validadas: su.ativo, su.id_unidade, u.nome
+    SELECT 
+        su.id_usuario, 
+        su.id_unidade,
+        us.id_perfil,
+        u.nome
+    INTO 
+        v_id_usuario, 
+        v_id_unidade,
+        v_id_perfil,
+        v_nome_usuario
+    FROM sessao_usuario su
+    INNER JOIN usuario_sistema us ON su.id_usuario = us.id_usuario
+    INNER JOIN usuario u ON u.id_usuario = su.id_usuario
+    WHERE su.id_sessao_usuario = p_id_sessao_usuario 
+      AND su.ativo = 1 
+    LIMIT 1;
+
+    -- Se a sessão não for encontrada ou não estiver ativa, interrompe
+    IF v_id_usuario IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sessão inválida ou utilizador não autenticado.';
+    END IF;
+
+    -- 2. Snapshot do Estado Atual (Garante a Auditoria antes da mudança)
+    SELECT JSON_OBJECT(
+        'id_senha', id_senha,
+        'codigo_visual', codigo_visual,
+        'id_fluxo_status', id_fluxo_status,
+        'id_atendimento', id_atendimento
+    ) INTO v_payload_old
+    FROM senha 
+    WHERE id_senha = p_id_senha;
+
+    -- 3. Transação de Dados
+    START TRANSACTION;
+
+        -- Atualiza para o status 99 (Não Compareceu/Evasão)
+        UPDATE senha 
+        SET id_fluxo_status = 99 
+        WHERE id_senha = p_id_senha;
+
+        -- 4. Registro no Ledger Imutável (Chamando sua sp_ledger_registrar_evento)
+        CALL sp_ledger_registrar_evento(
+            NULL,                  -- uuid_transacao_pai
+            v_id_usuario,          -- id_usuario
+            p_id_sessao_usuario,   -- id_sessao
+            v_id_perfil,           -- id_perfil
+            v_nome_usuario,        -- nome_usuario
+            'SENHA_NAO_COMPARECEU',-- acao
+            'RECEPCAO',            -- modulo
+            'PAINEL',              -- sub_modulo
+            'CHAMANDO',            -- estado_origem
+            'NAO_COMPARECEU',      -- estado_destino
+            v_payload_old,         -- estado_anterior (JSON capturado)
+            JSON_OBJECT('id_fluxo_status', 99), -- estado_novo
+            JSON_OBJECT('id_senha', p_id_senha), -- payload_original
+            'SUCESSO',             -- status_evento
+            NULL,                  -- codigo_erro
+            'Chamada encerrada por não comparecimento do paciente', -- mensagem
+            0,                     -- processing_time_ms
+            v_uuid_transacao,      -- OUT uuid
+            v_id_evento            -- OUT id_evento
+        );
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_atendimento_transicionar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -16272,6 +16415,212 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_login` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_login`(
+    IN p_login VARCHAR(120),
+    IN p_senha VARCHAR(255),
+    IN p_id_sistema BIGINT,
+    IN p_id_unidade BIGINT,
+    IN p_id_local_operacional BIGINT,
+    IN p_id_dispositivo BIGINT,
+    IN p_ip_origem VARCHAR(45),
+    IN p_user_agent VARCHAR(255)
+)
+BEGIN
+
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_hash_senha VARCHAR(255);
+    DECLARE v_id_perfil BIGINT;
+
+    DECLARE v_tentativas INT DEFAULT 0;
+    DECLARE v_bloqueado_ate DATETIME(6);
+
+    DECLARE v_max_tentativas INT DEFAULT 5;
+    DECLARE v_bloqueio_min INT DEFAULT 30;
+
+    DECLARE v_jwt_token VARCHAR(512);
+
+    -- =====================================================
+    -- Resolve parâmetros de bloqueio
+    -- =====================================================
+
+    SELECT CAST(valor AS UNSIGNED)
+    INTO v_max_tentativas
+    FROM auth_parametro
+    WHERE chave = 'login_tentativas_maximas'
+    AND ativo = 1
+    LIMIT 1;
+
+    SELECT CAST(valor AS UNSIGNED)
+    INTO v_bloqueio_min
+    FROM auth_parametro
+    WHERE chave = 'login_bloqueio_minutos'
+    AND ativo = 1
+    LIMIT 1;
+
+    -- =====================================================
+    -- Resolve usuário
+    -- =====================================================
+
+    SELECT id_usuario, senha_hash, COALESCE(tentativas_login,0), bloqueado_ate
+    INTO v_id_usuario, v_hash_senha, v_tentativas, v_bloqueado_ate
+    FROM usuario
+    WHERE login = p_login
+    AND ativo = 1
+    LIMIT 1;
+
+    IF v_id_usuario IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'USUARIO_NAO_ENCONTRADO';
+    END IF;
+
+    -- =====================================================
+    -- Bloqueio runtime
+    -- =====================================================
+
+    IF v_bloqueado_ate IS NOT NULL AND v_bloqueado_ate > NOW(6) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'USUARIO_BLOQUEADO';
+    END IF;
+
+    -- =====================================================
+    -- Validação senha
+    -- =====================================================
+
+    IF v_hash_senha <> SHA2(p_senha,256) AND v_hash_senha <> p_senha THEN
+
+        UPDATE usuario
+        SET tentativas_login = COALESCE(tentativas_login,0) + 1
+        WHERE id_usuario = v_id_usuario;
+
+        IF v_tentativas + 1 >= v_max_tentativas THEN
+            UPDATE usuario
+            SET bloqueado_ate = DATE_ADD(NOW(6), INTERVAL v_bloqueio_min MINUTE)
+            WHERE id_usuario = v_id_usuario;
+        END IF;
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'SENHA_INCORRETA';
+
+    END IF;
+
+    -- =====================================================
+    -- Resolve perfil federado
+    -- =====================================================
+
+    SELECT id_perfil
+    INTO v_id_perfil
+    FROM usuario_sistema
+    WHERE id_usuario = v_id_usuario
+    AND id_sistema = p_id_sistema
+    AND ativo = 1
+    LIMIT 1;
+
+    IF v_id_perfil IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'SEM_CONTEXTO_SISTEMA';
+    END IF;
+
+    -- =====================================================
+    -- Cria sessão JWT runtime
+    -- =====================================================
+
+    SET v_jwt_token = LOWER(REPLACE(UUID(), '-', ''));
+
+    INSERT INTO sessao_usuario(
+        id_usuario,
+        id_sistema,
+        id_unidade,
+        id_local_operacional,
+        id_perfil,
+        id_dispositivo,
+        token_jwt,
+        ip_origem,
+        user_agent,
+        iniciado_em,
+        expira_em,
+        ativo,
+        revogado,
+        criado_em
+    )
+    VALUES (
+        v_id_usuario,
+        p_id_sistema,
+        p_id_unidade,
+        p_id_local_operacional,
+        v_id_perfil,
+        p_id_dispositivo,
+        v_jwt_token,
+        p_ip_origem,
+        p_user_agent,
+        NOW(6),
+        DATE_ADD(NOW(6), INTERVAL 8 HOUR),
+        1,
+        0,
+        NOW(6)
+    );
+
+    -- Reset tentativas login
+
+    UPDATE usuario
+    SET tentativas_login = 0,
+        bloqueado_ate = NULL,
+        ultimo_login = NOW(6)
+    WHERE id_usuario = v_id_usuario;
+
+    -- =====================================================
+    -- Retorno API
+    -- =====================================================
+
+    SELECT
+        LAST_INSERT_ID() AS id_sessao_usuario,
+        v_id_usuario AS id_usuario,
+        p_id_sistema AS id_sistema,
+        v_id_perfil AS id_perfil,
+        v_jwt_token AS token_jwt,
+        DATE_ADD(NOW(6), INTERVAL 8 HOUR) AS expiracao_em;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_auth_logout` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_logout`(
+    IN p_id_sessao BIGINT
+)
+BEGIN
+    UPDATE sessao_usuario 
+    SET ativo = 0, 
+        finalized_em = NOW() 
+    WHERE id_sessao_usuario = p_id_sessao;
+    
+    SELECT p_id_sessao AS id_sessao_usuario, 'LOGOUT_OK' AS status;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_auth_permissoes` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -16498,6 +16847,40 @@ main: BEGIN
     CALL sp_auditoria_evento_registrar(p_id_sessao_usuario, 'CAT_ABERTA', 'cat_notificacao', p_id_cat);
 
     COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_chamar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_chamar_senha`(
+    IN p_id_sessao_usuario BIGINT,
+    IN p_id_senha BIGINT
+)
+BEGIN
+    -- Atualiza estado
+    UPDATE senha
+    SET status = 'CHAMADA', chamado_em = NOW()
+    WHERE id = p_id_senha;
+
+    -- Auditoria
+    INSERT INTO auditoria_evento (id_sessao_usuario, entidade, id_entidade, acao, criado_em)
+    VALUES (p_id_sessao_usuario, 'senha', p_id_senha, 'CALL', NOW());
+
+    -- Evento semântico
+    INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)
+    VALUES (p_id_senha, p_id_sessao_usuario, 'SENHA_CHAMADA', NOW());
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -16967,6 +17350,95 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_complementar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_complementar_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_senha BIGINT,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_status_atual VARCHAR(50) DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+    END;
+
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error','Sessão inválida','uuid_transacao',v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    START TRANSACTION;
+
+    SELECT status INTO v_status_atual
+    FROM senha
+    WHERE id_senha = p_id_senha
+    LIMIT 1
+    FOR UPDATE;
+
+    IF v_status_atual IS NULL THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Senha não encontrada';
+        LEAVE proc_block;
+    END IF;
+
+    -- atualizar status para COMPLEMENTADA
+    UPDATE senha
+    SET status = 'COMPLEMENTADA',
+        chamado_em = NOW(6)
+    WHERE id_senha = p_id_senha;
+
+    -- gerar GPAT
+    INSERT INTO gpat (id_senha, gerado_por, criado_em)
+    VALUES (p_id_senha, p_id_usuario, NOW(6));
+
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao,
+        p_id_usuario,
+        p_id_perfil,
+        'COMPLEMENTAR_SENHA',
+        v_status_atual,
+        p_id_senha,
+        JSON_OBJECT(),
+        'SUCESSO',
+        'Senha complementar vinculada à FFA e GPAT gerado'
+    );
+
+    COMMIT;
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Senha complementar finalizada com sucesso';
+    SET p_resultado = JSON_OBJECT('id_senha', p_id_senha, 'uuid_transacao', v_uuid_transacao);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_conciliador_estoque_faturamento` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -17264,6 +17736,47 @@ BEGIN
         hash_estado = VALUES(hash_estado),
         payload_snapshot = VALUES(payload_snapshot),
         atualizado_em = CURRENT_TIMESTAMP(6);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_criar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_criar_senha`(
+    IN p_id_sessao_usuario BIGINT,
+    IN p_id_sistema BIGINT,
+    IN p_id_unidade BIGINT,
+    IN p_id_local BIGINT,
+    IN p_prefixo VARCHAR(10),
+    IN p_numero INT
+)
+BEGIN
+    DECLARE v_id_senha BIGINT;
+
+    -- Insere a senha no core
+    INSERT INTO senha (id_sistema, id_unidade, id_local, prefixo, numero, criado_em)
+    VALUES (p_id_sistema, p_id_unidade, p_id_local, p_prefixo, p_numero, NOW());
+
+    SET v_id_senha = LAST_INSERT_ID();
+
+    -- Auditoria
+    INSERT INTO auditoria_evento (id_sessao_usuario, entidade, id_entidade, acao, criado_em)
+    VALUES (p_id_sessao_usuario, 'senha', v_id_senha, 'CREATE', NOW());
+
+    -- Evento semântico
+    INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)
+    VALUES (v_id_senha, p_id_sessao_usuario, 'SENHA_CRIADA', NOW());
 
 END ;;
 DELIMITER ;
@@ -18430,6 +18943,182 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_ffa_adicionar_item` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ffa_adicionar_item`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_ffa BIGINT,
+    IN p_tipo_item VARCHAR(50),
+    IN p_descricao_item VARCHAR(255),
+    IN p_quantidade INT,
+    OUT p_id_item BIGINT,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+    END;
+
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    START TRANSACTION;
+
+    INSERT INTO ffa_item (
+        id_ffa,
+        tipo_item,
+        descricao_item,
+        quantidade,
+        criado_por,
+        criado_em
+    ) VALUES (
+        p_id_ffa,
+        p_tipo_item,
+        p_descricao_item,
+        p_quantidade,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET p_id_item = LAST_INSERT_ID();
+
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'FFA_ADICIONAR_ITEM',
+        NULL, p_id_item,
+        JSON_OBJECT('id_ffa', p_id_ffa, 'tipo_item', p_tipo_item),
+        'SUCESSO', 'Item adicionado à FFA'
+    );
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Item adicionado à FFA com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_item', p_id_item,
+        'id_ffa', p_id_ffa,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_ffa_criar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ffa_criar`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_senha BIGINT,
+    OUT p_id_ffa BIGINT,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500);
+    DECLARE v_id_local BIGINT;
+    DECLARE v_id_paciente BIGINT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+    END;
+
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    START TRANSACTION;
+
+    -- Obter paciente e local da senha
+    SELECT id_paciente, id_local INTO v_id_paciente, v_id_local
+    FROM senha
+    WHERE id_senha = p_id_senha;
+
+    -- Criar FFA
+    INSERT INTO ffa (
+        id_senha,
+        id_paciente,
+        id_local,
+        criado_por,
+        criado_em
+    ) VALUES (
+        p_id_senha,
+        v_id_paciente,
+        v_id_local,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET p_id_ffa = LAST_INSERT_ID();
+
+    -- Ledger
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'FFA_CRIAR',
+        NULL, p_id_ffa,
+        JSON_OBJECT('id_senha', p_id_senha, 'id_paciente', v_id_paciente),
+        'SUCESSO', 'FFA criada a partir da senha'
+    );
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'FFA criada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_ffa', p_id_ffa,
+        'id_senha', p_id_senha,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_ffa_gpat_garantir` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -19044,6 +19733,40 @@ main: BEGIN
        AND (status_laboratorial IS NULL OR status_laboratorial <> 'CONCLUIDO');
 
     COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_finalizar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_senha`(
+    IN p_id_sessao_usuario BIGINT,
+    IN p_id_senha BIGINT
+)
+BEGIN
+    -- Finaliza senha
+    UPDATE senha
+    SET status = 'FINALIZADO', finalizado_em = NOW()
+    WHERE id = p_id_senha;
+
+    -- Auditoria
+    INSERT INTO auditoria_evento (id_sessao_usuario, entidade, id_entidade, acao, criado_em)
+    VALUES (p_id_sessao_usuario, 'senha', p_id_senha, 'FINALIZE', NOW());
+
+    -- Evento semântico
+    INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)
+    VALUES (p_id_senha, p_id_sessao_usuario, 'SENHA_FINALIZADA', NOW());
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -21128,6 +21851,1479 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_administracao_medicacao` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_administracao_medicacao`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_medicacao BIGINT DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_id_unidade BIGINT DEFAULT NULL;
+    DECLARE v_id_funcionario BIGINT DEFAULT NULL;
+    DECLARE v_dose VARCHAR(50) DEFAULT NULL;
+    DECLARE v_via_administracao VARCHAR(50) DEFAULT NULL;
+    DECLARE v_status VARCHAR(20) DEFAULT 'PENDENTE';
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ADMINISTRACAO_MEDICACAO',
+            NULL, v_id_medicacao, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRair DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+    SET v_id_unidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade'));
+    SET v_id_funcionario = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_funcionario'));
+    SET v_dose = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.dose'));
+    SET v_via_administracao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.via_administracao'));
+    SET v_status = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
+
+    -- =========================
+    -- INSERIR ADMINISTRAÇÃO
+    -- =========================
+    INSERT INTO administracao_medicacao (
+        id_atendimento,
+        id_unidade,
+        id_funcionario,
+        dose,
+        via_administracao,
+        status,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_id_atendimento,
+        v_id_unidade,
+        v_id_funcionario,
+        v_dose,
+        v_via_administracao,
+        v_status,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_medicacao = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ADMINISTRACAO_MEDICACAO',
+        NULL, v_id_medicacao, p_payload, 'SUCESSO',
+        CONCAT('Administração de medicação registrada: ', v_dose, ' via ', v_via_administracao)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Administração de medicação registrada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_medicacao', v_id_medicacao,
+        'id_atendimento', v_id_atendimento,
+        'id_unidade', v_id_unidade,
+        'id_funcionario', v_id_funcionario,
+        'dose', v_dose,
+        'via_administracao', v_via_administracao,
+        'status', v_status,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_administracao_medicacao_ordem` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_administracao_medicacao_ordem`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_ordem BIGINT DEFAULT NULL;
+    DECLARE v_id_medicacao BIGINT DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_id_unidade BIGINT DEFAULT NULL;
+    DECLARE v_id_funcionario BIGINT DEFAULT NULL;
+    DECLARE v_quantidade DECIMAL(10,2) DEFAULT NULL;
+    DECLARE v_frequencia VARCHAR(50) DEFAULT NULL;
+    DECLARE v_status VARCHAR(20) DEFAULT 'PENDENTE';
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ADMINISTRACAO_MEDICACAO_ORDEM',
+            NULL, v_id_ordem, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRair DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_medicacao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_medicacao'));
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+    SET v_id_unidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade'));
+    SET v_id_funcionario = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_funcionario'));
+    SET v_quantidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.quantidade'));
+    SET v_frequencia = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.frequencia'));
+    SET v_status = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
+
+    -- =========================
+    -- INSERIR ORDEM DE MEDICAÇÃO
+    -- =========================
+    INSERT INTO administracao_medicacao_ordem (
+        id_medicacao,
+        id_atendimento,
+        id_unidade,
+        id_funcionario,
+        quantidade,
+        frequencia,
+        status,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_id_medicacao,
+        v_id_atendimento,
+        v_id_unidade,
+        v_id_funcionario,
+        v_quantidade,
+        v_frequencia,
+        v_status,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_ordem = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ADMINISTRACAO_MEDICACAO_ORDEM',
+        NULL, v_id_ordem, p_payload, 'SUCESSO',
+        CONCAT('Ordem de medicação registrada: ', v_quantidade, ' doses, ', v_frequencia)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Ordem de medicação registrada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_ordem', v_id_ordem,
+        'id_medicacao', v_id_medicacao,
+        'id_atendimento', v_id_atendimento,
+        'id_unidade', v_id_unidade,
+        'id_funcionario', v_id_funcionario,
+        'quantidade', v_quantidade,
+        'frequencia', v_frequencia,
+        'status', v_status,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_agendamento_eventos` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_agendamento_eventos`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_evento BIGINT DEFAULT NULL;
+    DECLARE v_id_agenda BIGINT DEFAULT NULL;
+    DECLARE v_tipo_evento VARCHAR(50) DEFAULT NULL;
+    DECLARE v_descricao TEXT DEFAULT NULL;
+    DECLARE v_data_evento DATETIME DEFAULT NULL;
+    DECLARE v_status VARCHAR(50) DEFAULT 'PENDENTE';
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'AGENDAMENTO_EVENTO',
+            NULL, v_id_evento, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRAIR DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_agenda = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_agenda'));
+    SET v_tipo_evento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.tipo_evento'));
+    SET v_descricao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.descricao'));
+    SET v_data_evento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data_evento'));
+    SET v_status = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
+
+    -- =========================
+    -- INSERIR EVENTO DE AGENDAMENTO
+    -- =========================
+    INSERT INTO agendamento_eventos (
+        id_agenda,
+        tipo_evento,
+        descricao,
+        data_evento,
+        status,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_id_agenda,
+        v_tipo_evento,
+        v_descricao,
+        v_data_evento,
+        v_status,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_evento = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'AGENDAMENTO_EVENTO',
+        NULL, v_id_evento, p_payload, 'SUCESSO',
+        CONCAT('Evento registrado: ', v_tipo_evento, ' para agenda ', v_id_agenda)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Evento de agendamento registrado com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_evento', v_id_evento,
+        'id_agenda', v_id_agenda,
+        'tipo_evento', v_tipo_evento,
+        'descricao', v_descricao,
+        'data_evento', v_data_evento,
+        'status', v_status,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_agenda_disponibilidade` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_agenda_disponibilidade`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_disponibilidade BIGINT DEFAULT NULL;
+    DECLARE v_id_profissional BIGINT DEFAULT NULL;
+    DECLARE v_id_unidade BIGINT DEFAULT NULL;
+    DECLARE v_data_inicio DATETIME DEFAULT NULL;
+    DECLARE v_data_fim DATETIME DEFAULT NULL;
+    DECLARE v_status VARCHAR(50) DEFAULT 'ATIVA';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'AGENDA_DISPONIBILIDADE',
+            NULL, v_id_disponibilidade, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    START TRANSACTION;
+
+    SET v_id_profissional = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_profissional'));
+    SET v_id_unidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade'));
+    SET v_data_inicio = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data_inicio'));
+    SET v_data_fim = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data_fim'));
+    SET v_status = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
+
+    INSERT INTO agenda_disponibilidade (
+        id_profissional,
+        id_unidade,
+        data_inicio,
+        data_fim,
+        status,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_id_profissional,
+        v_id_unidade,
+        v_data_inicio,
+        v_data_fim,
+        v_status,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_disponibilidade = LAST_INSERT_ID();
+
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'AGENDA_DISPONIBILIDADE',
+        NULL, v_id_disponibilidade, p_payload, 'SUCESSO',
+        CONCAT('Disponibilidade registrada para profissional ', v_id_profissional)
+    );
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Disponibilidade registrada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_disponibilidade', v_id_disponibilidade,
+        'id_profissional', v_id_profissional,
+        'id_unidade', v_id_unidade,
+        'data_inicio', v_data_inicio,
+        'data_fim', v_data_fim,
+        'status', v_status,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_alerta_consumo` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_alerta_consumo`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_alerta BIGINT DEFAULT NULL;
+    DECLARE v_tipo_alerta VARCHAR(50) DEFAULT NULL;
+    DECLARE v_descricao TEXT DEFAULT NULL;
+    DECLARE v_id_unidade BIGINT DEFAULT NULL;
+    DECLARE v_id_funcionario BIGINT DEFAULT NULL;
+    DECLARE v_status VARCHAR(20) DEFAULT 'ABERTO';
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ALERTA_CONSUMO',
+            NULL, v_id_alerta, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRair DADOS DO PAYLOAD
+    -- =========================
+    SET v_tipo_alerta = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.tipo_alerta'));
+    SET v_descricao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.descricao'));
+    SET v_id_unidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade'));
+    SET v_id_funcionario = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_funcionario'));
+    SET v_status = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
+
+    -- =========================
+    -- INSERIR ALERTA
+    -- =========================
+    INSERT INTO alerta_consumo (
+        tipo_alerta,
+        descricao,
+        id_unidade,
+        id_funcionario,
+        status,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_tipo_alerta,
+        v_descricao,
+        v_id_unidade,
+        v_id_funcionario,
+        v_status,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_alerta = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ALERTA_CONSUMO',
+        NULL, v_id_alerta, p_payload, 'SUCESSO',
+        CONCAT('Alerta registrado: ', v_tipo_alerta)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Alerta de consumo registrado com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_alerta', v_id_alerta,
+        'tipo_alerta', v_tipo_alerta,
+        'descricao', v_descricao,
+        'id_unidade', v_id_unidade,
+        'id_funcionario', v_id_funcionario,
+        'status', v_status,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_atendimento_cancelar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_atendimento_cancelar`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_estado_origem VARCHAR(50) DEFAULT NULL;
+    DECLARE v_estado_destino VARCHAR(50) DEFAULT 'CANCELADO';
+    DECLARE v_id_fluxo_status BIGINT DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_CANCELAR',
+            v_estado_origem, v_estado_destino, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- OBTER ID DO ATENDIMENTO
+    -- =========================
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+
+    -- =========================
+    -- OBTER ESTADO ORIGEM
+    -- =========================
+    SELECT id_fluxo_status, codigo INTO v_id_fluxo_status, v_estado_origem
+    FROM senha
+    WHERE id_atendimento = v_id_atendimento
+    ORDER BY criado_em DESC
+    LIMIT 1;
+
+    -- =========================
+    -- INSERIR STATUS CANCELADO
+    -- =========================
+    INSERT INTO senha (id_atendimento, id_fluxo_status, criado_em)
+    VALUES (
+        v_id_atendimento,
+        (SELECT id_fluxo_status FROM fluxo_status WHERE codigo = v_estado_destino LIMIT 1),
+        NOW(6)
+    );
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_CANCELAR',
+        v_estado_origem, v_estado_destino, p_payload, 'SUCESSO',
+        CONCAT('Transição: ', v_estado_origem, ' -> ', v_estado_destino)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Atendimento cancelado com sucesso');
+    SET p_resultado = JSON_OBJECT(
+        'id_atendimento', v_id_atendimento,
+        'status_anterior', v_estado_origem,
+        'status_novo', v_estado_destino,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_atendimento_finalizar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_atendimento_finalizar`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_estado_origem VARCHAR(50) DEFAULT NULL;
+    DECLARE v_estado_destino VARCHAR(50) DEFAULT 'FINALIZADO';
+    DECLARE v_id_fluxo_status BIGINT DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_FINALIZAR',
+            v_estado_origem, v_estado_destino, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- OBTER ID DO ATENDIMENTO
+    -- =========================
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+
+    -- =========================
+    -- OBTER ESTADO ORIGEM
+    -- =========================
+    SELECT id_fluxo_status, codigo INTO v_id_fluxo_status, v_estado_origem
+    FROM senha
+    WHERE id_atendimento = v_id_atendimento
+    ORDER BY criado_em DESC
+    LIMIT 1;
+
+    -- =========================
+    -- INSERIR STATUS FINAL
+    -- =========================
+    INSERT INTO senha (id_atendimento, id_fluxo_status, criado_em)
+    VALUES (
+        v_id_atendimento,
+        (SELECT id_fluxo_status FROM fluxo_status WHERE codigo = v_estado_destino LIMIT 1),
+        NOW(6)
+    );
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_FINALIZAR',
+        v_estado_origem, v_estado_destino, p_payload, 'SUCESSO',
+        CONCAT('Transição: ', v_estado_origem, ' -> ', v_estado_destino)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Atendimento finalizado com sucesso');
+    SET p_resultado = JSON_OBJECT(
+        'id_atendimento', v_id_atendimento,
+        'status_anterior', v_estado_origem,
+        'status_novo', v_estado_destino,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_atendimento_iniciar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_atendimento_iniciar`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_INICIAR',
+            NULL, 'INICIADO', p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- OBTER DADOS DO ATENDIMENTO
+    -- =========================
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+
+    -- =========================
+    -- INSERIR ATENDIMENTO INICIAL
+    -- =========================
+    INSERT INTO atendimento (
+        id_atendimento,
+        id_usuario_responsavel,
+        id_perfil_responsavel,
+        criado_em
+    ) VALUES (
+        v_id_atendimento,
+        p_id_usuario,
+        p_id_perfil,
+        NOW(6)
+    );
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_INICIAR',
+        NULL, 'INICIADO', p_payload, 'SUCESSO', 'Atendimento iniciado'
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Atendimento iniciado';
+    SET p_resultado = JSON_OBJECT(
+        'id_atendimento', v_id_atendimento,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_atendimento_transicionar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_atendimento_transicionar`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_estado_origem VARCHAR(50) DEFAULT NULL;
+    DECLARE v_estado_destino VARCHAR(50) DEFAULT NULL;
+    DECLARE v_id_fluxo_status BIGINT DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_TRANSICIONAR',
+            v_estado_origem, v_estado_destino, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- OBTER DADOS DO ATENDIMENTO
+    -- =========================
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+    SET v_estado_destino = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
+
+    -- =========================
+    -- OBTER ESTADO ORIGEM
+    -- =========================
+    SELECT id_fluxo_status, codigo INTO v_id_fluxo_status, v_estado_origem
+    FROM senha
+    WHERE id_atendimento = v_id_atendimento
+    ORDER BY criado_em DESC
+    LIMIT 1;
+
+    -- =========================
+    -- INSERIR NOVO STATUS
+    -- =========================
+    INSERT INTO senha (id_atendimento, id_fluxo_status, criado_em)
+    VALUES (
+        v_id_atendimento,
+        (SELECT id_fluxo_status FROM fluxo_status WHERE codigo = v_estado_destino LIMIT 1),
+        NOW(6)
+    );
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_TRANSICIONAR',
+        v_estado_origem, v_estado_destino, p_payload, 'SUCESSO',
+        CONCAT('Transição: ', v_estado_origem, ' -> ', v_estado_destino)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Atendimento transicionado para ', v_estado_destino);
+    SET p_resultado = JSON_OBJECT(
+        'id_atendimento', v_id_atendimento,
+        'status_anterior', v_estado_origem,
+        'status_novo', v_estado_destino,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_atualizar_paciente` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_atualizar_paciente`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_paciente BIGINT DEFAULT NULL;
+    DECLARE v_nome_anterior VARCHAR(255) DEFAULT NULL;
+    DECLARE v_nome_novo VARCHAR(255) DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'PACIENTE_ATUALIZAR',
+            v_nome_anterior, v_nome_novo, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- OBTER PACIENTE E VALORES NOVOS
+    -- =========================
+    SET v_id_paciente = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_paciente'));
+    SET v_nome_novo = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.nome'));
+
+    SELECT nome INTO v_nome_anterior
+    FROM paciente
+    WHERE id_paciente = v_id_paciente;
+
+    -- =========================
+    -- ATUALIZAR PACIENTE
+    -- =========================
+    UPDATE paciente
+    SET nome = v_nome_novo,
+        atualizado_em = NOW(6)
+    WHERE id_paciente = v_id_paciente;
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'PACIENTE_ATUALIZAR',
+        v_nome_anterior, v_nome_novo, p_payload, 'SUCESSO',
+        CONCAT('Paciente atualizado: ', v_nome_anterior, ' -> ', v_nome_novo)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Paciente atualizado com sucesso');
+    SET p_resultado = JSON_OBJECT(
+        'id_paciente', v_id_paciente,
+        'nome_anterior', v_nome_anterior,
+        'nome_novo', v_nome_novo,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_cancelar_administracao_medicacao` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_cancelar_administracao_medicacao`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_administracao BIGINT DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_motivo_cancelamento VARCHAR(500) DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'CANCELAR_ADMINISTRACAO_MEDICACAO',
+            NULL, v_id_administracao, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRair DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_administracao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_administracao'));
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+    SET v_motivo_cancelamento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.motivo'));
+
+    -- =========================
+    -- VALIDAR EXISTÊNCIA
+    -- =========================
+    IF NOT EXISTS (
+        SELECT 1 FROM administracao_medicacao WHERE id_administracao = v_id_administracao
+    ) THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Administração não encontrada';
+        SET p_resultado = JSON_OBJECT('id_administracao', v_id_administracao, 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- CANCELAR ADMINISTRAÇÃO
+    -- =========================
+    UPDATE administracao_medicacao
+    SET cancelado_em = NOW(6),
+        cancelado_por = p_id_usuario,
+        motivo_cancelamento = v_motivo_cancelamento
+    WHERE id_administracao = v_id_administracao;
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'CANCELAR_ADMINISTRACAO_MEDICACAO',
+        NULL, v_id_administracao, p_payload, 'SUCESSO',
+        CONCAT('Administração cancelada: ', v_motivo_cancelamento)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Administração de medicação cancelada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_administracao', v_id_administracao,
+        'id_atendimento', v_id_atendimento,
+        'motivo', v_motivo_cancelamento,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_chamar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_chamar_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_senha BIGINT,
+    IN p_id_guiche BIGINT,
+    IN p_acao ENUM('CHAMAR','CANCELAR','NAO_ATENDIDA'),
+    IN p_motivo_cancelamento VARCHAR(500), -- NULL permitido
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_status_anterior VARCHAR(50) DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'CHAMAR_SENHA',
+            v_status_anterior, p_id_senha, JSON_OBJECT('acao', p_acao, 'id_guiche', p_id_guiche), 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- VERIFICAR STATUS ATUAL DA SENHA
+    -- =========================
+    SELECT status INTO v_status_anterior
+    FROM senha
+    WHERE id_senha = p_id_senha
+    LIMIT 1
+    FOR UPDATE; -- bloqueio para evitar chamada simultânea
+
+    IF v_status_anterior IS NULL THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Senha não encontrada';
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- PROCESSAR AÇÃO
+    -- =========================
+    CASE
+        WHEN p_acao = 'CHAMAR' THEN
+            IF v_status_anterior IN ('CHAMADA','EM_COMPLEMENTACAO') THEN
+                SET p_sucesso = FALSE;
+                SET p_mensagem = CONCAT('Senha já está em status ', v_status_anterior);
+                LEAVE proc_block;
+            END IF;
+
+            UPDATE senha
+            SET status = 'CHAMADA',
+                id_guiche = p_id_guiche,
+                chamado_em = NOW(6)
+            WHERE id_senha = p_id_senha;
+
+            SET p_mensagem = CONCAT('Senha chamada no guichê ', p_id_guiche);
+
+        WHEN p_acao = 'CANCELAR' THEN
+            IF p_motivo_cancelamento IS NULL OR p_motivo_cancelamento = '' THEN
+                SET p_sucesso = FALSE;
+                SET p_mensagem = 'Motivo de cancelamento obrigatório';
+                LEAVE proc_block;
+            END IF;
+
+            UPDATE senha
+            SET status = 'CANCELADA',
+                motivo_cancelamento = p_motivo_cancelamento,
+                chamado_em = NOW(6)
+            WHERE id_senha = p_id_senha;
+
+            SET p_mensagem = CONCAT('Senha cancelada com motivo: ', p_motivo_cancelamento);
+
+        WHEN p_acao = 'NAO_ATENDIDA' THEN
+            UPDATE senha
+            SET status = 'NAO_ATENDIDA',
+                chamado_em = NOW(6)
+            WHERE id_senha = p_id_senha;
+
+            SET p_mensagem = 'Senha marcada como não atendida';
+
+        ELSE
+            SET p_sucesso = FALSE;
+            SET p_mensagem = CONCAT('Ação inválida: ', p_acao);
+            LEAVE proc_block;
+    END CASE;
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'CHAMAR_SENHA',
+        v_status_anterior, p_id_senha, JSON_OBJECT('acao', p_acao, 'id_guiche', p_id_guiche), 'SUCESSO', p_mensagem
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_resultado = JSON_OBJECT(
+        'id_senha', p_id_senha,
+        'acao', p_acao,
+        'status_anterior', v_status_anterior,
+        'mensagem', p_mensagem,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_master_dispatcher` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -21228,107 +23424,111 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_dispatcher_runtime`(
     OUT p_sucesso BOOLEAN,
     OUT p_mensagem VARCHAR(500)
 )
-BEGIN
+    SQL SECURITY INVOKER
+proc_block: BEGIN
     DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
     DECLARE v_estado_origem VARCHAR(50) DEFAULT NULL;
     DECLARE v_estado_destino VARCHAR(50) DEFAULT NULL;
     DECLARE v_id_atendimento BIGINT DEFAULT NULL;
     DECLARE v_id_senha BIGINT DEFAULT NULL;
-    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
         SET p_sucesso = FALSE;
         SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
         SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
-        
-        -- Log do erro no ledger
+        ROLLBACK;
+
         CALL sp_ledger_evento_log(
             v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
             v_estado_origem, v_estado_destino, p_payload, 'ERRO', v_error_msg
         );
     END;
 
-    -- Iniciar transação
-    START TRANSACTION;
-
-    -- Validar sessão
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
     IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
         SET p_sucesso = FALSE;
         SET p_mensagem = 'Sessão inválida';
-        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida');
-        ROLLBACK;
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
     END IF;
 
-    -- Validar permissão por contexto
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- VALIDAR PERMISSÃO
+    -- =========================
     IF NOT EXISTS (
         SELECT 1 FROM fluxo_transicao ft
         WHERE ft.id_perfil_requerido = p_id_perfil
           AND ft.ativo = 1
           AND EXISTS (
-            SELECT 1 FROM fluxo_status fs_origem
-            WHERE fs_origem.id_fluxo_status = ft.id_status_origem
-              AND fs_origem.codigo LIKE CONCAT(p_contexto, '%')
+              SELECT 1 FROM fluxo_status fs_origem
+              WHERE fs_origem.id_fluxo_status = ft.id_status_origem
+                AND fs_origem.codigo LIKE CONCAT(p_contexto, '%')
           )
     ) AND p_acao != 'SESSION_HEARTBEAT' THEN
-        -- Não bloquear, apenas logar aviso
         SET p_mensagem = CONCAT('AVISO: Perfil ', p_id_perfil, ' pode não ter permissão para ', p_acao);
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
+            NULL, NULL, p_payload, 'AVISO', p_mensagem
+        );
     END IF;
 
-    -- Processar ação específica
-    CASE p_acao
-        -- ==================== SESSÃO ====================
-        WHEN 'SESSION_HEARTBEAT' THEN
-            UPDATE sessao_usuario 
-            SET ultimo_heartbeat = NOW(6) 
+    -- =========================
+    -- EXECUTAR AÇÃO
+    -- =========================
+    CASE
+        WHEN p_acao = 'SESSION_HEARTBEAT' THEN
+            UPDATE sessao_usuario
+            SET ultimo_heartbeat = NOW(6)
             WHERE id_sessao_usuario = p_id_sessao;
-            
+
             SET p_sucesso = TRUE;
             SET p_mensagem = 'Heartbeat registrado';
             SET p_resultado = JSON_OBJECT('id_sessao', p_id_sessao, 'timestamp', NOW(6));
 
-        -- ==================== ATENDIMENTO ====================
-        WHEN 'ATENDIMENTO_INICIAR' THEN
+        WHEN p_acao = 'ATENDIMENTO_INICIAR' THEN
             SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
-            
-            -- Log do evento
+
             CALL sp_ledger_evento_log(
                 v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
                 NULL, 'INICIADO', p_payload, 'SUCESSO', 'Atendimento iniciado'
             );
-            
+
             SET p_sucesso = TRUE;
             SET p_mensagem = 'Atendimento iniciado';
-            SET p_resultado = JSON_OBJECT(
-                'id_atendimento', v_id_atendimento,
-                'uuid_transacao', v_uuid_transacao
-            );
+            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento, 'uuid_transacao', v_uuid_transacao);
 
-        WHEN 'ATENDIMENTO_TRANSICIONAR' THEN
+        WHEN p_acao = 'ATENDIMENTO_TRANSICIONAR' THEN
             SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
             SET v_estado_destino = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
-            
-            -- Buscar estado atual
-            SELECT MAX(id_fluxo_status) INTO v_estado_origem
-            FROM senha 
-            WHERE id_atendimento = v_id_atendimento 
-            ORDER BY criado_em DESC LIMIT 1;
-            
-            -- Atualizar senha com novo status
-            UPDATE senha SET
-                id_fluxo_status = (
-                    SELECT id_fluxo_status FROM fluxo_status 
-                    WHERE codigo = v_estado_destino LIMIT 1
-                )
-            WHERE id_atendimento = v_id_atendimento;
-            
-            -- Log do evento
+
+            SELECT id_fluxo_status INTO v_estado_origem
+            FROM senha
+            WHERE id_atendimento = v_id_atendimento
+            ORDER BY criado_em DESC
+            LIMIT 1;
+
+            INSERT INTO senha (id_atendimento, id_fluxo_status, criado_em)
+            VALUES (v_id_atendimento, (SELECT id_fluxo_status FROM fluxo_status WHERE codigo = v_estado_destino LIMIT 1), NOW(6));
+
             CALL sp_ledger_evento_log(
                 v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                v_estado_origem, v_estado_destino, p_payload, 'SUCESSO', 
+                v_estado_origem, v_estado_destino, p_payload, 'SUCESSO',
                 CONCAT('Transição: ', v_estado_origem, ' -> ', v_estado_destino)
             );
-            
+
             SET p_sucesso = TRUE;
             SET p_mensagem = CONCAT('Atendimento transicionado para ', v_estado_destino);
             SET p_resultado = JSON_OBJECT(
@@ -21338,187 +23538,642 @@ BEGIN
                 'uuid_transacao', v_uuid_transacao
             );
 
-        -- ==================== SENHA ====================
-        WHEN 'SENHA_CRIAR' THEN
-            SET v_id_senha = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_senha'));
-            
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                NULL, 'CRIADA', p_payload, 'SUCESSO', 'Senha criada'
-            );
-            
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Senha criada';
-            SET p_resultado = JSON_OBJECT('id_senha', v_id_senha);
-
-        WHEN 'SENHA_CHAMAR' THEN
-            SET v_id_senha = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_senha'));
-            
-            UPDATE senha SET
-                chamada_em = NOW(6),
-                chamada_sequencial = chamada_sequencial + 1
-            WHERE id_senha = v_id_senha;
-            
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                'AGUARDANDO', 'CHAMADA', p_payload, 'SUCESSO', 'Senha chamada'
-            );
-            
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Senha chamada';
-            SET p_resultado = JSON_OBJECT('id_senha', v_id_senha);
-
-        WHEN 'SENHA_ATENDER' THEN
-            SET v_id_senha = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_senha'));
-            
-            UPDATE senha SET
-                executado_em = NOW(6)
-            WHERE id_senha = v_id_senha;
-            
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                'CHAMADA', 'ATENDIDA', p_payload, 'SUCESSO', 'Senha atendida'
-            );
-            
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Senha atendida';
-            SET p_resultado = JSON_OBJECT('id_senha', v_id_senha);
-
-        -- ==================== TRIAGEM ====================
-        WHEN 'TRIAGEM_REGISTRAR' THEN
-            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
-            
-            -- Registrar sinais vitais
-            INSERT INTO atendimento_sinais_vitais (
-                id_atendimento, id_usuario_registro,
-                pa_sistolica, pa_diastolica, frequencia_cardiaca,
-                temperatura, respiracao, spo2, peso, altura,
-                created_at
-            ) VALUES (
-                v_id_atendimento, p_id_usuario,
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.pa_sistolica')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.pa_diastolica')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.frequencia_cardiaca')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.temperatura')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.respiracao')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.spo2')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.peso')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.altura')),
-                NOW(6)
-            );
-            
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                NULL, 'REGISTRADA', p_payload, 'SUCESSO', 'Triagem registrada'
-            );
-            
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Triagem registrada';
-            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento);
-
-        -- ==================== PRESCRIÇÃO ====================
-        WHEN 'PRESCRICAO_CRIAR' THEN
-            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
-            
-            INSERT INTO atendimento_prescricao (
-                id_atendimento, id_medico, medicamento, dose, via, frequencia,
-                observacao, data_prescricao, status
-            ) VALUES (
-                v_id_atendimento, p_id_usuario,
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.medicamento')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.dose')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.via')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.frequencia')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.observacao')),
-                NOW(6), 'ATIVO'
-            );
-            
-            SET p_resultado = JSON_OBJECT(
-                'id_atendimento', v_id_atendimento,
-                'last_insert_id', LAST_INSERT_ID()
-            );
-            
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                NULL, 'ATIVO', p_payload, 'SUCESSO', 'Prescrição criada'
-            );
-            
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Prescrição criada';
-
-        -- ==================== FARMÁCIA ====================
-        WHEN 'FARMACIA_DISPENSAR' THEN
-            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
-            
-            -- Atualizar status da prescrição
-            UPDATE atendimento_prescricao SET
-                status = 'CONCLUIDO'
-            WHERE id = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_prescricao'))
-              AND id_atendimento = v_id_atendimento;
-            
-            -- Registrar dispensação
-            INSERT INTO dispensacao_medicacao (
-                id_ordem, id_item, id_farmaco, quantidade,
-                id_usuario_dispensador, data_hora, status, observacao
-            ) VALUES (
-                v_id_atendimento,
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_prescricao')),
-                NULL, 1, p_id_usuario, NOW(6), 'ENTREGUE',
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.observacao'))
-            );
-            
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                'ATIVO', 'CONCLUIDO', p_payload, 'SUCESSO', 'Medicamento dispensado'
-            );
-            
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Medicamento dispensado';
-            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento);
-
-        -- ==================== ENFERMAGEM ====================
-        WHEN 'ENFERMAGEM_REGISTRAR' THEN
-            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
-            
-            INSERT INTO atendimento_procedimento_enfermagem (
-                id_atendimento, id_usuario_enfermeiro,
-                procedimento, observacao, data_hora, status
-            ) VALUES (
-                v_id_atendimento, p_id_usuario,
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.procedimento')),
-                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.observacao')),
-                NOW(6), 'REALIZADO'
-            );
-            
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                NULL, 'REALIZADO', p_payload, 'SUCESSO', 'Procedimento registrado'
-            );
-            
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Procedimento registrado';
-            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento);
-
-        -- ==================== DEFAULT ====================
         ELSE
-            -- Ação genérica - apenas log
             CALL sp_ledger_evento_log(
                 v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
                 NULL, NULL, p_payload, 'SUCESSO', 'Ação genérica executada'
             );
-            
+
             SET p_sucesso = TRUE;
             SET p_mensagem = CONCAT('Ação ', p_acao, ' executada');
-            SET p_resultado = JSON_OBJECT('acao', p_acao, 'contexto', p_contexto);
+            SET p_resultado = JSON_OBJECT('acao', p_acao, 'contexto', p_contexto, 'uuid_transacao', v_uuid_transacao);
     END CASE;
 
-    -- Commit da transação
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
     COMMIT;
-    
-    -- Adicionar uuid_transacao ao resultado
-    IF p_resultado IS NOT NULL THEN
-        SET p_resultado = JSON_INSERT(p_resultado, '$.uuid_transacao', v_uuid_transacao);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_registrar_administracao_medicacao` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_registrar_administracao_medicacao`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_administracao BIGINT DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_medicamento VARCHAR(200) DEFAULT NULL;
+    DECLARE v_dose VARCHAR(50) DEFAULT NULL;
+    DECLARE v_via_administracao VARCHAR(50) DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ADMINISTRACAO_MEDICACAO',
+            NULL, NULL, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
     END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRair DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+    SET v_medicamento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.medicamento'));
+    SET v_dose = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.dose'));
+    SET v_via_administracao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.via'));
+
+    -- =========================
+    -- INSERIR ADMINISTRAÇÃO
+    -- =========================
+    INSERT INTO administracao_medicacao (
+        id_atendimento,
+        medicamento,
+        dose,
+        via_administracao,
+        criado_em,
+        criado_por
+    )
+    VALUES (
+        v_id_atendimento,
+        v_medicamento,
+        v_dose,
+        v_via_administracao,
+        NOW(6),
+        p_id_usuario
+    );
+
+    SET v_id_administracao = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ADMINISTRACAO_MEDICACAO',
+        NULL, v_id_administracao, p_payload, 'SUCESSO',
+        CONCAT('Administração registrada: ', v_medicamento, ' ', v_dose, ' via ', v_via_administracao)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Administração de medicação registrada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_administracao', v_id_administracao,
+        'id_atendimento', v_id_atendimento,
+        'medicamento', v_medicamento,
+        'dose', v_dose,
+        'via', v_via_administracao,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_registrar_alerta` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_registrar_alerta`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_alerta BIGINT DEFAULT NULL;
+    DECLARE v_tipo_alerta VARCHAR(100) DEFAULT NULL;
+    DECLARE v_descricao TEXT DEFAULT NULL;
+    DECLARE v_prioridade INT DEFAULT 1;
+    DECLARE v_id_destinatario BIGINT DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'REGISTRAR_ALERTA',
+            NULL, v_id_alerta, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRair DADOS DO PAYLOAD
+    -- =========================
+    SET v_tipo_alerta = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.tipo'));
+    SET v_descricao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.descricao'));
+    SET v_prioridade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.prioridade'));
+    SET v_id_destinatario = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_destinatario'));
+
+    -- =========================
+    -- INSERIR ALERTA
+    -- =========================
+    INSERT INTO alerta (
+        tipo_alerta,
+        descricao,
+        prioridade,
+        id_destinatario,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_tipo_alerta,
+        v_descricao,
+        v_prioridade,
+        v_id_destinatario,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_alerta = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'REGISTRAR_ALERTA',
+        NULL, v_id_alerta, p_payload, 'SUCESSO',
+        CONCAT('Alerta registrado: ', v_tipo_alerta)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Alerta registrado com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_alerta', v_id_alerta,
+        'tipo_alerta', v_tipo_alerta,
+        'descricao', v_descricao,
+        'prioridade', v_prioridade,
+        'id_destinatario', v_id_destinatario,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_senha_emitir` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_senha_emitir`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_senha BIGINT DEFAULT NULL;
+    DECLARE v_id_unidade BIGINT DEFAULT NULL;
+    DECLARE v_numero_senha INT DEFAULT NULL;
+    DECLARE v_prefixo CHAR(5) DEFAULT 'PA00';
+    DECLARE v_status VARCHAR(20) DEFAULT 'EM_ESPERA';
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'SENHA_EMITIR',
+            NULL, v_id_senha, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRAIR DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_unidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade'));
+    SET v_numero_senha = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.numero'));
+
+    -- =========================
+    -- INSERIR SENHA NA FILA
+    -- =========================
+    INSERT INTO senha (
+        id_unidade,
+        numero,
+        prefixo,
+        status,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_id_unidade,
+        v_numero_senha,
+        v_prefixo,
+        v_status,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_senha = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'SENHA_EMITIR',
+        NULL, v_id_senha, p_payload, 'SUCESSO',
+        CONCAT('Senha emitida: ', v_prefixo, v_numero_senha)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Senha emitida com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_senha', v_id_senha,
+        'id_unidade', v_id_unidade,
+        'numero_senha', v_numero_senha,
+        'prefixo', v_prefixo,
+        'status', v_status,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_senha_recepcao` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_senha_recepcao`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_senha BIGINT DEFAULT NULL;
+    DECLARE v_id_unidade BIGINT DEFAULT NULL;
+    DECLARE v_numero_senha INT DEFAULT NULL;
+    DECLARE v_guiche INT DEFAULT NULL;
+    DECLARE v_prefixo CHAR(5) DEFAULT 'RX00';
+    DECLARE v_status VARCHAR(20) DEFAULT 'EM_ESPERA';
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'SENHA_RECEPCAO',
+            NULL, v_id_senha, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRAIR DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_unidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade'));
+    SET v_guiche = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.guiche'));
+
+    -- =========================
+    -- GERAR NUMERO DA SENHA
+    -- =========================
+    SELECT COALESCE(MAX(numero), 0) + 1
+    INTO v_numero_senha
+    FROM senha
+    WHERE id_unidade = v_id_unidade
+      AND prefixo = CONCAT('RX', LPAD(v_guiche, 2, '0'));
+
+    SET v_prefixo = CONCAT('RX', LPAD(v_guiche, 2, '0'));
+
+    -- =========================
+    -- INSERIR SENHA INTERNA
+    -- =========================
+    INSERT INTO senha (
+        id_unidade,
+        numero,
+        prefixo,
+        status,
+        guiche,
+        criado_por,
+        criado_em
+    ) VALUES (
+        v_id_unidade,
+        v_numero_senha,
+        v_prefixo,
+        v_status,
+        v_guiche,
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET v_id_senha = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'SENHA_RECEPCAO',
+        NULL, v_id_senha, p_payload, 'SUCESSO',
+        CONCAT('Senha interna gerada pelo guichê ', v_guiche, ': ', v_prefixo, v_numero_senha)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Senha interna da recepção gerada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_senha', v_id_senha,
+        'id_unidade', v_id_unidade,
+        'numero_senha', v_numero_senha,
+        'prefixo', v_prefixo,
+        'guiche', v_guiche,
+        'status', v_status,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_vincular_atendimento_paciente` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_vincular_atendimento_paciente`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
+    DECLARE v_id_paciente BIGINT DEFAULT NULL;
+    DECLARE v_paciente_anterior BIGINT DEFAULT NULL;
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_VINCULAR',
+            v_paciente_anterior, v_id_paciente, p_payload, 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- EXTRair DADOS DO PAYLOAD
+    -- =========================
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+    SET v_id_paciente = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_paciente'));
+
+    -- =========================
+    -- OBTER PACIENTE ANTERIOR (se houver)
+    -- =========================
+    SELECT id_paciente INTO v_paciente_anterior
+    FROM atendimento
+    WHERE id_atendimento = v_id_atendimento
+    LIMIT 1;
+
+    -- =========================
+    -- ATUALIZAR VINCULO
+    -- =========================
+    UPDATE atendimento
+    SET id_paciente = v_id_paciente,
+        atualizado_em = NOW(6)
+    WHERE id_atendimento = v_id_atendimento;
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'ATENDIMENTO_VINCULAR',
+        v_paciente_anterior, v_id_paciente, p_payload, 'SUCESSO',
+        CONCAT('Atendimento vinculado: ', IFNULL(v_paciente_anterior, 'NULL'), ' -> ', v_id_paciente)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Atendimento vinculado ao paciente com sucesso');
+    SET p_resultado = JSON_OBJECT(
+        'id_atendimento', v_id_atendimento,
+        'paciente_anterior', v_paciente_anterior,
+        'paciente_novo', v_id_paciente,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
 
 END ;;
 DELIMITER ;
@@ -22519,6 +25174,191 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_painel_cancelar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_painel_cancelar_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_senha BIGINT,
+    IN p_motivo_cancelamento VARCHAR(500),
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_status_atual VARCHAR(50) DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+    END;
+
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error','Sessão inválida','uuid_transacao',v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    IF p_motivo_cancelamento IS NULL OR p_motivo_cancelamento = '' THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Motivo de cancelamento obrigatório';
+        SET p_resultado = JSON_OBJECT('error','Motivo de cancelamento obrigatório','uuid_transacao',v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    START TRANSACTION;
+
+    SELECT status INTO v_status_atual
+    FROM senha
+    WHERE id_senha = p_id_senha
+    LIMIT 1
+    FOR UPDATE;
+
+    IF v_status_atual IS NULL THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Senha não encontrada';
+        LEAVE proc_block;
+    END IF;
+
+    UPDATE senha
+    SET status = 'CANCELADA',
+        motivo_cancelamento = p_motivo_cancelamento,
+        chamado_em = NOW(6)
+    WHERE id_senha = p_id_senha;
+
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao,
+        p_id_usuario,
+        p_id_perfil,
+        'CANCELAR_SENHA',
+        v_status_atual,
+        p_id_senha,
+        JSON_OBJECT('motivo', p_motivo_cancelamento),
+        'SUCESSO',
+        CONCAT('Senha cancelada com motivo: ', p_motivo_cancelamento)
+    );
+
+    COMMIT;
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Senha cancelada com sucesso: ', p_motivo_cancelamento);
+    SET p_resultado = JSON_OBJECT('id_senha', p_id_senha, 'uuid_transacao', v_uuid_transacao);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_painel_chamar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_painel_chamar_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_senha BIGINT,
+    IN p_id_guiche BIGINT,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_status_atual VARCHAR(50) DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+    END;
+
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error','Sessão inválida','uuid_transacao',v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    START TRANSACTION;
+
+    SELECT status INTO v_status_atual
+    FROM senha
+    WHERE id_senha = p_id_senha
+    LIMIT 1
+    FOR UPDATE;
+
+    IF v_status_atual IS NULL THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Senha não encontrada';
+        LEAVE proc_block;
+    END IF;
+
+    IF v_status_atual IN ('CHAMADA','EM_COMPLEMENTACAO') THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('Senha já está em status ', v_status_atual);
+        LEAVE proc_block;
+    END IF;
+
+    UPDATE senha
+    SET status = 'CHAMADA',
+        id_guiche = p_id_guiche,
+        chamado_em = NOW(6)
+    WHERE id_senha = p_id_senha;
+
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao,
+        p_id_usuario,
+        p_id_perfil,
+        'CHAMAR_SENHA',
+        v_status_atual,
+        p_id_senha,
+        JSON_OBJECT('id_guiche', p_id_guiche),
+        'SUCESSO',
+        CONCAT('Senha chamada no guichê ', p_id_guiche)
+    );
+
+    COMMIT;
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Senha chamada no guichê ', p_id_guiche);
+    SET p_resultado = JSON_OBJECT('id_senha', p_id_senha, 'uuid_transacao', v_uuid_transacao);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_painel_config_set` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -22808,6 +25648,93 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_painel_inserir_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_painel_inserir_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_senha BIGINT,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_status_atual VARCHAR(50) DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+    END;
+
+    -- validar sessão
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error','Sessão inválida','uuid_transacao',v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    START TRANSACTION;
+
+    -- bloquear senha
+    SELECT status INTO v_status_atual
+    FROM senha
+    WHERE id_senha = p_id_senha
+    LIMIT 1
+    FOR UPDATE;
+
+    IF v_status_atual IS NULL THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Senha não encontrada';
+        LEAVE proc_block;
+    END IF;
+
+    -- atualizar status para inserido no painel
+    UPDATE senha
+    SET status = 'PENDENTE',
+        chamado_em = NOW(6)
+    WHERE id_senha = p_id_senha;
+
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao,
+        p_id_usuario,
+        p_id_perfil,
+        'INSERIR_PAINEL',
+        v_status_atual,
+        p_id_senha,
+        JSON_OBJECT(),
+        'SUCESSO',
+        CONCAT('Senha inserida no painel')
+    );
+
+    COMMIT;
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Senha inserida no painel com sucesso';
+    SET p_resultado = JSON_OBJECT('id_senha', p_id_senha, 'uuid_transacao', v_uuid_transacao);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_painel_seed_especialidades` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -22944,6 +25871,38 @@ BEGIN
 
     -- opcional: não seta painel_lane -> mostra todas as lanes
 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_patch_log` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_log`(
+    IN p_patch_nome VARCHAR(120),
+    IN p_status_execucao VARCHAR(20),
+    IN p_detalhes JSON
+)
+BEGIN
+    INSERT INTO schema_patch_execucao (
+        patch_nome,
+        status_execucao,
+        detalhes
+    )
+    VALUES (
+        p_patch_nome,
+        p_status_execucao,
+        p_detalhes
+    );
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -23087,6 +26046,103 @@ BEGIN
     -- Auditoria de patch
     INSERT INTO auth_audit (acao, recurso, detalhes, criado_em)
     VALUES ('PATCH_EXECUTADO', 'permissao', JSON_OBJECT('procedimento','sp_patch_permissao','executado_em',NOW()), NOW());
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_patch_run_all_auth` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_run_all_auth`()
+BEGIN
+    DECLARE v_error TEXT DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error = MESSAGE_TEXT;
+
+        CALL sp_patch_log(
+            'sp_patch_permissao',
+            'ERRO',
+            JSON_OBJECT(
+                'erro', v_error,
+                'executado_em', NOW()
+            )
+        );
+
+        -- auditoria funcional (se existir)
+        IF EXISTS (
+            SELECT 1
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+              AND table_name = 'auth_audit'
+        ) THEN
+            INSERT INTO auth_audit (
+                acao,
+                recurso,
+                detalhes,
+                sucesso,
+                criado_em
+            )
+            VALUES (
+                'PATCH_EXECUTADO',
+                'permissao',
+                JSON_OBJECT(
+                    'procedimento', 'sp_patch_permissao',
+                    'status', 'ERRO',
+                    'erro', v_error,
+                    'executado_em', NOW()
+                ),
+                0,
+                NOW()
+            );
+        END IF;
+
+        RESIGNAL;
+    END;
+
+    CALL sp_patch_permissao();
+
+    CALL sp_patch_log(
+        'sp_patch_permissao',
+        'SUCESSO',
+        JSON_OBJECT('executado_em', NOW())
+    );
+
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = DATABASE()
+          AND table_name = 'auth_audit'
+    ) THEN
+        INSERT INTO auth_audit (
+            acao,
+            recurso,
+            detalhes,
+            sucesso,
+            criado_em
+        )
+        VALUES (
+            'PATCH_EXECUTADO',
+            'permissao',
+            JSON_OBJECT(
+                'procedimento', 'sp_patch_permissao',
+                'status', 'SUCESSO',
+                'executado_em', NOW()
+            ),
+            1,
+            NOW()
+        );
+    END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -23880,6 +26936,142 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_recepcao_gerar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_recepcao_gerar_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_tipo_atendimento VARCHAR(50), -- 'ADULTO', 'CRIANCA', 'ESPECIAL', 'SAMU'
+    IN p_guiche INT,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_senha BIGINT DEFAULT NULL;
+    DECLARE v_numero_senha INT DEFAULT NULL;
+    DECLARE v_prefixo CHAR(10) DEFAULT NULL;
+    DECLARE v_hora_entrada DATETIME DEFAULT NOW(6);
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'RECEPCAO_GERAR_SENHA',
+            NULL, v_id_senha, JSON_OBJECT('tipo', p_tipo_atendimento, 'guiche', p_guiche), 'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- DEFINIR PREFIXO DA SENHA
+    -- =========================
+    SET v_prefixo = CASE 
+        WHEN p_tipo_atendimento = 'ADULTO' THEN 'A'
+        WHEN p_tipo_atendimento = 'CRIANCA' THEN 'C'
+        WHEN p_tipo_atendimento = 'ESPECIAL' THEN 'E'
+        WHEN p_tipo_atendimento = 'SAMU' THEN 'S'
+        ELSE 'N'
+    END;
+
+    -- =========================
+    -- GERAR NUMERO SEQUENCIAL RESET DIÁRIO
+    -- =========================
+    SELECT COALESCE(MAX(numero), 0) + 1
+    INTO v_numero_senha
+    FROM senha
+    WHERE prefixo = v_prefixo
+      AND DATE(criado_em) = CURRENT_DATE;
+
+    -- =========================
+    -- INSERIR SENHA
+    -- =========================
+    INSERT INTO senha (
+        prefixo,
+        numero,
+        id_guiche,
+        criado_por,
+        criado_em,
+        status
+    ) VALUES (
+        v_prefixo,
+        v_numero_senha,
+        p_guiche,
+        p_id_usuario,
+        v_hora_entrada,
+        'GERADA'
+    );
+
+    SET v_id_senha = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'RECEPCAO_GERAR_SENHA',
+        NULL, v_id_senha, JSON_OBJECT('tipo', p_tipo_atendimento, 'guiche', p_guiche), 'SUCESSO',
+        CONCAT('Senha gerada: ', v_prefixo, '-', LPAD(v_numero_senha, 3, '0'))
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Senha gerada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_senha', v_id_senha,
+        'numero', v_numero_senha,
+        'prefixo', v_prefixo,
+        'guiche', p_guiche,
+        'hora_entrada', v_hora_entrada,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_recepcao_iniciar_complementacao` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -24039,6 +27231,65 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_registrar_evento` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_registrar_evento`(
+    IN p_uuid_transacao_pai CHAR(36),
+    IN p_id_usuario BIGINT,
+    IN p_id_sessao BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_nome_usuario VARCHAR(100),
+    IN p_acao VARCHAR(100),
+    IN p_modulo VARCHAR(50),
+    IN p_sub_modulo VARCHAR(50),
+    IN p_estado_origem VARCHAR(50),
+    IN p_estado_destino VARCHAR(50),
+    IN p_estado_anterior JSON,
+    IN p_estado_novo JSON,
+    IN p_payload_original JSON,
+    IN p_status_evento ENUM('SUCESSO', 'ERRO', 'AVISO', 'CANCELADO', 'ROLLBACK'),
+    IN p_codigo_erro VARCHAR(50),
+    IN p_mensagem VARCHAR(1000),
+    IN p_processing_time_ms INT,
+    OUT p_uuid_transacao CHAR(36),
+    OUT p_id_evento BIGINT
+)
+BEGIN
+    DECLARE v_uuid CHAR(36) DEFAULT UUID();
+    DECLARE v_sequencia INT DEFAULT 1;
+
+    SELECT COALESCE(MAX(sequencia_evento), 0) + 1 INTO v_sequencia 
+    FROM atendimento_evento_ledger 
+    WHERE uuid_transacao = v_uuid;
+
+    INSERT INTO atendimento_evento_ledger (
+        uuid_transacao, uuid_transacao_pai, sequencia_evento, id_usuario, id_sessao, 
+        id_perfil, nome_usuario, acao, modulo, sub_modulo, estado_origem, 
+        estado_destino, estado_anterior, estado_novo, payload_original, 
+        status_evento, codigo_erro, mensagem, processing_time_ms, created_at
+    ) VALUES (
+        v_uuid, p_uuid_transacao_pai, v_sequencia, p_id_usuario, p_id_sessao, 
+        p_id_perfil, p_nome_usuario, p_acao, p_modulo, p_sub_modulo, p_estado_origem, 
+        p_estado_destino, p_estado_anterior, p_estado_novo, p_payload_original, 
+        p_status_evento, p_codigo_erro, p_mensagem, p_processing_time_ms, NOW(6)
+    );
+
+    SET p_uuid_transacao = v_uuid;
+    SET p_id_evento = LAST_INSERT_ID();
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_retry_semantico_worker` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -24083,6 +27334,48 @@ BEGIN
         WHERE id_retry = v_id_retry;
 
     END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_runtime_clinico_exec` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_runtime_clinico_exec`(
+    IN p_id_sessao_usuario BIGINT,
+    IN p_contexto VARCHAR(60),
+    IN p_recurso VARCHAR(120),
+    IN p_acao VARCHAR(60),
+    IN p_payload JSON
+)
+BEGIN
+
+    INSERT INTO atendimento_evento (
+        id_sessao_usuario,
+        contexto,
+        recurso,
+        acao,
+        payload,
+        criado_em
+    )
+    VALUES (
+        p_id_sessao_usuario,
+        p_contexto,
+        p_recurso,
+        p_acao,
+        p_payload,
+        NOW()
+    );
 
 END ;;
 DELIMITER ;
@@ -26094,6 +29387,314 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_totem_gerar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_totem_gerar_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_paciente BIGINT,
+    IN p_tipo_senha VARCHAR(20), -- tratar default internamente
+    OUT p_id_senha BIGINT,
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+
+    -- =========================
+    -- DECLARAR VARIÁVEIS E HANDLERS NO TOPO
+    -- =========================
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_numero_senha VARCHAR(20);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+    END;
+
+    -- =========================
+    -- TRATAR VALOR DEFAULT
+    -- =========================
+    IF p_tipo_senha IS NULL OR p_tipo_senha = '' THEN
+        SET p_tipo_senha = 'NORMAL';
+    END IF;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error','Sessão inválida','uuid_transacao',v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- GERAR NÚMERO DE SENHA SEQUENCIAL COM RESET DIÁRIO
+    -- =========================
+    SET v_numero_senha = CONCAT(
+        CASE p_tipo_senha
+            WHEN 'NORMAL' THEN 'CLINI-'
+            WHEN 'PRIORITARIO' THEN 'CLINI-PRI-'
+            WHEN 'PEDIATRIA' THEN 'PED-'
+            ELSE 'CLINI-'
+        END,
+        LPAD(
+            IFNULL(
+                (SELECT MAX(CAST(SUBSTRING(numero_senha, -3) AS UNSIGNED))
+                 FROM senha
+                 WHERE DATE(criado_em) = CURDATE()
+                 AND tipo_senha = p_tipo_senha),0
+            ) + 1, 3, '0'
+        )
+    );
+
+    -- =========================
+    -- INSERIR SENHA
+    -- =========================
+    INSERT INTO senha (
+        id_paciente,
+        tipo_senha,
+        numero_senha,
+        status,
+        gerado_por,
+        criado_em
+    ) VALUES (
+        p_id_paciente,
+        p_tipo_senha,
+        v_numero_senha,
+        'GERADA',
+        p_id_usuario,
+        NOW(6)
+    );
+
+    SET p_id_senha = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao,
+        p_id_usuario,
+        p_id_perfil,
+        'GERAR_SENHA',
+        NULL,
+        p_id_senha,
+        JSON_OBJECT('tipo_senha', p_tipo_senha,'numero_senha',v_numero_senha),
+        'SUCESSO',
+        CONCAT('Senha gerada: ', v_numero_senha)
+    );
+
+    -- =========================
+    -- COMMIT E RETORNO
+    -- =========================
+    COMMIT;
+
+    SET p_sucesso = TRUE;
+    SET p_mensagem = CONCAT('Senha gerada com sucesso: ', v_numero_senha);
+    SET p_resultado = JSON_OBJECT(
+        'id_senha', p_id_senha,
+        'numero_senha', v_numero_senha,
+        'tipo_senha', p_tipo_senha,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_triagem_classificar_senha` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_triagem_classificar_senha`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_perfil BIGINT,
+    IN p_id_senha BIGINT,
+    IN p_id_paciente BIGINT,
+    IN p_manha_prioridade BOOLEAN,  -- TRUE = aplicar lógica de prioridade
+    OUT p_resultado JSON,
+    OUT p_sucesso BOOLEAN,
+    OUT p_mensagem VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+proc_block: BEGIN
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
+    DECLARE v_id_triagem BIGINT DEFAULT NULL;
+    DECLARE v_manchester INT DEFAULT NULL;
+    DECLARE v_idade INT DEFAULT NULL;
+    DECLARE v_prioridade_especialidade INT DEFAULT NULL;
+    DECLARE v_grau_prioridade INT DEFAULT NULL;
+    DECLARE v_cor_interna VARCHAR(20) DEFAULT 'AZUL';
+    DECLARE v_hora_classificacao DATETIME DEFAULT NOW(6);
+
+    -- =========================
+    -- HANDLER GLOBAL DE ERRO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
+        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+        ROLLBACK;
+
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, p_id_usuario, p_id_perfil, 'TRIAGEM_CLASSIFICAR',
+            NULL, v_id_triagem,
+            JSON_OBJECT('id_senha', p_id_senha, 'id_paciente', p_id_paciente),
+            'ERRO', v_error_msg
+        );
+    END;
+
+    -- =========================
+    -- VALIDAR SESSÃO
+    -- =========================
+    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Sessão inválida';
+        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
+        LEAVE proc_block;
+    END IF;
+
+    -- =========================
+    -- INICIAR TRANSAÇÃO
+    -- =========================
+    START TRANSACTION;
+
+    -- =========================
+    -- OBTER IDADE E DADOS DO PACIENTE
+    -- =========================
+    SELECT TIMESTAMPDIFF(YEAR, data_nascimento, CURDATE()),
+           especialidade
+    INTO v_idade, v_prioridade_especialidade
+    FROM paciente
+    WHERE id_paciente = p_id_paciente;
+
+    -- =========================
+    -- CALCULAR PRIORIDADE MANCHESTER + IDADE + ESPECIALIDADE
+    -- =========================
+    IF p_manha_prioridade THEN
+        SELECT manchester
+        INTO v_manchester
+        FROM classificacao_manchester
+        WHERE id_paciente = p_id_paciente
+        ORDER BY criado_em DESC
+        LIMIT 1;
+
+        SET v_grau_prioridade = v_manchester
+                                 + IF(v_idade >= 65, 1, 0)
+                                 + IF(v_prioridade_especialidade IS NOT NULL, 1, 0);
+    ELSE
+        SET v_grau_prioridade = 1; -- padrão
+        SET v_manchester = 0;
+    END IF;
+
+    -- =========================
+    -- DEFINIR COR INTERNA PARA PAINEL
+    -- =========================
+    SET v_cor_interna = CASE
+        WHEN v_grau_prioridade >= 3 THEN 'VERMELHO'
+        WHEN v_grau_prioridade = 2 THEN 'AMARELO'
+        WHEN v_grau_prioridade = 1 THEN 'VERDE'
+        ELSE 'AZUL'
+    END;
+
+    -- =========================
+    -- INSERIR REGISTRO DE TRIAGEM
+    -- =========================
+    INSERT INTO triagem (
+        id_senha,
+        id_paciente,
+        manchester,
+        idade,
+        prioridade_especialidade,
+        grau_prioridade,
+        cor_interna,
+        classificado_por,
+        criado_em
+    ) VALUES (
+        p_id_senha,
+        p_id_paciente,
+        v_manchester,
+        v_idade,
+        v_prioridade_especialidade,
+        v_grau_prioridade,
+        v_cor_interna,
+        p_id_usuario,
+        v_hora_classificacao
+    );
+
+    SET v_id_triagem = LAST_INSERT_ID();
+
+    -- =========================
+    -- REGISTRAR LEDGER
+    -- =========================
+    CALL sp_ledger_evento_log(
+        v_uuid_transacao, p_id_usuario, p_id_perfil, 'TRIAGEM_CLASSIFICAR',
+        NULL, v_id_triagem,
+        JSON_OBJECT('id_senha', p_id_senha, 'id_paciente', p_id_paciente),
+        'SUCESSO', CONCAT('Paciente classificado com prioridade ', v_grau_prioridade)
+    );
+
+    -- =========================
+    -- RETORNO PADRÃO
+    -- =========================
+    SET p_sucesso = TRUE;
+    SET p_mensagem = 'Triagem realizada com sucesso';
+    SET p_resultado = JSON_OBJECT(
+        'id_triagem', v_id_triagem,
+        'id_senha', p_id_senha,
+        'id_paciente', p_id_paciente,
+        'manchester', v_manchester,
+        'idade', v_idade,
+        'prioridade_especialidade', v_prioridade_especialidade,
+        'grau_prioridade', v_grau_prioridade,
+        'cor_interna', v_cor_interna,
+        'uuid_transacao', v_uuid_transacao
+    );
+
+    -- =========================
+    -- COMMIT TRANSAÇÃO
+    -- =========================
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_triagem_finalizar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -26141,6 +29742,77 @@ main: BEGIN
         NULL
     );
     COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_usuario_criar_contexto` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_criar_contexto`(
+    IN p_login VARCHAR(60),
+    IN p_id_sistema BIGINT,
+    IN p_id_unidade BIGINT,
+    IN p_id_local_operacional BIGINT,
+    IN p_id_perfil BIGINT
+)
+BEGIN
+    DECLARE v_id_usuario BIGINT;
+    
+    -- Busca ID do usuário
+    SELECT id_usuario INTO v_id_usuario
+    FROM usuario
+    WHERE login = p_login
+    LIMIT 1;
+    
+    IF v_id_usuario IS NULL THEN
+        SELECT 'USUARIO_NAO_ENCONTRADO' as erro;
+    ELSE
+        -- Vincula ao sistema
+        CALL sp_usuario_vincular_sistema(v_id_usuario, p_id_sistema, p_id_perfil);
+        
+        -- Vincula à unidade
+        CALL sp_usuario_vincular_unidade(v_id_usuario, p_id_unidade);
+        
+        -- Vincula ao local
+        CALL sp_usuario_vincular_local(v_id_usuario, p_id_local_operacional);
+        
+        -- Cria contexto
+        INSERT INTO usuario_contexto (
+            id_usuario,
+            id_sistema,
+            id_unidade,
+            id_local_operacional,
+            id_perfil,
+            ativo,
+            criado_em
+        ) VALUES (
+            v_id_usuario,
+            p_id_sistema,
+            p_id_unidade,
+            p_id_local_operacional,
+            p_id_perfil,
+            1,
+            NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+            id_sistema = VALUES(id_sistema),
+            id_unidade = VALUES(id_unidade),
+            id_local_operacional = VALUES(id_local_operacional),
+            id_perfil = VALUES(id_perfil),
+            ativo = 1;
+        
+        SELECT 'SUCESSO' as resultado, v_id_usuario as id_usuario;
+    END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -26750,6 +30422,110 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_usuario_vincular_local` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_vincular_local`(
+    IN p_id_usuario BIGINT,
+    IN p_id_local_operacional BIGINT
+)
+BEGIN
+    INSERT INTO usuario_local_operacional (
+        id_usuario,
+        id_local_operacional,
+        criado_em
+    ) VALUES (
+        p_id_usuario,
+        p_id_local_operacional,
+        NOW()
+    )
+    ON DUPLICATE KEY UPDATE
+        id_local_operacional = VALUES(id_local_operacional);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_usuario_vincular_sistema` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_vincular_sistema`(
+    IN p_id_usuario BIGINT,
+    IN p_id_sistema BIGINT,
+    IN p_id_perfil BIGINT
+)
+BEGIN
+    INSERT INTO usuario_sistema (
+        id_usuario,
+        id_sistema,
+        id_perfil,
+        ativo,
+        criado_em
+    ) VALUES (
+        p_id_usuario,
+        p_id_sistema,
+        p_id_perfil,
+        1,
+        NOW()
+    )
+    ON DUPLICATE KEY UPDATE
+        id_perfil = VALUES(id_perfil),
+        ativo = 1;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_usuario_vincular_unidade` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_vincular_unidade`(
+    IN p_id_usuario BIGINT,
+    IN p_id_unidade BIGINT
+)
+BEGIN
+    INSERT INTO usuario_unidade (
+        id_usuario,
+        id_unidade,
+        ativo,
+        criado_em
+    ) VALUES (
+        p_id_usuario,
+        p_id_unidade,
+        1,
+        NOW()
+    )
+    ON DUPLICATE KEY UPDATE
+        ativo = 1;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_validar_transicao_fluxo` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -27203,4 +30979,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-07  5:11:55
+-- Dump completed on 2026-03-09  6:54:51

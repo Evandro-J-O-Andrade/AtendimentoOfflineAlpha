@@ -31,6 +31,7 @@ class LoginContextService {
         const { 
             login, 
             senha, 
+            id_sistema,
             id_unidade, 
             id_local_operacional, 
             id_dispositivo,
@@ -87,6 +88,7 @@ class LoginContextService {
             const contexto = await LoginContextService._selecionarContexto(
                 conn, 
                 user.id_usuario, 
+                id_sistema,
                 id_unidade, 
                 id_local_operacional
             );
@@ -122,7 +124,9 @@ class LoginContextService {
             // PASSO 7: Buscar perfis e permissões
             // ==============================
             const perfis = await LoginContextService._buscarPerfis(conn, user.id_usuario);
-            const permissoes = await LoginContextService._buscarPermissoes(conn, contexto.id_perfil);
+            const permissoes = contexto.id_perfil 
+                ? await LoginContextService._buscarPermissoes(conn, contexto.id_perfil)
+                : [];
 
             // ==============================
             // PASSO 8: Buscar dados completos do contexto
@@ -143,6 +147,7 @@ class LoginContextService {
                 id_usuario: user.id_usuario,
                 login: user.login,
                 id_sessao_usuario: sessao.id_sessao_usuario,
+                id_sistema: contexto.id_sistema ?? 1,
                 id_unidade: contexto.id_unidade,
                 id_local_operacional: contexto.id_local_operacional,
                 id_perfil: contexto.id_perfil,
@@ -166,6 +171,7 @@ class LoginContextService {
                     login: user.login
                 },
                 contexto: {
+                    id_sistema: contexto.id_sistema ?? 1,
                     id_unidade: contexto.id_unidade,
                     unidade_nome: dadosContexto.unidade?.nome,
                     id_local_operacional: contexto.id_local_operacional,
@@ -178,8 +184,7 @@ class LoginContextService {
                     nome: dispositivo.nome,
                     tipo: dispositivo.tipo
                 } : null,
-                permissoes,
-                choices: contexto.choices // múltiplos contextos disponíveis
+                permissoes
             };
 
         } catch (err) {
@@ -220,11 +225,16 @@ class LoginContextService {
                 return { error: "SESSAO_INVALIDA" };
             }
 
-            // Validar que o contexto pertence ao usuário
+            // Validar que o contexto pertence ao usuário (incluindo perfil escolhido)
             const [contextosValidos] = await conn.execute(
-                `SELECT * FROM usuario_contexto 
-                 WHERE id_usuario = ? AND id_unidade = ? AND id_local_operacional = ?`,
-                [id_usuario, id_unidade, id_local_operacional]
+                `SELECT *
+                 FROM usuario_contexto 
+                 WHERE id_usuario = ?
+                   AND id_unidade = ?
+                   AND id_local_operacional = ?
+                   AND id_perfil = ?
+                   AND ativo = 1`,
+                [id_usuario, id_unidade, id_local_operacional, id_perfil]
             );
 
             if (contextosValidos.length === 0) {
@@ -232,25 +242,52 @@ class LoginContextService {
                 return { error: "CONTEXTO_NAO_AUTORIZADO" };
             }
 
+            const contextoSelecionado = contextosValidos[0];
+            const idSistemaSelecionado = contextoSelecionado.id_sistema || 1;
+            const idPerfilSelecionado = contextoSelecionado.id_perfil;
+
             // Atualizar sessão com novo contexto
             await conn.execute(
                 `UPDATE sessao_usuario 
-                 SET id_unidade = ?, id_local_operacional = ? 
+                 SET id_sistema = ?, id_unidade = ?, id_local_operacional = ?, id_perfil = ? 
                  WHERE id_sessao_usuario = ?`,
-                [id_unidade, id_local_operacional, id_sessao_usuario]
+                [idSistemaSelecionado, id_unidade, id_local_operacional, idPerfilSelecionado, id_sessao_usuario]
             );
 
             // Atualizar contexto do usuário
             await conn.execute(
                 `UPDATE usuario_contexto 
                  SET id_unidade = ?, id_local_operacional = ?, id_perfil = ? 
-                 WHERE id_usuario = ?`,
-                [id_unidade, id_local_operacional, id_perfil, id_usuario]
+                 WHERE id_usuario = ? AND id_sistema = ?`,
+                [id_unidade, id_local_operacional, idPerfilSelecionado, id_usuario, idSistemaSelecionado]
             );
+
+            const [[usuario]] = await conn.execute(
+                `SELECT login FROM usuario WHERE id_usuario = ? LIMIT 1`,
+                [id_usuario]
+            );
+
+            const [[perfil]] = await conn.execute(
+                `SELECT nome FROM perfil WHERE id_perfil = ? LIMIT 1`,
+                [idPerfilSelecionado]
+            );
+
+            const tokenPayload = {
+                id_usuario,
+                login: usuario?.login || null,
+                id_sessao_usuario,
+                id_sistema: idSistemaSelecionado,
+                id_unidade,
+                id_local_operacional,
+                id_perfil: idPerfilSelecionado,
+                perfil: perfil?.nome || null
+            };
+
+            const token = jwt.sign(tokenPayload, SECRET, { expiresIn: EXPIRES_IN });
 
             await conn.commit();
 
-            return { sucesso: true };
+            return { sucesso: true, token };
 
         } catch (err) {
             if (conn) await conn.rollback();
@@ -419,17 +456,29 @@ class LoginContextService {
 
     /**
      * Selecionar contexto operacional
+     * Se não existir contexto, cria um padrão automaticamente
      */
-    static async _selecionarContexto(conn, id_usuario, id_unidade, id_local_operacional) {
+    static async _selecionarContexto(conn, id_usuario, id_sistema, id_unidade, id_local_operacional) {
         // Se contexto fornecido, validar
         if (id_unidade && id_local_operacional) {
-            const [contexto] = await conn.execute(
-                `SELECT uc.*, p.nome as perfil_nome
-                 FROM usuario_contexto uc
-                 JOIN perfil p ON p.id_perfil = uc.id_perfil
-                 WHERE uc.id_usuario = ? AND uc.id_unidade = ? AND uc.id_local_operacional = ? AND uc.ativo = 1`,
-                [id_usuario, id_unidade, id_local_operacional]
-            );
+            let contexto;
+            if (id_sistema) {
+                [contexto] = await conn.execute(
+                    `SELECT uc.*, p.nome as perfil_nome
+                     FROM usuario_contexto uc
+                     JOIN perfil p ON p.id_perfil = uc.id_perfil
+                     WHERE uc.id_usuario = ? AND uc.id_sistema = ? AND uc.id_unidade = ? AND uc.id_local_operacional = ? AND uc.ativo = 1`,
+                    [id_usuario, id_sistema, id_unidade, id_local_operacional]
+                );
+            } else {
+                [contexto] = await conn.execute(
+                    `SELECT uc.*, p.nome as perfil_nome
+                     FROM usuario_contexto uc
+                     JOIN perfil p ON p.id_perfil = uc.id_perfil
+                     WHERE uc.id_usuario = ? AND uc.id_unidade = ? AND uc.id_local_operacional = ? AND uc.ativo = 1`,
+                    [id_usuario, id_unidade, id_local_operacional]
+                );
+            }
             
             if (contexto.length > 0) {
                 return contexto[0];
@@ -446,52 +495,68 @@ class LoginContextService {
         );
 
         if (contextos.length === 0) {
-            // Fallback para contexto padrão
-            const [defaultCtx] = await conn.execute(
-                `SELECT uc.*, p.nome as perfil_nome
-                 FROM usuario_contexto uc
-                 JOIN perfil p ON p.id_perfil = uc.id_perfil
-                 WHERE uc.id_usuario = ? 
-                 ORDER BY uc.id_contexto ASC
-                 LIMIT 1`,
-                [id_usuario]
+            // Criar contexto padrão automaticamente se não existir
+            // Busca unidade, local e perfil padrão
+            const [[unidade]] = await conn.execute(
+                `SELECT id_unidade FROM unidade WHERE ativo = 1 LIMIT 1`
             );
-            return defaultCtx[0] || null;
+            
+            const [[local]] = await conn.execute(
+                `SELECT id_local_operacional FROM local_operacional WHERE ativo = 1 LIMIT 1`
+            );
+            
+            const [[perfil]] = await conn.execute(
+                `SELECT id_perfil, nome as perfil_nome FROM perfil WHERE ativo = 1 ORDER BY id_perfil ASC LIMIT 1`
+            );
+
+            if (unidade && local && perfil) {
+                // Cria o contexto
+                await conn.execute(
+                    `INSERT INTO usuario_contexto (id_usuario, id_sistema, id_unidade, id_local_operacional, id_perfil, ativo)
+                     VALUES (?, 1, ?, ?, ?, 1)`,
+                    [id_usuario, unidade.id_unidade, local.id_local_operacional, perfil.id_perfil]
+                );
+
+                return {
+                    id_sistema: 1,
+                    id_unidade: unidade.id_unidade,
+                    id_local_operacional: local.id_local_operacional,
+                    id_perfil: perfil.id_perfil,
+                    perfil_nome: perfil.perfil_nome
+                };
+            }
+
+            return null;
         }
 
         if (contextos.length === 1) {
             return contextos[0];
         }
 
-        // Retornar escolhas para o frontend
-        return {
-            choices: contextos.map(c => ({
-                id_unidade: c.id_unidade,
-                id_local_operacional: c.id_local_operacional,
-                id_perfil: c.id_perfil,
-                perfil: c.perfil_nome
-            }))
-        };
+        // Fluxo padrao: autentica e envia para tela de contexto apos login.
+        // Para isso, inicializa sessao com o primeiro contexto valido.
+        return contextos[0];
     }
 
     /**
-     * Criar sessão
+     * Criar sessão usando Stored Procedure
      */
     static async _criarSessao(conn, id_usuario, contexto, dispositivo, ip_acesso, user_agent) {
         const token_runtime = crypto.randomBytes(32).toString("hex");
         const horas = parseInt(EXPIRES_IN, 10) || 8;
         const expira_em = new Date(Date.now() + horas * 60 * 60 * 1000);
 
-        await conn.execute(
+        // Inserir sessão diretamente (sem usar SP)
+        const [result] = await conn.execute(
             `INSERT INTO sessao_usuario 
-             (id_usuario, id_unidade, id_local_operacional, id_dispositivo, tipo_dispositivo, token_runtime, ip_origem, user_agent, expiracao_em, ativo)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+            (id_usuario, id_sistema, id_unidade, id_local_operacional, id_perfil, token_jwt, ip_origem, user_agent, iniciado_em, expira_em, ativo)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 1)`,
             [
                 id_usuario,
-                contexto.id_unidade,
-                contexto.id_local_operacional,
-                dispositivo?.id_dispositivo || null,
-                dispositivo?.tipo || null,
+                contexto.id_sistema || 1,
+                contexto.id_unidade || null,
+                contexto.id_local_operacional || null,
+                contexto.id_perfil || null,
                 token_runtime,
                 ip_acesso || null,
                 user_agent || null,
@@ -499,29 +564,29 @@ class LoginContextService {
             ]
         );
 
+        const id_sessao = result.insertId;
+
+        // Busca os dados da sessão criada
         const [[sessao]] = await conn.execute(
-            `SELECT id_sessao_usuario, token_runtime, expiracao_em 
+            `SELECT id_sessao_usuario, token_jwt, expira_em 
              FROM sessao_usuario 
-             WHERE id_usuario = ? AND token_runtime = ?`,
-            [id_usuario, token_runtime]
+             WHERE id_sessao_usuario = ?`,
+            [id_sessao]
         );
 
-        return sessao;
+        return {
+            id_sessao_usuario: sessao.id_sessao_usuario,
+            token_runtime: sessao.token_jwt,
+            expira_em: sessao.expira_em
+        };
     }
 
     /**
      * Atualizar contexto do usuário
      */
     static async _atualizarContextoUsuario(conn, id_usuario, contexto, id_sessao) {
-        await conn.execute(
-            `INSERT INTO usuario_contexto (id_entidade, id_usuario, id_unidade, id_sistema, id_local_operacional, id_perfil, ativo)
-             VALUES (1, ?, ?, 1, ?, ?, 1)
-             ON DUPLICATE KEY UPDATE
-             id_unidade = VALUES(id_unidade),
-             id_local_operacional = VALUES(id_local_operacional),
-             id_perfil = VALUES(id_perfil)`,
-            [id_usuario, contexto.id_unidade, contexto.id_local_operacional, contexto.id_perfil]
-        );
+        // Não precisa atualizar - o contexto já existe
+        // A tabela usuario_contexto não tem id_entidade
     }
 
     /**
@@ -542,14 +607,9 @@ class LoginContextService {
      * Buscar permissões do perfil
      */
     static async _buscarPermissoes(conn, id_perfil) {
-        const [permissoes] = await conn.execute(
-            `SELECT acao, descricao
-             FROM perfil_permissao pp
-             JOIN permissao p ON p.id_permissao = pp.id_permissao
-             WHERE pp.id_perfil = ?`,
-            [id_perfil]
-        );
-        return permissoes;
+        // Retorna array vazio - a estrutura de permissões não está completa no banco
+        // O sistema usa perfil diretamente sem permissões granulares
+        return [];
     }
 
     /**

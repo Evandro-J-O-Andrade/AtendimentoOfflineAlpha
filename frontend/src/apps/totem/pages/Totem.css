@@ -1,282 +1,234 @@
-/* Totem de Senha */
-.totem-container {
+.totem-page {
     min-height: 100vh;
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    color: white;
-    display: flex;
-    flex-direction: column;
+    background: #e9edf2;
+    padding: 10px;
+    color: #0c3f73;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
 }
 
-/* Header */
-.totem-header {
+.totem-head {
+    border: 4px solid #1f5f9f;
+    border-radius: 18px;
+    background: #f3f6fa;
+    padding: 12px 18px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    align-items: center;
+}
+
+.totem-head-logos {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 30px;
-    background: rgba(0,0,0,0.3);
+    gap: 14px;
 }
 
-.totem-logo {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    background: white;
-    padding: 8px;
+.totem-head-logos img {
+    height: 62px;
+    object-fit: contain;
 }
 
-.totem-header h1 {
-    font-size: 36px;
-    font-weight: 700;
-    letter-spacing: 4px;
-    color: #60a5fa;
-}
-
-/* Content */
-.totem-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-}
-
-.totem-error {
-    background: rgba(220,38,38,0.2);
-    border: 2px solid #dc2626;
-    padding: 20px 40px;
-    border-radius: 12px;
+.totem-head-title {
     text-align: center;
-    margin-bottom: 40px;
 }
 
-.totem-error button {
-    margin-top: 16px;
-    padding: 12px 24px;
-    background: #dc2626;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
+.totem-head-title h1 {
+    margin: 0;
+    font-size: 42px;
+    letter-spacing: 0.3px;
 }
 
-/* Welcome Screen */
-.welcome-screen {
-    text-align: center;
-    width: 100%;
-    max-width: 800px;
-}
-
-.welcome-screen h2 {
-    font-size: 48px;
+.totem-head-title h2 {
+    margin: 6px 0 2px;
+    font-size: 26px;
     font-weight: 700;
-    color: white;
-    margin-bottom: 16px;
-    letter-spacing: 4px;
 }
 
-.welcome-screen p {
+.totem-head-title p {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.totem-plantao {
+    margin-top: 12px;
+    border: 4px solid #1f5f9f;
+    border-radius: 18px;
+    background: #f3f6fa;
+    padding: 10px 14px;
+}
+
+.totem-plantao-row {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 10px;
+    margin-bottom: 6px;
     font-size: 24px;
-    color: #94a3b8;
-    margin-bottom: 48px;
 }
 
-.type-options {
-    display: flex;
-    justify-content: center;
-    gap: 32px;
-    margin-bottom: 40px;
+.totem-plantao-row:last-child {
+    margin-bottom: 0;
 }
 
-.type-btn {
-    width: 200px;
-    height: 200px;
-    background: #334155;
-    border: 4px solid transparent;
-    border-radius: 20px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    transition: all 0.3s;
-}
-
-.type-btn:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.type-btn.consulta:hover {
-    border-color: #3b82f6;
-    background: #1e3a8a;
-}
-
-.type-btn.urgencia:hover {
-    border-color: #dc2626;
-    background: #7f1d1d;
-}
-
-.type-btn.exame:hover {
-    border-color: #8b5cf6;
-    background: #4c1d95;
-}
-
-.type-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.type-icon {
-    font-size: 56px;
-}
-
-.type-label {
-    font-size: 24px;
-    font-weight: 600;
-    color: white;
-}
-
-.loading-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    font-size: 20px;
-    color: #94a3b8;
-}
-
-.loading-indicator .spinner {
-    width: 32px;
-    height: 32px;
-    border: 4px solid rgba(255,255,255,0.1);
-    border-top-color: #3b82f6;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Success Screen */
-.success-screen {
-    text-align: center;
-    width: 100%;
-    max-width: 600px;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.success-screen h2 {
-    font-size: 36px;
-    font-weight: 700;
-    color: #10b981;
-    margin-bottom: 40px;
-    letter-spacing: 2px;
-}
-
-.ticket-display {
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-    padding: 60px;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(5,150,105,0.4);
-    margin-bottom: 40px;
-}
-
-.ticket-code {
-    display: block;
-    font-size: 120px;
+.totem-plantao-row .esp {
+    text-align: right;
     font-weight: 800;
-    letter-spacing: 8px;
-    color: white;
 }
 
-.ticket-type-label {
-    display: inline-block;
-    margin-top: 16px;
-    padding: 8px 32px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 30px;
-    font-size: 24px;
+.totem-plantao-row .medico {
     font-weight: 600;
 }
 
-.ticket-info {
-    margin-bottom: 40px;
-}
-
-.ticket-info p {
-    font-size: 24px;
-    color: white;
-    margin-bottom: 8px;
-}
-
-.ticket-hint {
-    color: #94a3b8 !important;
-    font-size: 18px !important;
-}
-
-.btn-new-ticket {
-    padding: 20px 48px;
-    background: #334155;
-    color: white;
-    border: 2px solid #475569;
-    border-radius: 12px;
-    font-size: 20px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-new-ticket:hover {
-    background: #475569;
-    border-color: #64748b;
-}
-
-/* Footer */
-.totem-footer {
-    padding: 20px;
+.totem-plantao-empty {
+    font-size: 22px;
     text-align: center;
-    background: rgba(0,0,0,0.3);
-    color: #64748b;
-    font-size: 16px;
+    color: #3f5f7a;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .totem-header h1 {
+.totem-main {
+    margin-top: 12px;
+    border: 4px solid #1f5f9f;
+    border-radius: 18px;
+    background: #f3f6fa;
+    padding: 14px 14px 18px;
+}
+
+.totem-main h3 {
+    margin: 0 0 12px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.totem-boxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.box-left,
+.box-right {
+    border-radius: 28px;
+    min-height: 270px;
+    padding: 18px;
+}
+
+.box-left {
+    background: #040c9b;
+}
+
+.box-right {
+    background: #1285e8;
+}
+
+.box-left h4,
+.box-right h4 {
+    margin: 0 0 14px;
+    text-align: center;
+    color: #fff;
+    font-size: 32px;
+}
+
+.btn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.box-right .btn-grid {
+    grid-template-columns: 1fr;
+}
+
+.totem-btn {
+    height: 86px;
+    border: 0;
+    background: #dbe3ec;
+    color: #0b4f88;
+    font-size: 25px;
+    font-weight: 800;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.totem-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.totem-btn:hover:not(:disabled) {
+    filter: brightness(0.96);
+}
+
+.totem-msg {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.totem-msg.ok {
+    background: #e4f7e9;
+    border: 2px solid #2f8f46;
+    color: #155726;
+}
+
+.totem-msg.err {
+    background: #ffe8e8;
+    border: 2px solid #c54040;
+    color: #8f2121;
+}
+
+@media (max-width: 1280px) {
+    .totem-head-title h1 {
+        font-size: 30px;
+    }
+
+    .totem-head-title h2 {
+        font-size: 21px;
+    }
+
+    .totem-main h3 {
+        font-size: 22px;
+    }
+
+    .box-left h4,
+    .box-right h4 {
         font-size: 24px;
     }
 
-    .welcome-screen h2 {
-        font-size: 32px;
+    .totem-btn {
+        font-size: 19px;
+        height: 72px;
     }
 
-    .type-options {
-        flex-direction: column;
-        align-items: center;
+    .totem-plantao-row {
+        font-size: 18px;
+        grid-template-columns: 220px 1fr;
+    }
+}
+
+@media (max-width: 960px) {
+    .totem-head {
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
-    .type-btn {
-        width: 100%;
-        max-width: 280px;
-        height: 160px;
+    .totem-head-logos {
+        justify-content: center;
     }
 
-    .ticket-code {
-        font-size: 80px;
+    .totem-boxes {
+        grid-template-columns: 1fr;
     }
 
-    .ticket-display {
-        padding: 40px;
+    .totem-plantao-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+        text-align: center;
+    }
+
+    .totem-plantao-row .esp {
+        text-align: center;
     }
 }

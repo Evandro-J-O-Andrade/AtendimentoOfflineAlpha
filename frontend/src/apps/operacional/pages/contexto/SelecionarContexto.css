@@ -1,0 +1,132 @@
+.contexto-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(140deg, #e5edf3 0%, #f4f7fa 100%);
+    padding: 20px;
+}
+
+.contexto-card {
+    background: #dfe8ef;
+    border: 1px solid #a4bdd0;
+    border-radius: 8px;
+    padding: 28px 24px;
+    max-width: 560px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.contexto-card h1 {
+    margin: 0 0 8px;
+    color: #17324d;
+    font-size: 20px;
+    text-align: center;
+}
+
+.contexto-subtitle {
+    text-align: center;
+    color: #35526d;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.contexto-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.field {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    align-items: center;
+    gap: 12px;
+}
+
+.field span {
+    color: #17324d;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.field select {
+    height: 32px;
+    border: 1px solid #9db4c5;
+    border-radius: 4px;
+    padding: 4px 8px;
+    background: #f9fbfc;
+    color: #1b3348;
+    font-size: 13px;
+}
+
+.field select:disabled {
+    background: #eaf0f5;
+    color: #486176;
+}
+
+.contexto-empty {
+    text-align: center;
+    color: #4b6174;
+    padding: 16px;
+    border: 1px dashed #a4bdd0;
+    border-radius: 6px;
+    background: #edf3f7;
+    margin-bottom: 14px;
+}
+
+.contexto-error {
+    margin: 8px 0 14px;
+    color: #9f1f1f;
+    background: #fdeeee;
+    border: 1px solid #efc1c1;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.contexto-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-confirmar {
+    background: #2f5d87;
+    color: white;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-confirmar:hover:not(:disabled) {
+    background: #244a6d;
+}
+
+.btn-confirmar:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.contexto-loading {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: #2f5d87;
+}
+
+@media (max-width: 640px) {
+    .contexto-card {
+        padding: 20px 14px;
+    }
+
+    .field {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+}

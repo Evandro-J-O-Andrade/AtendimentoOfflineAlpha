@@ -30,6 +30,7 @@ class AuthController {
                 const payload = {
                     login,
                     senha,
+                    id_sistema,
                     id_unidade,
                     id_local_operacional,
                     id_dispositivo,
@@ -50,14 +51,6 @@ class AuthController {
                     const statusCode = result.error === "DISPOSITIVO_INVALIDO" ? 403 : 401;
                     return res.status(statusCode).json({
                         error: result.error
-                    });
-                }
-
-                // Se há múltiplas escolhas de contexto, retornar para o frontend
-                if (result.choices) {
-                    return res.status(200).json({
-                        choices: result.choices,
-                        message: "SELECIONE_CONTEXTO"
                     });
                 }
 
@@ -152,11 +145,11 @@ class AuthController {
 
             // Buscar sistemas
             const [sistemas] = await conn.query(
-                "SELECT id_sistema, nome, sigla FROM sistema WHERE ativo = 1"
+                "SELECT id_sistema, nome FROM sistema WHERE ativo = 1"
             );
             const sistemasMap = {};
             sistemas.forEach(s => {
-                sistemasMap[s.id_sistema] = s.sigla || s.nome;
+                sistemasMap[s.id_sistema] = s.nome;
             });
 
             // Buscar unidades
@@ -219,7 +212,7 @@ class AuthController {
                     uc.id_local_operacional,
                     uc.id_perfil,
                     s.nome as sistema_nome,
-                    s.sigla as sistema_sigla,
+                    NULL as sistema_sigla,
                     u.nome as unidade_nome,
                     lo.nome as local_nome,
                     lo.tipo as local_tipo,

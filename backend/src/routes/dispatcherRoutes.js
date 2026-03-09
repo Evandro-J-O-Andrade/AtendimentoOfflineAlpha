@@ -8,6 +8,21 @@ const db = require("../config/database");
  * Ponto único de entrada para todas as ações
  * =====================================
  * 
+ * MAPA DE AÇÕES -> SPs:
+ * - ATENDIMENTO_INICIAR -> sp_master_atendimento_iniciar
+ * - ATENDIMENTO_TRANSICIONAR -> sp_master_atendimento_transicionar
+ * - ATENDIMENTO_FINALIZAR -> sp_master_atendimento_finalizar
+ * - ATENDIMENTO_CANCELAR -> sp_master_atendimento_cancelar
+ * - PACIENTE_ATUALIZAR -> sp_master_atualizar_paciente
+ * - ATENDIMENTO_VINCULAR_PACIENTE -> sp_master_vincular_atendimento_paciente
+ * - ADMINISTRACAO_MEDICACAO -> sp_master_registrar_administracao_medicacao
+ * - CANCELAR_ADMINISTRACAO_MEDICACAO -> sp_master_cancelar_administracao_medicacao
+ * - REGISTRAR_ALERTA -> sp_master_registrar_alerta
+ * - AGENDA_DISPONIBILIDADE -> sp_master_agenda_disponibilidade
+ * - ALERTA_CONSUMO -> sp_master_alerta_consumo
+ * - ADMINISTRACAO_MEDICACAO_ORDEM -> sp_master_administracao_medicacao_ordem
+ * - AGENDAMENTO_EVENTO -> sp_master_agendamento_eventos
+ * 
  * Payload esperado:
  * {
  *   "acao": "ATENDIMENTO_TRANSICIONAR",
@@ -18,6 +33,62 @@ const db = require("../config/database");
  *   }
  * }
  */
+
+// Mapeamento de ações para Stored Procedures
+const ACAO_SP_MAP = {
+    // Atendimento
+    'ATENDIMENTO_INICIAR': 'sp_master_atendimento_iniciar',
+    'ATENDIMENTO_TRANSICIONAR': 'sp_master_atendimento_transicionar',
+    'ATENDIMENTO_FINALIZAR': 'sp_master_atendimento_finalizar',
+    'ATENDIMENTO_CANCELAR': 'sp_master_atendimento_cancelar',
+    
+    // Paciente
+    'PACIENTE_ATUALIZAR': 'sp_master_atualizar_paciente',
+    'ATENDIMENTO_VINCULAR_PACIENTE': 'sp_master_vincular_atendimento_paciente',
+    
+    // Senha
+    'TOTEM_GERAR_SENHA': 'sp_totem_gerar_senha',
+    'SENHA_EMITIR': 'sp_master_senha_emitir',
+    'SENHA_RECEPCAO': 'sp_master_senha_recepcao',
+    'CHAMAR_SENHA': 'sp_master_chamar_senha',
+    'SENHA_CRIAR': 'sp_master_dispatcher_runtime',
+    'SENHA_CHAMAR': 'sp_master_dispatcher_runtime',
+    'SENHA_ATENDER': 'sp_master_dispatcher_runtime',
+    'COMPLEMENTAR_SENHA': 'sp_complementar_senha',
+    'CANCELAR_SENHA': 'sp_painel_cancelar_senha',
+    'SENHA_INSERIR': 'sp_painel_inserir_senha',
+    
+    // Triagem
+    'TRIAGEM_CLASSIFICAR': 'sp_triagem_classificar_senha',
+    'TRIAGEM_REGISTRAR': 'sp_master_dispatcher_runtime',
+    
+    // FFA (Prontuário)
+    'FFA_CRIAR': 'sp_ffa_criar',
+    'FFA_ADICIONAR_ITEM': 'sp_ffa_adicionar_item',
+    
+    // Medicação
+    'ADMINISTRACAO_MEDICACAO_REGISTRAR': 'sp_master_registrar_administracao_medicacao',
+    'ADMINISTRACAO_MEDICACAO': 'sp_master_registrar_administracao_medicacao',
+    'CANCELAR_ADMINISTRACAO_MEDICACAO': 'sp_master_cancelar_administracao_medicacao',
+    'ADMINISTRACAO_MEDICACAO_ORDEM': 'sp_master_administracao_medicacao_ordem',
+    
+    // Alertas
+    'REGISTRAR_ALERTA': 'sp_master_registrar_alerta',
+    'ALERTA_REGISTRAR': 'sp_master_registrar_alerta',
+    'ALERTA_CONSUMO': 'sp_master_alerta_consumo',
+    
+    // Agenda
+    'AGENDA_DISPONIBILIDADE_CRIAR': 'sp_master_agenda_disponibilidade',
+    'AGENDA_DISPONIBILIDADE': 'sp_master_agenda_disponibilidade',
+    'AGENDAMENTO_EVENTO_CRIAR': 'sp_master_agendamento_eventos',
+    'AGENDAMENTO_EVENTO': 'sp_master_agendamento_eventos',
+    
+    // Padrão (dispatcher central)
+    'SESSION_HEARTBEAT': 'sp_master_dispatcher_runtime',
+    'PRESCRICAO_CRIAR': 'sp_master_dispatcher_runtime',
+    'FARMACIA_DISPENSAR': 'sp_master_dispatcher_runtime',
+    'ENFERMAGEM_REGISTRAR': 'sp_master_dispatcher_runtime'
+};
 
 // Middleware para validar sessão
 const validarSessao = async (req, res, next) => {
@@ -40,12 +111,16 @@ const validarSessao = async (req, res, next) => {
 /**
  * POST /api/runtime/dispatch
  * Endpoint central para todas as ações do sistema
+ * Executa a SP correta com base na ação
  */
 router.post("/dispatch", validarSessao, async (req, res) => {
     const connection = await db.getConnection();
     
     try {
         const { acao, contexto, payload } = req.body;
+        const id_sessao = req.user.id_sessao_usuario;
+        const id_usuario = req.user.id_usuario;
+        const id_perfil = req.user.id_perfil;
         
         // Validar parâmetros obrigatórios
         if (!acao) {
@@ -65,9 +140,14 @@ router.post("/dispatch", validarSessao, async (req, res) => {
             });
         }
 
+        // Determinar qual SP chamar
+        const storedProcedure = ACAO_SP_MAP[acao] || 'sp_master_dispatcher_runtime';
+        
+        console.log(`[dispatcher] Executando ${storedProcedure} para ação ${acao}`);
+
         // Chamar a stored procedure
-        const [results] = await connection.query(
-            `CALL sp_master_dispatcher_runtime(?, ?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
+        await connection.query(
+            `CALL ${storedProcedure}(?, ?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
             [id_sessao, id_usuario, id_perfil, acao, contexto || 'DEFAULT', payloadJson]
         );
 
@@ -197,18 +277,60 @@ router.get("/dispatch/acao/list", validarSessao, async (req, res) => {
             ORDER BY fs_origem.codigo, fs_destino.codigo
         `, [id_perfil]);
 
-        // Lista de ações simplificada
+        // Lista completa de ações disponíveis mapeadas para SPs
         const acoesSimplificadas = [
-            { codigo: 'SESSION_HEARTBEAT', descricao: 'Manter sessão ativa', contexto: 'SESSION' },
-            { codigo: 'ATENDIMENTO_INICIAR', descricao: 'Iniciar atendimento', contexto: 'ATENDIMENTO' },
-            { codigo: 'ATENDIMENTO_TRANSICIONAR', descricao: 'Transicionar atendimento', contexto: 'ATENDIMENTO' },
-            { codigo: 'SENHA_CRIAR', descricao: 'Criar nova senha', contexto: 'SENHA' },
-            { codigo: 'SENHA_CHAMAR', descricao: 'Chamar senha', contexto: 'SENHA' },
-            { codigo: 'SENHA_ATENDER', descricao: 'Atender senha', contexto: 'SENHA' },
-            { codigo: 'TRIAGEM_REGISTRAR', descricao: 'Registrar triagem', contexto: 'TRIAGEM' },
-            { codigo: 'PRESCRICAO_CRIAR', descricao: 'Criar prescrição', contexto: 'PRESCRICAO' },
-            { codigo: 'FARMACIA_DISPENSAR', descricao: 'Dispensar medicamento', contexto: 'FARMACIA' },
-            { codigo: 'ENFERMAGEM_REGISTRAR', descricao: 'Registrar procedimento', contexto: 'ENFERMAGEM' },
+            // Sessão
+            { codigo: 'SESSION_HEARTBEAT', descricao: 'Manter sessão ativa', contexto: 'SESSION', sp: 'sp_master_dispatcher_runtime' },
+            
+            // Atendimento
+            { codigo: 'ATENDIMENTO_INICIAR', descricao: 'Iniciar atendimento', contexto: 'ATENDIMENTO', sp: 'sp_master_atendimento_iniciar' },
+            { codigo: 'ATENDIMENTO_TRANSICIONAR', descricao: 'Transicionar atendimento', contexto: 'ATENDIMENTO', sp: 'sp_master_atendimento_transicionar' },
+            { codigo: 'ATENDIMENTO_FINALIZAR', descricao: 'Finalizar atendimento', contexto: 'ATENDIMENTO', sp: 'sp_master_atendimento_finalizar' },
+            { codigo: 'ATENDIMENTO_CANCELAR', descricao: 'Cancelar atendimento', contexto: 'ATENDIMENTO', sp: 'sp_master_atendimento_cancelar' },
+            { codigo: 'ATENDIMENTO_VINCULAR_PACIENTE', descricao: 'Vincular paciente ao atendimento', contexto: 'ATENDIMENTO', sp: 'sp_master_vincular_atendimento_paciente' },
+            
+            // Paciente
+            { codigo: 'PACIENTE_ATUALIZAR', descricao: 'Atualizar dados do paciente', contexto: 'PACIENTE', sp: 'sp_master_atualizar_paciente' },
+            
+            // Senha/Totem
+            { codigo: 'TOTEM_GERAR_SENHA', descricao: 'Gerar senha (Totem)', contexto: 'SENHA', sp: 'sp_totem_gerar_senha' },
+            { codigo: 'SENHA_EMITIR', descricao: 'Emitir senha (Totem)', contexto: 'SENHA', sp: 'sp_master_senha_emitir' },
+            { codigo: 'SENHA_RECEPCAO', descricao: 'Senha recepção/guichê', contexto: 'SENHA', sp: 'sp_master_senha_recepcao' },
+            { codigo: 'CHAMAR_SENHA', descricao: 'Chamar/Cancelar senha', contexto: 'SENHA', sp: 'sp_master_chamar_senha' },
+            { codigo: 'COMPLEMENTAR_SENHA', descricao: 'Complementar senha', contexto: 'SENHA', sp: 'sp_complementar_senha' },
+            { codigo: 'CANCELAR_SENHA', descricao: 'Cancelar senha', contexto: 'SENHA', sp: 'sp_painel_cancelar_senha' },
+            { codigo: 'SENHA_INSERIR', descricao: 'Inserir senha no painel', contexto: 'SENHA', sp: 'sp_painel_inserir_senha' },
+            { codigo: 'SENHA_CRIAR', descricao: 'Criar nova senha', contexto: 'SENHA', sp: 'sp_master_dispatcher_runtime' },
+            { codigo: 'SENHA_CHAMAR', descricao: 'Chamar senha', contexto: 'SENHA', sp: 'sp_master_dispatcher_runtime' },
+            { codigo: 'SENHA_ATENDER', descricao: 'Atender senha', contexto: 'SENHA', sp: 'sp_master_dispatcher_runtime' },
+            
+            // Triagem
+            { codigo: 'TRIAGEM_CLASSIFICAR', descricao: 'Classificar senha (Manchester)', contexto: 'TRIAGEM', sp: 'sp_triagem_classificar_senha' },
+            { codigo: 'TRIAGEM_REGISTRAR', descricao: 'Registrar triagem', contexto: 'TRIAGEM', sp: 'sp_master_dispatcher_runtime' },
+            
+            // FFA (Prontuário)
+            { codigo: 'FFA_CRIAR', descricao: 'Criar FFA/Prontuário', contexto: 'FFA', sp: 'sp_ffa_criar' },
+            { codigo: 'FFA_ADICIONAR_ITEM', descricao: 'Adicionar item na FFA', contexto: 'FFA', sp: 'sp_ffa_adicionar_item' },
+            
+            // Prescrição
+            { codigo: 'PRESCRICAO_CRIAR', descricao: 'Criar prescrição', contexto: 'PRESCRICAO', sp: 'sp_master_dispatcher_runtime' },
+            
+            // Farmácia
+            { codigo: 'FARMACIA_DISPENSAR', descricao: 'Dispensar medicamento', contexto: 'FARMACIA', sp: 'sp_master_dispatcher_runtime' },
+            { codigo: 'ADMINISTRACAO_MEDICACAO_REGISTRAR', descricao: 'Registrar administração de medicação', contexto: 'FARMACIA', sp: 'sp_master_registrar_administracao_medicacao' },
+            { codigo: 'ADMINISTRACAO_MEDICACAO_ORDEM', descricao: 'Criar ordem de medicação', contexto: 'FARMACIA', sp: 'sp_master_administracao_medicacao_ordem' },
+            { codigo: 'CANCELAR_ADMINISTRACAO_MEDICACAO', descricao: 'Cancelar administração', contexto: 'FARMACIA', sp: 'sp_master_cancelar_administracao_medicacao' },
+            
+            // Enfermagem
+            { codigo: 'ENFERMAGEM_REGISTRAR', descricao: 'Registrar procedimento', contexto: 'ENFERMAGEM', sp: 'sp_master_dispatcher_runtime' },
+            
+            // Alertas
+            { codigo: 'REGISTRAR_ALERTA', descricao: 'Registrar alerta', contexto: 'ALERTA', sp: 'sp_master_registrar_alerta' },
+            { codigo: 'ALERTA_CONSUMO', descricao: 'Alerta de consumo', contexto: 'ALERTA', sp: 'sp_master_alerta_consumo' },
+            
+            // Agenda
+            { codigo: 'AGENDA_DISPONIBILIDADE_CRIAR', descricao: 'Criar disponibilidade na agenda', contexto: 'AGENDA', sp: 'sp_master_agenda_disponibilidade' },
+            { codigo: 'AGENDAMENTO_EVENTO_CRIAR', descricao: 'Criar evento de agendamento', contexto: 'AGENDA', sp: 'sp_master_agendamento_eventos' }
         ];
 
         // Mesclar com ações do banco

@@ -1,133 +1,170 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./Totem.css";
 
-export default function Totem() {
-    const [step, setStep] = useState("welcome"); // welcome, type, success
-    const [, setTicketType] = useState(null);
-    const [ticket, setTicket] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+function dataExtenso() {
+    const now = new Date();
+    return now.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        weekday: "long"
+    });
+}
 
-    // Gerar senha
-    async function handleGenerateTicket(type) {
+function normalizarLabel(nome) {
+    return String(nome || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase();
+}
+
+export default function Totem() {
+    const [opcoes, setOpcoes] = useState([]);
+    const [plantao, setPlantao] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [mensagem, setMensagem] = useState("");
+    const [erro, setErro] = useState("");
+
+    useEffect(() => {
+        async function carregarDados() {
+            try {
+                const [opcoesRes, plantaoRes] = await Promise.all([
+                    fetch("/api/totem/opcoes"),
+                    fetch("/api/totem/plantao-medico?id_unidade=1")
+                ]);
+
+                const opcoesData = await opcoesRes.json().catch(() => ({}));
+                const plantaoData = await plantaoRes.json().catch(() => ({}));
+
+                if (opcoesRes.ok) setOpcoes(opcoesData.opcoes || []);
+                if (plantaoRes.ok) setPlantao(plantaoData.plantao || []);
+            } catch (e) {
+                console.error(e);
+                setErro("Falha ao carregar dados do totem.");
+            }
+        }
+
+        carregarDados();
+    }, []);
+
+    const grupos = useMemo(() => {
+        const g = {
+            prioritario: [],
+            pediatria: [],
+            normalAdulto: []
+        };
+
+        for (const opcao of opcoes) {
+            const nome = normalizarLabel(opcao.nome);
+            if (nome.includes("PEDI")) {
+                g.pediatria.push(opcao);
+            } else if (
+                nome.includes("PRIOR") ||
+                nome.includes("PREFER") ||
+                nome.includes("EMERGEN") ||
+                nome.includes("URG")
+            ) {
+                g.prioritario.push(opcao);
+            } else {
+                g.normalAdulto.push(opcao);
+            }
+        }
+        return g;
+    }, [opcoes]);
+
+    async function gerarSenha(id_opcao) {
         setLoading(true);
-        setError("");
-        setTicketType(type);
+        setErro("");
+        setMensagem("");
 
         try {
-            const res = await fetch("/api/totem/senhas", {
+            const res = await fetch("/api/totem/gerar-senha", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tipo: type })
+                body: JSON.stringify({
+                    id_opcao,
+                    id_unidade: 1,
+                    id_local_operacional: 1
+                })
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                setTicket(data.senha);
-                setStep("success");
-            } else {
-                setError(data.error || "Erro ao gerar senha");
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data?.senha) {
+                setErro(data.error || "Nao foi possivel gerar a senha.");
+                return;
             }
+
+            setMensagem(`Senha gerada: ${data.senha.tipo}`);
         } catch {
-            setError("Erro de comunicação");
+            setErro("Erro de comunicacao com o servidor.");
         } finally {
             setLoading(false);
         }
     }
 
-    // Voltar ao início
-    function handleReset() {
-        setStep("welcome");
-        setTicketType(null);
-        setTicket(null);
-        setError("");
+    function renderBotoes(lista, classe) {
+        return lista.map((opcao) => (
+            <button
+                key={opcao.id_opcao}
+                type="button"
+                className={`totem-btn ${classe}`}
+                onClick={() => gerarSenha(opcao.id_opcao)}
+                disabled={loading}
+            >
+                {String(opcao.nome || "GERAR SENHA").toUpperCase()}
+            </button>
+        ));
     }
 
     return (
-        <div className="totem-container">
-            <header className="totem-header">
-                <img src="/assets/img/logosenfundo.png" alt="Logo" className="totem-logo" />
-                <h1>PRONTO ATENDIMENTO</h1>
-            </header>
+        <div className="totem-page">
+            <section className="totem-head">
+                <div className="totem-head-logos">
+                    <img src="/assets/img/prefeitura.png" alt="Prefeitura" />
+                    <img src="/assets/img/sistema.png" alt="Alpha" />
+                </div>
+                <div className="totem-head-title">
+                    <h1>PREFEITURA DO MUNICIPIO DE POA - SP</h1>
+                    <h2>PRONTO ATENDIMENTO DR GUIDO GUIDA</h2>
+                    <p>{dataExtenso()}</p>
+                </div>
+            </section>
 
-            <main className="totem-content">
-                {error && (
-                    <div className="totem-error">
-                        {error}
-                        <button onClick={handleReset}>Tentar novamente</button>
-                    </div>
-                )}
-
-                {/* Welcome Screen */}
-                {step === "welcome" && (
-                    <div className="welcome-screen">
-                        <h2>BEM-VINDO</h2>
-                        <p>Selecione o tipo de atendimento:</p>
-                        
-                        <div className="type-options">
-                            <button 
-                                onClick={() => handleGenerateTicket("CONSULTA")}
-                                disabled={loading}
-                                className="type-btn consulta"
-                            >
-                                <span className="type-icon">👨‍⚕️</span>
-                                <span className="type-label">Consulta</span>
-                            </button>
-                            
-                            <button 
-                                onClick={() => handleGenerateTicket("URGENCIA")}
-                                disabled={loading}
-                                className="type-btn urgencia"
-                            >
-                                <span className="type-icon">🚨</span>
-                                <span className="type-label">Urgência</span>
-                            </button>
-                            
-                            <button 
-                                onClick={() => handleGenerateTicket("EXAME")}
-                                disabled={loading}
-                                className="type-btn exame"
-                            >
-                                <span className="type-icon">🧪</span>
-                                <span className="type-label">Exame</span>
-                            </button>
+            <section className="totem-plantao">
+                {plantao.length === 0 && <div className="totem-plantao-empty">Sem escala medica do dia.</div>}
+                {plantao.map((item, idx) => (
+                    <div key={`${item.medico_nome}-${idx}`} className="totem-plantao-row">
+                        <div className="esp">{String(item.especialidade || "MEDICO CLINICO").toUpperCase()}</div>
+                        <div className="medico">
+                            {String(item.medico_nome || "MEDICO DE PLANTAO").toUpperCase()} - CRM: {item.crm || "N/A"}
                         </div>
-
-                        {loading && (
-                            <div className="loading-indicator">
-                                <span className="spinner"></span>
-                                Gerando senha...
-                            </div>
-                        )}
                     </div>
-                )}
+                ))}
+            </section>
 
-                {/* Success Screen */}
-                {step === "success" && (
-                    <div className="success-screen">
-                        <h2>SUA SENHA</h2>
-                        
-                        <div className="ticket-display">
-                            <span className="ticket-code">{ticket?.codigo}</span>
-                            <span className="ticket-type-label">{ticket?.tipo}</span>
+            <section className="totem-main">
+                <h3>SENHA ELETRONICA DE CHAMADA PARA ATENDIMENTO</h3>
+
+                <div className="totem-boxes">
+                    <div className="box-left">
+                        <h4>ATENDIMENTO PRIORITARIO</h4>
+                        <div className="btn-grid">
+                            {renderBotoes(grupos.prioritario, "btn-prioritario")}
+                            {renderBotoes(grupos.pediatria, "btn-pediatria")}
                         </div>
-
-                        <div className="ticket-info">
-                            <p>Aguarde ser chamado</p>
-                            <p className="ticket-hint">Compareça ao balção quando sua senha for exibida</p>
-                        </div>
-
-                        <button onClick={handleReset} className="btn-new-ticket">
-                            Obter nova senha
-                        </button>
                     </div>
-                )}
-            </main>
 
-            <footer className="totem-footer">
-                <p>Emitido em: {new Date().toLocaleString("pt-BR")}</p>
-            </footer>
+                    <div className="box-right">
+                        <h4>ATENDIMENTO NORMAL - ADULTO</h4>
+                        <div className="btn-grid">
+                            {renderBotoes(grupos.normalAdulto, "btn-normal")}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {mensagem && <div className="totem-msg ok">{mensagem}</div>}
+            {erro && <div className="totem-msg err">{erro}</div>}
         </div>
     );
 }
