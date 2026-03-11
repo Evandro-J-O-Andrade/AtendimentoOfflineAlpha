@@ -126,6 +126,36 @@ export default function SelecionarContexto() {
             return;
         }
 
+        // ===============================================================
+        // VERIFICAÇÃO DE PERFIL: Impede admin de acessar módulos operacionais
+        // ===============================================================
+        const perfilUsuario = session?.user?.perfil?.toUpperCase() || '';
+        const perfilSelecionado = selectedContext.perfil_nome?.toUpperCase() || '';
+        
+        // Se o usuário é ADMIN, só pode selecionar perfis de ADMIN
+        if (perfilUsuario.includes('ADMIN') || perfilUsuario.includes('SUPORTE') || perfilUsuario.includes('TI')) {
+            if (!perfilSelecionado.includes('ADMIN') && !perfilSelecionado.includes('SUPORTE') && !perfilSelecionado.includes('TI')) {
+                setErro("❌ Administradores só podem acessar módulos administrativos. Selecione um perfil de administrador.");
+                return;
+            }
+        }
+        
+        // Se o usuário é médico, só pode selecionar perfis de médico
+        if (perfilUsuario.includes('MEDICO') || perfilUsuario.includes('CLÍNICO')) {
+            if (!perfilSelecionado.includes('MEDICO') && !perfilSelecionado.includes('CLÍNICO')) {
+                setErro("❌ Médicos só podem acessar módulos médicos.");
+                return;
+            }
+        }
+        
+        // Se o usuário é enfermeiro, só pode selecionar perfis de enfermagem
+        if (perfilUsuario.includes('ENFERMAGEM') || perfilUsuario.includes('ENFERMEIRO')) {
+            if (!perfilSelecionado.includes('ENFERMAGEM') && !perfilSelecionado.includes('ENFERMEIRO') && !perfilSelecionado.includes('TRIAGEM')) {
+                setErro("❌ Profissionais de enfermagem só podem acessar módulos de enfermagem ou triagem.");
+                return;
+            }
+        }
+
         try {
             const res = await fetch("/api/auth/selecionar-contexto", {
                 method: "POST",

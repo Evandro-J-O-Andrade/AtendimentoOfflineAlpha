@@ -255,6 +255,63 @@ class AuthController {
                 });
             }
 
+            // ===============================================================
+            // VERIFICAÇÃO DE PERFIL: Impede admin de acessar módulos operacionais
+            // ===============================================================
+            const perfilUsuario = req.user.perfil?.toUpperCase() || '';
+            const idPerfilNumerico = parseInt(id_perfil);
+            
+            // Buscar o nome do perfil que está sendo selecionado
+            const conn = await require("../config/database").getConnection();
+            try {
+                const [perfis] = await conn.query(
+                    "SELECT nome FROM perfil WHERE id_perfil = ?",
+                    [idPerfilNumerico]
+                );
+                
+                if (perfis.length > 0) {
+                    const perfilSelecionado = perfis[0].nome?.toUpperCase() || '';
+                    
+                    // Se o usuário é ADMIN, só pode selecionar perfis de ADMIN
+                    if (perfilUsuario.includes('ADMIN') || perfilUsuario.includes('SUPORTE') || perfilUsuario.includes('TI')) {
+                        if (!perfilSelecionado.includes('ADMIN') && !perfilSelecionado.includes('SUPORTE') && !perfilSelecionado.includes('TI')) {
+                            return res.status(403).json({
+                                error: "PERFIL_INVALIDO",
+                                mensagem: "Administradores só podem acessar módulos administrativos."
+                            });
+                        }
+                    }
+                    
+                    // Se o usuário é médico, só pode selecionar perfis de médico
+                    if (perfilUsuario.includes('MEDICO') || perfilUsuario.includes('CLÍNICO')) {
+                        if (!perfilSelecionado.includes('MEDICO') && !perfilSelecionado.includes('CLÍNICO')) {
+                            return res.status(403).json({
+                                error: "PERFIL_INVALIDO",
+                                mensagem: "Médicos só podem acessar módulos médicos."
+                            });
+                        }
+                    }
+                    
+                    // Se o usuário é enfermeiro, só pode selecionar perfis de enfermagem
+                    if (perfilUsuario.includes('ENFERMAGEM') || perfilUsuario.includes('ENFERMEIRO')) {
+                        if (!perfilSelecionado.includes('ENFERMAGEM') && !perfilSelecionado.includes('ENFERMEIRO') && !perfilSelecionado.includes('TRIAGEM')) {
+                            return res.status(403).json({
+                                error: "PERFIL_INVALIDO",
+                                mensagem: "Profissionais de enfermagem só podem acessar módulos de enfermagem ou triagem."
+                            });
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Erro ao validar perfil:", err);
+                return res.status(500).json({
+                    error: "ERRO_AO_VALIDAR_PERFIL",
+                    mensagem: "Erro ao validar perfil do usuário."
+                });
+            } finally {
+                conn.release();
+            }
+
             const payload = {
                 id_usuario: req.user.id_usuario,
                 id_sessao_usuario: req.user.id_sessao_usuario,
@@ -323,6 +380,40 @@ class AuthController {
             console.error("Erro ao buscar contexto atual:", err);
             return res.status(500).json({
                 error: "ERRO_AO_BUSCAR_CONTEXTO"
+            });
+        }
+    }
+
+    /**
+     * Sync - sincronização automática de runtime para offline/online
+     */
+    static async sync(req, res) {
+        try {
+            // O middleware já carregou o contexto em req.runtime
+            if (!req.runtime) {
+                return res.status(401).json({ error: "SEM_AUTENTICACAO" });
+            }
+
+            // Retorna runtime completo para sincronização
+            return res.json({
+                sucesso: true,
+                usuario: req.runtime.usuario,
+                sessao: req.runtime.sessao,
+                contexto: {
+                    unidade: req.runtime.contexto.unidade,
+                    local: req.runtime.contexto.local,
+                    dispositivo: req.runtime.contexto.dispositivo
+                },
+                contextos: req.runtime.contextos || [],
+                permissoes: req.runtime.permissoes || [],
+                perfil: req.runtime.perfil,
+                runtime: req.runtime.perfis // Array de perfis com contextos, filas
+            });
+
+        } catch (err) {
+            console.error("Erro na sincronização:", err);
+            return res.status(500).json({
+                error: "ERRO_SINCRONIZACAO"
             });
         }
     }

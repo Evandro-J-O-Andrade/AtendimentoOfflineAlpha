@@ -18,6 +18,127 @@ function normalizarLabel(nome) {
         .toUpperCase();
 }
 
+// Função para imprimir comprovante de senha
+function imprimirSenha(senhaData) {
+    try {
+        const conteudo = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Senha - ${senhaData.tipo}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 10px;
+        }
+        body { font-family: Arial, sans-serif; }
+        .comprovante {
+            width: 280px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #000;
+            margin: 0 auto;
+        }
+        .header {
+            background: #000080;
+            color: white;
+            padding: 8px;
+            margin: -15px -15px 15px -15px;
+        }
+        .header h1 { font-size: 12px; margin-bottom: 3px; }
+        .header h2 { font-size: 10px; font-weight: normal; }
+        .senha-numero {
+            font-size: 42px;
+            font-weight: bold;
+            color: #000080;
+            margin: 15px 0;
+        }
+        .senha-tipo {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .data-hora {
+            font-size: 11px;
+            color: #666;
+            border-top: 1px dashed #ccc;
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+        .aviso {
+            font-size: 9px;
+            color: #888;
+            margin-top: 8px;
+        }
+        @page {
+            margin: 0;
+            size: auto;
+        }
+        @media print {
+            html, body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            body {
+                padding-top: 5mm;
+            }
+            .comprovante { border: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="comprovante">
+        <div class="header">
+            <h1>PREFEITURA DE POÁ - SP</h1>
+            <h2>PRONTO ATENDIMENTO DR GUIDO GUIDA</h2>
+        </div>
+        <div class="senha-numero">${senhaData.tipo}</div>
+        <div class="senha-tipo">${senhaData.label || "Senha de Atendimento"}</div>
+        <div class="data-hora">
+            ${new Date().toLocaleDateString("pt-BR")} - ${new Date().toLocaleTimeString("pt-BR")}
+        </div>
+        <div class="aviso">
+            Acompanhe o painel de chamada
+        </div>
+    </div>
+    <script>
+        window.onload = function() {
+            window.print();
+            setTimeout(function() {
+                window.close();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
+    `;
+        
+        const janelaImpressao = window.open("", "_blank", "width=400,height=600");
+        
+        // Verificar se popup foi bloqueado
+        if (!janelaImpressao) {
+            console.warn("Popup de impressão foi bloqueado pelo navegador");
+            // Fallback: criar um elemento modal para visualização
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(conteudo);
+                printWindow.document.close();
+            }
+            return;
+        }
+        
+        janelaImpressao.document.write(conteudo);
+        janelaImpressao.document.close();
+    } catch (err) {
+        console.error("Erro ao imprimir senha:", err);
+    }
+}
+
 export default function Totem() {
     const [opcoes, setOpcoes] = useState([]);
     const [plantao, setPlantao] = useState([]);
@@ -72,7 +193,7 @@ export default function Totem() {
         return g;
     }, [opcoes]);
 
-    async function gerarSenha(id_opcao) {
+    async function gerarSenha(id_opcao, nomeOpcao) {
         setLoading(true);
         setErro("");
         setMensagem("");
@@ -94,7 +215,13 @@ export default function Totem() {
                 return;
             }
 
+            // Adicionar label para impressão
+            data.senha.label = nomeOpcao || "Atendimento";
+            
             setMensagem(`Senha gerada: ${data.senha.tipo}`);
+            
+            // Imprimir comprovante automaticamente
+            setTimeout(() => imprimirSenha(data.senha), 500);
         } catch {
             setErro("Erro de comunicacao com o servidor.");
         } finally {
@@ -108,7 +235,7 @@ export default function Totem() {
                 key={opcao.id_opcao}
                 type="button"
                 className={`totem-btn ${classe}`}
-                onClick={() => gerarSenha(opcao.id_opcao)}
+                onClick={() => gerarSenha(opcao.id_opcao, opcao.nome)}
                 disabled={loading}
             >
                 {String(opcao.nome || "GERAR SENHA").toUpperCase()}
@@ -121,12 +248,14 @@ export default function Totem() {
             <section className="totem-head">
                 <div className="totem-head-logos">
                     <img src="/assets/img/prefeitura.png" alt="Prefeitura" />
-                    <img src="/assets/img/sistema.png" alt="Alpha" />
                 </div>
                 <div className="totem-head-title">
                     <h1>PREFEITURA DO MUNICIPIO DE POA - SP</h1>
                     <h2>PRONTO ATENDIMENTO DR GUIDO GUIDA</h2>
                     <p>{dataExtenso()}</p>
+                </div>
+                <div className="totem-head-alpha">
+                    <img src="/assets/img/sistema.png" alt="Alpha" />
                 </div>
             </section>
 
@@ -146,16 +275,34 @@ export default function Totem() {
                 <h3>SENHA ELETRONICA DE CHAMADA PARA ATENDIMENTO</h3>
 
                 <div className="totem-boxes">
-                    <div className="box-left">
-                        <h4>ATENDIMENTO PRIORITARIO</h4>
+                    {/* PRIORITÁRIO */}
+                    <div className="box-prioritario">
+                        <div className="box-img">
+                            <img src="/assets/img/prioritario.jpg" alt="Prioritário" />
+                        </div>
+                        <h4>Prioritário para preferenciais</h4>
                         <div className="btn-grid">
                             {renderBotoes(grupos.prioritario, "btn-prioritario")}
+                        </div>
+                    </div>
+
+                    {/* PEDIATRIA */}
+                    <div className="box-pediatria">
+                        <div className="box-img">
+                            <img src="/assets/img/pediatrico.png" alt="Pediatria" />
+                        </div>
+                        <h4>Pediatria</h4>
+                        <div className="btn-grid">
                             {renderBotoes(grupos.pediatria, "btn-pediatria")}
                         </div>
                     </div>
 
-                    <div className="box-right">
-                        <h4>ATENDIMENTO NORMAL - ADULTO</h4>
+                    {/* NORMAL */}
+                    <div className="box-normal">
+                        <div className="box-img">
+                            <img src="/assets/img/normal.png" alt="Normal" />
+                        </div>
+                        <h4>Normal para clínico normal</h4>
                         <div className="btn-grid">
                             {renderBotoes(grupos.normalAdulto, "btn-normal")}
                         </div>

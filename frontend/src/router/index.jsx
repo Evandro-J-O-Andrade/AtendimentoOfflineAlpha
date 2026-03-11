@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Páginas
-import Login from "../apps/operacional/pages/Login.jsx";
+import Login from "../apps/auth/pages/Login.jsx";
 import SelecionarContexto from "../apps/operacional/pages/contexto/SelecionarContexto.jsx";
 import PainelUsuario from "../apps/painel/pages/PainelUsuario.jsx";
 import Admin from "../apps/admin/pages/Admin.jsx";

@@ -169,6 +169,9 @@ class AuthService {
             // Esta SP NÃO valida senha - a validação já foi feita no JavaScript acima
             let loginResult;
             try {
+                // Gera um token aleatório para a sessão
+                const tokenJwt = require('crypto').randomBytes(32).toString('hex');
+                
                 [loginResult] = await conn.query(
                     "CALL sp_auth_criar_sessao(?, ?, ?, ?, ?, ?)",
                     [
@@ -177,7 +180,7 @@ class AuthService {
                         id_unidade,
                         id_local_operacional,
                         id_perfil,
-                        null // p_token - não usa JWT na sessão, usa token_runtime
+                        tokenJwt
                     ]
                 );
             } catch (spErr) {

@@ -1,68 +1,104 @@
+/* ========================================
+   TOTEM - ESTILO COM IMAGENS
+   ======================================== */
+
 .totem-page {
     min-height: 100vh;
-    background: #e9edf2;
-    padding: 10px;
-    color: #0c3f73;
-    font-family: "Tahoma", "Segoe UI", sans-serif;
+    background: linear-gradient(180deg, #1e5799 0%, #2989d8 50%, #207cca 100%);
+    padding: 15px;
+    color: #fff;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
 }
 
+/* ----- CABEÇALHO ----- */
 .totem-head {
-    border: 4px solid #1f5f9f;
-    border-radius: 18px;
-    background: #f3f6fa;
-    padding: 12px 18px;
+    border: 4px solid #fff;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
+    padding: 12px 20px;
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 90px 1fr 90px;
     align-items: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    gap: 10px;
+    overflow: hidden;
 }
 
 .totem-head-logos {
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: center;
 }
 
 .totem-head-logos img {
-    height: 62px;
+    max-width: 100%;
+    height: 55px;
     object-fit: contain;
 }
 
 .totem-head-title {
     text-align: center;
+    overflow: hidden;
 }
 
 .totem-head-title h1 {
     margin: 0;
-    font-size: 42px;
-    letter-spacing: 0.3px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e5799;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .totem-head-title h2 {
-    margin: 6px 0 2px;
-    font-size: 26px;
-    font-weight: 700;
+    margin: 3px 0 2px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2989d8;
 }
 
 .totem-head-title p {
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
 }
 
+.totem-head-alpha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.totem-head-alpha img {
+    max-width: 100%;
+    height: 60px;
+    object-fit: contain;
+}
+
+/* ----- PLANTÃO MÉDICO ----- */
 .totem-plantao {
     margin-top: 12px;
-    border: 4px solid #1f5f9f;
-    border-radius: 18px;
-    background: #f3f6fa;
-    padding: 10px 14px;
+    border: 3px solid #fff;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.95);
+    padding: 12px 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .totem-plantao-row {
     display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 10px;
+    grid-template-columns: 220px 1fr;
+    gap: 8px;
     margin-bottom: 6px;
-    font-size: 24px;
+    font-size: 18px;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    border-left: 4px solid #2989d8;
 }
 
 .totem-plantao-row:last-child {
@@ -71,164 +107,264 @@
 
 .totem-plantao-row .esp {
     text-align: right;
-    font-weight: 800;
+    font-weight: 700;
+    color: #1e5799;
+    text-transform: uppercase;
 }
 
 .totem-plantao-row .medico {
     font-weight: 600;
+    color: #333;
 }
 
 .totem-plantao-empty {
-    font-size: 22px;
+    font-size: 16px;
     text-align: center;
-    color: #3f5f7a;
+    color: #888;
+    font-style: italic;
 }
 
+/* ----- ÁREA PRINCIPAL ----- */
 .totem-main {
     margin-top: 12px;
-    border: 4px solid #1f5f9f;
-    border-radius: 18px;
-    background: #f3f6fa;
-    padding: 14px 14px 18px;
+    border: 4px solid #fff;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #ffffff 0%, #e8e8e8 100%);
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
 .totem-main h3 {
-    margin: 0 0 12px;
+    margin: 0 0 16px;
     text-align: center;
-    font-size: 30px;
-    font-weight: 800;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1e5799;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
+/* ----- BOXES DAS OPÇÕES ----- */
 .totem-boxes {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
 }
 
-.box-left,
-.box-right {
-    border-radius: 28px;
-    min-height: 270px;
-    padding: 18px;
+.box-prioritario,
+.box-pediatria,
+.box-normal {
+    border-radius: 12px;
+    min-height: 360px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-.box-left {
-    background: #040c9b;
+/* PRIORITÁRIO - Vermelho */
+.box-prioritario {
+    background: linear-gradient(180deg, #c62828 0%, #b71c1c 100%);
+    box-shadow: 0 5px 15px rgba(198, 40, 40, 0.4);
+    border: 3px solid #ef5350;
 }
 
-.box-right {
-    background: #1285e8;
+/* PEDIATRIA - Roxo */
+.box-pediatria {
+    background: linear-gradient(180deg, #7b1fa2 0%, #6a1b9a 100%);
+    box-shadow: 0 5px 15px rgba(123, 31, 162, 0.4);
+    border: 3px solid #ab47bc;
 }
 
-.box-left h4,
-.box-right h4 {
+/* NORMAL - Azul */
+.box-normal {
+    background: linear-gradient(180deg, #1565c0 0%, #0d47a1 100%);
+    box-shadow: 0 5px 15px rgba(21, 101, 192, 0.4);
+    border: 3px solid #42a5f5;
+}
+
+/* Imagem no topo do box */
+.box-img {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    min-height: 120px;
+}
+
+.box-img img {
+    max-width: 100%;
+    max-height: 110px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.box-prioritario h4,
+.box-pediatria h4,
+.box-normal h4 {
     margin: 0 0 14px;
     text-align: center;
     color: #fff;
-    font-size: 32px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-transform: uppercase;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    min-height: 40px;
+    width: 100%;
 }
 
+/* ----- BOTÕES ----- */
 .btn-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-}
-
-.box-right .btn-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+    flex: 1;
+    width: 100%;
+    align-content: start;
 }
 
 .totem-btn {
-    height: 86px;
-    border: 0;
-    background: #dbe3ec;
-    color: #0b4f88;
-    font-size: 25px;
-    font-weight: 800;
-    border-radius: 4px;
+    height: 80px;
+    border: 2px solid rgba(255,255,255,0.5);
+    background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
     cursor: pointer;
-}
-
-.totem-btn:disabled {
-    opacity: 0.7;
-    cursor: wait;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+    padding: 5px;
+    width: 100%;
 }
 
 .totem-btn:hover:not(:disabled) {
-    filter: brightness(0.96);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    filter: brightness(1.05);
 }
 
+.totem-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.totem-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    background: #ccc;
+    color: #666;
+}
+
+/* Cores específicas para cada tipo de botão */
+.box-prioritario .totem-btn {
+    background: linear-gradient(180deg, #ffcdd2 0%, #ef9a9a 100%);
+    color: #b71c1c;
+    border-color: #ef5350;
+}
+
+.box-prioritario .totem-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, #ffebee 0%, #ffcdd2 100%);
+}
+
+.box-pediatria .totem-btn {
+    background: linear-gradient(180deg, #f3e5f5 0%, #e1bee7 100%);
+    color: #6a1b9a;
+    border-color: #ab47bc;
+}
+
+.box-pediatria .totem-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, #fbefff 0%, #f3e8ff 100%);
+}
+
+.box-normal .totem-btn {
+    background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #0d47a1;
+    border-color: #42a5f5;
+}
+
+.box-normal .totem-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+/* ----- MENSAGENS ----- */
 .totem-msg {
-    margin-top: 10px;
-    padding: 12px;
+    margin-top: 14px;
+    padding: 16px;
     border-radius: 10px;
     font-size: 20px;
     font-weight: 700;
     text-align: center;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .totem-msg.ok {
-    background: #e4f7e9;
-    border: 2px solid #2f8f46;
-    color: #155726;
+    background: linear-gradient(90deg, #4caf50, #66bb6a);
+    border: 2px solid #81c784;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
 }
 
 .totem-msg.err {
-    background: #ffe8e8;
-    border: 2px solid #c54040;
-    color: #8f2121;
+    background: linear-gradient(90deg, #f44336, #e57373);
+    border: 2px solid #ef9a9a;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
 }
 
+/* ----- RESPONSIVO ----- */
 @media (max-width: 1280px) {
-    .totem-head-title h1 {
-        font-size: 30px;
-    }
-
-    .totem-head-title h2 {
-        font-size: 21px;
-    }
-
-    .totem-main h3 {
-        font-size: 22px;
-    }
-
-    .box-left h4,
-    .box-right h4 {
-        font-size: 24px;
-    }
-
-    .totem-btn {
-        font-size: 19px;
-        height: 72px;
-    }
-
-    .totem-plantao-row {
-        font-size: 18px;
-        grid-template-columns: 220px 1fr;
-    }
+    .totem-head { grid-template-columns: 70px 1fr 70px; padding: 10px 15px; }
+    .totem-head-logos img { height: 45px; }
+    .totem-head-alpha img { height: 50px; }
+    .totem-head-title h1 { font-size: 20px; }
+    .totem-head-title h2 { font-size: 14px; }
+    .totem-head-title p { font-size: 12px; }
+    .totem-main h3 { font-size: 20px; }
+    .box-prioritario h4, .box-pediatria h4, .box-normal h4 { font-size: 13px; }
+    .totem-btn { font-size: 13px; height: 70px; }
+    .totem-plantao-row { font-size: 14px; grid-template-columns: 180px 1fr; }
+    .box-img img { max-height: 90px; }
+    .box-img { min-height: 100px; }
 }
 
 @media (max-width: 960px) {
     .totem-head {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px;
+        padding: 10px;
     }
-
-    .totem-head-logos {
-        justify-content: center;
-    }
-
-    .totem-boxes {
-        grid-template-columns: 1fr;
-    }
-
+    .totem-head-logos { justify-content: center; }
+    .totem-head-logos img { height: 50px; }
+    .totem-head-alpha { justify-content: center; margin-top: 5px; }
+    .totem-head-alpha img { height: 50px; }
+    .totem-head-title h1 { font-size: 18px; }
+    .totem-head-title h2 { font-size: 14px; }
+    .totem-boxes { grid-template-columns: 1fr; }
+    .box-img { min-height: 80px; }
+    .box-img img { max-height: 70px; }
     .totem-plantao-row {
         grid-template-columns: 1fr;
-        gap: 2px;
+        gap: 4px;
         text-align: center;
     }
-
-    .totem-plantao-row .esp {
-        text-align: center;
-    }
+    .totem-plantao-row .esp { text-align: center; }
 }

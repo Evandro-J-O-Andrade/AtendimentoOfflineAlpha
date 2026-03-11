@@ -34,4 +34,10 @@ router.post("/logout", authMiddleware, AuthController.logout);
 // Contexto atual (com runtime completo)
 router.get("/contexto-atual", authMiddleware, runtimeContextMiddleware, AuthController.contextoAtual);
 
+// Runtime para sincronização (offline/online)
+router.get("/runtime", authMiddleware, runtimeContextMiddleware, AuthController.contextoAtual);
+
+// Sync - sincronização automática de runtime
+router.post("/sync", authMiddleware, AuthController.sync);
+
 module.exports = router;

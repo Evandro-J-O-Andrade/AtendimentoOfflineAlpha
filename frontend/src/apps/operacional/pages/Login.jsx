@@ -53,11 +53,20 @@ export default function Login() {
 
             // if we get here, login failed
             const apiError = data?.error;
-            if (apiError === "SEM_CONTEXTO" || apiError === "USUARIO_SEM_CONTEXTO") {
-                setError("Seu usuário não possui contexto de acesso (sistema/unidade/local).");
+            
+            // Traduz erros técnicos para mensagens amigáveis
+            let erroMensagem = apiError;
+            if (apiError === "USUARIO_NAO_ENCONTRADO" || apiError === "USUARIO_NAO_ENCONTRADO") {
+                erroMensagem = "Usuário não encontrado";
+            } else if (apiError === "SENHA_INCORRETA" || apiError === "SENHA_INVALIDA") {
+                erroMensagem = "Senha incorreta";
+            } else if (apiError === "SEM_CONTEXTO" || apiError === "USUARIO_SEM_CONTEXTO") {
+                erroMensagem = "Seu usuário não possui contexto de acesso (sistema/unidade/local).";
             } else {
-                setError(apiError || (res.ok ? "Credenciais inválidas" : "Falha ao autenticar"));
+                erroMensagem = apiError || (res.ok ? "Credenciais inválidas" : "Falha ao autenticar");
             }
+            
+            setError(erroMensagem);
             setLoading(false);
 
         } catch {

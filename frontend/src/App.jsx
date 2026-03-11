@@ -1,12 +1,26 @@
-import { RuntimeAuthProvider } from "./apps/operacional/auth/RuntimeAuthContext";
-import AppRouter from "./router";
+import React from "react";
+import { AppProvider, useApp } from "./context/AppContext";
+import Login from "./apps/auth/pages/Login";
+import Painel from "./apps/operacional/pages/Painel";
 
-function App() {
+function AppRouter() {
+  const { usuario, loading } = useApp();
+
+  if (loading) {
     return (
-        <RuntimeAuthProvider>
-            <AppRouter />
-        </RuntimeAuthProvider>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <p>Carregando...</p>
+      </div>
     );
+  }
+
+  return usuario ? <Painel /> : <Login />;
 }
 
-export default App;
+export default function App() {
+  return (
+    <AppProvider>
+      <AppRouter />
+    </AppProvider>
+  );
+}

@@ -139,6 +139,11 @@ router.post("/gerar-senha", async (req, res) => {
             id_local_operacional = 1 
         } = req.body;
 
+        // Validar se id_opcao foi fornecido
+        if (!id_opcao) {
+            return res.status(400).json({ error: "ID_OPCAO_OBRIGATORIO" });
+        }
+
         const [opcaoRows] = await conn.query(
             `
             SELECT id_opcao, codigo, label, lane, tipo_atendimento, prefixo
@@ -149,13 +154,13 @@ router.post("/gerar-senha", async (req, res) => {
             [id_opcao]
         );
 
-        const opcao = opcaoRows[0] || {
-            codigo: "CLINICO",
-            label: "Normal - Adulto",
-            lane: "ADULTO",
-            tipo_atendimento: "CLINICO",
-            prefixo: "A"
-        };
+        // Se opção não existir no banco, registrar warning e usar fallback
+        if (opcaoRows.length === 0) {
+            console.warn(`Tentativa de gerar senha com opção inválida: ${id_opcao}`);
+            return res.status(400).json({ error: "OPCAO_INVALIDA", mensagem: "Opção de atendimento não encontrada" });
+        }
+
+        const opcao = opcaoRows[0];
 
         const prefixo = (opcao.prefixo || opcao.codigo?.slice(0, 1) || "A").toUpperCase();
 
@@ -183,10 +188,8 @@ router.post("/gerar-senha", async (req, res) => {
         const numeroSenha = Number(seq?.ultimo_numero || 1);
         const codigoVisual = `${prefixo}${String(numeroSenha).padStart(3, "0")}`;
 
-        const [[unidade]] = await conn.query(
-            `SELECT id_saas_entidade FROM unidade WHERE id_unidade = ? LIMIT 1`,
-            [id_unidade]
-        );
+        // Remove busca de id_saas_entidade que não existe na tabela
+        const id_saas_entidade = 1; // Valor padrão
 
         const [[fluxoStatus]] = await conn.query(
             `SELECT id_fluxo_status FROM fluxo_status WHERE ativo = 1 ORDER BY id_fluxo_status ASC LIMIT 1`
@@ -220,7 +223,7 @@ router.post("/gerar-senha", async (req, res) => {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
-                unidade?.id_saas_entidade || 1,
+                id_saas_entidade,
                 id_unidade,
                 id_local_operacional,
                 codigoVisual,
@@ -240,10 +243,9 @@ router.post("/gerar-senha", async (req, res) => {
 
         await conn.query(
             `
-            INSERT INTO totem_evento (id_totem, evento, ip_acesso)
-            VALUES (1, 'SENHA_GERADA', ?)
-            `,
-            [req.ip || null]
+            INSERT INTO totem_evento (id_totem, evento)
+            VALUES (1, 'SENHA_GERADA')
+            `
         );
 
         await conn.commit();
@@ -321,10 +323,9 @@ router.post("/feedback", async (req, res) => {
                 id_senha,
                 avaliacao,
                 comentario,
-                ip_acesso,
                 data_feedback
-            ) VALUES (?, ?, ?, ?, NOW())
-        `, [id_senha, avaliacao, comentario, req.ip]);
+            ) VALUES (?, ?, ?, NOW())
+        `, [id_senha, avaliacao, comentario]);
 
         res.json({ success: true, mensagem: "Feedback registrado" });
 

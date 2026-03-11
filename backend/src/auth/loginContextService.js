@@ -1,16 +1,17 @@
 /**
  * ================================================================
- * Login Context Service
+ * Login Context Service - Versão Parruda
  * ================================================================
  * 
- * Serviço de contexto de login para o sistema HIS offline-first.
- * Implementa a arquitetura de autenticação com:
- * - Identidade (usuário, perfil)
- * - Sessão (sessão auditável)
- * - Contexto (unidade, local, dispositivo)
- * - Runtime (motor clínico)
+ * Serviço de contexto de login para o HIS offline-first.
+ * Implementa autenticação completa e runtime parrudo:
+ * - Perfis, contextos e permissões
+ * - Filas e pacientes (FFA) do local
+ * - Especialidades médicas
+ * - Sessão auditável
  * 
- * @version 1.0.0
+ * Não gera senha sozinho nem chama paciente automático.
+ * @version 1.0.0-parrudo
  * ================================================================
  */
 
@@ -85,7 +86,7 @@ class LoginContextService {
             // ==============================
             // PASSO 4: Selecionar contexto operacional
             // ==============================
-            const contexto = await LoginContextService._selecionarContexto(
+            const resultadoContexto = await LoginContextService._selecionarContexto(
                 conn, 
                 user.id_usuario, 
                 id_sistema,
@@ -93,10 +94,14 @@ class LoginContextService {
                 id_local_operacional
             );
 
-            if (!contexto) {
+            if (!resultadoContexto) {
                 await conn.rollback();
                 return { error: "USUARIO_SEM_CONTEXTO" };
             }
+
+            // Extrair contexto atual e lista de contextos
+            const contexto = resultadoContexto.contextoAtual;
+            const listaContextos = resultadoContexto.contextos;
 
             // ==============================
             // PASSO 5: Criar sessão
@@ -121,9 +126,34 @@ class LoginContextService {
             );
 
             // ==============================
-            // PASSO 7: Buscar perfis e permissões
+            // PASSO 7: Buscar runtime parrudo (estrutura completa)
             // ==============================
-            const perfis = await LoginContextService._buscarPerfis(conn, user.id_usuario);
+            const runtimeParrudo = await LoginContextService._buscarRuntimeParrudo(conn, user.id_usuario);
+            
+            // ==============================
+            // PASSO 7b: Atualizar runtime com pacientes nas filas (VERSÃO PARRUDO)
+            // ==============================
+            const filasPacientes = await LoginContextService._atualizarRuntimeFilasPacientes(
+                conn,
+                user.id_usuario,
+                contexto.id_unidade,
+                contexto.id_local_operacional
+            );
+            
+            // Incluir pacientes em cada perfil do runtime
+            runtimeParrudo.forEach(perfil => {
+                if (perfil.contextos && perfil.contextos.length > 0) {
+                    perfil.contextos.forEach(ctx => {
+                        // Adicionar pacientes apenas no contexto atual
+                        if (ctx.id_unidade === contexto.id_unidade && 
+                            ctx.id_local_operacional === contexto.id_local_operacional) {
+                            ctx.filasPacientes = filasPacientes;
+                        }
+                    });
+                }
+            });
+            
+            // Buscar permissões do perfil atual
             const permissoes = contexto.id_perfil 
                 ? await LoginContextService._buscarPermissoes(conn, contexto.id_perfil)
                 : [];
@@ -143,6 +173,18 @@ class LoginContextService {
             // ==============================
             // RETORNO: Token JWT com contexto completo
             // ==============================
+            // Formatar lista de contextos para o token
+            const contextosToken = listaContextos.map(ctx => ({
+                id_sistema: ctx.id_sistema ?? 1,
+                id_unidade: ctx.id_unidade,
+                id_local_operacional: ctx.id_local_operacional,
+                id_perfil: ctx.id_perfil,
+                perfil: ctx.perfil_nome,
+                unidade_nome: ctx.unidade_nome || dadosContexto.unidade?.nome,
+                local_nome: ctx.local_nome || dadosContexto.local?.nome,
+                local_tipo: ctx.local_tipo
+            }));
+
             const tokenPayload = {
                 id_usuario: user.id_usuario,
                 login: user.login,
@@ -154,13 +196,16 @@ class LoginContextService {
                 perfil: contexto.perfil_nome,
                 id_dispositivo: dispositivo?.id_dispositivo || null,
                 tipo_dispositivo: dispositivo?.tipo || null,
-                permissoes: permissoes.map(p => p.acao)
+                permissoes: permissoes.map(p => p.acao),
+                contextos: contextosToken,
+                runtime: runtimeParrudo
             };
 
             const token = jwt.sign(tokenPayload, SECRET, { expiresIn: EXPIRES_IN });
 
             return {
                 token,
+                runtime: runtimeParrudo,
                 sessao: {
                     id_sessao_usuario: sessao.id_sessao_usuario,
                     token_runtime: sessao.token_runtime,
@@ -173,12 +218,22 @@ class LoginContextService {
                 contexto: {
                     id_sistema: contexto.id_sistema ?? 1,
                     id_unidade: contexto.id_unidade,
-                    unidade_nome: dadosContexto.unidade?.nome,
+                    unidade_nome: contexto.unidade_nome || dadosContexto.unidade?.nome,
                     id_local_operacional: contexto.id_local_operacional,
-                    local_nome: dadosContexto.local?.nome,
+                    local_nome: contexto.local_nome || dadosContexto.local?.nome,
                     id_perfil: contexto.id_perfil,
                     perfil: contexto.perfil_nome
                 },
+                contextos: listaContextos.map(ctx => ({
+                    id_sistema: ctx.id_sistema ?? 1,
+                    id_unidade: ctx.id_unidade,
+                    unidade_nome: ctx.unidade_nome,
+                    id_local_operacional: ctx.id_local_operacional,
+                    local_nome: ctx.local_nome,
+                    local_tipo: ctx.local_tipo,
+                    id_perfil: ctx.id_perfil,
+                    perfil: ctx.perfil_nome
+                })),
                 dispositivo: dispositivo ? {
                     id_dispositivo: dispositivo.id_dispositivo,
                     nome: dispositivo.nome,
@@ -397,25 +452,38 @@ class LoginContextService {
      * Validar senha com bcrypt
      */
     static async _validarSenha(senha, senhaHash) {
-        if (!senhaHash) return false;
+        if (!senhaHash) {
+            console.warn('Falha na validação: senha hash ausente');
+            return false;
+        }
 
-        // Tentar bcrypt
+        // ==============================
+        // Caso bcrypt
+        // ==============================
         if (senhaHash.startsWith('$2')) {
             try {
-                return await bcrypt.compare(senha, senhaHash);
+                const valida = await bcrypt.compare(senha, senhaHash);
+                if (!valida) console.warn('Senha incorreta (bcrypt)');
+                return valida;
             } catch (err) {
                 console.error('Erro ao validar senha bcrypt:', err);
                 return false;
             }
         }
 
-        // Hash SHA256 legado
+        // ==============================
+        // Caso SHA256 legado
+        // ==============================
         const sha = crypto.createHash('sha256').update(senha).digest('hex');
         if (senhaHash === sha) {
-            console.warn('AVISO: Usando hash SHA256 legado - considere migrar para bcrypt');
+            console.warn('Login usando hash SHA256 legado - considere migrar para bcrypt');
             return true;
         }
 
+        // ==============================
+        // Senha incorreta
+        // ==============================
+        console.warn('Senha incorreta (não corresponde a bcrypt nem SHA256 legado)');
         return false;
     }
 
@@ -457,6 +525,7 @@ class LoginContextService {
     /**
      * Selecionar contexto operacional
      * Se não existir contexto, cria um padrão automaticamente
+     * Retorna objeto com contexto atual E lista de todos os contextos disponíveis
      */
     static async _selecionarContexto(conn, id_usuario, id_sistema, id_unidade, id_local_operacional) {
         // Se contexto fornecido, validar
@@ -464,32 +533,53 @@ class LoginContextService {
             let contexto;
             if (id_sistema) {
                 [contexto] = await conn.execute(
-                    `SELECT uc.*, p.nome as perfil_nome
+                    `SELECT uc.*, p.nome as perfil_nome, u.nome as unidade_nome, lo.nome as local_nome
                      FROM usuario_contexto uc
                      JOIN perfil p ON p.id_perfil = uc.id_perfil
+                     LEFT JOIN unidade u ON u.id_unidade = uc.id_unidade
+                     LEFT JOIN local_operacional lo ON lo.id_local_operacional = uc.id_local_operacional
                      WHERE uc.id_usuario = ? AND uc.id_sistema = ? AND uc.id_unidade = ? AND uc.id_local_operacional = ? AND uc.ativo = 1`,
                     [id_usuario, id_sistema, id_unidade, id_local_operacional]
                 );
             } else {
                 [contexto] = await conn.execute(
-                    `SELECT uc.*, p.nome as perfil_nome
+                    `SELECT uc.*, p.nome as perfil_nome, u.nome as unidade_nome, lo.nome as local_nome
                      FROM usuario_contexto uc
                      JOIN perfil p ON p.id_perfil = uc.id_perfil
+                     LEFT JOIN unidade u ON u.id_unidade = uc.id_unidade
+                     LEFT JOIN local_operacional lo ON lo.id_local_operacional = uc.id_local_operacional
                      WHERE uc.id_usuario = ? AND uc.id_unidade = ? AND uc.id_local_operacional = ? AND uc.ativo = 1`,
                     [id_usuario, id_unidade, id_local_operacional]
                 );
             }
             
             if (contexto.length > 0) {
-                return contexto[0];
+                // Buscar todos os contextos do usuário para retornar na lista
+                const [todosContextos] = await conn.execute(
+                    `SELECT uc.id_sistema, uc.id_unidade, uc.id_local_operacional, uc.id_perfil, 
+                            p.nome as perfil_nome, u.nome as unidade_nome, lo.nome as local_nome, lo.tipo as local_tipo
+                     FROM usuario_contexto uc
+                     JOIN perfil p ON p.id_perfil = uc.id_perfil
+                     LEFT JOIN unidade u ON u.id_unidade = uc.id_unidade
+                     LEFT JOIN local_operacional lo ON lo.id_local_operacional = uc.id_local_operacional
+                     WHERE uc.id_usuario = ? AND uc.ativo = 1`,
+                    [id_usuario]
+                );
+                return {
+                    contextoAtual: contexto[0],
+                    contextos: todosContextos
+                };
             }
         }
 
-        // Buscar contextos disponíveis
+        // Buscar TODOS os contextos disponíveis do usuário
         const [contextos] = await conn.execute(
-            `SELECT uc.*, p.nome as perfil_nome
+            `SELECT uc.id_sistema, uc.id_unidade, uc.id_local_operacional, uc.id_perfil, 
+                    p.nome as perfil_nome, u.nome as unidade_nome, lo.nome as local_nome, lo.tipo as local_tipo
              FROM usuario_contexto uc
              JOIN perfil p ON p.id_perfil = uc.id_perfil
+             LEFT JOIN unidade u ON u.id_unidade = uc.id_unidade
+             LEFT JOIN local_operacional lo ON lo.id_local_operacional = uc.id_local_operacional
              WHERE uc.id_usuario = ? AND uc.ativo = 1`,
             [id_usuario]
         );
@@ -517,12 +607,19 @@ class LoginContextService {
                     [id_usuario, unidade.id_unidade, local.id_local_operacional, perfil.id_perfil]
                 );
 
-                return {
+                const novoContexto = {
                     id_sistema: 1,
                     id_unidade: unidade.id_unidade,
                     id_local_operacional: local.id_local_operacional,
                     id_perfil: perfil.id_perfil,
-                    perfil_nome: perfil.perfil_nome
+                    perfil_nome: perfil.perfil_nome,
+                    unidade_nome: unidade.nome,
+                    local_nome: local.nome
+                };
+                
+                return {
+                    contextoAtual: novoContexto,
+                    contextos: [novoContexto]
                 };
             }
 
@@ -530,12 +627,19 @@ class LoginContextService {
         }
 
         if (contextos.length === 1) {
-            return contextos[0];
+            // Retornar o contexto único com a lista
+            return {
+                contextoAtual: contextos[0],
+                contextos: contextos
+            };
         }
 
-        // Fluxo padrao: autentica e envia para tela de contexto apos login.
-        // Para isso, inicializa sessao com o primeiro contexto valido.
-        return contextos[0];
+        // Múltiplos contextos: retornar lista para o frontend decidir
+        // Por padrão, usa o primeiro contexto mas retorna todos para possibilidade de mudança
+        return {
+            contextoAtual: contextos[0],
+            contextos: contextos
+        };
     }
 
     /**
@@ -590,7 +694,121 @@ class LoginContextService {
     }
 
     /**
-     * Buscar perfis do usuário
+     * Buscar runtime parrudo - estrutura completa com todos os perfis, contextos, filas e acessos
+     * Versão canônica para todo o HIS/PA
+     */
+    static async _buscarRuntimeParrudo(conn, id_usuario) {
+        // 1. Buscar todos os perfis do usuário
+        const [perfisUsuario] = await conn.execute(
+            `SELECT DISTINCT p.id_perfil, p.nome as perfil
+             FROM usuario_perfil up
+             JOIN perfil p ON p.id_perfil = up.id_perfil
+             WHERE up.id_usuario = ? AND p.ativo = 1`,
+            [id_usuario]
+        );
+
+        // 2. Para cada perfil, buscar todos os contextos do usuário
+        const perfisCompletos = [];
+        
+        for (const perfil of perfisUsuario) {
+            // Buscar contextos deste perfil para este usuário
+            const [contextos] = await conn.execute(
+                `SELECT 
+                    uc.id_unidade,
+                    uc.id_local_operacional,
+                    u.nome as unidade_nome,
+                    lo.nome as local_nome,
+                    lo.tipo as local_tipo
+                 FROM usuario_contexto uc
+                 JOIN unidade u ON u.id_unidade = uc.id_unidade
+                 JOIN local_operacional lo ON lo.id_local_operacional = uc.id_local_operacional
+                 WHERE uc.id_usuario = ? 
+                   AND uc.id_perfil = ? 
+                   AND uc.ativo = 1`,
+                [id_usuario, perfil.id_perfil]
+            );
+
+            // Para cada contexto, buscar filas e acessos
+            const contextosCompletos = [];
+            for (const ctx of contextos) {
+                // Buscar filas deste local operacional
+                const [filas] = await conn.execute(
+                    `SELECT nome FROM fila_operacional 
+                     WHERE id_local_operacional = ? AND ativo = 1`,
+                    [ctx.id_local_operacional]
+                );
+
+                // Buscar acessos/permissões deste perfil
+                const [permissoes] = await conn.execute(
+                    `SELECT p.acao 
+                     FROM perfil_permissao pp
+                     JOIN permissao p ON p.id_permissao = pp.id_permissao
+                     WHERE pp.id_perfil = ?`,
+                    [perfil.id_perfil]
+                );
+
+                // Buscar especialidades médicas se for perfil médico
+                let especialidades = [];
+                if (perfil.perfil.toUpperCase().includes('MEDICO') || perfil.perfil.toUpperCase().includes('CLINICO')) {
+                    const [especialidadesRows] = await conn.execute(
+                        `SELECT e.id_especialidade, e.nome, e.cbo 
+                         FROM medico_especialidade me
+                         JOIN especialidade e ON e.id_especialidade = me.id_especialidade
+                         WHERE me.id_usuario = ?`,
+                        [id_usuario]
+                    );
+                    especialidades = especialidadesRows;
+                }
+
+                contextosCompletos.push({
+                    id_unidade: ctx.id_unidade,
+                    id_local_operacional: ctx.id_local_operacional,
+                    descricao: ctx.local_nome || ctx.unidade_nome,
+                    filas: filas.map(f => f.nome),
+                    acessos: permissoes.map(p => p.acao),
+                    especialidades: especialidades.length > 0 ? especialidades : undefined
+                });
+            }
+
+            // Se o usuário não tem contextos, criar um padrão vazio
+            if (contextosCompletos.length === 0) {
+                contextosCompletos.push({
+                    id_unidade: 1,
+                    id_local_operacional: 1,
+                    descricao: "Sem contexto",
+                    filas: [],
+                    acessos: []
+                });
+            }
+
+            perfisCompletos.push({
+                id_perfil: perfil.id_perfil,
+                perfil: perfil.perfil,
+                contextos: contextosCompletos
+            });
+        }
+
+        // Se o usuário não tem perfis, retornar estrutura vazia
+        if (perfisCompletos.length === 0) {
+            return [{
+                id_perfil: 0,
+                perfil: "Sem Perfil",
+                contextos: [{
+                    id_unidade: 1,
+                    id_local_operacional: 1,
+                    descricao: "Sem contexto",
+                    filas: [],
+                    acessos: []
+                }]
+            }];
+        }
+
+        return perfisCompletos;
+    }
+
+    /**
+     * Buscar perfis do usuário (versão simples)
+     * @deprecated Use _buscarRuntimeParrudo para estrutura completa
      */
     static async _buscarPerfis(conn, id_usuario) {
         const [perfis] = await conn.execute(
@@ -675,6 +893,43 @@ class LoginContextService {
         );
 
         return dados[0] || null;
+    }
+
+    /**
+     * Atualiza runtime com pacientes em espera (FFA) - Versão Parruda
+     * Adiciona pacientes das filas ao contexto do usuário
+     */
+    static async _atualizarRuntimeFilasPacientes(conn, id_usuario, id_unidade, id_local_operacional) {
+        try {
+            // Buscar filas ativas do local
+            const [filas] = await conn.execute(
+                `SELECT id_fila_operacional, nome FROM fila_operacional 
+                 WHERE id_unidade = ? AND id_local_operacional = ? AND ativo = 1`,
+                [id_unidade, id_local_operacional]
+            );
+
+            const filasComPacientes = [];
+            for (const fila of filas) {
+                // Buscar pacientes em espera (FFA)
+                const [pacientes] = await conn.execute(
+                    `SELECT id_ffa, nome_paciente, status, urgencia, data_chegada
+                     FROM ffa
+                     WHERE id_unidade = ? AND id_local_operacional = ? AND id_fila_operacional = ? 
+                       AND status IN ('EM_ESPERA', 'EM_TRIAGEM')
+                     ORDER BY urgencia DESC, data_chegada ASC`,
+                    [id_unidade, id_local_operacional, fila.id_fila_operacional]
+                );
+                filasComPacientes.push({ 
+                    id_fila: fila.id_fila_operacional, 
+                    nome_fila: fila.nome, 
+                    pacientes 
+                });
+            }
+            return filasComPacientes;
+        } catch (err) {
+            console.error("Erro ao buscar pacientes nas filas:", err);
+            return [];
+        }
     }
 }
 
