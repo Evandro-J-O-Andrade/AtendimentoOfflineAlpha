@@ -398,20 +398,41 @@ Usada para o dashboard do administrador do sistema
 que precisa acessar todas as funcionalidades
 */
 
-router.get("/admin", (req, res) => {
+router.get("/admin", async (req, res) => {
     const decoded = validarToken(req, res);
     if (!decoded) return;
 
-    res.json({
-        status: "ok",
-        admin: true,
-        usuario: {
-            id_usuario: decoded.id_usuario,
-            perfil: decoded.perfil,
-            id_perfil: decoded.id_perfil
-        },
-        mensagem: "Dashboard Administrador"
-    });
+    let conn;
+    try {
+        conn = await db.getConnection();
+
+        const [[usuarios]] = await conn.query("SELECT COUNT(*) AS total FROM usuario WHERE ativo = 1");
+        const [[unidades]] = await conn.query("SELECT COUNT(*) AS total FROM unidade");
+        const [[locais]]   = await conn.query("SELECT COUNT(*) AS total FROM local_operacional");
+        const [[senhasDia]] = await conn.query("SELECT COUNT(*) AS total FROM senha WHERE DATE(criado_em) = CURDATE()");
+
+        res.json({
+            status: "ok",
+            admin: true,
+            usuario: {
+                id_usuario: decoded.id_usuario,
+                perfil: decoded.perfil,
+                id_perfil: decoded.id_perfil
+            },
+            indicadores: {
+                usuarios_ativos: usuarios?.total || 0,
+                unidades: unidades?.total || 0,
+                locais_operacionais: locais?.total || 0,
+                senhas_hoje: senhasDia?.total || 0
+            },
+            mensagem: "Dashboard Administrador"
+        });
+    } catch (err) {
+        console.error("Erro /painel/admin:", err.message);
+        res.status(500).json({ erro: "ERRO_DE_CONEXAO" });
+    } finally {
+        if (conn) conn.release();
+    }
 });
 
 router.get("/admin/catalogo-acoes", async (req, res) => {
@@ -532,3 +553,4 @@ router.post("/admin/executar-acao", async (req, res) => {
 });
 
 module.exports = router;
+

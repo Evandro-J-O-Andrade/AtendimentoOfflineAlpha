@@ -6,6 +6,7 @@ import SelecionarContexto from "../apps/operacional/pages/contexto/SelecionarCon
 import PainelUsuario from "../apps/painel/pages/PainelUsuario.jsx";
 import Admin from "../apps/admin/pages/Admin.jsx";
 import AdminModulePage from "../apps/admin/pages/AdminModulePage.jsx";
+import Dashboard from "../pages/Dashboard.jsx";
 
 // Páginas operacionais
 import Recepcao from "../apps/operacional/pages/recepcao/Recepcao.jsx";
@@ -18,7 +19,7 @@ import Painel from "../apps/painel/pages/Painel.jsx";
 
 // Guardas de segurança
 import SecurityGuard from "../apps/operacional/security/SecurityGuard.jsx";
-import AdminGuard from "../apps/admin/security/AdminGuard.jsx";
+import RuntimeActionRouter from "../runtime/RuntimeActionRouter.jsx";
 
 export default function AppRouter() {
     return (
@@ -32,11 +33,24 @@ export default function AppRouter() {
                 <Route path="/totem" element={<Totem />} />
 
                 {/* Rota de seleção de contexto (após login, antes do painel) */}
+                <Route path="/contexto" element={<SelecionarContexto />} />
+
+                {/* Rota curinga baseada em acao_frontend do banco */}
                 <Route
-                    path="/contexto"
+                    path="/runtime/:acao"
                     element={
                         <SecurityGuard>
-                            <SelecionarContexto />
+                            <RuntimeActionRouter />
+                        </SecurityGuard>
+                    }
+                />
+
+                {/* Dashboard principal com menu dinâmico */}
+                <Route
+                    path="/dashboard"
+                    element={
+                        <SecurityGuard>
+                            <Dashboard />
                         </SecurityGuard>
                     }
                 />
@@ -102,29 +116,24 @@ export default function AppRouter() {
                 />
 
                 {/* Rota de painel de chamadas */}
-                <Route
-                    path="/painel-chamadas"
-                    element={
-                        <Painel />
-                    }
-                />
+                <Route path="/painel-chamadas" element={<Painel />} />
 
-                {/* Painel admin - acesso total sem contexto operacional */}
+                {/* Painel admin */}
                 <Route
                     path="/admin"
                     element={
-                        <AdminGuard>
+                        <SecurityGuard acao="painel_admin">
                             <Admin />
-                        </AdminGuard>
+                        </SecurityGuard>
                     }
                 />
 
                 <Route
                     path="/admin/modulo/:moduloId"
                     element={
-                        <AdminGuard>
+                        <SecurityGuard acao="painel_admin">
                             <AdminModulePage />
-                        </AdminGuard>
+                        </SecurityGuard>
                     }
                 />
 

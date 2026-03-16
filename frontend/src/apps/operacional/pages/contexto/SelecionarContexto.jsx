@@ -1,37 +1,37 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRuntimeAuth } from "../../auth/RuntimeAuthContext";
+import loginService from "../../../../services/loginService";
+import { useApp } from "../../../../context/AppContext";
 import "./SelecionarContexto.css";
 
 export default function SelecionarContexto() {
-    const { session, setSession, authFetch } = useRuntimeAuth();
     const navigate = useNavigate();
+    const { hydrateSession } = useApp();
     const [contextos, setContextos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedUnidade, setSelectedUnidade] = useState("");
     const [selectedEspecialidade, setSelectedEspecialidade] = useState("");
     const [selectedSala, setSelectedSala] = useState("");
     const [erro, setErro] = useState("");
+    const [credenciaisPendentes, setCredenciaisPendentes] = useState(null);
 
     useEffect(() => {
-        async function fetchContextos() {
-            try {
-                const res = await authFetch("/api/auth/meus-contextos");
-                if (res.ok) {
-                    const data = await res.json();
-                    setContextos(data.contextos || []);
-                }
-            } catch (err) {
-                console.error("Erro ao buscar contextos:", err);
-            } finally {
-                setLoading(false);
-            }
+        const pending = sessionStorage.getItem("pending_context");
+        if (!pending) {
+            setLoading(false);
+            setErro("Nenhum contexto pendente encontrado. Faça login novamente.");
+            return;
         }
-
-        if (session?.token) {
-            fetchContextos();
+        try {
+            const data = JSON.parse(pending);
+            setCredenciaisPendentes(data);
+            setContextos(data.contextos || []);
+        } catch {
+            setErro("Não foi possível ler os contextos. Faça login novamente.");
+        } finally {
+            setLoading(false);
         }
-    }, [session, authFetch]);
+    }, []);
 
     const contextosDaUnidade = contextos.filter(
         (ctx) => String(ctx.id_unidade) === String(selectedUnidade)
@@ -46,19 +46,22 @@ export default function SelecionarContexto() {
         ).values()
     );
 
-    const salas = Array.from(
-        new Map(
-            contextosDaUnidade
-                .filter((ctx) => String(ctx.id_perfil) === String(selectedEspecialidade))
-                .map((ctx) => [
-                    String(ctx.id_local_operacional),
-                    {
-                        id_local_operacional: String(ctx.id_local_operacional),
-                        nome: ctx.local_nome || `Local ${ctx.id_local_operacional}`
-                    }
-                ])
-        ).values()
-    );
+    const salas = [
+        { id_local_operacional: "", nome: "Selecione a sala" },
+        ...Array.from(
+            new Map(
+                contextosDaUnidade
+                    .filter((ctx) => String(ctx.id_perfil) === String(selectedEspecialidade))
+                    .map((ctx) => [
+                        String(ctx.id_local_operacional),
+                        {
+                            id_local_operacional: String(ctx.id_local_operacional),
+                            nome: ctx.local_nome || `Local ${ctx.id_local_operacional}`
+                        }
+                    ])
+            ).values()
+        )
+    ];
 
     useEffect(() => {
         if (contextos.length === 0) return;
@@ -70,11 +73,9 @@ export default function SelecionarContexto() {
         }
 
         if (!selectedUnidade) {
-            const unidadeSessao = session?.user?.id_unidade ? String(session.user.id_unidade) : "";
-            const unidadeValida = unidades.some((u) => String(u.id_unidade) === unidadeSessao);
-            setSelectedUnidade(unidadeValida ? unidadeSessao : "");
+            setSelectedUnidade("");
         }
-    }, [contextos, selectedUnidade, session]);
+    }, [contextos, selectedUnidade]);
 
     useEffect(() => {
         if (!selectedUnidade) return;
@@ -101,11 +102,10 @@ export default function SelecionarContexto() {
         }
         if (salas.length === 0) return;
 
-        const salaNaoDefinida = salas.find((s) => String(s.nome || "").toUpperCase().includes("NAO DEFIN"));
         const exists = salas.some((s) => s.id_local_operacional === String(selectedSala));
 
         if (!exists) {
-            setSelectedSala(salaNaoDefinida?.id_local_operacional || salas[0].id_local_operacional);
+            setSelectedSala("");
         }
     }, [selectedEspecialidade, selectedSala, salas]);
 
@@ -126,80 +126,49 @@ export default function SelecionarContexto() {
             return;
         }
 
-        // ===============================================================
-        // VERIFICAÇÃO DE PERFIL: Impede admin de acessar módulos operacionais
-        // ===============================================================
-        const perfilUsuario = session?.user?.perfil?.toUpperCase() || '';
-        const perfilSelecionado = selectedContext.perfil_nome?.toUpperCase() || '';
-        
-        // Se o usuário é ADMIN, só pode selecionar perfis de ADMIN
-        if (perfilUsuario.includes('ADMIN') || perfilUsuario.includes('SUPORTE') || perfilUsuario.includes('TI')) {
-            if (!perfilSelecionado.includes('ADMIN') && !perfilSelecionado.includes('SUPORTE') && !perfilSelecionado.includes('TI')) {
-                setErro("❌ Administradores só podem acessar módulos administrativos. Selecione um perfil de administrador.");
-                return;
-            }
-        }
-        
-        // Se o usuário é médico, só pode selecionar perfis de médico
-        if (perfilUsuario.includes('MEDICO') || perfilUsuario.includes('CLÍNICO')) {
-            if (!perfilSelecionado.includes('MEDICO') && !perfilSelecionado.includes('CLÍNICO')) {
-                setErro("❌ Médicos só podem acessar módulos médicos.");
-                return;
-            }
-        }
-        
-        // Se o usuário é enfermeiro, só pode selecionar perfis de enfermagem
-        if (perfilUsuario.includes('ENFERMAGEM') || perfilUsuario.includes('ENFERMEIRO')) {
-            if (!perfilSelecionado.includes('ENFERMAGEM') && !perfilSelecionado.includes('ENFERMEIRO') && !perfilSelecionado.includes('TRIAGEM')) {
-                setErro("❌ Profissionais de enfermagem só podem acessar módulos de enfermagem ou triagem.");
-                return;
-            }
-        }
-
         try {
-            const res = await fetch("/api/auth/selecionar-contexto", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session.token}`
-                },
-                body: JSON.stringify({
-                    id_unidade: selectedContext.id_unidade,
-                    id_local_operacional: selectedContext.id_local_operacional,
-                    id_perfil: selectedContext.id_perfil
-                })
+            const loginResult = await loginService.login({
+                usuario: credenciaisPendentes?.usuario,
+                senha: credenciaisPendentes?.senha,
+                id_unidade: selectedContext.id_unidade,
+                id_local_operacional: selectedContext.id_local_operacional,
+                id_perfil: selectedContext.id_perfil,
+                id_sistema: selectedContext.id_sistema
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                if (data.token) {
-                    setSession(data.token);
-                }
-                
-                // Redirecionar baseado no perfil
-                const perfil = selectedContext.perfil_nome?.toUpperCase();
-                if (perfil?.includes("ADMIN") || perfil?.includes("SUPORTE") || perfil?.includes(" TI") || perfil?.includes("TECNOLOGIA") || perfil?.includes("MANUTEN")) {
-                    navigate("/admin");
-                } else if (perfil?.includes('RECEPCAO') || perfil?.includes('RECEPÇÃO')) {
-                    navigate("/recepcao");
-                } else if (perfil?.includes('TRIAGEM')) {
-                    navigate("/triagem");
-                } else if (perfil?.includes('ENFERMAGEM')) {
-                    navigate("/enfermagem");
-                } else if (perfil?.includes('MEDICO') || perfil?.includes('CLÍNICO')) {
-                    navigate("/medico");
-                } else if (perfil?.includes('FARMAC') || perfil?.includes('FARMÁCIA')) {
-                    navigate("/farmacia");
-                } else {
-                    navigate("/painel");
-                }
+            if (!loginResult?.sucesso) {
+                setErro(loginResult?.erro || "Não foi possível ativar o contexto selecionado.");
+                return;
+            }
+
+            hydrateSession(loginResult);
+            sessionStorage.removeItem("pending_context");
+
+            const permissoesCtx = loginResult.permissoes || [];
+            const perfilNome = (selectedContext.perfil_nome || "").toUpperCase();
+            const temPainelAdmin = permissoesCtx.some(
+                (p) => String(p.acao_frontend || "").toLowerCase() === "painel_admin" || String(p.codigo || "").toUpperCase().includes("ADMIN")
+            );
+
+            if (temPainelAdmin || perfilNome.includes("ADMIN")) {
+                navigate("/admin", { replace: true });
+            } else if (perfilNome.includes("RECEPCAO") || perfilNome.includes("RECEPÇÃO")) {
+                navigate("/recepcao", { replace: true });
+            } else if (perfilNome.includes("TRIAGEM")) {
+                navigate("/triagem", { replace: true });
+            } else if (perfilNome.includes("ENFERMAGEM") || perfilNome.includes("ENFERMEIRO")) {
+                navigate("/enfermagem", { replace: true });
+            } else if (perfilNome.includes("MEDICO") || perfilNome.includes("CLÍNICO")) {
+                navigate("/medico", { replace: true });
+            } else if (perfilNome.includes("FARMAC") || perfilNome.includes("FARMÁCIA")) {
+                navigate("/farmacia", { replace: true });
             } else {
-                const data = await res.json().catch(() => ({}));
-                setErro(data.error || "Não foi possível ativar o contexto selecionado.");
+                navigate("/dashboard", { replace: true });
             }
         } catch (err) {
             console.error("Erro ao selecionar contexto:", err);
-            setErro("Erro ao selecionar contexto.");
+            const detalhe = err.response?.data?.erro || err.response?.data?.error || err.message;
+            setErro(`Erro ao selecionar contexto: ${detalhe}`);
         }
     }
 
@@ -283,7 +252,7 @@ export default function SelecionarContexto() {
                 <div className="contexto-actions">
                     <button 
                         className="btn-confirmar"
-                        disabled={!selectedUnidade || !selectedEspecialidade || !selectedSala}
+                        disabled={!selectedUnidade || !selectedEspecialidade || selectedSala === ""}
                         onClick={handleConfirmar}
                     >
                         Confirmar e Entrar

@@ -9,6 +9,9 @@ const router = express.Router();
 // ROTAS PÚBLICAS
 // ============================
 
+// Checar existência de usuário
+router.post("/checkUser", AuthController.checkUser);
+
 // Login padrão
 router.post("/login", AuthController.login);
 
@@ -18,6 +21,9 @@ router.get("/contextos", AuthController.listarContextos);
 // ============================
 // ROTAS AUTENTICADAS
 // ============================
+
+// Permissões por perfil
+router.get("/permissoes/:idPerfil", authMiddleware, AuthController.permissoesPorPerfil);
 
 // Usuário atual
 router.get("/me", authMiddleware, AuthController.me);

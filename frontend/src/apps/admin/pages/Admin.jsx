@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRuntimeAuth } from "../../operacional/auth/RuntimeAuthContext";
+import axios from "axios";
+import { useApp } from "../../../context/AppContext";
 import "./Admin.css";
 
 export default function Admin() {
-    const { session, authFetch, logout } = useRuntimeAuth();
     const navigate = useNavigate();
+    const { contexto, usuario, getToken, logout } = useApp();
     const [adminData, setAdminData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,24 +15,16 @@ export default function Admin() {
     useEffect(() => {
         async function fetchAdminData() {
             try {
-                const response = await authFetch("/api/painel/admin");
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setAdminData(data);
-                } else {
-                    // Dados mock para quando a API não responder
-                    setAdminData({
-                        usuario: { nome: "Administrador", perfil: "ADMIN" },
-                        unidades: 1,
-                        usuarios: 10,
-                        senhas_hoje: 25
-                    });
-                }
+                const token = getToken();
+                const res = await axios.get("/api/painel/admin", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setAdminData(res.data);
             } catch (err) {
-                // Dados mock para quando a API não responder
+                setError(err.message);
+                // fallback mock
                 setAdminData({
-                    usuario: { nome: "Administrador", perfil: "ADMIN" },
+                    usuario: { nome: usuario?.login || "Administrador", perfil: "ADMIN" },
                     unidades: 1,
                     usuarios: 10,
                     senhas_hoje: 25
@@ -41,10 +34,8 @@ export default function Admin() {
             }
         }
 
-        if (session?.token) {
-            fetchAdminData();
-        }
-    }, [session, authFetch]);
+        fetchAdminData();
+    }, [usuario, getToken]);
 
     if (loading) {
         return <div className="admin-loading">Carregando painel administrativo...</div>;
@@ -103,9 +94,9 @@ export default function Admin() {
                 <header className="admin-header">
                     <h1>Sistema de Atendimento Alpha Hospitalar - Unidade Guido Guida</h1>
                     <div className="admin-user">
-                        <span>Perfil: <strong>{adminData?.usuario?.perfil}</strong></span>
+                        <span>Perfil: <strong>{adminData?.usuario?.perfil || contexto?.id_perfil}</strong></span>
                         <div className="user-avatar">
-                            {getInitials(adminData?.usuario?.nome)}
+                            {getInitials(adminData?.usuario?.nome || usuario?.login)}
                         </div>
                     </div>
                 </header>

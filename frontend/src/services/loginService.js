@@ -3,8 +3,8 @@ import axios from "axios";
 const API_BASE = "http://localhost:3001/api"; // Backend HIS/PA
 
 // Função exportada para compatibilidade (alias para loginService.login)
-export async function loginFull(login, senha, contexto = {}) {
-  return loginService.login({ login, senha, ...contexto });
+export async function loginFull(usuario, senha, contexto = {}) {
+  return loginService.login({ usuario, senha, ...contexto });
 }
 
 export async function logoutFull() {
@@ -32,8 +32,8 @@ export function hasPermission(permissao) {
 export function hasPerfil(perfil) {
   const data = loginService.getUserData();
   if (!data || !data.runtime) return false;
-  return data.runtime.some(p => 
-    p.perfil.toUpperCase().includes(perfil.toUpperCase())
+  return data.runtime?.some(
+    (p) => p?.perfil?.toUpperCase() === perfil.toUpperCase()
   );
 }
 
@@ -44,21 +44,29 @@ export const loginService = {
    */
   login: async (credentials) => {
     try {
-      const response = await axios.post(`${API_BASE}/auth/login`, credentials);
-      
-      if (response.data?.token) {
-        // Salvar token no storage local
-        localStorage.setItem("token_his", response.data.token);
-        localStorage.setItem("hispa_auth", JSON.stringify(response.data));
-        
-        return response.data;
+      const payload = {
+        ...credentials,
+      };
+      if (credentials.login && !credentials.usuario) {
+        payload.usuario = credentials.login;
       }
-      
-      return { error: "Erro ao logar", sucesso: false };
+
+      const response = await axios.post(`${API_BASE}/auth/login`, payload);
+      const data = response.data || {};
+
+      if (data.sucesso && data.token) {
+        localStorage.setItem("token_his", data.token);
+        localStorage.setItem("hispa_auth", JSON.stringify(data));
+        return data;
+      }
+
+      return data.sucesso === false
+        ? data
+        : { sucesso: false, erro: "ERRO_DE_CONEXAO" };
     } catch (err) {
       console.error("loginService error:", err);
       return { 
-        error: err.response?.data?.error || "Erro de conexão",
+        erro: err.response?.data?.erro || err.response?.data?.error || "ERRO_DE_CONEXAO",
         sucesso: false 
       };
     }
@@ -99,8 +107,10 @@ export const loginService = {
       );
       
       if (response.data?.runtime) {
-        // Atualizar cache local
-        const dadosAtuais = JSON.parse(localStorage.getItem("hispa_auth") || "{}");
+        // Atualizar cache local com tolerância a JSON corrompido
+        let dadosAtuais = {};
+        try { dadosAtuais = JSON.parse(localStorage.getItem("hispa_auth") || "{}"); } catch {}
+
         const dadosMerge = {
           ...dadosAtuais,
           runtime: response.data.runtime,
@@ -131,7 +141,14 @@ export const loginService = {
    * Verifica se está autenticado
    */
   isAuthenticated: () => {
-    return !!localStorage.getItem("token_his");
+    const token = localStorage.getItem("token_his");
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload?.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
   },
 
   /**
@@ -153,6 +170,14 @@ export const loginService = {
    */
   getToken: () => {
     return localStorage.getItem("token_his");
+  },
+
+  /**
+   * Runtime local (offline-first)
+   */
+  getRuntimeLocal: () => {
+    const data = loginService.getUserData();
+    return data?.runtime || [];
   }
 };
 

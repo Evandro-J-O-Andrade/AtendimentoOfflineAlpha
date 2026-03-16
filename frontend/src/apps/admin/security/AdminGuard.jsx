@@ -1,23 +1,22 @@
-import { useRuntimeAuth } from "../../operacional/auth/RuntimeAuthContext";
 import { Navigate } from "react-router-dom";
+import { useApp } from "../../../context/AppContext";
 
 /**
- * SecurityGuard para rotas de Administrador
- * Diferente do SecurityGuard operacional, este não exige contexto operacional
- * pois o admin precisa acessar sem estar vinculado a uma unidade/local específico
+ * Guard para rotas administrativas
+ * Baseado em permissões reais
  */
 export default function AdminGuard({ children }) {
-    const { session, loading } = useRuntimeAuth();
+  const { isAuthenticated, permissoes, loading } = useApp();
 
-    if (loading) {
-        return <div>Carregando...</div>;
-    }
+  if (loading) return <div>Carregando...</div>;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-    // Verifica se tem token (usuário está logado)
-    if (!session || !session.token) {
-        return <Navigate to="/login" replace />;
-    }
+  const isAdmin = permissoes?.some((p) => {
+    const acao = String(p.acao_frontend || "").toLowerCase();
+    const cod = String(p.codigo || "").toUpperCase();
+    return acao === "painel_admin" || acao === "adm_dashboard" || cod.includes("ADMIN");
+  });
 
-    // Não exige contexto operacional para admin
-    return children;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  return children;
 }

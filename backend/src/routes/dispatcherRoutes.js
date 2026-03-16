@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/database");
+const authMiddleware = require("../auth/authMiddleware");
 
 /**
  * =====================================
@@ -113,7 +114,7 @@ const validarSessao = async (req, res, next) => {
  * Endpoint central para todas as ações do sistema
  * Executa a SP correta com base na ação
  */
-router.post("/dispatch", validarSessao, async (req, res) => {
+router.post("/dispatch", authMiddleware, async (req, res) => {
     const connection = await db.getConnection();
     
     try {
@@ -182,7 +183,7 @@ router.post("/dispatch", validarSessao, async (req, res) => {
  * POST /api/runtime/dispatch/batch
  * Executar múltiplas ações em uma única transação
  */
-router.post("/dispatch/batch", validarSessao, async (req, res) => {
+router.post("/dispatch/batch", authMiddleware, async (req, res) => {
     const connection = await db.getConnection();
     
     try {
