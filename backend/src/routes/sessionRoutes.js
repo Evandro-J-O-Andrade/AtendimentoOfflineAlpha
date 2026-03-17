@@ -39,9 +39,9 @@ router.get("/session", authMiddleware, async (req, res) => {
         let permissoes = [];
         try {
             const [permRows] = await pool.query(
-                `SELECT p.codigo, p.acao_frontend, p.grupo_menu, p.nome, p.icone, p.ordem_menu, p.url_menu
+                `SELECT p.codigo, p.acao_frontend, p.grupo_menu, p.nome, p.icone, p.ordem_menu, p.nome_procedure AS url_menu
                    FROM permissao p
-                   JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao AND pp.ativo = 1
+                   JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao
                   WHERE pp.id_perfil = ? AND p.ativo = 1
                   ORDER BY p.ordem_menu, p.nome`,
                 [id_perfil]

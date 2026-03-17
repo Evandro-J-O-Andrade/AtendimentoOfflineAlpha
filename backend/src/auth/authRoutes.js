@@ -29,7 +29,7 @@ router.get("/permissoes/:idPerfil", authMiddleware, AuthController.permissoesPor
 router.get("/me", authMiddleware, AuthController.me);
 
 // Meus contextos disponíveis
-router.get("/meus-contextos", authMiddleware, AuthController.meusContextos);
+router.get("/meus-contextos", authMiddleware, AuthController.listarContextos);
 
 // Selecionar contexto (quando há múltiplas escolhas)
 router.post("/selecionar-contexto", authMiddleware, AuthController.selecionarContexto);
@@ -47,3 +47,4 @@ router.get("/runtime", authMiddleware, runtimeContextMiddleware, AuthController.
 router.post("/sync", authMiddleware, AuthController.sync);
 
 module.exports = router;
+

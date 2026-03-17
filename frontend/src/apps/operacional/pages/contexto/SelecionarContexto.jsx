@@ -144,27 +144,16 @@ export default function SelecionarContexto() {
             hydrateSession(loginResult);
             sessionStorage.removeItem("pending_context");
 
-            const permissoesCtx = loginResult.permissoes || [];
-            const perfilNome = (selectedContext.perfil_nome || "").toUpperCase();
-            const temPainelAdmin = permissoesCtx.some(
-                (p) => String(p.acao_frontend || "").toLowerCase() === "painel_admin" || String(p.codigo || "").toUpperCase().includes("ADMIN")
-            );
+            // Redireciona conforme permissões retornadas
+            const perms = loginResult.permissoes || [];
+            const hasAdmin =
+                perms.some((p) =>
+                    typeof p === "string"
+                        ? p.toUpperCase() === "ADMIN" || p.toUpperCase().includes("PAINEL_ADMIN")
+                        : String(p.acao_frontend || p.codigo || "").toLowerCase() === "painel_admin"
+                );
 
-            if (temPainelAdmin || perfilNome.includes("ADMIN")) {
-                navigate("/admin", { replace: true });
-            } else if (perfilNome.includes("RECEPCAO") || perfilNome.includes("RECEPÇÃO")) {
-                navigate("/recepcao", { replace: true });
-            } else if (perfilNome.includes("TRIAGEM")) {
-                navigate("/triagem", { replace: true });
-            } else if (perfilNome.includes("ENFERMAGEM") || perfilNome.includes("ENFERMEIRO")) {
-                navigate("/enfermagem", { replace: true });
-            } else if (perfilNome.includes("MEDICO") || perfilNome.includes("CLÍNICO")) {
-                navigate("/medico", { replace: true });
-            } else if (perfilNome.includes("FARMAC") || perfilNome.includes("FARMÁCIA")) {
-                navigate("/farmacia", { replace: true });
-            } else {
-                navigate("/dashboard", { replace: true });
-            }
+            navigate(hasAdmin ? "/admin" : "/dashboard", { replace: true });
         } catch (err) {
             console.error("Erro ao selecionar contexto:", err);
             const detalhe = err.response?.data?.erro || err.response?.data?.error || err.message;

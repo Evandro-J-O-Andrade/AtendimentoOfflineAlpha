@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import axios from "axios";
 import { useApp } from "../context/AppContext";
+import { executeRuntimeAction } from "../services/runtimeService";
 
 export default function RuntimeActionRouter() {
   const { acao } = useParams();
-  const { contexto, permissoes, isAuthenticated, getToken } = useApp();
+  const { contexto, permissoes, isAuthenticated } = useApp();
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -24,22 +24,17 @@ export default function RuntimeActionRouter() {
     const executar = async () => {
       if (!contexto || !acao) return;
       try {
-        const token = getToken();
-        const res = await axios.post(
-          "/api/runtime/dispatch",
-          { acao: acao.toUpperCase(), payload: {} },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setDados(res.data);
+        const res = await executeRuntimeAction(acao, {}, contexto?.id || contexto?.id_contexto || contexto?.id_unidade);
+        setDados(res);
       } catch (err) {
         console.error(err);
-        setErro(err.response?.data?.erro || err.message || "Erro ao executar ação");
+        setErro(err?.response?.data?.erro || err?.message || "Erro ao executar ação");
       } finally {
         setCarregando(false);
       }
     };
     executar();
-  }, [acao, contexto, getToken]);
+  }, [acao, contexto]);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!contexto) return <Navigate to="/contexto" replace />;

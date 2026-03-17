@@ -4,6 +4,19 @@ import { fetchSession } from "../services/sessionService";
 
 const AppContext = createContext(null);
 
+const normalizePermissoes = (perms) =>
+  (perms || []).map((p) =>
+    typeof p === "string"
+      ? {
+          codigo: p,
+          acao_frontend: p.toLowerCase(),
+          nome: p,
+          grupo_menu: "Geral",
+          ativo: 1,
+        }
+      : p
+  );
+
 export function AppProvider({ children }) {
   const [estado, setEstado] = useState({
     usuario: null,
@@ -30,7 +43,7 @@ export function AppProvider({ children }) {
           contexto: sessaoApi.contexto,
           contextosDisponiveis: sessaoApi.contextos || [],
           sessao: sessaoApi.contexto?.id_sessao_usuario || null,
-          permissoes: sessaoApi.permissoes || [],
+          permissoes: normalizePermissoes(sessaoApi.permissoes),
           isAuthenticated: true,
           loading: false,
         }));
@@ -43,7 +56,7 @@ export function AppProvider({ children }) {
         sessao: dados.sessao || dados.contexto?.id_sessao_usuario || null,
         contexto: dados.contexto,
         contextosDisponiveis: dados.contextos || [],
-        permissoes: dados.permissoes || [],
+        permissoes: normalizePermissoes(dados.permissoes),
         isAuthenticated: !!dados.token,
         loading: false,
       }));
@@ -59,7 +72,7 @@ export function AppProvider({ children }) {
       sessao: sessao.contexto?.id_sessao_usuario || sessao.sessao,
       contexto: sessao.contexto,
       contextosDisponiveis: sessao.contextos || prev.contextosDisponiveis,
-      permissoes: sessao.permissoes || [],
+      permissoes: normalizePermissoes(sessao.permissoes),
       isAuthenticated: true,
       loading: false,
     }));
@@ -67,6 +80,17 @@ export function AppProvider({ children }) {
 
   const login = useCallback(async (loginValue, senha, opcoes = {}) => {
     const resultado = await loginService.login({ usuario: loginValue, senha, ...opcoes });
+
+    // Caso precise selecionar contexto
+    if (!resultado.sucesso && resultado.erro === "SELECIONE_CONTEXTO") {
+      sessionStorage.setItem("pending_context", JSON.stringify({
+        usuario: loginValue,
+        senha,
+        contextos: resultado.contextos || []
+      }));
+      return { sucesso: false, erro: "SELECIONE_CONTEXTO", contextos: resultado.contextos || [] };
+    }
+
     if (resultado.sucesso) {
       const sessaoApi = await fetchSession().catch(() => null);
       hydrateSession(sessaoApi || resultado);
@@ -120,7 +144,7 @@ export function AppProvider({ children }) {
     logout,
     selecionarContexto,
     setContextosDisponiveis: (ctxs) => setEstado((prev) => ({ ...prev, contextosDisponiveis: ctxs || [] })),
-    setPermissoes: (perms) => setEstado((prev) => ({ ...prev, permissoes: perms || [] })),
+    setPermissoes: (perms) => setEstado((prev) => ({ ...prev, permissoes: normalizePermissoes(perms || []) })),
     hasPermission,
     getToken,
   };

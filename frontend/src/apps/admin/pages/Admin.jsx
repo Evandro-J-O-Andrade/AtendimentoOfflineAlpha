@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api/api";
 import { useApp } from "../../../context/AppContext";
 import "./Admin.css";
 
@@ -15,20 +15,16 @@ export default function Admin() {
     useEffect(() => {
         async function fetchAdminData() {
             try {
-                const token = getToken();
-                const res = await axios.get("/api/painel/admin", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get("/painel/admin");
                 setAdminData(res.data);
             } catch (err) {
+                const apiErr = err?.response?.data?.error || err?.response?.data?.erro;
+                if (apiErr === "TOKEN_EXPIRADO") {
+                    logout();
+                    navigate("/login", { replace: true });
+                    return;
+                }
                 setError(err.message);
-                // fallback mock
-                setAdminData({
-                    usuario: { nome: usuario?.login || "Administrador", perfil: "ADMIN" },
-                    unidades: 1,
-                    usuarios: 10,
-                    senhas_hoje: 25
-                });
             } finally {
                 setLoading(false);
             }

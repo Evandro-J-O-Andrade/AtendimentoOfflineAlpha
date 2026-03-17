@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { executarAcao } from "../services/runtimeService";
+import { executeRuntimeAction } from "../services/runtimeService";
 
 /**
  * Menu Dinâmico - Renderiza o menu baseado nas permissões do banco
@@ -24,7 +24,7 @@ export default function MenuDinamico({ menu, onAction, ativo }) {
     // Se tem ação definida, executa via dispatcher
     if (item.acao) {
       try {
-        const resultado = await executarAcao(item.acao, {});
+        const resultado = await executeRuntimeAction(item.acao, {});
         if (resultado.sucesso && onAction) {
           onAction(item.acao, resultado);
         }
@@ -63,11 +63,14 @@ export default function MenuDinamico({ menu, onAction, ativo }) {
   return (
     <nav className="menu-dinamico">
       {Object.entries(menu).map(([grupo, itens]) => (
-        <div key={grupo} className="menu-grupo">
+        <div key={`grupo-${grupo}`} className="menu-grupo">
           <h3 className="menu-titulo-grupo">{grupo}</h3>
           <ul className="menu-lista">
-            {itens.map((item) => (
-              <li key={item.codigo} className="menu-item">
+            {itens.map((item, idx) => (
+              <li
+                key={`${grupo}-${item.codigo || item.url || item.nome || "item"}-${idx}`}
+                className="menu-item"
+              >
                 <button
                   className={`menu-botao ${ativo === item.codigo ? "ativo" : ""}`}
                   onClick={() => handleClick(item)}

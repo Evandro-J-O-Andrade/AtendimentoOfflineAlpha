@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-const API_BASE = "http://localhost:3001/api";
+import api from "../api/api";
 
 /**
  * Hook para fila em tempo real com cache offline
@@ -27,13 +25,9 @@ export const useFilaRealtime = (runtime) => {
 
     const fetchFila = async () => {
       try {
-        const token = localStorage.getItem("token_his");
-        const response = await axios.get(
-          `${API_BASE}/fila/atual`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { id_local_operacional }
-          }
+        const response = await api.get(
+          `/fila/atual`,
+          { params: { id_local_operacional } }
         );
         
         setFila(response.data);

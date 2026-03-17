@@ -33,16 +33,18 @@ export default function Login() {
     setError(null);
 
     try {
-      const sessao = await loginService.login({ usuario, senha });
+      const sessao = await setAuthContext(usuario, senha);
 
       if (!sessao?.sucesso) {
         setError(traduzirErro(sessao?.erro));
         setContextosDisponiveis(sessao?.contextos || []);
         setLoading(false);
+        if (sessao?.erro === "SELECIONE_CONTEXTO") {
+          navigate("/contexto", { replace: true });
+        }
         return;
       }
 
-      setAuthContext(sessao);
       setContextosDisponiveis(sessao.contextos || []);
 
       const ctxUnico = sessao.contextos?.length === 1 ? sessao.contextos[0] : null;

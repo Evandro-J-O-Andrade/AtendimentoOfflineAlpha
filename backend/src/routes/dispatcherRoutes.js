@@ -109,12 +109,8 @@ const validarSessao = async (req, res, next) => {
     }
 };
 
-/**
- * POST /api/runtime/dispatch
- * Endpoint central para todas as ações do sistema
- * Executa a SP correta com base na ação
- */
-router.post("/dispatch", authMiddleware, async (req, res) => {
+// Handler reutilizável para execução única
+async function executarAcao(req, res) {
     const connection = await db.getConnection();
     
     try {
@@ -177,7 +173,19 @@ router.post("/dispatch", authMiddleware, async (req, res) => {
     } finally {
         connection.release();
     }
-});
+}
+
+/**
+ * POST /api/runtime
+ * Endpoint principal único: React -> Node -> sp_master_dispatcher_runtime
+ */
+router.post("/", authMiddleware, executarAcao);
+
+/**
+ * POST /api/runtime/dispatch
+ * Alias legado para compatibilidade
+ */
+router.post("/dispatch", authMiddleware, executarAcao);
 
 /**
  * POST /api/runtime/dispatch/batch

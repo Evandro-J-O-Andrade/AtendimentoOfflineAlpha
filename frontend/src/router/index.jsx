@@ -17,6 +17,24 @@ import Farmacia from "../apps/operacional/pages/farmacia/Farmacia.jsx";
 import Totem from "../apps/totem/pages/Totem.jsx";
 import Painel from "../apps/painel/pages/Painel.jsx";
 
+// Páginas de novos setores
+import Laboratorio from "../apps/operacional/pages/laboratorio/Laboratorio.jsx";
+import Internacao from "../apps/operacional/pages/internacao/Internacao.jsx";
+import Estoque from "../apps/operacional/pages/estoque/Estoque.jsx";
+
+// Novas páginas de setores
+import Ambulancia from "../apps/operacional/pages/ambulancia/Ambulancia.jsx";
+import Remocao from "../apps/operacional/pages/remocao/Remocao.jsx";
+import Manutencao from "../apps/operacional/pages/manutencao/Manutencao.jsx";
+import Gasoterapia from "../apps/operacional/pages/gasoterapia/Gasoterapia.jsx";
+import AssistenciaSocial from "../apps/operacional/pages/assistencia_social/AssistenciaSocial.jsx";
+import Faturamento from "../apps/operacional/pages/faturamento/Faturamento.jsx";
+import Cat from "../apps/operacional/pages/cat/Cat.jsx";
+import Obito from "../apps/operacional/pages/obito/Obito.jsx";
+import Pdv from "../apps/operacional/pages/pdv/Pdv.jsx";
+import Nutricao from "../apps/operacional/pages/nutricao/Nutricao.jsx";
+import Interconsulta from "../apps/operacional/pages/interconsulta/Interconsulta.jsx";
+
 // Guardas de segurança
 import SecurityGuard from "../apps/operacional/security/SecurityGuard.jsx";
 import RuntimeActionRouter from "../runtime/RuntimeActionRouter.jsx";
@@ -115,8 +133,126 @@ export default function AppRouter() {
                     }
                 />
 
+                {/* Rotas de novos setores */}
+                <Route
+                    path="/laboratorio"
+                    element={
+                        <SecurityGuard>
+                            <Laboratorio />
+                        </SecurityGuard>
+                    }
+                />
+
+                <Route
+                    path="/internacao"
+                    element={
+                        <SecurityGuard>
+                            <Internacao />
+                        </SecurityGuard>
+                    }
+                />
+
+                <Route
+                    path="/estoque"
+                    element={
+                        <SecurityGuard>
+                            <Estoque />
+                        </SecurityGuard>
+                    }
+                />
+
                 {/* Rota de painel de chamadas */}
                 <Route path="/painel-chamadas" element={<Painel />} />
+
+                {/* Novas rotas de setores */}
+                <Route
+                    path="/ambulancia"
+                    element={
+                        <SecurityGuard acao="painel_ambulancia">
+                            <Ambulancia />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/remocao"
+                    element={
+                        <SecurityGuard acao="painel_remocao">
+                            <Remocao />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/manutencao"
+                    element={
+                        <SecurityGuard acao="painel_manutencao">
+                            <Manutencao />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/gasoterapia"
+                    element={
+                        <SecurityGuard acao="painel_gasoterapia">
+                            <Gasoterapia />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/assistencia-social"
+                    element={
+                        <SecurityGuard acao="painel_assistencia_social">
+                            <AssistenciaSocial />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/faturamento"
+                    element={
+                        <SecurityGuard acao="painel_faturamento">
+                            <Faturamento />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/cat"
+                    element={
+                        <SecurityGuard acao="painel_cat">
+                            <Cat />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/obito"
+                    element={
+                        <SecurityGuard acao="painel_obito">
+                            <Obito />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/pdv"
+                    element={
+                        <SecurityGuard acao="painel_pdv">
+                            <Pdv />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/nutricao"
+                    element={
+                        <SecurityGuard acao="painel_nutricao">
+                            <Nutricao />
+                        </SecurityGuard>
+                    }
+                />
+                <Route
+                    path="/interconsulta"
+                    element={
+                        <SecurityGuard acao="painel_interconsulta">
+                            <Interconsulta />
+                        </SecurityGuard>
+                    }
+                />
 
                 {/* Painel admin */}
                 <Route

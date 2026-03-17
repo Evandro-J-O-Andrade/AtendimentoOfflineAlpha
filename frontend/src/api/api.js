@@ -15,27 +15,30 @@ const api = axios.create({
 // Interceptor para adicionar token JWT em todas as requisições
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token_his");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Interceptor para tratar erros globais
+// Interceptor para tratar erros globais (expiração/401)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado ou inválido
-      localStorage.removeItem("token");
-      localStorage.removeItem("sessao");
-      window.location.href = "/login";
+    const status = error?.response?.status;
+    const code = error?.response?.data?.error || error?.response?.data?.erro;
+
+    if (status === 401 || code === "TOKEN_EXPIRADO") {
+      localStorage.removeItem("token_his");
+      localStorage.removeItem("hispa_auth");
+      sessionStorage.removeItem("pending_context");
+      window.location.replace("/login");
+      return Promise.reject(error);
     }
+
     return Promise.reject(error);
   }
 );
@@ -45,7 +48,7 @@ api.interceptors.response.use(
  * @param {string} url 
  * @returns {Promise<any>}
  */
-export const apiGet = (url) => api.get(url).then((res) => res.data);
+export const apiGet = (url, config) => api.get(url, config).then((res) => res.data);
 
 /**
  * POST request
@@ -53,7 +56,7 @@ export const apiGet = (url) => api.get(url).then((res) => res.data);
  * @param {any} data 
  * @returns {Promise<any>}
  */
-export const apiPost = (url, data) => api.post(url, data).then((res) => res.data);
+export const apiPost = (url, data, config) => api.post(url, data, config).then((res) => res.data);
 
 /**
  * PUT request
@@ -61,13 +64,13 @@ export const apiPost = (url, data) => api.post(url, data).then((res) => res.data
  * @param {any} data 
  * @returns {Promise<any>}
  */
-export const apiPut = (url, data) => api.put(url, data).then((res) => res.data);
+export const apiPut = (url, data, config) => api.put(url, data, config).then((res) => res.data);
 
 /**
  * DELETE request
  * @param {string} url 
  * @returns {Promise<any>}
  */
-export const apiDelete = (url) => api.delete(url).then((res) => res.data);
+export const apiDelete = (url, config) => api.delete(url, config).then((res) => res.data);
 
 export default api;

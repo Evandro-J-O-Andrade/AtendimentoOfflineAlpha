@@ -9,11 +9,16 @@ export default function SecurityGuard({ children, acao }) {
   if (!contexto) return <Navigate to="/contexto" replace />;
 
   if (acao) {
-    const tem = (permissoes || []).some(
-      (p) =>
-        String(p.acao_frontend || "").toLowerCase() ===
-        String(acao).toLowerCase()
-    );
+    const alvo = String(acao).toLowerCase();
+    const tem = (permissoes || []).some((p) => {
+      const acaoFrontend = String(p.acao_frontend || "").toLowerCase();
+      const codigo = String(p.codigo || "").toUpperCase();
+
+      if (acaoFrontend === alvo) return true;
+      // Permissão vinda como "ADMIN" deve liberar painel_admin
+      if (alvo === "painel_admin" && codigo === "ADMIN") return true;
+      return false;
+    });
     if (!tem) {
       return (
         <div style={{ padding: 24, color: "#b91c1c" }}>
