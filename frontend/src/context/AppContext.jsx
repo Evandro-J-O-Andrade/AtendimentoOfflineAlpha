@@ -79,7 +79,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const login = useCallback(async (loginValue, senha, opcoes = {}) => {
-    const resultado = await loginService.login({ usuario: loginValue, senha, ...opcoes });
+    const resultado = await loginService.login({ login: loginValue, senha, ...opcoes });
 
     // Caso precise selecionar contexto
     if (!resultado.sucesso && resultado.erro === "SELECIONE_CONTEXTO") {

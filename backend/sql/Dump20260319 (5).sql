@@ -993,18 +993,18 @@ DROP TABLE IF EXISTS `atendimento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento` (
   `id_atendimento` bigint NOT NULL AUTO_INCREMENT,
-  `protocolo` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `protocolo` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `id_ffa` bigint DEFAULT NULL,
   `id_pessoa` bigint NOT NULL,
   `id_unidade` int DEFAULT NULL,
   `id_senha` bigint DEFAULT NULL,
-  `status_atendimento` enum('ABERTO','EM_ATENDIMENTO','EM_OBSERVACAO','INTERNADO','FINALIZADO','NAO_ATENDIDO','RETORNO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `status_atendimento` enum('ABERTO','EM_ATENDIMENTO','EM_OBSERVACAO','INTERNADO','FINALIZADO','NAO_ATENDIDO','RETORNO') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `id_local_atual` bigint DEFAULT NULL,
   `id_sala_atual` int DEFAULT NULL,
   `id_especialidade` int DEFAULT NULL,
   `data_abertura` datetime DEFAULT CURRENT_TIMESTAMP,
   `data_fechamento` datetime DEFAULT NULL,
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ABERTO',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'ABERTO',
   PRIMARY KEY (`id_atendimento`),
   UNIQUE KEY `protocolo` (`protocolo`),
   KEY `id_pessoa` (`id_pessoa`),
@@ -1018,7 +1018,7 @@ CREATE TABLE `atendimento` (
   CONSTRAINT `atendimento_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`),
   CONSTRAINT `atendimento_ibfk_3` FOREIGN KEY (`id_local_atual`) REFERENCES `local_atendimento` (`id_local`),
   CONSTRAINT `atendimento_ibfk_4` FOREIGN KEY (`id_sala_atual`) REFERENCES `sala` (`id_sala`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1828,22 +1828,21 @@ DROP TABLE IF EXISTS `auditoria_evento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auditoria_evento` (
   `id_auditoria` bigint NOT NULL AUTO_INCREMENT,
-  `id_sessao_usuario` bigint DEFAULT NULL,
-  `entidade` varchar(80) NOT NULL,
-  `id_entidade` bigint DEFAULT NULL,
-  `acao` varchar(80) NOT NULL,
-  `detalhe` text,
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  `id_usuario` bigint DEFAULT NULL,
-  `tabela` varchar(50) DEFAULT NULL,
-  `id_usuario_espelho` bigint DEFAULT NULL COMMENT 'Denormalização para performance',
+  `id_usuario` bigint NOT NULL,
+  `id_sessao_usuario` bigint NOT NULL,
+  `dominio` varchar(50) NOT NULL,
+  `tipo_evento` varchar(100) NOT NULL,
+  `id_referencia` bigint DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  `metadata` json DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL,
+  `status` varchar(20) DEFAULT 'OK',
   PRIMARY KEY (`id_auditoria`),
-  KEY `idx_aud_sessao` (`id_sessao_usuario`),
-  KEY `idx_aud_entidade` (`entidade`,`id_entidade`),
-  KEY `idx_auditoria_sessao_data` (`id_sessao_usuario`,`criado_em`),
-  KEY `idx_auditoria_entidade` (`entidade`,`id_entidade`,`criado_em`),
-  CONSTRAINT `fk_aud_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=290 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_usuario` (`id_usuario`),
+  KEY `idx_sessao` (`id_sessao_usuario`),
+  KEY `idx_dominio_tipo` (`dominio`,`tipo_evento`),
+  KEY `idx_referencia` (`id_referencia`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Auditoria de eventos: rastreia tudo que acontece no sistema';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1852,7 +1851,6 @@ CREATE TABLE `auditoria_evento` (
 
 LOCK TABLES `auditoria_evento` WRITE;
 /*!40000 ALTER TABLE `auditoria_evento` DISABLE KEYS */;
-INSERT INTO `auditoria_evento` VALUES (5,NULL,'sessao_usuario',123,'SESSAO_REVOGADA','Logout forçado via SQL (sem sessão ativa)','2026-02-13 04:23:51',7,'sessao_usuario',7),(6,2,'sessao_usuario',2,'SESSAO_ABERTA','Sessão aberta para usuario=5 sistema=1 unidade=2 local=1','2026-02-13 05:10:01',5,'sessao_usuario',5),(7,2,'sql',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=(n/a) | ERRNO=(n/a) | MSG=(n/a) | CTX=Falha ao emitir senha','2026-02-13 05:34:23',5,'auditoria_evento',5),(8,2,'SQL',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=42000 | ERRNO=1305 | MSG=PROCEDURE pronto_atendimento.sp_assert_true does not exist | CTX=Falha ao emitir senha','2026-02-13 06:08:14',NULL,NULL,NULL),(9,2,'SQL',NULL,'ERRO_SQL','ROTINA=sp_senha_emitir | SQLSTATE=42000 | ERRNO=1305 | MSG=PROCEDURE pronto_atendimento.sp_assert_true does not exist | CTX=Falha ao emitir senha','2026-02-13 06:15:18',NULL,NULL,NULL),(10,2,'SENHA',3,'EMITIR','codigo=A001 | origem=TOTEM | tipo=CLINICO | lane=ADULTO | local=1','2026-02-13 06:17:42',5,'senhas',5),(11,3,'sessao_usuario',3,'SESSAO_ABERTA','Sessão aberta para usuario=5 sistema=1 unidade=2 local=1','2026-02-13 06:19:13',5,'sessao_usuario',5),(12,3,'SENHA',4,'EMITIR','codigo=A002 | origem=TOTEM | tipo=CLINICO | lane=ADULTO | local=1','2026-02-13 06:19:25',5,'senhas',5),(13,3,'SENHA',3,'CHAMAR','codigo=A001 | local=1 | lane=ADULTO','2026-02-13 06:19:40',5,'senhas',5),(14,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'inicio_complementacao_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-13 06:37:56',NULL,NULL,NULL),(15,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_complementar_e_abrir_ffa | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'s.tipo\' in \'field list\' | CTX=Falha ao complementar e abrir FFA','2026-02-13 06:38:13',NULL,NULL,NULL),(16,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=45000 | ERRNO=1644 | MSG=[NOT_FOUND] Falha de asserção. | CTX=Falha ao encaminhar (fila_operacional)','2026-02-13 06:38:31',NULL,NULL,NULL),(18,3,'SENHA',4,'INICIAR_COMPLEMENTACAO','codigo=A002 | local_operacional=1','2026-02-15 03:36:47',5,'senhas',5),(19,3,'SENHA',3,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 03:38:24',5,'senhas',5),(20,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_complementar_e_abrir_ffa | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'criado_em\' in \'field list\' | CTX=Falha ao complementar e abrir FFA','2026-02-15 03:58:23',NULL,NULL,NULL),(21,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'atualizado_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-15 04:11:00',NULL,NULL,NULL),(22,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_iniciar_complementacao | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'atualizado_em\' in \'field list\' | CTX=Falha ao iniciar complementação','2026-02-15 04:11:21',NULL,NULL,NULL),(23,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:24:39',5,'senhas',5),(24,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:27:57',5,'senhas',5),(25,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:30:13',5,'senhas',5),(26,3,'SENHA',1,'INICIAR_COMPLEMENTACAO','codigo=A001 | local_operacional=1','2026-02-15 04:31:10',5,'senhas',5),(27,3,'PESSOA',34,'CRIAR','nome=PACIENTE TESTE','2026-02-15 04:31:10',5,'pessoa',5),(28,3,'ATENDIMENTO',13,'ABRIR','protocolo=GPAT-20260215-0000000001|id_pessoa=34|id_senha=1','2026-02-15 04:31:10',5,'atendimento',5),(29,3,'FFA',12,'ABRIR','gpat=GPAT-20260215-0000000001|id_paciente=8|id_senha=1','2026-02-15 04:31:10',5,'ffa',5),(30,3,'SENHA',1,'COMPLEMENTAR_E_ABRIR_FFA','codigo=A001|id_ffa=12|id_paciente=8','2026-02-15 04:31:10',5,'senhas',5),(31,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=42S22 | ERRNO=1054 | MSG=Unknown column \'fo.status\' in \'where clause\' | CTX=Falha ao encaminhar','2026-02-15 04:56:44',NULL,NULL,NULL),(32,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_painel_filtro_locais_seed | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao seedar filtro de locais do painel','2026-02-15 05:49:12',NULL,NULL,NULL),(33,3,'SQL',NULL,'ERRO_SQL','ROTINA=sp_painel_filtro_locais_seed | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao seedar filtro de locais do painel','2026-02-15 05:49:20',NULL,NULL,NULL),(34,3,'PAINEL',1,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(35,3,'PAINEL',2,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(36,3,'PAINEL',78,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(37,3,'PAINEL',150,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:06:19',5,'painel_config',5),(38,3,'PAINEL',1,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(39,3,'PAINEL',2,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(40,3,'PAINEL',23,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(41,3,'PAINEL',247,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(42,3,'PAINEL',24,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(43,3,'PAINEL',7,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(44,3,'PAINEL',221,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(45,3,'PAINEL',78,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(46,3,'PAINEL',79,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(47,3,'PAINEL',150,'CONFIG_SET','chave=FILTRO_LOCAIS_CODIGOS_JSON | tipo=JSON','2026-02-15 06:26:42',5,'painel_config',5),(48,52,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`)) | CTX=Falha na rotina','2026-03-09 05:28:24',NULL,NULL,NULL),(49,52,'SQL',NULL,'ERRO_SQL','ROTINA=sp_triagem_finalizar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai | CTX=Falha na rotina','2026-03-09 05:28:24',NULL,NULL,NULL),(50,53,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\' | CTX=Falha na rotina','2026-03-09 05:50:35',NULL,NULL,NULL),(51,53,'SQL',NULL,'ERRO_SQL','ROTINA=sp_medico_encaminhar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI | CTX=Falha na rotina','2026-03-09 05:50:35',NULL,NULL,NULL),(52,53,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`)) | CTX=Falha na rotina','2026-03-09 05:51:00',NULL,NULL,NULL),(53,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\' | CTX=Falha na rotina','2026-03-09 06:17:54',NULL,NULL,NULL),(54,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_medico_encaminhar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI | CTX=Falha na rotina','2026-03-09 06:17:54',NULL,NULL,NULL),(55,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`)) | CTX=Falha na rotina','2026-03-09 06:17:56',NULL,NULL,NULL),(56,54,'SQL',NULL,'ERRO_SQL','ROTINA=sp_medico_finalizar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai | CTX=Falha na rotina','2026-03-09 06:17:56',NULL,NULL,NULL),(57,57,'SQL',NULL,'ERRO_SQL','ROTINA=sp_recepcao_encaminhar_ffa | SQLSTATE=42000 | ERRNO=1318 | MSG=Incorrect number of arguments for PROCEDURE pronto_atendimento.sp_operacao_encaminhar; expected 3, got 4 | CTX=Falha ao encaminhar FFA','2026-03-09 06:59:24',NULL,NULL,NULL),(58,57,'SQL',NULL,'ERRO_SQL','ROTINA=sp_estoque_movimento_criar | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao criar movimento','2026-03-09 07:02:29',NULL,NULL,NULL),(59,57,'SQL',NULL,'ERRO_SQL','ROTINA=sp_estoque_movimento_item_add | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao inserir item movimento','2026-03-09 07:02:31',NULL,NULL,NULL),(60,58,'SQL',NULL,'ERRO_SQL','ROTINA=sp_estoque_movimento_criar | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao criar movimento','2026-03-10 21:36:22',NULL,NULL,NULL),(61,59,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`)) | CTX=Falha na rotina','2026-03-10 21:42:15',NULL,NULL,NULL),(62,59,'SQL',NULL,'ERRO_SQL','ROTINA=sp_triagem_finalizar | SQLSTATE=45000 | ERRNO=1644 | MSG=[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai | CTX=Falha na rotina','2026-03-10 21:42:15',NULL,NULL,NULL),(63,59,'SQL',NULL,'ERRO_SQL','ROTINA=sp_fila_chamar_proxima | SQLSTATE=(n/a) | ERRNO=0 | MSG=(n/a) | CTX=Falha ao chamar próxima fila','2026-03-10 21:42:26',NULL,NULL,NULL),(64,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 21:38:14',1,NULL,1),(65,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 21:38:17',1,NULL,1),(66,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 21:38:23',1,NULL,1),(67,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 21:38:37',1,NULL,1),(68,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 21:40:24',1,NULL,1),(69,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 21:42:38',1,NULL,1),(70,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 21:42:56',1,NULL,1),(71,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:07:15',1,NULL,1),(72,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:08:02',1,NULL,1),(73,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:12:04',1,NULL,1),(74,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:13:43',1,NULL,1),(75,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:14:13',1,NULL,1),(76,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:14:35',NULL,NULL,NULL),(77,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:14:38',NULL,NULL,NULL),(78,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:15:17',NULL,NULL,NULL),(79,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:17:20',NULL,NULL,NULL),(80,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:17:21',NULL,NULL,NULL),(81,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário temporariamente bloqueado\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:17:47',NULL,NULL,NULL),(82,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:18:04',1,NULL,1),(83,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:19:05',1,NULL,1),(84,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:20:20',1,NULL,1),(85,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:22:09',1,NULL,1),(86,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:22:37',1,NULL,1),(87,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:23:46',1,NULL,1),(88,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:25:37',1,NULL,1),(89,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:27:05',1,NULL,1),(90,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:28:12',1,NULL,1),(91,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:31:44',1,NULL,1),(92,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:33:48',1,NULL,1),(93,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:34:56',1,NULL,1),(94,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:35:02',1,NULL,1),(95,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:35:26',1,NULL,1),(96,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:35:40',1,NULL,1),(97,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:35:50',1,NULL,1),(98,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-14 22:37:50',NULL,NULL,NULL),(99,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:38:44',1,NULL,1),(100,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:38:56',NULL,NULL,NULL),(101,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:39:45',NULL,NULL,NULL),(102,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:39:55',1,NULL,1),(103,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:41:21',1,NULL,1),(104,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:41:50',1,NULL,1),(105,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-14 22:44:17',1,NULL,1),(106,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-14 22:44:52',1,NULL,1),(107,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:44:58',1,NULL,1),(108,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:45:07',1,NULL,1),(109,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário temporariamente bloqueado\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:45:24',NULL,NULL,NULL),(110,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:45:35',NULL,NULL,NULL),(111,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário temporariamente bloqueado\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-14 22:46:36',NULL,NULL,NULL),(112,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário temporariamente bloqueado\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:47:07',NULL,NULL,NULL),(113,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário temporariamente bloqueado\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-14 22:47:10',NULL,NULL,NULL),(114,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:49:39',1,NULL,1),(115,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:50:04',1,NULL,1),(116,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:50:11',1,NULL,1),(117,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:52:00',1,NULL,1),(118,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:52:07',1,NULL,1),(119,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 22:57:10',1,NULL,1),(120,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:00:32',1,NULL,1),(121,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:12:00',1,NULL,1),(122,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:19:41',1,NULL,1),(123,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:20:08',1,NULL,1),(124,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:20:34',NULL,NULL,NULL),(125,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:20:40',NULL,NULL,NULL),(126,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:20:48',NULL,NULL,NULL),(127,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:22:04',NULL,NULL,NULL),(128,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: recepcao.req\",\"contexto\":{\"usuario\":\"recepcao.req\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:27:50',NULL,NULL,NULL),(129,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:28:15',NULL,NULL,NULL),(130,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:28:25',1,NULL,1),(131,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:28:52',NULL,NULL,NULL),(132,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:30:46',1,NULL,1),(133,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:37:41',1,NULL,1),(134,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:38:10',1,NULL,1),(135,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:38:46',1,NULL,1),(136,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:39:06',1,NULL,1),(137,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:44:27',1,NULL,1),(138,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-14 23:48:01',1,NULL,1),(139,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-14 23:59:58',1,NULL,1),(140,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 00:00:08',1,NULL,1),(141,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-15 00:03:28',1,NULL,1),(142,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 00:06:20',1,NULL,1),(143,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-15 00:07:17',1,NULL,1),(144,NULL,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 00:09:39',1,NULL,1),(145,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: teste\",\"contexto\":{\"usuario\":\"teste\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-15 00:15:07',NULL,NULL,NULL),(146,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-15 00:57:06',1,NULL,1),(147,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 01:19:52',1,NULL,1),(148,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-15 02:10:30',NULL,NULL,NULL),(149,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6456\"}','2026-03-15 02:11:23',NULL,NULL,NULL),(150,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:47:12',NULL,NULL,NULL),(151,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:47:18',NULL,NULL,NULL),(152,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:47:20',NULL,NULL,NULL),(153,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:49:20',NULL,NULL,NULL),(154,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:49:28',NULL,NULL,NULL),(155,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:49:36',NULL,NULL,NULL),(156,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:51:49',NULL,NULL,NULL),(157,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Field \'uuid_sessao\' doesn\'t have a default value\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 02:59:04',NULL,NULL,NULL),(158,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'token_runtime\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:07:30',NULL,NULL,NULL),(159,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'token_runtime\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:07:52',NULL,NULL,NULL),(160,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`sessao_usuario`, CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`))\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:25:43',NULL,NULL,NULL),(161,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`sessao_usuario`, CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`))\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:25:51',NULL,NULL,NULL),(162,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`sessao_usuario`, CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`))\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:51:20',NULL,NULL,NULL),(163,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`sessao_usuario`, CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`))\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:59:03',NULL,NULL,NULL),(164,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`sessao_usuario`, CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`))\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:59:32',NULL,NULL,NULL),(165,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`sessao_usuario`, CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`))\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 03:59:45',NULL,NULL,NULL),(166,7,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:01:05',1,NULL,1),(167,8,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:01:41',1,NULL,1),(168,9,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:03:46',1,NULL,1),(169,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:05:13',NULL,NULL,NULL),(170,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin01\",\"contexto\":{\"usuario\":\"admin01\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:05:18',NULL,NULL,NULL),(171,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: totem\",\"contexto\":{\"usuario\":\"totem\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:05:21',NULL,NULL,NULL),(172,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: totem\",\"contexto\":{\"usuario\":\"totem\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:05:26',NULL,NULL,NULL),(173,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: recepcao\",\"contexto\":{\"usuario\":\"recepcao\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:08:12',NULL,NULL,NULL),(174,10,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:08:27',1,NULL,1),(175,11,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:08:50',1,NULL,1),(176,12,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:12:14',1,NULL,1),(177,13,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:14:11',1,NULL,1),(178,14,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:14:29',1,NULL,1),(179,15,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:29:06',1,NULL,1),(180,16,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:29:28',1,NULL,1),(181,17,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:38:21',1,NULL,1),(182,18,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:43:29',1,NULL,1),(183,19,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:43:42',1,NULL,1),(184,20,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:44:05',1,NULL,1),(185,21,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:46:52',1,NULL,1),(186,22,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:52:07',1,NULL,1),(187,23,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:53:57',1,NULL,1),(188,24,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:53:57',1,NULL,1),(189,25,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:54:44',1,NULL,1),(190,26,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 04:59:02',1,NULL,1),(191,27,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:01:49',1,NULL,1),(192,28,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:04:31',1,NULL,1),(193,29,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:05:24',1,NULL,1),(194,30,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:07:02',1,NULL,1),(195,31,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:10:18',1,NULL,1),(196,32,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:11:06',1,NULL,1),(197,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:12:48',NULL,NULL,NULL),(198,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: totem\",\"contexto\":{\"usuario\":\"totem\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:12:54',NULL,NULL,NULL),(199,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: medico\",\"contexto\":{\"usuario\":\"medico\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:12:57',NULL,NULL,NULL),(200,33,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:13:08',1,NULL,1),(201,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:15:17',1,NULL,1),(202,34,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:19:33',1,NULL,1),(203,35,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:20:16',1,NULL,1),(204,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:23:34',1,NULL,1),(205,36,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:23:45',1,NULL,1),(206,37,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:24:05',1,NULL,1),(207,38,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:25:01',1,NULL,1),(208,39,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:28:23',1,NULL,1),(209,40,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:29:24',1,NULL,1),(210,41,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:29:42',1,NULL,1),(211,42,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:34:19',1,NULL,1),(212,43,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:47:06',1,NULL,1),(213,44,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:49:04',1,NULL,1),(214,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:49:33',1,NULL,1),(215,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:49:38',1,NULL,1),(216,45,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:49:51',1,NULL,1),(217,46,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:51:18',1,NULL,1),(218,47,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:52:40',1,NULL,1),(219,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:53:03',1,NULL,1),(220,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:53:09',1,NULL,1),(221,48,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 05:53:20',1,NULL,1),(222,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:15:31',1,NULL,1),(223,49,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:15:43',1,NULL,1),(224,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:29:40',1,NULL,1),(225,50,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:29:47',1,NULL,1),(226,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:40:32',1,NULL,1),(227,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:40:37',1,NULL,1),(228,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:40:44',1,NULL,1),(229,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:40:50',1,NULL,1),(230,51,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:41:11',1,NULL,1),(231,52,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:43:58',1,NULL,1),(232,53,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:47:51',1,NULL,1),(233,54,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:52:08',1,NULL,1),(234,55,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-15 06:55:27',1,NULL,1),(235,56,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:24:04',1,NULL,1),(236,57,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:25:25',1,NULL,1),(237,58,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:25:25',1,NULL,1),(238,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"EVANDRO.ANDRADE\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:35:13',1,NULL,1),(239,59,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:35:23',1,NULL,1),(240,60,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:38:51',1,NULL,1),(241,61,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:40:01',1,NULL,1),(242,62,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:43:03',1,NULL,1),(243,63,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:43:21',1,NULL,1),(244,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:52:03',1,NULL,1),(245,64,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:52:13',1,NULL,1),(246,65,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:54:35',1,NULL,1),(247,66,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:57:21',1,NULL,1),(248,67,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:57:44',1,NULL,1),(249,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Usuário inexistente: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:57:55',NULL,NULL,NULL),(250,68,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:58:12',1,NULL,1),(251,69,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:58:30',1,NULL,1),(252,NULL,'auth',NULL,'LOGIN_FAIL','{\"mensagem\":\"Senha incorreta\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:59:34',1,NULL,1),(253,70,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 22:59:43',1,NULL,1),(254,71,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 23:12:02',1,NULL,1),(255,72,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 23:35:42',1,NULL,1),(256,73,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 23:37:33',1,NULL,1),(257,74,'auth',NULL,'LOGIN_SUCCESS','{\"mensagem\":\"Login bem-sucedido\",\"contexto\":{\"id_sistema\":1,\"id_unidade\":1,\"id_local_operacional\":1},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 23:50:53',1,NULL,1),(258,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 23:55:07',NULL,NULL,NULL),(259,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-16 23:59:56',NULL,NULL,NULL),(260,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:09:48',NULL,NULL,NULL),(261,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:09:48',NULL,NULL,NULL),(262,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:09:48',NULL,NULL,NULL),(263,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:09:49',NULL,NULL,NULL),(264,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:10:00',NULL,NULL,NULL),(265,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:12:22',NULL,NULL,NULL),(266,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:13:13',NULL,NULL,NULL),(267,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:13:13',NULL,NULL,NULL),(268,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:13:37',NULL,NULL,NULL),(269,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:13:53',NULL,NULL,NULL),(270,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:14:47',NULL,NULL,NULL),(271,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:14:50',NULL,NULL,NULL),(272,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:14:55',NULL,NULL,NULL),(273,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:14:55',NULL,NULL,NULL),(274,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:14:57',NULL,NULL,NULL),(275,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:22:22',NULL,NULL,NULL),(276,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:23:00',NULL,NULL,NULL),(277,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:23:05',NULL,NULL,NULL),(278,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:24:49',NULL,NULL,NULL),(279,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:26:00',NULL,NULL,NULL),(280,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:26:25',NULL,NULL,NULL),(281,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 00:28:08',NULL,NULL,NULL),(282,NULL,'auth',NULL,'LOGIN_ERROR','{\"mensagem\":\"Unknown column \'id_local_operacional\' in \'field list\'\",\"contexto\":{\"usuario\":\"evandro.andrade\"},\"ip\":\"::ffff:127.0.0.1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"}','2026-03-17 01:49:01',NULL,NULL,NULL),(283,NULL,'auth',NULL,'CHECK_USER_FAIL','{\"mensagem\":\"Usuário não encontrado: admin\",\"contexto\":{\"usuario\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-17 01:50:37',NULL,NULL,NULL),(284,NULL,'auth',NULL,'LOGIN_ERRO','{\"mensagem\":\"Incorrect number of arguments for PROCEDURE pronto_atendimento.sp_master_login; expected 5, got 8\",\"contexto\":{\"login\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-17 01:53:24',NULL,NULL,NULL),(285,NULL,'auth',NULL,'LOGIN_ERRO','{\"mensagem\":\"Incorrect number of arguments for PROCEDURE pronto_atendimento.sp_master_login; expected 5, got 8\",\"contexto\":{\"login\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-17 01:56:36',NULL,NULL,NULL),(286,NULL,'auth',NULL,'LOGIN_ERRO','{\"mensagem\":\"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near \'SELECT @p_resultado AS resultado, @p_sucesso AS sucesso, @p_mensagem AS mensagem\' at line 1\",\"contexto\":{\"login\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-17 02:03:38',NULL,NULL,NULL),(287,NULL,'auth',NULL,'LOGIN_ERRO','{\"mensagem\":\"Unknown column \'u.senha\' in \'field list\'\",\"contexto\":{\"login\":\"admin\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-17 02:04:31',NULL,NULL,NULL),(288,NULL,'auth',NULL,'LOGIN_ERRO','{\"mensagem\":\"Unknown column \'u.senha\' in \'field list\'\",\"contexto\":{\"login\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-17 02:11:25',NULL,NULL,NULL),(289,NULL,'auth',NULL,'LOGIN_ERRO','{\"mensagem\":\"Unknown column \'evento\' in \'field list\'\",\"contexto\":{\"login\":\"evandro.andrade\"},\"ip\":\"::1\",\"user_agent\":\"curl/8.13.0\"}','2026-03-17 02:33:51',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `auditoria_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3655,15 +3653,16 @@ DROP TABLE IF EXISTS `erro_catalogo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `erro_catalogo` (
-  `code` varchar(80) NOT NULL,
-  `severidade` enum('ERRO','AVISO') NOT NULL DEFAULT 'ERRO',
-  `http_status` smallint NOT NULL DEFAULT '400',
-  `mensagem_pt` varchar(255) NOT NULL,
-  `ativo` tinyint NOT NULL DEFAULT '1',
-  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime DEFAULT NULL,
-  PRIMARY KEY (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id_erro_catalogo` bigint NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(20) NOT NULL,
+  `dominio` varchar(50) NOT NULL,
+  `descricao` varchar(255) NOT NULL,
+  `ativo` tinyint(1) NOT NULL DEFAULT '1',
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_erro_catalogo`),
+  UNIQUE KEY `codigo` (`codigo`),
+  KEY `idx_erro_catalogo_dominio` (`dominio`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3672,8 +3671,43 @@ CREATE TABLE `erro_catalogo` (
 
 LOCK TABLES `erro_catalogo` WRITE;
 /*!40000 ALTER TABLE `erro_catalogo` DISABLE KEYS */;
-INSERT INTO `erro_catalogo` VALUES ('ERRO_INTERNO','ERRO',500,'Erro interno do sistema.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_LOCAL_DESTINO_INVALIDO','ERRO',400,'Local de destino inválido.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SENHA_FORA_CONTEXTO','ERRO',403,'Senha fora do contexto atual (sistema/unidade).',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SENHA_FORA_LOCAL','ERRO',403,'Senha não pertence a este local/fila.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SENHA_NAO_ENCONTRADA','ERRO',404,'Senha não encontrada.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SENHA_SEM_VINCULO_FFA','ERRO',409,'Senha ainda não possui FFA vinculada.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SENHA_SEM_VINCULO_PACIENTE','ERRO',409,'Senha ainda não foi complementada na recepção (sem paciente).',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SENHA_STATUS_INVALIDO','ERRO',409,'Ação não permitida para o status atual.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SESSAO_INVALIDA','ERRO',401,'Sessão inválida ou expirada.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SESSAO_LOCAL_INVALIDO','ERRO',400,'Local operacional inválido ou inativo.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SESSAO_SISTEMA_INVALIDO','ERRO',400,'Sistema inválido ou inativo.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SESSAO_UNIDADE_INVALIDA','ERRO',400,'Unidade inválida ou inativa.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SESSAO_USUARIO_INVALIDO','ERRO',403,'Usuário inválido ou inativo.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59'),('ERRO_SQL','ERRO',500,'Erro interno do sistema.',1,'2026-02-01 06:30:30','2026-02-01 06:34:59');
+INSERT INTO `erro_catalogo` VALUES (1,'E001','SISTEMA','Sessão inválida ou expirada',1,'2026-03-19 06:37:29.807214'),(2,'E002','FILA','Transição de estado não permitida na matriz',1,'2026-03-19 06:37:29.807214'),(3,'E003','SEGURANCA','Usuário sem permissão para esta ação',1,'2026-03-19 06:37:29.807214'),(4,'E004','DISPATCHER','Erro crítico na execução dinâmica da Procedure',1,'2026-03-19 06:37:29.807214'),(5,'E005','ASSISTENCIAL','Paciente com atendimento já finalizado',1,'2026-03-19 06:37:29.807214');
 /*!40000 ALTER TABLE `erro_catalogo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `erro_evento`
+--
+
+DROP TABLE IF EXISTS `erro_evento`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `erro_evento` (
+  `id_erro` bigint NOT NULL AUTO_INCREMENT,
+  `id_sessao_usuario` bigint DEFAULT NULL,
+  `id_erro_catalogo` bigint DEFAULT NULL,
+  `uuid_transacao` char(36) DEFAULT NULL,
+  `dominio` varchar(50) DEFAULT NULL,
+  `acao` varchar(100) DEFAULT NULL,
+  `mensagem_erro` text NOT NULL,
+  `stack_trace` json DEFAULT NULL,
+  `payload_tentativa` json DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_erro`),
+  KEY `idx_erro_sessao` (`id_sessao_usuario`),
+  KEY `idx_erro_data` (`criado_em`),
+  KEY `fk_erro_catalogo` (`id_erro_catalogo`),
+  CONSTRAINT `fk_erro_catalogo` FOREIGN KEY (`id_erro_catalogo`) REFERENCES `erro_catalogo` (`id_erro_catalogo`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `erro_evento`
+--
+
+LOCK TABLES `erro_evento` WRITE;
+/*!40000 ALTER TABLE `erro_evento` DISABLE KEYS */;
+/*!40000 ALTER TABLE `erro_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -4817,6 +4851,40 @@ CREATE TABLE `evento_ffa` (
 LOCK TABLES `evento_ffa` WRITE;
 /*!40000 ALTER TABLE `evento_ffa` DISABLE KEYS */;
 /*!40000 ALTER TABLE `evento_ffa` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `evento_geral`
+--
+
+DROP TABLE IF EXISTS `evento_geral`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `evento_geral` (
+  `id_evento` bigint NOT NULL AUTO_INCREMENT,
+  `id_usuario` bigint NOT NULL,
+  `id_unidade` bigint NOT NULL,
+  `dominio` varchar(50) NOT NULL,
+  `tipo_evento` varchar(100) NOT NULL,
+  `id_referencia` bigint DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  `metadata` json DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL,
+  PRIMARY KEY (`id_evento`),
+  KEY `idx_usuario` (`id_usuario`),
+  KEY `idx_unidade` (`id_unidade`),
+  KEY `idx_dominio_tipo` (`dominio`,`tipo_evento`),
+  KEY `idx_referencia` (`id_referencia`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ledger canônico: registra todos eventos gerais do HIS/PA';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `evento_geral`
+--
+
+LOCK TABLES `evento_geral` WRITE;
+/*!40000 ALTER TABLE `evento_geral` DISABLE KEYS */;
+/*!40000 ALTER TABLE `evento_geral` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -6050,17 +6118,17 @@ CREATE TABLE `ffa` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `id_atendimento` bigint DEFAULT NULL,
   `id_paciente` bigint NOT NULL,
-  `gpat` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` enum('ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO','CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO','OBSERVACAO','MEDICACAO','AGUARDANDO_MEDICACAO','AGUARDANDO_RX','EM_RX','AGUARDANDO_COLETA','EM_COLETA','AGUARDANDO_ECG','EM_ECG','ALTA','TRANSFERENCIA','INTERNACAO','FINALIZADO','AGUARDANDO_RETORNO','EMERGENCIA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `layout` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gpat` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `status` enum('ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO','CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO','OBSERVACAO','MEDICACAO','AGUARDANDO_MEDICACAO','AGUARDANDO_RX','EM_RX','AGUARDANDO_COLETA','EM_COLETA','AGUARDANDO_ECG','EM_ECG','ALTA','TRANSFERENCIA','INTERNACAO','FINALIZADO','AGUARDANDO_RETORNO','EMERGENCIA') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `layout` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `id_usuario_criacao` bigint NOT NULL,
   `id_usuario_alteracao` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
-  `classificacao_manchester` enum('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `linha_assistencial` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `classificacao_manchester` enum('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `linha_assistencial` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `id_senha` bigint DEFAULT NULL,
-  `classificacao_cor` enum('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `classificacao_cor` enum('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `tempo_limite` datetime DEFAULT NULL,
   `data_criacao` datetime DEFAULT CURRENT_TIMESTAMP,
   `id_gpat` bigint DEFAULT NULL,
@@ -6071,7 +6139,7 @@ CREATE TABLE `ffa` (
   KEY `idx_ffa_status` (`status`),
   KEY `ix_ffa_id_gpat` (`id_gpat`),
   CONSTRAINT `fk_ffa_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6785,17 +6853,19 @@ DROP TABLE IF EXISTS `fluxo_transicao_matriz`;
 CREATE TABLE `fluxo_transicao_matriz` (
   `id_transicao` bigint NOT NULL AUTO_INCREMENT,
   `dominio_fluxo` varchar(50) NOT NULL,
-  `estado_origem` varchar(50) NOT NULL,
-  `estado_destino` varchar(50) NOT NULL,
+  `estado_origem` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `estado_destino` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `condicao_validacao` json NOT NULL,
   `penalidade_timeout` varchar(50) DEFAULT NULL,
   `permite_offline` tinyint(1) DEFAULT '1',
   `prioridade_execucao` int DEFAULT '1',
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `permite_automatico` tinyint DEFAULT '0',
+  `requer_confirmacao` tinyint DEFAULT '0',
   PRIMARY KEY (`id_transicao`),
   UNIQUE KEY `uk_transicao_fluxo` (`dominio_fluxo`,`estado_origem`,`estado_destino`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6804,6 +6874,7 @@ CREATE TABLE `fluxo_transicao_matriz` (
 
 LOCK TABLES `fluxo_transicao_matriz` WRITE;
 /*!40000 ALTER TABLE `fluxo_transicao_matriz` DISABLE KEYS */;
+INSERT INTO `fluxo_transicao_matriz` VALUES (1,'FILA','AGUARDANDO','CHAMADO','{\"requer_painel\": true, \"requer_sessao_ativa\": true, \"bloquear_se_cancelado\": true}',NULL,1,1,1,'2026-03-18 21:25:26.445335',0,0),(2,'FILA','CHAMADO','EM_ATENDIMENTO','{\"requer_sessao_ativa\": true}',NULL,1,1,1,'2026-03-18 21:25:26.445335',0,0),(3,'FILA','EM_ATENDIMENTO','CONCLUIDO','{\"requer_sessao_ativa\": true}',NULL,1,1,1,'2026-03-18 21:25:26.445335',0,0),(4,'FILA','AGUARDANDO','EVASAO','{\"requer_sessao_ativa\": true}',NULL,1,1,1,'2026-03-18 21:25:26.445335',0,0),(7,'FILA','AZUL','VERDE','{\"tempo_max\": 120, \"risco_resultante\": \"VERDE\"}',NULL,1,1,1,'2026-03-18 22:32:37.713421',0,0),(8,'FILA','VERDE','AMARELO','{\"tempo_max\": 60, \"risco_resultante\": \"AMARELO\"}',NULL,1,1,1,'2026-03-18 22:32:37.713421',0,0),(9,'FILA','AMARELO','LARANJA','{\"tempo_max\": 30, \"risco_resultante\": \"LARANJA\"}',NULL,1,1,1,'2026-03-18 22:32:37.713421',0,0),(10,'FILA','LARANJA','VERMELHO','{\"tempo_max\": 10, \"risco_resultante\": \"VERMELHO\"}',NULL,1,1,1,'2026-03-18 22:32:37.713421',0,0);
 /*!40000 ALTER TABLE `fluxo_transicao_matriz` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -8758,7 +8829,7 @@ CREATE TABLE `local` (
   KEY `idx_local_tipo` (`id_tipo_local`),
   CONSTRAINT `fk_local_tipo` FOREIGN KEY (`id_tipo_local`) REFERENCES `tipo_local` (`id_tipo_local`),
   CONSTRAINT `fk_local_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8767,6 +8838,7 @@ CREATE TABLE `local` (
 
 LOCK TABLES `local` WRITE;
 /*!40000 ALTER TABLE `local` DISABLE KEYS */;
+INSERT INTO `local` VALUES (1,1,1,'HOSPITAL','HOSPITAL CENTRAL','Hospital central',NULL,NULL,1,'2026-03-17 05:19:48.545358','2026-03-17 05:19:48.545358'),(2,1,2,'HC-TRI-01','Sala de Triagem',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.285627'),(3,1,3,'HC-MED-01','Consultório Médico 1',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.289226'),(4,1,3,'HC-MED-02','Consultório Médico 2',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.292803'),(5,1,4,'HC-ENF-A','Enfermaria A',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.295215'),(6,1,4,'HC-ENF-B','Enfermaria B',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.298372'),(7,1,5,'HC-EME-01','Sala de Emergência',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.301005'),(8,1,6,'HC-LAB-01','Laboratório',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.303238'),(9,1,7,'HC-FAR-01','Farmácia Central',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.305763'),(10,1,8,'HC-EST-01','Estoque Geral',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.307966'),(11,2,1,'UPA-REC-01','Recepção UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.310087'),(12,2,2,'UPA-TRI-01','Triagem UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.312598'),(13,2,5,'UPA-EME-01','Emergência UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.314920'),(14,2,7,'UPA-FAR-01','Farmácia UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.317352'),(15,1,9,'HC-AMB-01','Frota Ambulâncias',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.319702'),(16,1,13,'HC-NUT-01','Nutrição',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.321234'),(17,1,14,'HC-SOC-01','Assistência Social',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.322845'),(18,1,15,'HC-FAT-01','Faturamento',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.325211'),(19,1,16,'HC-CAT-01','CAT',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.326903'),(20,1,17,'HC-OBT-01','Serviço de Óbito',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.328897'),(21,1,18,'HC-PDV-01','PDV/Vendas',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.330434'),(22,1,19,'HC-GAS-01','Gasoterapia',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.332010'),(23,1,20,'HC-MAN-01','Manutenção',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.333580'),(24,1,12,'HC-ADM-01','Administração',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.336411');
 /*!40000 ALTER TABLE `local` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9022,7 +9094,7 @@ CREATE TABLE `login_tentativa` (
   KEY `idx_login_tentativa_usuario` (`id_usuario`),
   KEY `idx_login_tentativa_dispositivo` (`dispositivo_origem`),
   CONSTRAINT `fk_login_tentativa_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=326 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=355 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9031,7 +9103,7 @@ CREATE TABLE `login_tentativa` (
 
 LOCK TABLES `login_tentativa` WRITE;
 /*!40000 ALTER TABLE `login_tentativa` DISABLE KEYS */;
-INSERT INTO `login_tentativa` VALUES (325,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"local\": 1, \"motivo\": \"senha_invalida\", \"perfil\": 1, \"unidade\": 1}','2026-03-17 02:33:51.791824');
+INSERT INTO `login_tentativa` VALUES (325,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"local\": 1, \"motivo\": \"senha_invalida\", \"perfil\": 1, \"unidade\": 1}','2026-03-17 02:33:51.791824'),(326,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-18 23:35:02.867801'),(327,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:17:53.899340'),(328,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:18:11.174637'),(329,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:21:43.064339'),(330,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:22:23.671894'),(331,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:24:40.138020'),(332,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:26:57.827559'),(333,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:33:03.647368'),(334,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:34:47.922935'),(335,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:45:49.530441'),(336,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:46:27.426464'),(337,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:03:23.176693'),(338,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:32:30.353930'),(339,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:35:21.193754'),(340,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:38:20.941715'),(341,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:43:28.918931'),(342,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:51:54.563315'),(343,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:59:21.944160'),(344,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:07:58.857052'),(345,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:29:07.799726'),(346,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:01.385918'),(347,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:44.134117'),(348,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:39:04.870962'),(349,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:56:36.074630'),(350,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 04:20:56.795283'),(351,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:29:05.750402'),(352,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-19 05:46:18.668307'),(353,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:47:15.194814'),(354,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 06:47:43.612246');
 /*!40000 ALTER TABLE `login_tentativa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9942,15 +10014,15 @@ DROP TABLE IF EXISTS `paciente`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `paciente` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `uuid_paciente` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `hash_identidade` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `uuid_paciente` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `hash_identidade` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `id_pessoa` bigint NOT NULL,
-  `prontuario` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prontuario` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `data_cadastro` datetime DEFAULT CURRENT_TIMESTAMP,
-  `sexo` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sexo` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `data_nascimento` date DEFAULT NULL,
-  `nome` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `documento_principal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nome` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `documento_principal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `metadata_identidade` json DEFAULT NULL,
   `id_entidade` bigint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
@@ -9963,7 +10035,7 @@ CREATE TABLE `paciente` (
   KEY `idx_paciente_prontuario` (`id_entidade`,`prontuario`),
   CONSTRAINT `fk_paciente_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `paciente_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
-) ENGINE=InnoDB AUTO_INCREMENT=10029 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10029 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10275,6 +10347,40 @@ CREATE TABLE `painel_consumo_evento` (
 LOCK TABLES `painel_consumo_evento` WRITE;
 /*!40000 ALTER TABLE `painel_consumo_evento` DISABLE KEYS */;
 /*!40000 ALTER TABLE `painel_consumo_evento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `painel_evento_stream`
+--
+
+DROP TABLE IF EXISTS `painel_evento_stream`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `painel_evento_stream` (
+  `id_evento` bigint NOT NULL AUTO_INCREMENT,
+  `dominio` varchar(50) NOT NULL,
+  `tipo_evento` varchar(50) NOT NULL,
+  `id_referencia` bigint NOT NULL,
+  `id_painel` bigint DEFAULT NULL,
+  `id_lane` bigint DEFAULT NULL,
+  `id_local` bigint DEFAULT NULL,
+  `payload` json NOT NULL,
+  `processado` tinyint(1) DEFAULT '0',
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id_evento`),
+  KEY `idx_painel` (`id_painel`,`processado`),
+  KEY `idx_ref` (`id_referencia`),
+  KEY `idx_stream` (`processado`,`criado_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `painel_evento_stream`
+--
+
+LOCK TABLES `painel_evento_stream` WRITE;
+/*!40000 ALTER TABLE `painel_evento_stream` DISABLE KEYS */;
+/*!40000 ALTER TABLE `painel_evento_stream` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -10804,7 +10910,7 @@ CREATE TABLE `perfil` (
 
 LOCK TABLES `perfil` WRITE;
 /*!40000 ALTER TABLE `perfil` DISABLE KEYS */;
-INSERT INTO `perfil` VALUES (42,'ADMIN','Administrador','Perfil administrativo padrão','HIS/PA',1,'2026-03-15 04:01:01.967149');
+INSERT INTO `perfil` VALUES (2,'RECEPCAO','Recepcionista','Atendimento na recepção','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(3,'ENFERMAGEM','Enfermeiro','Triagem e enfermagem','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(4,'MEDICO','Médico','Atendimento médico','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(5,'FARMACIA','Farmacêutico','Dispensação de medicamentos','FARMACIA',1,'2026-03-17 06:46:37.000000'),(6,'LABORATORIO','Técnico de Laboratório','Análises laboratoriais','LABORATORIO',1,'2026-03-17 06:46:37.000000'),(7,'AUX_ENF','Auxiliar de Enfermagem','Apoio à enfermagem','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(8,'ESTOQUE','Estoquista','Gestão de estoque','ESTOQUE',1,'2026-03-17 06:46:37.000000'),(9,'AMBULANCIA','Técnico de Ambulância','Transporte de pacientes','AMBULANCIA',1,'2026-03-17 06:46:37.000000'),(10,'ASSIST_SOCIAL','Assistente Social','Serviço social','SOCIAL',1,'2026-03-17 06:46:37.000000'),(11,'NUTRICAO','Nutricionista','Nutrição e dietas','NUTRICAO',1,'2026-03-17 06:46:37.000000'),(12,'FATURAMENTO','Faturista','Faturamento','FATURAMENTO',1,'2026-03-17 06:46:37.000000'),(13,'MANUTENCAO','Técnico de Manutenção','Manutenção','MANUTENCAO',1,'2026-03-17 06:46:37.000000'),(14,'GASOTERAPIA','Gasoterapeuta','Gasoterapia','GASOTERAPIA',1,'2026-03-17 06:46:37.000000'),(15,'PDV','Atendente PDV','Ponto de venda','COMERCIAL',1,'2026-03-17 06:46:37.000000'),(16,'COORDENADOR','Coordenador','Coordenação de setor','GERAL',1,'2026-03-17 06:46:37.000000'),(42,'ADMIN','Administrador','Perfil administrativo padrão','HIS/PA',1,'2026-03-15 04:01:01.967149');
 /*!40000 ALTER TABLE `perfil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10835,7 +10941,7 @@ CREATE TABLE `perfil_permissao` (
 
 LOCK TABLES `perfil_permissao` WRITE;
 /*!40000 ALTER TABLE `perfil_permissao` DISABLE KEYS */;
-INSERT INTO `perfil_permissao` VALUES (42,1,'2026-03-15 05:48:13.000000');
+INSERT INTO `perfil_permissao` VALUES (1,1,'2026-03-17 07:02:03.000000'),(1,2,'2026-03-17 07:02:03.000000'),(1,3,'2026-03-17 07:02:03.000000'),(1,4,'2026-03-17 07:02:03.000000'),(1,5,'2026-03-17 07:02:03.000000'),(1,6,'2026-03-17 07:02:03.000000'),(1,7,'2026-03-17 07:02:03.000000'),(1,8,'2026-03-17 07:02:03.000000'),(1,9,'2026-03-17 07:02:03.000000'),(1,10,'2026-03-17 07:02:03.000000'),(1,11,'2026-03-17 07:02:03.000000'),(1,12,'2026-03-17 07:02:03.000000'),(1,14,'2026-03-17 07:02:03.000000'),(1,15,'2026-03-17 07:02:03.000000'),(1,16,'2026-03-17 07:02:03.000000'),(1,17,'2026-03-17 07:02:03.000000'),(1,18,'2026-03-17 07:02:03.000000'),(1,19,'2026-03-17 07:02:03.000000'),(1,20,'2026-03-17 07:02:03.000000'),(1,21,'2026-03-17 07:02:03.000000'),(1,22,'2026-03-17 07:02:03.000000'),(2,14,'2026-03-17 06:46:37.000000'),(2,15,'2026-03-17 06:46:37.000000'),(3,14,'2026-03-17 06:46:37.000000'),(3,16,'2026-03-17 06:46:37.000000'),(3,17,'2026-03-17 06:46:37.000000'),(4,14,'2026-03-17 06:46:37.000000'),(4,18,'2026-03-17 06:46:37.000000'),(5,14,'2026-03-17 06:46:37.000000'),(5,19,'2026-03-17 06:46:37.000000'),(6,14,'2026-03-17 06:46:37.000000'),(6,20,'2026-03-17 06:46:37.000000'),(7,16,'2026-03-17 06:46:37.000000'),(7,17,'2026-03-17 06:46:37.000000'),(8,14,'2026-03-17 06:46:37.000000'),(8,22,'2026-03-17 06:46:37.000000'),(9,2,'2026-03-17 06:46:37.000000'),(9,3,'2026-03-17 06:46:37.000000'),(9,14,'2026-03-17 06:46:37.000000'),(10,6,'2026-03-17 06:46:37.000000'),(10,14,'2026-03-17 06:46:37.000000'),(11,11,'2026-03-17 06:46:37.000000'),(11,14,'2026-03-17 06:46:37.000000'),(12,7,'2026-03-17 06:46:37.000000'),(12,14,'2026-03-17 06:46:37.000000'),(13,4,'2026-03-17 06:46:37.000000'),(13,14,'2026-03-17 06:46:37.000000'),(14,5,'2026-03-17 06:46:37.000000'),(14,14,'2026-03-17 06:46:37.000000'),(15,10,'2026-03-17 06:46:37.000000'),(15,14,'2026-03-17 06:46:37.000000'),(16,1,'2026-03-17 06:46:37.000000'),(16,14,'2026-03-17 06:46:37.000000'),(16,15,'2026-03-17 06:46:37.000000'),(16,16,'2026-03-17 06:46:37.000000'),(16,17,'2026-03-17 06:46:37.000000'),(16,18,'2026-03-17 06:46:37.000000'),(16,19,'2026-03-17 06:46:37.000000'),(16,20,'2026-03-17 06:46:37.000000'),(16,21,'2026-03-17 06:46:37.000000'),(16,22,'2026-03-17 06:46:37.000000'),(42,1,'2026-03-15 05:48:13.000000'),(42,2,'2026-03-17 06:16:18.000000'),(42,3,'2026-03-17 06:16:19.000000'),(42,4,'2026-03-17 06:16:19.000000'),(42,5,'2026-03-17 06:16:20.000000'),(42,6,'2026-03-17 06:16:20.000000'),(42,7,'2026-03-17 06:16:20.000000'),(42,8,'2026-03-17 06:16:20.000000'),(42,9,'2026-03-17 06:16:20.000000'),(42,10,'2026-03-17 06:16:21.000000'),(42,11,'2026-03-17 06:16:21.000000'),(42,12,'2026-03-17 06:16:21.000000');
 /*!40000 ALTER TABLE `perfil_permissao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10865,7 +10971,7 @@ CREATE TABLE `permissao` (
   UNIQUE KEY `uk_permissao_codigo` (`codigo`),
   KEY `idx_perm_dominio` (`dominio`),
   KEY `idx_perm_ativo` (`ativo`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10874,7 +10980,7 @@ CREATE TABLE `permissao` (
 
 LOCK TABLES `permissao` WRITE;
 /*!40000 ALTER TABLE `permissao` DISABLE KEYS */;
-INSERT INTO `permissao` VALUES (1,'ADMIN','Painel Admin','Permite acessar o painel administrativo','GERAL',NULL,'painel_admin',NULL,1,'2026-03-15 05:42:57.000000','ADMIN',NULL,NULL,1);
+INSERT INTO `permissao` VALUES (1,'ADMIN','Painel Admin','Permite acessar o painel administrativo','GERAL',NULL,'painel_admin',NULL,1,'2026-03-15 05:42:57.000000','ADMIN',NULL,NULL,1),(2,'AMBULANCIA','Painel Ambulância','Acesso ao painel de ambulância/transporte','AMBULANCIA',NULL,'painel_ambulancia',NULL,1,'2026-03-17 06:12:47.000000','AMBULANCIA',NULL,NULL,1),(3,'REMOCAO','Painel Remoção','Acesso ao painel de remoção','REMOCAO',NULL,'painel_remocao',NULL,1,'2026-03-17 06:12:47.000000','REMOCAO',NULL,NULL,1),(4,'MANUTENCAO','Painel Manutenção','Acesso ao painel de manutenção','MANUTENCAO',NULL,'painel_manutencao',NULL,1,'2026-03-17 06:12:47.000000','MANUTENCAO',NULL,NULL,1),(5,'GASOTERAPIA','Painel Gasoterapia','Acesso ao painel de gasoterapia','GASOTERAPIA',NULL,'painel_gasoterapia',NULL,1,'2026-03-17 06:12:47.000000','GASOTERAPIA',NULL,NULL,1),(6,'ASSISTENCIA_SOCIAL','Painel Assistência Social','Acesso ao painel de assistência social','ASSISTENCIA_SOCIAL',NULL,'painel_assistencia_social',NULL,1,'2026-03-17 06:12:47.000000','ASSISTENCIA_SOCIAL',NULL,NULL,1),(7,'FATURAMENTO','Painel Faturamento','Acesso ao painel de faturamento','FATURAMENTO',NULL,'painel_faturamento',NULL,1,'2026-03-17 06:12:47.000000','FATURAMENTO',NULL,NULL,1),(8,'CAT','Painel CAT','Acesso ao painel de CAT (Acidentes de Trabalho)','CAT',NULL,'painel_cat',NULL,1,'2026-03-17 06:12:47.000000','CAT',NULL,NULL,1),(9,'OBITO','Painel Óbito','Acesso ao painel de óbito','OBITO',NULL,'painel_obito',NULL,1,'2026-03-17 06:12:47.000000','OBITO',NULL,NULL,1),(10,'PDV','Painel PDV','Acesso ao painel de PDV/Vendas','PDV',NULL,'painel_pdv',NULL,1,'2026-03-17 06:12:47.000000','PDV',NULL,NULL,1),(11,'NUTRICAO','Painel Nutrição','Acesso ao painel de nutrição','NUTRICAO',NULL,'painel_nutricao',NULL,1,'2026-03-17 06:12:47.000000','NUTRICAO',NULL,NULL,1),(12,'INTERCONSULTA','Painel Interconsulta','Acesso ao painel de interconsulta','INTERCONSULTA',NULL,'painel_interconsulta',NULL,1,'2026-03-17 06:12:47.000000','INTERCONSULTA',NULL,NULL,1),(14,'DASHBOARD','Dashboard',NULL,'GERAL',NULL,'painel_dashboard',NULL,1,'2026-03-17 06:46:37.000000','DASHBOARD',NULL,NULL,1),(15,'RECEPCAO','Recepção',NULL,'RECEPCAO',NULL,'painel_recepcao',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(16,'TRIAGEM','Triagem',NULL,'ATENDIMENTO',NULL,'painel_triagem',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(17,'ENFERMAGEM','Enfermagem',NULL,'ATENDIMENTO',NULL,'painel_enfermagem',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(18,'MEDICO','Atendimento Médico',NULL,'ATENDIMENTO',NULL,'painel_medico',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(19,'FARMACIA','Farmácia',NULL,'FARMACIA',NULL,'painel_farmacia',NULL,1,'2026-03-17 06:46:37.000000','FARMACIA',NULL,NULL,1),(20,'LABORATORIO','Laboratório',NULL,'LABORATORIO',NULL,'painel_laboratorio',NULL,1,'2026-03-17 06:46:37.000000','LABORATORIO',NULL,NULL,1),(21,'INTERNACAO','Internação',NULL,'INTERNACAO',NULL,'painel_internacao',NULL,1,'2026-03-17 06:46:37.000000','INTERNACAO',NULL,NULL,1),(22,'ESTOQUE','Estoque',NULL,'ESTOQUE',NULL,'painel_estoque',NULL,1,'2026-03-17 06:46:37.000000','ESTOQUE',NULL,NULL,1);
 /*!40000 ALTER TABLE `permissao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10919,7 +11025,7 @@ CREATE TABLE `pessoa` (
 
 LOCK TABLES `pessoa` WRITE;
 /*!40000 ALTER TABLE `pessoa` DISABLE KEYS */;
-INSERT INTO `pessoa` VALUES (1,'Administrador Sistema',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(2,'Recepcionista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(3,'Enfermeira Triagem',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(4,'Medico Plantonista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(5,'Farmaceutico',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(1001,'Paciente Teste 01',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1002,'Paciente Teste 02',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1003,'Paciente Teste 03',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1004,'Paciente Teste 04',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1005,'Paciente Teste 05',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1006,'Paciente Teste 06',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1007,'Paciente Teste 07',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1008,'Paciente Teste 08',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1009,'Paciente Teste 09',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1010,'Paciente Teste 10',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1);
+INSERT INTO `pessoa` VALUES (1,'Administrador Sistema',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(2,'Recepcionista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(3,'Enfermeira Triagem',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(4,'Medico Plantonista',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(5,'Farmaceutico',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','OUTRO',NULL,1,'2026-03-07 00:50:21.071593',NULL,1),(6,'Juliana Costa',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(7,'Roberto Ferreira',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(8,'Patrícia Almeida',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(9,'Marcos Rodrigues',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(10,'Luciana Martins',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(11,'Fernanda Souza',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(12,'Ricardo Lima',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(13,'Carla Dias',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(14,'Bruno Castro',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(15,'Tatiana Reis',NULL,'NAO_INFORMADO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','FUNCIONARIO',NULL,1,'2026-03-17 06:46:37.000000',NULL,1),(1001,'Paciente Teste 01',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1002,'Paciente Teste 02',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1003,'Paciente Teste 03',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1004,'Paciente Teste 04',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1005,'Paciente Teste 05',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1006,'Paciente Teste 06',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1007,'Paciente Teste 07',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1008,'Paciente Teste 08',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1009,'Paciente Teste 09',NULL,'MASCULINO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1),(1010,'Paciente Teste 10',NULL,'FEMININO','NAO_INFORMADO',NULL,NULL,NULL,NULL,NULL,'NAO_INFORMADO','PACIENTE',NULL,1,'2026-03-09 02:52:10.696195',NULL,1);
 /*!40000 ALTER TABLE `pessoa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13490,6 +13596,9 @@ CREATE TABLE `senha` (
   `estado_snapshot` json DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `risco_dinamico` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `risco_dinamico_em` datetime(6) DEFAULT NULL,
+  `risco_dinamico_origem` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_senha`),
   UNIQUE KEY `uk_senha_codigo_dia` (`id_saas_entidade`,`id_unidade`,(cast(`criado_em` as date)),`codigo_visual`),
   KEY `idx_senha_saas` (`id_saas_entidade`),
@@ -13497,8 +13606,9 @@ CREATE TABLE `senha` (
   KEY `idx_senha_paciente` (`id_paciente`),
   KEY `idx_senha_atendimento` (`id_atendimento`),
   KEY `idx_senha_uuid_sync` (`uuid_sync`),
+  KEY `idx_senha_runtime` (`executado_em`,`cancelado`,`nao_compareceu`,`criado_em`),
   KEY `idx_senha_data_dia` ((cast(`criado_em` as date)))
-) ENGINE=InnoDB AUTO_INCREMENT=1080 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1086 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13507,7 +13617,7 @@ CREATE TABLE `senha` (
 
 LOCK TABLES `senha` WRITE;
 /*!40000 ALTER TABLE `senha` DISABLE KEYS */;
-INSERT INTO `senha` VALUES (1001,1,1,NULL,'CLI-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1002,1,1,NULL,'CLI-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1003,1,1,NULL,'PED-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1004,1,1,NULL,'CLI-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1005,1,1,NULL,'PED-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1006,1,1,NULL,'CLI-004',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1007,1,1,NULL,'CLI-005',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1008,1,1,NULL,'PED-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1009,1,1,NULL,'CLI-006',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1010,1,1,NULL,'CLI-007',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL),(1047,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9d73a6ca-4c8d-4598-83d8-1557939fd990',0,NULL,NULL,'2026-03-11 01:37:37.869538',NULL),(1048,1,1,1,'P002',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'16385ac6-21ca-46db-9d1c-1fce3bdf146e',0,NULL,NULL,'2026-03-11 01:37:39.917484',NULL),(1049,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b1b95573-fd88-4c73-8bda-eeb14eb5812d',0,NULL,NULL,'2026-03-11 01:37:41.176215',NULL),(1050,1,1,1,'P003',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'efdbbe73-8ec1-4a40-bd0d-a1d1f92d8985',0,NULL,NULL,'2026-03-11 01:39:11.645634',NULL),(1051,1,1,1,'P004',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'80c3de42-afbb-4279-b776-0a55b798ad4b',0,NULL,NULL,'2026-03-11 01:39:27.123352',NULL),(1052,1,1,1,'C002',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'f5ea0a7f-89c4-416a-a3b6-39b7d1def62d',0,NULL,NULL,'2026-03-11 01:39:28.381425',NULL),(1053,1,1,1,'P005',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'c632bb2e-7e6a-4f4c-929c-31fdf4821248',0,NULL,NULL,'2026-03-11 01:42:37.406235',NULL),(1054,1,1,1,'P006',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,6,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'e12c005b-7302-4baf-8e6d-a1a8788452db',0,NULL,NULL,'2026-03-11 01:42:38.363552',NULL),(1055,1,1,1,'C003',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9df08589-9ae0-4698-a2a4-ecbf1e2247c2',0,NULL,NULL,'2026-03-11 01:42:39.021091',NULL),(1056,1,1,1,'C004',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'8434ed27-6bc8-4701-b0a4-5a6af7becf52',0,NULL,NULL,'2026-03-11 01:42:39.715106',NULL),(1057,1,1,1,'P007',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,7,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'545a2d06-cbda-408a-9023-e1b5250a943d',0,NULL,NULL,'2026-03-11 01:42:40.564160',NULL),(1058,1,1,1,'C005',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'532c069c-9401-4594-9566-8f1a5162a04e',0,NULL,NULL,'2026-03-11 01:42:41.156766',NULL),(1059,1,1,1,'P008',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,8,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'f57d7f26-a473-4c40-8838-33406cc92d8a',0,NULL,NULL,'2026-03-11 01:49:01.291675',NULL),(1060,1,1,1,'P009',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,9,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'572227dc-aaf6-4917-b48c-839f50e4506c',0,NULL,NULL,'2026-03-11 01:49:02.354536',NULL),(1061,1,1,1,'C006',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,6,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'2c0c194d-f60f-44dd-8b7a-c19ad9285042',0,NULL,NULL,'2026-03-11 01:49:03.100371',NULL),(1062,1,1,1,'P010',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,10,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9ac92bba-f471-4372-b865-314171a2491e',0,NULL,NULL,'2026-03-11 01:51:20.176711',NULL),(1063,1,1,1,'P011',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,11,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'97559ee6-6ecc-47f8-bae3-b4ad0571cebb',0,NULL,NULL,'2026-03-11 01:51:21.706821',NULL),(1064,1,1,1,'C007',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,7,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0375598e-61c6-4960-a1d0-cf126c03cb34',0,NULL,NULL,'2026-03-11 01:51:22.449154',NULL),(1065,1,1,1,'P012',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,12,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9c9d2149-42ea-4e1f-8cbb-de87b9213611',0,NULL,NULL,'2026-03-11 01:53:59.786072',NULL),(1066,1,1,1,'C008',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,8,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0c016b44-4f43-4c4e-bc10-58a413375ace',0,NULL,NULL,'2026-03-11 01:55:09.940169',NULL),(1067,1,1,1,'P013',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,13,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'a6dca1c7-405a-4933-8d00-73138c12a4ee',0,NULL,NULL,'2026-03-11 02:05:15.657145',NULL),(1068,1,1,1,'P014',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,14,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'c368eb3e-f5a6-4909-b9ab-4d4086175540',0,NULL,NULL,'2026-03-11 02:05:29.942983',NULL),(1069,1,1,1,'P015',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,15,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'39e996d6-817c-4fda-91b8-c6a0d317ab28',0,NULL,NULL,'2026-03-11 02:06:32.153055',NULL),(1070,1,1,1,'P016',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,16,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'e2e287f6-c657-44c9-a417-9017c682f307',0,NULL,NULL,'2026-03-11 02:07:30.514829',NULL),(1071,1,1,1,'P017',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,17,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'483dad9e-3857-45d1-9859-345c111b4897',0,NULL,NULL,'2026-03-11 02:12:15.263708',NULL),(1072,1,1,1,'P018',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,18,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'1574f6c9-3352-458d-823a-3b05354a46f0',0,NULL,NULL,'2026-03-11 02:35:09.982899',NULL),(1073,1,1,1,'P019',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,19,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0d2b06c6-985f-4d0f-87c5-7fe92e685dfb',0,NULL,NULL,'2026-03-11 02:41:39.129162',NULL),(1074,1,1,1,'P020',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,20,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'686cc778-4334-4c76-b0a6-48d343ca612d',0,NULL,NULL,'2026-03-11 03:00:34.709224',NULL),(1075,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'1931d8fc-ca52-41bc-b3c0-c7618dc1a12d',0,NULL,NULL,'2026-03-15 05:10:27.471176',NULL),(1076,1,1,1,'P002',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'106f27cf-ab11-4bf3-bfa8-cd2d34f9cdc3',0,NULL,NULL,'2026-03-15 05:24:10.306927',NULL),(1077,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b529e17e-3635-4884-85e5-3a11deb0e651',0,NULL,NULL,'2026-03-16 22:54:42.291139',NULL),(1078,1,1,1,'C002',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b260abdd-4730-4f70-bffc-356da76e4bcc',0,NULL,NULL,'2026-03-16 22:54:42.364450',NULL),(1079,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'79d3a9d6-7062-4288-93c8-4a59b14099d2',0,NULL,NULL,'2026-03-16 23:35:46.828794',NULL);
+INSERT INTO `senha` VALUES (1001,1,1,NULL,'CLI-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1002,1,1,NULL,'CLI-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1003,1,1,NULL,'PED-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1004,1,1,NULL,'CLI-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1005,1,1,NULL,'PED-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1006,1,1,NULL,'CLI-004',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1007,1,1,NULL,'CLI-005',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1008,1,1,NULL,'PED-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1009,1,1,NULL,'CLI-006',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1010,1,1,NULL,'CLI-007',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1047,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9d73a6ca-4c8d-4598-83d8-1557939fd990',0,NULL,NULL,'2026-03-11 01:37:37.869538',NULL,NULL,NULL,NULL),(1048,1,1,1,'P002',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'16385ac6-21ca-46db-9d1c-1fce3bdf146e',0,NULL,NULL,'2026-03-11 01:37:39.917484',NULL,NULL,NULL,NULL),(1049,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b1b95573-fd88-4c73-8bda-eeb14eb5812d',0,NULL,NULL,'2026-03-11 01:37:41.176215',NULL,NULL,NULL,NULL),(1050,1,1,1,'P003',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'efdbbe73-8ec1-4a40-bd0d-a1d1f92d8985',0,NULL,NULL,'2026-03-11 01:39:11.645634',NULL,NULL,NULL,NULL),(1051,1,1,1,'P004',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'80c3de42-afbb-4279-b776-0a55b798ad4b',0,NULL,NULL,'2026-03-11 01:39:27.123352',NULL,NULL,NULL,NULL),(1052,1,1,1,'C002',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'f5ea0a7f-89c4-416a-a3b6-39b7d1def62d',0,NULL,NULL,'2026-03-11 01:39:28.381425',NULL,NULL,NULL,NULL),(1053,1,1,1,'P005',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'c632bb2e-7e6a-4f4c-929c-31fdf4821248',0,NULL,NULL,'2026-03-11 01:42:37.406235',NULL,NULL,NULL,NULL),(1054,1,1,1,'P006',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,6,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'e12c005b-7302-4baf-8e6d-a1a8788452db',0,NULL,NULL,'2026-03-11 01:42:38.363552',NULL,NULL,NULL,NULL),(1055,1,1,1,'C003',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9df08589-9ae0-4698-a2a4-ecbf1e2247c2',0,NULL,NULL,'2026-03-11 01:42:39.021091',NULL,NULL,NULL,NULL),(1056,1,1,1,'C004',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'8434ed27-6bc8-4701-b0a4-5a6af7becf52',0,NULL,NULL,'2026-03-11 01:42:39.715106',NULL,NULL,NULL,NULL),(1057,1,1,1,'P007',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,7,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'545a2d06-cbda-408a-9023-e1b5250a943d',0,NULL,NULL,'2026-03-11 01:42:40.564160',NULL,NULL,NULL,NULL),(1058,1,1,1,'C005',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'532c069c-9401-4594-9566-8f1a5162a04e',0,NULL,NULL,'2026-03-11 01:42:41.156766',NULL,NULL,NULL,NULL),(1059,1,1,1,'P008',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,8,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'f57d7f26-a473-4c40-8838-33406cc92d8a',0,NULL,NULL,'2026-03-11 01:49:01.291675',NULL,NULL,NULL,NULL),(1060,1,1,1,'P009',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,9,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'572227dc-aaf6-4917-b48c-839f50e4506c',0,NULL,NULL,'2026-03-11 01:49:02.354536',NULL,NULL,NULL,NULL),(1061,1,1,1,'C006',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,6,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'2c0c194d-f60f-44dd-8b7a-c19ad9285042',0,NULL,NULL,'2026-03-11 01:49:03.100371',NULL,NULL,NULL,NULL),(1062,1,1,1,'P010',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,10,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9ac92bba-f471-4372-b865-314171a2491e',0,NULL,NULL,'2026-03-11 01:51:20.176711',NULL,NULL,NULL,NULL),(1063,1,1,1,'P011',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,11,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'97559ee6-6ecc-47f8-bae3-b4ad0571cebb',0,NULL,NULL,'2026-03-11 01:51:21.706821',NULL,NULL,NULL,NULL),(1064,1,1,1,'C007',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,7,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0375598e-61c6-4960-a1d0-cf126c03cb34',0,NULL,NULL,'2026-03-11 01:51:22.449154',NULL,NULL,NULL,NULL),(1065,1,1,1,'P012',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,12,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9c9d2149-42ea-4e1f-8cbb-de87b9213611',0,NULL,NULL,'2026-03-11 01:53:59.786072',NULL,NULL,NULL,NULL),(1066,1,1,1,'C008',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,8,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0c016b44-4f43-4c4e-bc10-58a413375ace',0,NULL,NULL,'2026-03-11 01:55:09.940169',NULL,NULL,NULL,NULL),(1067,1,1,1,'P013',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,13,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'a6dca1c7-405a-4933-8d00-73138c12a4ee',0,NULL,NULL,'2026-03-11 02:05:15.657145',NULL,NULL,NULL,NULL),(1068,1,1,1,'P014',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,14,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'c368eb3e-f5a6-4909-b9ab-4d4086175540',0,NULL,NULL,'2026-03-11 02:05:29.942983',NULL,NULL,NULL,NULL),(1069,1,1,1,'P015',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,15,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'39e996d6-817c-4fda-91b8-c6a0d317ab28',0,NULL,NULL,'2026-03-11 02:06:32.153055',NULL,NULL,NULL,NULL),(1070,1,1,1,'P016',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,16,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'e2e287f6-c657-44c9-a417-9017c682f307',0,NULL,NULL,'2026-03-11 02:07:30.514829',NULL,NULL,NULL,NULL),(1071,1,1,1,'P017',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,17,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'483dad9e-3857-45d1-9859-345c111b4897',0,NULL,NULL,'2026-03-11 02:12:15.263708',NULL,NULL,NULL,NULL),(1072,1,1,1,'P018',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,18,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'1574f6c9-3352-458d-823a-3b05354a46f0',0,NULL,NULL,'2026-03-11 02:35:09.982899',NULL,NULL,NULL,NULL),(1073,1,1,1,'P019',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,19,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0d2b06c6-985f-4d0f-87c5-7fe92e685dfb',0,NULL,NULL,'2026-03-11 02:41:39.129162',NULL,NULL,NULL,NULL),(1074,1,1,1,'P020',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,20,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'686cc778-4334-4c76-b0a6-48d343ca612d',0,NULL,NULL,'2026-03-11 03:00:34.709224',NULL,NULL,NULL,NULL),(1075,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'1931d8fc-ca52-41bc-b3c0-c7618dc1a12d',0,NULL,NULL,'2026-03-15 05:10:27.471176',NULL,NULL,NULL,NULL),(1076,1,1,1,'P002',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'106f27cf-ab11-4bf3-bfa8-cd2d34f9cdc3',0,NULL,NULL,'2026-03-15 05:24:10.306927',NULL,NULL,NULL,NULL),(1077,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b529e17e-3635-4884-85e5-3a11deb0e651',0,NULL,NULL,'2026-03-16 22:54:42.291139',NULL,NULL,NULL,NULL),(1078,1,1,1,'C002',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b260abdd-4730-4f70-bffc-356da76e4bcc',0,NULL,NULL,'2026-03-16 22:54:42.364450',NULL,NULL,NULL,NULL),(1079,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'79d3a9d6-7062-4288-93c8-4a59b14099d2',0,NULL,NULL,'2026-03-16 23:35:46.828794',NULL,NULL,NULL,NULL),(1080,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'fabe2f7d-ef11-44ef-93d2-0f9b47b5ddb8',0,NULL,NULL,'2026-03-19 01:33:12.980839',NULL,NULL,NULL,NULL),(1081,1,1,1,'P002',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'3c057fc8-38af-405e-ba3c-a2233cc93e33',0,NULL,NULL,'2026-03-19 02:05:48.150816',NULL,NULL,NULL,NULL),(1082,1,1,1,'P003',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'fbb81763-72b6-48b9-bb8c-c5f7c3e29ae7',0,NULL,NULL,'2026-03-19 02:05:56.010680',NULL,NULL,NULL,NULL),(1083,1,1,1,'P004',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b6f848bd-50a5-4afd-b521-f3b5a4f71f2e',0,NULL,NULL,'2026-03-19 02:06:04.864958',NULL,NULL,NULL,NULL),(1084,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'2e29c827-e249-44d0-97f3-0196b2b08b89',0,NULL,NULL,'2026-03-19 02:06:15.834491',NULL,NULL,NULL,NULL),(1085,1,1,1,'P005',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'a389a01c-fb6e-4a03-9f1a-accf199f4a72',0,NULL,NULL,'2026-03-19 02:06:21.088199',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `senha` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13567,7 +13677,7 @@ CREATE TABLE `senha_sequencia` (
 
 LOCK TABLES `senha_sequencia` WRITE;
 /*!40000 ALTER TABLE `senha_sequencia` DISABLE KEYS */;
-INSERT INTO `senha_sequencia` VALUES (1,1,'2026-03-11','C',8),(1,1,'2026-03-11','P',20),(1,1,'2026-03-15','P',2),(1,1,'2026-03-16','C',2),(1,1,'2026-03-16','P',1);
+INSERT INTO `senha_sequencia` VALUES (1,1,'2026-03-11','C',8),(1,1,'2026-03-11','P',20),(1,1,'2026-03-15','P',2),(1,1,'2026-03-16','C',2),(1,1,'2026-03-16','P',1),(1,1,'2026-03-19','C',1),(1,1,'2026-03-19','P',5);
 /*!40000 ALTER TABLE `senha_sequencia` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13779,7 +13889,7 @@ CREATE TABLE `sessao_usuario` (
   CONSTRAINT `fk_sessao_usuario_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
   CONSTRAINT `fk_sessao_usuario_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_sessao_usuario_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13788,7 +13898,7 @@ CREATE TABLE `sessao_usuario` (
 
 LOCK TABLES `sessao_usuario` WRITE;
 /*!40000 ALTER TABLE `sessao_usuario` DISABLE KEYS */;
-INSERT INTO `sessao_usuario` VALUES (7,'63c37b7d-452b-4a86-aea0-d86a37df5023',1,42,1,1,NULL,NULL,'1372fc2f1b036f2b2eaaeb43b4c848d2bc1f6d000fe7547ee335ffaa5c7962a2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:05.817284','2026-03-15 12:01:05.816000',NULL,NULL,1,0,'2026-03-15 04:01:05.817284',NULL,NULL,NULL,NULL,NULL,NULL),(8,'b39ce1df-7561-459d-acc9-94d0ebe3eb21',1,42,1,1,NULL,NULL,'eb37f4e0fc8692e22c3fb36c6534970edad66762027721b31fd4066240f0e23d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:41.237955','2026-03-15 12:01:41.237000',NULL,NULL,1,0,'2026-03-15 04:01:41.237955',NULL,NULL,NULL,NULL,NULL,NULL),(9,'4cb66dd7-0573-420e-8ee3-35a16c0b8354',1,42,1,1,NULL,NULL,'cee05051dc58779e8644c9ca5504d973527acd3089c95ada44df2750bdebe2a4',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:03:46.388138','2026-03-15 12:03:46.387000',NULL,NULL,1,0,'2026-03-15 04:03:46.388138',NULL,NULL,NULL,NULL,NULL,NULL),(10,'2d3f8c43-6965-4796-bb51-5cfa62cda2da',1,42,1,1,NULL,NULL,'f51713aca9e0affe852e6a510cb8d87fb8447b521523209a210768507ffc6302',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:27.379626','2026-03-15 12:08:27.368000',NULL,NULL,1,0,'2026-03-15 04:08:27.379626',NULL,NULL,NULL,NULL,NULL,NULL),(11,'2f6d3f77-1f54-4564-8fb7-014d6f78866f',1,42,1,1,NULL,NULL,'e7317224ce17d218708316ed36838c06f4027a4ca72dd982971a395a771dd4a1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:50.176704','2026-03-15 12:08:50.175000',NULL,NULL,1,0,'2026-03-15 04:08:50.176704',NULL,NULL,NULL,NULL,NULL,NULL),(12,'e144b098-9911-4205-8ae1-06828e2f987f',1,42,1,1,NULL,NULL,'3adb704fa919ccda9b98001ad2c36762917b309fbfd58d9813ab44e074c8f7b6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:12:14.179418','2026-03-15 12:12:14.178000',NULL,NULL,1,0,'2026-03-15 04:12:14.179418',NULL,NULL,NULL,NULL,NULL,NULL),(13,'397ae7a5-01eb-41c9-bde3-b71553c18da1',1,42,1,1,NULL,NULL,'a3e36c54a2f521f2403d7dbf972699b009b3778d4262f26b03fe0d216d3131b7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:11.011380','2026-03-15 12:14:11.004000',NULL,NULL,1,0,'2026-03-15 04:14:11.011380',NULL,NULL,NULL,NULL,NULL,NULL),(14,'dd97f6f7-55f8-45bd-8866-be0c7b7f7afd',1,42,1,1,NULL,NULL,'871d0b640f96992252ffbf2d9f83382a3a08398e010ef1a2b7ffdb52fff3ca75',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:29.945664','2026-03-15 12:14:29.944000',NULL,NULL,1,0,'2026-03-15 04:14:29.945664',NULL,NULL,NULL,NULL,NULL,NULL),(15,'13249301-44c2-49fc-8f06-a941c8dbd883',1,42,1,1,NULL,NULL,'b902ac1b34000f57048d9a7b455389d4853b5de92dea9731e64c366ec1de6db2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:05.577331','2026-03-15 12:29:05.527000',NULL,NULL,1,0,'2026-03-15 04:29:05.577331',NULL,NULL,NULL,NULL,NULL,NULL),(16,'1ab7c4ec-55ec-44a8-9fed-e5993231f768',1,42,1,1,NULL,NULL,'12d51baea86c236f511a88c8a4771b5ea749b48b59b3566892cfea9228594aab',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:28.697984','2026-03-15 12:29:28.696000',NULL,NULL,1,0,'2026-03-15 04:29:28.697984',NULL,NULL,NULL,NULL,NULL,NULL),(17,'1f103d68-a824-4fe1-a51d-16ada7bfaa2f',1,42,1,1,NULL,NULL,'882dd04c16cb0024d88c6d2792071e763f5e5906fccca406b99fa523be1806ad',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:38:21.583153','2026-03-15 12:38:21.579000',NULL,NULL,1,0,'2026-03-15 04:38:21.583153',NULL,NULL,NULL,NULL,NULL,NULL),(18,'58075872-3163-4505-9c92-660c35893b77',1,42,1,1,NULL,NULL,'ee653d551b1cb460d4f3707c99772ac5b81f530dca5cb43d29134d878ebf3eb6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:29.831578','2026-03-15 12:43:29.830000',NULL,NULL,1,0,'2026-03-15 04:43:29.831578',NULL,NULL,NULL,NULL,NULL,NULL),(19,'c9cd4225-14ec-4a92-b6b3-47c521ce771b',1,42,1,1,NULL,NULL,'d0785168510e09119c38365c10ef25a5c8673d9f7da617f22c286348fb18ef85',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:42.608531','2026-03-15 12:43:42.607000',NULL,NULL,1,0,'2026-03-15 04:43:42.608531',NULL,NULL,NULL,NULL,NULL,NULL),(20,'3c5da068-7630-4c91-a709-47fa8cef55d6',1,42,1,1,NULL,NULL,'7f34ec46414d5dfa85aa6823ed0b9772616a831ff2c0d8718fa5fc7a7a1eeaf5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:44:05.883072','2026-03-15 12:44:05.882000',NULL,NULL,1,0,'2026-03-15 04:44:05.883072',NULL,NULL,NULL,NULL,NULL,NULL),(21,'8fe9121c-c63c-43a0-88f5-81f6f1e70ff3',1,42,1,1,NULL,NULL,'26f46ab3f1e78157bf5dd91e81437d6a6251c78ae7cc5fb9dc9db79c8feecd1e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:46:52.323077','2026-03-15 12:46:52.321000',NULL,NULL,1,0,'2026-03-15 04:46:52.323077',NULL,NULL,NULL,NULL,NULL,NULL),(22,'55a81184-9657-4b28-8540-5bf0e217eeae',1,42,1,1,NULL,NULL,'a18136a06af71bcb136c75c5bbfbc166b3ca9c853956997d9efc0e6ad9e3996d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:52:07.194269','2026-03-15 12:52:07.192000',NULL,NULL,1,0,'2026-03-15 04:52:07.194269',NULL,NULL,NULL,NULL,NULL,NULL),(23,'c3e7b60e-d6b7-4042-9b8e-045d61d9518c',1,42,1,1,NULL,NULL,'fb00d6352697002685225620f45f854828ba6d29e6a87719928dea3e1aae6a8c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.549440','2026-03-15 12:53:57.548000',NULL,NULL,1,0,'2026-03-15 04:53:57.549440',NULL,NULL,NULL,NULL,NULL,NULL),(24,'d99e2221-1442-41a9-88ea-8b93eb13912a',1,42,1,1,NULL,NULL,'560906d8554298e4dca2f11fcfd9c327c39322471fcb34f11243b240a6259ec9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.812067','2026-03-15 12:53:57.805000',NULL,NULL,1,0,'2026-03-15 04:53:57.812067',NULL,NULL,NULL,NULL,NULL,NULL),(25,'0d218d46-92b4-45f5-90f0-3fe1b281eb72',1,42,1,1,NULL,NULL,'d53958ce98a94e0adf1628b3a524fecf24acefe9f521ae8b2fbf6b2a092675af',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:54:44.965119','2026-03-15 12:54:44.964000',NULL,NULL,1,0,'2026-03-15 04:54:44.965119',NULL,NULL,NULL,NULL,NULL,NULL),(26,'a4a074ec-0b7a-4186-ac94-c67f0fc9fb26',1,42,1,1,NULL,NULL,'777637c164c144831659549628ecd2238b224efd07c38d44afe82d100a3ab66d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:59:02.337344','2026-03-15 12:59:02.335000',NULL,NULL,1,0,'2026-03-15 04:59:02.337344',NULL,NULL,NULL,NULL,NULL,NULL),(27,'afe722c9-ef79-4fcb-bf7c-360d9670d6ec',1,42,1,1,NULL,NULL,'3c8ddda048fa01707486bc2623b27b795be575fdfcac170816e033bc50b65fd5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:01:49.926764','2026-03-15 13:01:49.925000',NULL,NULL,1,0,'2026-03-15 05:01:49.926764',NULL,NULL,NULL,NULL,NULL,NULL),(28,'9b9c4550-4e6d-444c-a3dc-b4e94f3bc3e4',1,42,1,1,NULL,NULL,'1722fb2391563a12a08db86c7a6185846b41cf32e351038b802d8debdc935d7d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:04:31.209876','2026-03-15 13:04:31.208000',NULL,NULL,1,0,'2026-03-15 05:04:31.209876',NULL,NULL,NULL,NULL,NULL,NULL),(29,'8ac9f6d8-fb40-4885-9986-65b5fc5c84b2',1,42,1,1,NULL,NULL,'6c61a69433e695be84fbf9b9f59b788e5593ca03e34d1889992bee938f4a27c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:05:24.089442','2026-03-15 13:05:24.087000',NULL,NULL,1,0,'2026-03-15 05:05:24.089442',NULL,NULL,NULL,NULL,NULL,NULL),(30,'b18c5b34-8442-4215-a99d-50b355959639',1,42,1,1,NULL,NULL,'524f43c0cae88f5940ed43a9a9bfa507041d6e263c25ac292b43c9399dc579a8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:07:02.949027','2026-03-15 13:07:02.946000',NULL,NULL,1,0,'2026-03-15 05:07:02.949027',NULL,NULL,NULL,NULL,NULL,NULL),(31,'2de510c9-3d05-4f64-ba88-724ccaa67cd9',1,42,1,1,NULL,NULL,'86fada34141e91b2111e1a4adb1d608192278d8d003bdf76ce238c0d3b34896b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:10:18.915385','2026-03-15 13:10:18.913000',NULL,NULL,1,0,'2026-03-15 05:10:18.915385',NULL,NULL,NULL,NULL,NULL,NULL),(32,'e412dc45-9a52-4c20-8872-e279fb7c5ee3',1,42,1,1,NULL,NULL,'ec2214b4e05e9a2ac5ceb8e8d7928747260cc0f312548dc13ca82275987d9280',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:11:06.087464','2026-03-15 13:11:06.086000',NULL,NULL,1,0,'2026-03-15 05:11:06.087464',NULL,NULL,NULL,NULL,NULL,NULL),(33,'07d17b58-4172-4d4b-ac37-fd4a4478c275',1,42,1,1,NULL,NULL,'c4d78d54a26ea192a604b14e20b74a9658d9a1c338fe30d67fdd5a797bbeae96',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:13:08.825375','2026-03-15 13:13:08.824000',NULL,NULL,1,0,'2026-03-15 05:13:08.825375',NULL,NULL,NULL,NULL,NULL,NULL),(34,'d31b6c73-2d2c-4452-8c1e-376ec08adace',1,42,1,1,NULL,NULL,'e7f8c8b98aa3e810fa7613e91f71cf9384282a3a15b9491d9a0455a184ad38d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:19:33.582081','2026-03-15 13:19:33.580000',NULL,NULL,1,0,'2026-03-15 05:19:33.582081',NULL,NULL,NULL,NULL,NULL,NULL),(35,'f3f52003-da54-4489-8c3b-84582fb4b097',1,42,1,1,NULL,NULL,'9f1793aeb07425915397c5a27f8be18767b13d8ac692cfe3722483ca0ca26f16',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:20:16.048413','2026-03-15 13:20:16.047000',NULL,NULL,1,0,'2026-03-15 05:20:16.048413',NULL,NULL,NULL,NULL,NULL,NULL),(36,'f669359c-77b2-4e95-a951-e94f19a4c3f0',1,42,1,1,NULL,NULL,'4f5fb83da594beb48268959b625532c8eca7d8aea1f07fac379c7b5a420cbb9c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:23:45.486190','2026-03-15 13:23:45.485000',NULL,NULL,1,0,'2026-03-15 05:23:45.486190',NULL,NULL,NULL,NULL,NULL,NULL),(37,'a47179c5-7506-4981-8874-4d375b6db2a5',1,42,1,1,NULL,NULL,'3f1fe25ae0e4f047a55d2e2fa4306b8c05157969c8ff46dc60daa9765e6b4670',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:24:05.181714','2026-03-15 13:24:05.180000',NULL,NULL,1,0,'2026-03-15 05:24:05.181714',NULL,NULL,NULL,NULL,NULL,NULL),(38,'f8e70a89-7e2a-499b-9ad8-a3041ca84674',1,42,1,1,NULL,NULL,'1fc1055ff66c52efff0f050e9b9f6563b50215f5a2c441ac9700e1c25c88ad22',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:25:01.357715','2026-03-15 13:25:01.356000',NULL,NULL,1,0,'2026-03-15 05:25:01.357715',NULL,NULL,NULL,NULL,NULL,NULL),(39,'2585de0f-319a-486a-ba66-c0fb9290b0fb',1,42,1,1,NULL,NULL,'d677c12877e0cecd198e649b8efee8312f25554bb5fe7dd772948bc8d20bbae6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:28:23.799640','2026-03-15 13:28:23.797000',NULL,NULL,1,0,'2026-03-15 05:28:23.799640',NULL,NULL,NULL,NULL,NULL,NULL),(40,'faf72121-36ce-463b-a77a-318d5ddc9e0f',1,42,1,1,NULL,NULL,'a6a1c717a2807104c181ab4f659558b611239fb88dc3a459852900d571a1de4e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:24.565813','2026-03-15 13:29:24.564000',NULL,NULL,1,0,'2026-03-15 05:29:24.565813',NULL,NULL,NULL,NULL,NULL,NULL),(41,'6e513914-1319-4d5d-be03-fde1eb0222b9',1,42,1,1,NULL,NULL,'a1d23df2b021e98171cf65e5803a7276152e6b2d724c8a5c4033fc47a3c02330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:42.507935','2026-03-15 13:29:42.506000',NULL,NULL,1,0,'2026-03-15 05:29:42.507935',NULL,NULL,NULL,NULL,NULL,NULL),(42,'4816f1ab-c5e8-4515-a20d-8cc56613fabb',1,42,1,1,NULL,NULL,'4d7a1e2d9ac6f80e53a72219992fd6cea2a671934edb62d9459504afb09552f1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:34:19.502653','2026-03-15 13:34:19.501000',NULL,NULL,1,0,'2026-03-15 05:34:19.502653',NULL,NULL,NULL,NULL,NULL,NULL),(43,'3ed53aee-4311-4bbc-8f36-6ae72bdaf19e',1,42,1,1,NULL,NULL,'5303f79f6960a59ca5aaf5e734eed88f83205405fb72d3e72d2e772c17918794',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:47:06.103453','2026-03-15 13:47:06.101000',NULL,NULL,1,0,'2026-03-15 05:47:06.103453',NULL,NULL,NULL,NULL,NULL,NULL),(44,'b18293a4-59cb-4ff2-8656-4062d0c0b85f',1,42,1,1,NULL,NULL,'acb1d550e8f4e2b8dba1035a6ac81477289c6d38a0527fcc2c8c5658ce993f9a',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:04.716838','2026-03-15 13:49:04.715000',NULL,NULL,1,0,'2026-03-15 05:49:04.716838',NULL,NULL,NULL,NULL,NULL,NULL),(45,'1af2b45c-ac3a-4434-b220-acb2c566fb67',1,42,1,1,NULL,NULL,'c144c2a5f987ee11854fba3963bcec76fb5193156ceef574096654849e401da8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:51.795570','2026-03-15 13:49:51.794000',NULL,NULL,1,0,'2026-03-15 05:49:51.795570',NULL,NULL,NULL,NULL,NULL,NULL),(46,'0176059d-2ca7-47fa-b75c-fec17e8e5d84',1,42,1,1,NULL,NULL,'92b3eb710653308e3bf4bd243e79b62153a54a4d427a7fd472a345ed6ba1a4c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:51:18.543658','2026-03-15 13:51:18.543000',NULL,NULL,1,0,'2026-03-15 05:51:18.543658',NULL,NULL,NULL,NULL,NULL,NULL),(47,'68640f65-cd41-437e-b5ca-1f3bfbd0ba73',1,42,1,1,NULL,NULL,'f6730df241ca451cb6cc9aa1e2fa1b5f8ab8f5060d94123cb17d6ad6411463d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:52:40.592110','2026-03-15 13:52:40.590000',NULL,NULL,1,0,'2026-03-15 05:52:40.592110',NULL,NULL,NULL,NULL,NULL,NULL),(48,'a3106b09-f571-4853-abcb-24616ea7bf2d',1,42,1,1,NULL,NULL,'a69c2b85547f87d8ce9ef80a1f1bae89f2baa86a4a09c75dbd553315ca025fa9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:53:20.003322','2026-03-15 13:53:20.001000',NULL,NULL,1,0,'2026-03-15 05:53:20.003322',NULL,NULL,NULL,NULL,NULL,NULL),(49,'4a05a12b-efd9-4afd-a675-87ae6c71505a',1,42,1,1,NULL,NULL,'41a2228d80125b77416308aa72c7ada8e1b92ed81eeaa8e107b989896a5fcae7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:15:43.228380','2026-03-15 14:15:43.227000',NULL,NULL,1,0,'2026-03-15 06:15:43.228380',NULL,NULL,NULL,NULL,NULL,NULL),(50,'5d15c751-c5aa-41f3-a6a1-2ba53b051ad2',1,42,1,1,NULL,NULL,'4803775615d816cdc13c43b6482d76854cf32928fb4f4f0f129dc096ce84a18b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:29:47.314898','2026-03-15 14:29:47.313000',NULL,NULL,1,0,'2026-03-15 06:29:47.314898',NULL,NULL,NULL,NULL,NULL,NULL),(51,'0d3dfb20-53c1-46c9-9998-a1cfd26396cc',1,42,1,1,NULL,NULL,'0e0390b5245ca5e54eec47bbe454a7ac8843d94c4cba035e9f1cd9488134f330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:41:11.699902','2026-03-15 14:41:11.698000',NULL,NULL,1,0,'2026-03-15 06:41:11.699902',NULL,NULL,NULL,NULL,NULL,NULL),(52,'bca53638-a182-44fe-9451-a80b8ee440bc',1,42,1,1,NULL,NULL,'a2bdbbaf06a9708d00051add445c25e8ba9422832889fd41d1ab977735d9fe80',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:43:58.577254','2026-03-15 14:43:58.575000',NULL,NULL,1,0,'2026-03-15 06:43:58.577254',NULL,NULL,NULL,NULL,NULL,NULL),(53,'522e2766-d026-410d-85dd-f21b37e23d1d',1,42,1,1,NULL,NULL,'409cf7bad8ffebf248f3dcb5106bbba228db8bce130521af8fcabd101a23d7cc',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:47:51.929614','2026-03-15 14:47:51.927000',NULL,NULL,1,0,'2026-03-15 06:47:51.929614',NULL,NULL,NULL,NULL,NULL,NULL),(54,'e32c3349-14c1-4b9c-bbcf-ae81432eea55',1,42,1,1,NULL,NULL,'9bd4705293555f6ac1ca2feadc9fc296d8b74310af622eefb9cc48e5833ab717',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:52:08.454722','2026-03-15 14:52:08.453000',NULL,NULL,1,0,'2026-03-15 06:52:08.454722',NULL,NULL,NULL,NULL,NULL,NULL),(55,'670299a1-f54e-4e5f-a4a6-e73ef010e578',1,42,1,1,NULL,NULL,'87418159553fb03bd6e62cb7b80aeb7af3e52128feaeb5dcea81643c83d81629',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:55:27.345484','2026-03-15 14:55:27.342000',NULL,NULL,1,0,'2026-03-15 06:55:27.345484',NULL,NULL,NULL,NULL,NULL,NULL),(56,'ce264be2-c41e-427d-93cf-4faf1870740d',1,42,1,1,NULL,NULL,'b81b4c61a9330dfa0290e9a5b3cc77109d0ca292c95a7d6e105326aa5f7710fb',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:24:04.569310','2026-03-17 06:24:04.554000',NULL,NULL,1,0,'2026-03-16 22:24:04.569310',NULL,NULL,NULL,NULL,NULL,NULL),(57,'0db5dde4-0fa2-41ae-a8d6-8d042cd2e082',1,42,1,1,NULL,NULL,'eb335f0c74a9e213608127a17dc82ca476719214773266aec02b6b1fafec0fff',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.812490','2026-03-17 06:25:25.811000',NULL,NULL,1,0,'2026-03-16 22:25:25.812490',NULL,NULL,NULL,NULL,NULL,NULL),(58,'0f8bd2f2-9667-4acc-a56d-e035d5303759',1,42,1,1,NULL,NULL,'8861b5cf060a3fdcfa568589c04cef2b157a3027ffa043732f941727ec790976',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.940807','2026-03-17 06:25:25.938000',NULL,NULL,1,0,'2026-03-16 22:25:25.940807',NULL,NULL,NULL,NULL,NULL,NULL),(59,'4dde9d25-9151-49c6-b88f-8225669b5c1a',1,42,1,1,NULL,NULL,'f341d4930e8ed0054aedd5055572e8e531494c5a9a508ddc462275a3f8e7c35e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:35:23.378417','2026-03-17 06:35:23.376000',NULL,NULL,1,0,'2026-03-16 22:35:23.378417',NULL,NULL,NULL,NULL,NULL,NULL),(60,'7d293064-9697-4f28-af2a-2d147b68f3bf',1,42,1,1,NULL,NULL,'2465ee9007e950467e2731a05f6940c42b2add6269f88497dd9e0bbda0e46aab',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:38:51.083680','2026-03-17 06:38:51.082000',NULL,NULL,1,0,'2026-03-16 22:38:51.083680',NULL,NULL,NULL,NULL,NULL,NULL),(61,'0b362983-ea96-435d-b349-1182b4864a98',1,42,1,1,NULL,NULL,'cab38f6d7dac91e02f1abd9885e1dfd51e6d01cb3099558b27685d947f1df373',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:40:01.718458','2026-03-17 06:40:01.717000',NULL,NULL,1,0,'2026-03-16 22:40:01.718458',NULL,NULL,NULL,NULL,NULL,NULL),(62,'205e5718-bdd1-4576-bb7d-b186f62c6fc1',1,42,1,1,NULL,NULL,'ed5a4e43c718119c84dbaa4563d2b6c079d4e6737224ebe766591789ed97878f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:03.769537','2026-03-17 06:43:03.768000',NULL,NULL,1,0,'2026-03-16 22:43:03.769537',NULL,NULL,NULL,NULL,NULL,NULL),(63,'e6bfb0c4-5d28-4102-a911-b7f0f7b7f1de',1,42,1,1,NULL,NULL,'12cafcefbeba26e5c96db7ba273371d0b50ca5ce31e7589994b421830ab74582',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:21.698424','2026-03-17 06:43:21.697000',NULL,NULL,1,0,'2026-03-16 22:43:21.698424',NULL,NULL,NULL,NULL,NULL,NULL),(64,'8296bcf0-c33f-4d0a-b674-caf510a6286d',1,42,1,1,NULL,NULL,'594167c174364ed6863af304f145356e220e9fd37cb4db5f7ce0d50708fdd731',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:52:13.880474','2026-03-17 06:52:13.879000',NULL,NULL,1,0,'2026-03-16 22:52:13.880474',NULL,NULL,NULL,NULL,NULL,NULL),(65,'6e7c7a1b-2590-44cf-b4ab-d5b746edebc8',1,42,1,1,NULL,NULL,'d57a14c6abefa3a8a62a22fb3f5c93ad87110d77df7978353ceec76625a4bea4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:54:35.486146','2026-03-17 06:54:35.485000',NULL,NULL,1,0,'2026-03-16 22:54:35.486146',NULL,NULL,NULL,NULL,NULL,NULL),(66,'58cf0196-1fba-4b9b-87e8-9f461b079fb5',1,42,1,1,NULL,NULL,'de6e277deb3a1c05a51bb86ccdab7b02d210ef8662882f51318a5a13b5135419',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:21.990369','2026-03-17 06:57:21.988000',NULL,NULL,1,0,'2026-03-16 22:57:21.990369',NULL,NULL,NULL,NULL,NULL,NULL),(67,'d1805ea1-d6cf-4d7a-ad86-b5b34c098b28',1,42,1,1,NULL,NULL,'45100470d323ffc68ea37a87c251e9de9a8e4fdecd3745998c69d1a28b1b5cba',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:44.317456','2026-03-17 06:57:44.316000',NULL,NULL,1,0,'2026-03-16 22:57:44.317456',NULL,NULL,NULL,NULL,NULL,NULL),(68,'2f12c7c9-3d29-4013-acf0-723b2a179f9d',1,42,1,1,NULL,NULL,'1e4d84197e1128f080a571e2a8c3dcdbaa5d5670a58c784f2e943e95d102481e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:12.306487','2026-03-17 06:58:12.305000',NULL,NULL,1,0,'2026-03-16 22:58:12.306487',NULL,NULL,NULL,NULL,NULL,NULL),(69,'f22372a2-a564-421d-8e0a-a5553071e740',1,42,1,1,NULL,NULL,'68f7de146c3ce12e5ebe82a60bf7277e9d622240508dce923e6219be86628581',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:30.889045','2026-03-17 06:58:30.887000',NULL,NULL,1,0,'2026-03-16 22:58:30.889045',NULL,NULL,NULL,NULL,NULL,NULL),(70,'fbedc517-f035-4224-a8bb-8f13839285b4',1,42,1,1,NULL,NULL,'804e18ee16c4e652e3cf0bdd0f36445b52359a6e45e9bfa1931d51f14c606c00',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:59:43.851763','2026-03-17 06:59:43.850000',NULL,NULL,1,0,'2026-03-16 22:59:43.851763',NULL,NULL,NULL,NULL,NULL,NULL),(71,'44e4f97b-5ace-4279-aedd-eeffe8c37bd1',1,42,1,1,NULL,NULL,'366a33456c208d33b00f848b5182d9dc77fb699f729c8684711e46ca99335ff8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:12:02.595586','2026-03-17 07:12:02.595000',NULL,NULL,1,0,'2026-03-16 23:12:02.595586',NULL,NULL,NULL,NULL,NULL,NULL),(72,'b93fa42b-428b-42d3-b256-43fd2750e343',1,42,1,1,NULL,NULL,'92edc1447539a63f2882d1e34b7fc909b82ebff0f900587e57391ac24b54c572',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:35:42.036490','2026-03-17 07:35:42.035000',NULL,NULL,1,0,'2026-03-16 23:35:42.036490',NULL,NULL,NULL,NULL,NULL,NULL),(73,'66c87673-862c-441f-9a5a-317ff725f5ac',1,42,1,1,NULL,NULL,'befa220ec4bdeac6412aa243c8b736af6c71e1eaf2665aadf18d9cce594dec50',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:37:33.276373','2026-03-17 07:37:33.274000',NULL,NULL,1,0,'2026-03-16 23:37:33.276373',NULL,NULL,NULL,NULL,NULL,NULL),(74,'8d938f96-45d2-40ef-a25f-06b545ca0188',1,42,1,1,NULL,NULL,'51df221db516bad738304aa5ed695fd5bdec441ab2280f4dcbb8a80054988fd4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:50:53.630289','2026-03-17 07:50:53.629000',NULL,NULL,1,0,'2026-03-16 23:50:53.630289',NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `sessao_usuario` VALUES (7,'63c37b7d-452b-4a86-aea0-d86a37df5023',1,42,1,1,NULL,NULL,'1372fc2f1b036f2b2eaaeb43b4c848d2bc1f6d000fe7547ee335ffaa5c7962a2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:05.817284','2026-03-15 12:01:05.816000',NULL,NULL,1,0,'2026-03-15 04:01:05.817284',NULL,NULL,NULL,NULL,NULL,NULL),(8,'b39ce1df-7561-459d-acc9-94d0ebe3eb21',1,42,1,1,NULL,NULL,'eb37f4e0fc8692e22c3fb36c6534970edad66762027721b31fd4066240f0e23d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:41.237955','2026-03-15 12:01:41.237000',NULL,NULL,1,0,'2026-03-15 04:01:41.237955',NULL,NULL,NULL,NULL,NULL,NULL),(9,'4cb66dd7-0573-420e-8ee3-35a16c0b8354',1,42,1,1,NULL,NULL,'cee05051dc58779e8644c9ca5504d973527acd3089c95ada44df2750bdebe2a4',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:03:46.388138','2026-03-15 12:03:46.387000',NULL,NULL,1,0,'2026-03-15 04:03:46.388138',NULL,NULL,NULL,NULL,NULL,NULL),(10,'2d3f8c43-6965-4796-bb51-5cfa62cda2da',1,42,1,1,NULL,NULL,'f51713aca9e0affe852e6a510cb8d87fb8447b521523209a210768507ffc6302',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:27.379626','2026-03-15 12:08:27.368000',NULL,NULL,1,0,'2026-03-15 04:08:27.379626',NULL,NULL,NULL,NULL,NULL,NULL),(11,'2f6d3f77-1f54-4564-8fb7-014d6f78866f',1,42,1,1,NULL,NULL,'e7317224ce17d218708316ed36838c06f4027a4ca72dd982971a395a771dd4a1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:50.176704','2026-03-15 12:08:50.175000',NULL,NULL,1,0,'2026-03-15 04:08:50.176704',NULL,NULL,NULL,NULL,NULL,NULL),(12,'e144b098-9911-4205-8ae1-06828e2f987f',1,42,1,1,NULL,NULL,'3adb704fa919ccda9b98001ad2c36762917b309fbfd58d9813ab44e074c8f7b6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:12:14.179418','2026-03-15 12:12:14.178000',NULL,NULL,1,0,'2026-03-15 04:12:14.179418',NULL,NULL,NULL,NULL,NULL,NULL),(13,'397ae7a5-01eb-41c9-bde3-b71553c18da1',1,42,1,1,NULL,NULL,'a3e36c54a2f521f2403d7dbf972699b009b3778d4262f26b03fe0d216d3131b7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:11.011380','2026-03-15 12:14:11.004000',NULL,NULL,1,0,'2026-03-15 04:14:11.011380',NULL,NULL,NULL,NULL,NULL,NULL),(14,'dd97f6f7-55f8-45bd-8866-be0c7b7f7afd',1,42,1,1,NULL,NULL,'871d0b640f96992252ffbf2d9f83382a3a08398e010ef1a2b7ffdb52fff3ca75',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:29.945664','2026-03-15 12:14:29.944000',NULL,NULL,1,0,'2026-03-15 04:14:29.945664',NULL,NULL,NULL,NULL,NULL,NULL),(15,'13249301-44c2-49fc-8f06-a941c8dbd883',1,42,1,1,NULL,NULL,'b902ac1b34000f57048d9a7b455389d4853b5de92dea9731e64c366ec1de6db2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:05.577331','2026-03-15 12:29:05.527000',NULL,NULL,1,0,'2026-03-15 04:29:05.577331',NULL,NULL,NULL,NULL,NULL,NULL),(16,'1ab7c4ec-55ec-44a8-9fed-e5993231f768',1,42,1,1,NULL,NULL,'12d51baea86c236f511a88c8a4771b5ea749b48b59b3566892cfea9228594aab',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:28.697984','2026-03-15 12:29:28.696000',NULL,NULL,1,0,'2026-03-15 04:29:28.697984',NULL,NULL,NULL,NULL,NULL,NULL),(17,'1f103d68-a824-4fe1-a51d-16ada7bfaa2f',1,42,1,1,NULL,NULL,'882dd04c16cb0024d88c6d2792071e763f5e5906fccca406b99fa523be1806ad',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:38:21.583153','2026-03-15 12:38:21.579000',NULL,NULL,1,0,'2026-03-15 04:38:21.583153',NULL,NULL,NULL,NULL,NULL,NULL),(18,'58075872-3163-4505-9c92-660c35893b77',1,42,1,1,NULL,NULL,'ee653d551b1cb460d4f3707c99772ac5b81f530dca5cb43d29134d878ebf3eb6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:29.831578','2026-03-15 12:43:29.830000',NULL,NULL,1,0,'2026-03-15 04:43:29.831578',NULL,NULL,NULL,NULL,NULL,NULL),(19,'c9cd4225-14ec-4a92-b6b3-47c521ce771b',1,42,1,1,NULL,NULL,'d0785168510e09119c38365c10ef25a5c8673d9f7da617f22c286348fb18ef85',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:42.608531','2026-03-15 12:43:42.607000',NULL,NULL,1,0,'2026-03-15 04:43:42.608531',NULL,NULL,NULL,NULL,NULL,NULL),(20,'3c5da068-7630-4c91-a709-47fa8cef55d6',1,42,1,1,NULL,NULL,'7f34ec46414d5dfa85aa6823ed0b9772616a831ff2c0d8718fa5fc7a7a1eeaf5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:44:05.883072','2026-03-15 12:44:05.882000',NULL,NULL,1,0,'2026-03-15 04:44:05.883072',NULL,NULL,NULL,NULL,NULL,NULL),(21,'8fe9121c-c63c-43a0-88f5-81f6f1e70ff3',1,42,1,1,NULL,NULL,'26f46ab3f1e78157bf5dd91e81437d6a6251c78ae7cc5fb9dc9db79c8feecd1e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:46:52.323077','2026-03-15 12:46:52.321000',NULL,NULL,1,0,'2026-03-15 04:46:52.323077',NULL,NULL,NULL,NULL,NULL,NULL),(22,'55a81184-9657-4b28-8540-5bf0e217eeae',1,42,1,1,NULL,NULL,'a18136a06af71bcb136c75c5bbfbc166b3ca9c853956997d9efc0e6ad9e3996d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:52:07.194269','2026-03-15 12:52:07.192000',NULL,NULL,1,0,'2026-03-15 04:52:07.194269',NULL,NULL,NULL,NULL,NULL,NULL),(23,'c3e7b60e-d6b7-4042-9b8e-045d61d9518c',1,42,1,1,NULL,NULL,'fb00d6352697002685225620f45f854828ba6d29e6a87719928dea3e1aae6a8c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.549440','2026-03-15 12:53:57.548000',NULL,NULL,1,0,'2026-03-15 04:53:57.549440',NULL,NULL,NULL,NULL,NULL,NULL),(24,'d99e2221-1442-41a9-88ea-8b93eb13912a',1,42,1,1,NULL,NULL,'560906d8554298e4dca2f11fcfd9c327c39322471fcb34f11243b240a6259ec9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.812067','2026-03-15 12:53:57.805000',NULL,NULL,1,0,'2026-03-15 04:53:57.812067',NULL,NULL,NULL,NULL,NULL,NULL),(25,'0d218d46-92b4-45f5-90f0-3fe1b281eb72',1,42,1,1,NULL,NULL,'d53958ce98a94e0adf1628b3a524fecf24acefe9f521ae8b2fbf6b2a092675af',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:54:44.965119','2026-03-15 12:54:44.964000',NULL,NULL,1,0,'2026-03-15 04:54:44.965119',NULL,NULL,NULL,NULL,NULL,NULL),(26,'a4a074ec-0b7a-4186-ac94-c67f0fc9fb26',1,42,1,1,NULL,NULL,'777637c164c144831659549628ecd2238b224efd07c38d44afe82d100a3ab66d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:59:02.337344','2026-03-15 12:59:02.335000',NULL,NULL,1,0,'2026-03-15 04:59:02.337344',NULL,NULL,NULL,NULL,NULL,NULL),(27,'afe722c9-ef79-4fcb-bf7c-360d9670d6ec',1,42,1,1,NULL,NULL,'3c8ddda048fa01707486bc2623b27b795be575fdfcac170816e033bc50b65fd5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:01:49.926764','2026-03-15 13:01:49.925000',NULL,NULL,1,0,'2026-03-15 05:01:49.926764',NULL,NULL,NULL,NULL,NULL,NULL),(28,'9b9c4550-4e6d-444c-a3dc-b4e94f3bc3e4',1,42,1,1,NULL,NULL,'1722fb2391563a12a08db86c7a6185846b41cf32e351038b802d8debdc935d7d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:04:31.209876','2026-03-15 13:04:31.208000',NULL,NULL,1,0,'2026-03-15 05:04:31.209876',NULL,NULL,NULL,NULL,NULL,NULL),(29,'8ac9f6d8-fb40-4885-9986-65b5fc5c84b2',1,42,1,1,NULL,NULL,'6c61a69433e695be84fbf9b9f59b788e5593ca03e34d1889992bee938f4a27c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:05:24.089442','2026-03-15 13:05:24.087000',NULL,NULL,1,0,'2026-03-15 05:05:24.089442',NULL,NULL,NULL,NULL,NULL,NULL),(30,'b18c5b34-8442-4215-a99d-50b355959639',1,42,1,1,NULL,NULL,'524f43c0cae88f5940ed43a9a9bfa507041d6e263c25ac292b43c9399dc579a8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:07:02.949027','2026-03-15 13:07:02.946000',NULL,NULL,1,0,'2026-03-15 05:07:02.949027',NULL,NULL,NULL,NULL,NULL,NULL),(31,'2de510c9-3d05-4f64-ba88-724ccaa67cd9',1,42,1,1,NULL,NULL,'86fada34141e91b2111e1a4adb1d608192278d8d003bdf76ce238c0d3b34896b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:10:18.915385','2026-03-15 13:10:18.913000',NULL,NULL,1,0,'2026-03-15 05:10:18.915385',NULL,NULL,NULL,NULL,NULL,NULL),(32,'e412dc45-9a52-4c20-8872-e279fb7c5ee3',1,42,1,1,NULL,NULL,'ec2214b4e05e9a2ac5ceb8e8d7928747260cc0f312548dc13ca82275987d9280',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:11:06.087464','2026-03-15 13:11:06.086000',NULL,NULL,1,0,'2026-03-15 05:11:06.087464',NULL,NULL,NULL,NULL,NULL,NULL),(33,'07d17b58-4172-4d4b-ac37-fd4a4478c275',1,42,1,1,NULL,NULL,'c4d78d54a26ea192a604b14e20b74a9658d9a1c338fe30d67fdd5a797bbeae96',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:13:08.825375','2026-03-15 13:13:08.824000',NULL,NULL,1,0,'2026-03-15 05:13:08.825375',NULL,NULL,NULL,NULL,NULL,NULL),(34,'d31b6c73-2d2c-4452-8c1e-376ec08adace',1,42,1,1,NULL,NULL,'e7f8c8b98aa3e810fa7613e91f71cf9384282a3a15b9491d9a0455a184ad38d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:19:33.582081','2026-03-15 13:19:33.580000',NULL,NULL,1,0,'2026-03-15 05:19:33.582081',NULL,NULL,NULL,NULL,NULL,NULL),(35,'f3f52003-da54-4489-8c3b-84582fb4b097',1,42,1,1,NULL,NULL,'9f1793aeb07425915397c5a27f8be18767b13d8ac692cfe3722483ca0ca26f16',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:20:16.048413','2026-03-15 13:20:16.047000',NULL,NULL,1,0,'2026-03-15 05:20:16.048413',NULL,NULL,NULL,NULL,NULL,NULL),(36,'f669359c-77b2-4e95-a951-e94f19a4c3f0',1,42,1,1,NULL,NULL,'4f5fb83da594beb48268959b625532c8eca7d8aea1f07fac379c7b5a420cbb9c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:23:45.486190','2026-03-15 13:23:45.485000',NULL,NULL,1,0,'2026-03-15 05:23:45.486190',NULL,NULL,NULL,NULL,NULL,NULL),(37,'a47179c5-7506-4981-8874-4d375b6db2a5',1,42,1,1,NULL,NULL,'3f1fe25ae0e4f047a55d2e2fa4306b8c05157969c8ff46dc60daa9765e6b4670',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:24:05.181714','2026-03-15 13:24:05.180000',NULL,NULL,1,0,'2026-03-15 05:24:05.181714',NULL,NULL,NULL,NULL,NULL,NULL),(38,'f8e70a89-7e2a-499b-9ad8-a3041ca84674',1,42,1,1,NULL,NULL,'1fc1055ff66c52efff0f050e9b9f6563b50215f5a2c441ac9700e1c25c88ad22',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:25:01.357715','2026-03-15 13:25:01.356000',NULL,NULL,1,0,'2026-03-15 05:25:01.357715',NULL,NULL,NULL,NULL,NULL,NULL),(39,'2585de0f-319a-486a-ba66-c0fb9290b0fb',1,42,1,1,NULL,NULL,'d677c12877e0cecd198e649b8efee8312f25554bb5fe7dd772948bc8d20bbae6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:28:23.799640','2026-03-15 13:28:23.797000',NULL,NULL,1,0,'2026-03-15 05:28:23.799640',NULL,NULL,NULL,NULL,NULL,NULL),(40,'faf72121-36ce-463b-a77a-318d5ddc9e0f',1,42,1,1,NULL,NULL,'a6a1c717a2807104c181ab4f659558b611239fb88dc3a459852900d571a1de4e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:24.565813','2026-03-15 13:29:24.564000',NULL,NULL,1,0,'2026-03-15 05:29:24.565813',NULL,NULL,NULL,NULL,NULL,NULL),(41,'6e513914-1319-4d5d-be03-fde1eb0222b9',1,42,1,1,NULL,NULL,'a1d23df2b021e98171cf65e5803a7276152e6b2d724c8a5c4033fc47a3c02330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:42.507935','2026-03-15 13:29:42.506000',NULL,NULL,1,0,'2026-03-15 05:29:42.507935',NULL,NULL,NULL,NULL,NULL,NULL),(42,'4816f1ab-c5e8-4515-a20d-8cc56613fabb',1,42,1,1,NULL,NULL,'4d7a1e2d9ac6f80e53a72219992fd6cea2a671934edb62d9459504afb09552f1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:34:19.502653','2026-03-15 13:34:19.501000',NULL,NULL,1,0,'2026-03-15 05:34:19.502653',NULL,NULL,NULL,NULL,NULL,NULL),(43,'3ed53aee-4311-4bbc-8f36-6ae72bdaf19e',1,42,1,1,NULL,NULL,'5303f79f6960a59ca5aaf5e734eed88f83205405fb72d3e72d2e772c17918794',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:47:06.103453','2026-03-15 13:47:06.101000',NULL,NULL,1,0,'2026-03-15 05:47:06.103453',NULL,NULL,NULL,NULL,NULL,NULL),(44,'b18293a4-59cb-4ff2-8656-4062d0c0b85f',1,42,1,1,NULL,NULL,'acb1d550e8f4e2b8dba1035a6ac81477289c6d38a0527fcc2c8c5658ce993f9a',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:04.716838','2026-03-15 13:49:04.715000',NULL,NULL,1,0,'2026-03-15 05:49:04.716838',NULL,NULL,NULL,NULL,NULL,NULL),(45,'1af2b45c-ac3a-4434-b220-acb2c566fb67',1,42,1,1,NULL,NULL,'c144c2a5f987ee11854fba3963bcec76fb5193156ceef574096654849e401da8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:51.795570','2026-03-15 13:49:51.794000',NULL,NULL,1,0,'2026-03-15 05:49:51.795570',NULL,NULL,NULL,NULL,NULL,NULL),(46,'0176059d-2ca7-47fa-b75c-fec17e8e5d84',1,42,1,1,NULL,NULL,'92b3eb710653308e3bf4bd243e79b62153a54a4d427a7fd472a345ed6ba1a4c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:51:18.543658','2026-03-15 13:51:18.543000',NULL,NULL,1,0,'2026-03-15 05:51:18.543658',NULL,NULL,NULL,NULL,NULL,NULL),(47,'68640f65-cd41-437e-b5ca-1f3bfbd0ba73',1,42,1,1,NULL,NULL,'f6730df241ca451cb6cc9aa1e2fa1b5f8ab8f5060d94123cb17d6ad6411463d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:52:40.592110','2026-03-15 13:52:40.590000',NULL,NULL,1,0,'2026-03-15 05:52:40.592110',NULL,NULL,NULL,NULL,NULL,NULL),(48,'a3106b09-f571-4853-abcb-24616ea7bf2d',1,42,1,1,NULL,NULL,'a69c2b85547f87d8ce9ef80a1f1bae89f2baa86a4a09c75dbd553315ca025fa9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:53:20.003322','2026-03-15 13:53:20.001000',NULL,NULL,1,0,'2026-03-15 05:53:20.003322',NULL,NULL,NULL,NULL,NULL,NULL),(49,'4a05a12b-efd9-4afd-a675-87ae6c71505a',1,42,1,1,NULL,NULL,'41a2228d80125b77416308aa72c7ada8e1b92ed81eeaa8e107b989896a5fcae7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:15:43.228380','2026-03-15 14:15:43.227000',NULL,NULL,1,0,'2026-03-15 06:15:43.228380',NULL,NULL,NULL,NULL,NULL,NULL),(50,'5d15c751-c5aa-41f3-a6a1-2ba53b051ad2',1,42,1,1,NULL,NULL,'4803775615d816cdc13c43b6482d76854cf32928fb4f4f0f129dc096ce84a18b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:29:47.314898','2026-03-15 14:29:47.313000',NULL,NULL,1,0,'2026-03-15 06:29:47.314898',NULL,NULL,NULL,NULL,NULL,NULL),(51,'0d3dfb20-53c1-46c9-9998-a1cfd26396cc',1,42,1,1,NULL,NULL,'0e0390b5245ca5e54eec47bbe454a7ac8843d94c4cba035e9f1cd9488134f330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:41:11.699902','2026-03-15 14:41:11.698000',NULL,NULL,1,0,'2026-03-15 06:41:11.699902',NULL,NULL,NULL,NULL,NULL,NULL),(52,'bca53638-a182-44fe-9451-a80b8ee440bc',1,42,1,1,NULL,NULL,'a2bdbbaf06a9708d00051add445c25e8ba9422832889fd41d1ab977735d9fe80',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:43:58.577254','2026-03-15 14:43:58.575000',NULL,NULL,1,0,'2026-03-15 06:43:58.577254',NULL,NULL,NULL,NULL,NULL,NULL),(53,'522e2766-d026-410d-85dd-f21b37e23d1d',1,42,1,1,NULL,NULL,'409cf7bad8ffebf248f3dcb5106bbba228db8bce130521af8fcabd101a23d7cc',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:47:51.929614','2026-03-15 14:47:51.927000',NULL,NULL,1,0,'2026-03-15 06:47:51.929614',NULL,NULL,NULL,NULL,NULL,NULL),(54,'e32c3349-14c1-4b9c-bbcf-ae81432eea55',1,42,1,1,NULL,NULL,'9bd4705293555f6ac1ca2feadc9fc296d8b74310af622eefb9cc48e5833ab717',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:52:08.454722','2026-03-15 14:52:08.453000',NULL,NULL,1,0,'2026-03-15 06:52:08.454722',NULL,NULL,NULL,NULL,NULL,NULL),(55,'670299a1-f54e-4e5f-a4a6-e73ef010e578',1,42,1,1,NULL,NULL,'87418159553fb03bd6e62cb7b80aeb7af3e52128feaeb5dcea81643c83d81629',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:55:27.345484','2026-03-15 14:55:27.342000',NULL,NULL,1,0,'2026-03-15 06:55:27.345484',NULL,NULL,NULL,NULL,NULL,NULL),(56,'ce264be2-c41e-427d-93cf-4faf1870740d',1,42,1,1,NULL,NULL,'b81b4c61a9330dfa0290e9a5b3cc77109d0ca292c95a7d6e105326aa5f7710fb',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:24:04.569310','2026-03-17 06:24:04.554000',NULL,NULL,1,0,'2026-03-16 22:24:04.569310',NULL,NULL,NULL,NULL,NULL,NULL),(57,'0db5dde4-0fa2-41ae-a8d6-8d042cd2e082',1,42,1,1,NULL,NULL,'eb335f0c74a9e213608127a17dc82ca476719214773266aec02b6b1fafec0fff',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.812490','2026-03-17 06:25:25.811000',NULL,NULL,1,0,'2026-03-16 22:25:25.812490',NULL,NULL,NULL,NULL,NULL,NULL),(58,'0f8bd2f2-9667-4acc-a56d-e035d5303759',1,42,1,1,NULL,NULL,'8861b5cf060a3fdcfa568589c04cef2b157a3027ffa043732f941727ec790976',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.940807','2026-03-17 06:25:25.938000',NULL,NULL,1,0,'2026-03-16 22:25:25.940807',NULL,NULL,NULL,NULL,NULL,NULL),(59,'4dde9d25-9151-49c6-b88f-8225669b5c1a',1,42,1,1,NULL,NULL,'f341d4930e8ed0054aedd5055572e8e531494c5a9a508ddc462275a3f8e7c35e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:35:23.378417','2026-03-17 06:35:23.376000',NULL,NULL,1,0,'2026-03-16 22:35:23.378417',NULL,NULL,NULL,NULL,NULL,NULL),(60,'7d293064-9697-4f28-af2a-2d147b68f3bf',1,42,1,1,NULL,NULL,'2465ee9007e950467e2731a05f6940c42b2add6269f88497dd9e0bbda0e46aab',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:38:51.083680','2026-03-17 06:38:51.082000',NULL,NULL,1,0,'2026-03-16 22:38:51.083680',NULL,NULL,NULL,NULL,NULL,NULL),(61,'0b362983-ea96-435d-b349-1182b4864a98',1,42,1,1,NULL,NULL,'cab38f6d7dac91e02f1abd9885e1dfd51e6d01cb3099558b27685d947f1df373',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:40:01.718458','2026-03-17 06:40:01.717000',NULL,NULL,1,0,'2026-03-16 22:40:01.718458',NULL,NULL,NULL,NULL,NULL,NULL),(62,'205e5718-bdd1-4576-bb7d-b186f62c6fc1',1,42,1,1,NULL,NULL,'ed5a4e43c718119c84dbaa4563d2b6c079d4e6737224ebe766591789ed97878f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:03.769537','2026-03-17 06:43:03.768000',NULL,NULL,1,0,'2026-03-16 22:43:03.769537',NULL,NULL,NULL,NULL,NULL,NULL),(63,'e6bfb0c4-5d28-4102-a911-b7f0f7b7f1de',1,42,1,1,NULL,NULL,'12cafcefbeba26e5c96db7ba273371d0b50ca5ce31e7589994b421830ab74582',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:21.698424','2026-03-17 06:43:21.697000',NULL,NULL,1,0,'2026-03-16 22:43:21.698424',NULL,NULL,NULL,NULL,NULL,NULL),(64,'8296bcf0-c33f-4d0a-b674-caf510a6286d',1,42,1,1,NULL,NULL,'594167c174364ed6863af304f145356e220e9fd37cb4db5f7ce0d50708fdd731',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:52:13.880474','2026-03-17 06:52:13.879000',NULL,NULL,1,0,'2026-03-16 22:52:13.880474',NULL,NULL,NULL,NULL,NULL,NULL),(65,'6e7c7a1b-2590-44cf-b4ab-d5b746edebc8',1,42,1,1,NULL,NULL,'d57a14c6abefa3a8a62a22fb3f5c93ad87110d77df7978353ceec76625a4bea4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:54:35.486146','2026-03-17 06:54:35.485000',NULL,NULL,1,0,'2026-03-16 22:54:35.486146',NULL,NULL,NULL,NULL,NULL,NULL),(66,'58cf0196-1fba-4b9b-87e8-9f461b079fb5',1,42,1,1,NULL,NULL,'de6e277deb3a1c05a51bb86ccdab7b02d210ef8662882f51318a5a13b5135419',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:21.990369','2026-03-17 06:57:21.988000',NULL,NULL,1,0,'2026-03-16 22:57:21.990369',NULL,NULL,NULL,NULL,NULL,NULL),(67,'d1805ea1-d6cf-4d7a-ad86-b5b34c098b28',1,42,1,1,NULL,NULL,'45100470d323ffc68ea37a87c251e9de9a8e4fdecd3745998c69d1a28b1b5cba',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:44.317456','2026-03-17 06:57:44.316000',NULL,NULL,1,0,'2026-03-16 22:57:44.317456',NULL,NULL,NULL,NULL,NULL,NULL),(68,'2f12c7c9-3d29-4013-acf0-723b2a179f9d',1,42,1,1,NULL,NULL,'1e4d84197e1128f080a571e2a8c3dcdbaa5d5670a58c784f2e943e95d102481e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:12.306487','2026-03-17 06:58:12.305000',NULL,NULL,1,0,'2026-03-16 22:58:12.306487',NULL,NULL,NULL,NULL,NULL,NULL),(69,'f22372a2-a564-421d-8e0a-a5553071e740',1,42,1,1,NULL,NULL,'68f7de146c3ce12e5ebe82a60bf7277e9d622240508dce923e6219be86628581',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:30.889045','2026-03-17 06:58:30.887000',NULL,NULL,1,0,'2026-03-16 22:58:30.889045',NULL,NULL,NULL,NULL,NULL,NULL),(70,'fbedc517-f035-4224-a8bb-8f13839285b4',1,42,1,1,NULL,NULL,'804e18ee16c4e652e3cf0bdd0f36445b52359a6e45e9bfa1931d51f14c606c00',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:59:43.851763','2026-03-17 06:59:43.850000',NULL,NULL,1,0,'2026-03-16 22:59:43.851763',NULL,NULL,NULL,NULL,NULL,NULL),(71,'44e4f97b-5ace-4279-aedd-eeffe8c37bd1',1,42,1,1,NULL,NULL,'366a33456c208d33b00f848b5182d9dc77fb699f729c8684711e46ca99335ff8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:12:02.595586','2026-03-17 07:12:02.595000',NULL,NULL,1,0,'2026-03-16 23:12:02.595586',NULL,NULL,NULL,NULL,NULL,NULL),(72,'b93fa42b-428b-42d3-b256-43fd2750e343',1,42,1,1,NULL,NULL,'92edc1447539a63f2882d1e34b7fc909b82ebff0f900587e57391ac24b54c572',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:35:42.036490','2026-03-17 07:35:42.035000',NULL,NULL,1,0,'2026-03-16 23:35:42.036490',NULL,NULL,NULL,NULL,NULL,NULL),(73,'66c87673-862c-441f-9a5a-317ff725f5ac',1,42,1,1,NULL,NULL,'befa220ec4bdeac6412aa243c8b736af6c71e1eaf2665aadf18d9cce594dec50',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:37:33.276373','2026-03-17 07:37:33.274000',NULL,NULL,1,0,'2026-03-16 23:37:33.276373',NULL,NULL,NULL,NULL,NULL,NULL),(74,'8d938f96-45d2-40ef-a25f-06b545ca0188',1,42,1,1,NULL,NULL,'51df221db516bad738304aa5ed695fd5bdec441ab2280f4dcbb8a80054988fd4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:50:53.630289','2026-03-17 07:50:53.629000',NULL,NULL,1,0,'2026-03-16 23:50:53.630289',NULL,NULL,NULL,NULL,NULL,NULL),(78,'3b817e39-233c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4ODc3MDIsImV4cCI6MTc3MzkxNjUwMn0.0SJm2FT5mgk0cEtaF752tWHd2UMHPFOHcOjlCFqXmdI',NULL,'::1','curl/8.13.0','2026-03-18 23:35:02.854844','2026-03-19 23:35:02.854844',NULL,NULL,1,0,'2026-03-18 23:35:02.854844',NULL,NULL,NULL,NULL,NULL,NULL),(79,'61576bee-09d5-42df-88ef-d509585ed06c',1,42,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3MjAsImV4cCI6MTc3MzkyMjUyMH0.wy0lwa6mw4LgT2050PzSyFKlB4sk9TCBTtA0IDuTpP4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:15:20.257667','2026-03-20 01:15:20.252000',NULL,NULL,1,0,'2026-03-19 01:15:20.257667',NULL,NULL,NULL,NULL,NULL,NULL),(80,'daa7e12b-fc80-4bc7-ab55-683fec51173c',1,42,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3NjAsImV4cCI6MTc3MzkyMjU2MH0.h0jR45ip_ANARg6gQgl587t9wEDtIqBEjtvFgqAS8I8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:16:00.352448','2026-03-20 01:16:00.351000',NULL,NULL,1,0,'2026-03-19 01:16:00.352448',NULL,NULL,NULL,NULL,NULL,NULL),(81,'99baf4e6-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4NzMsImV4cCI6MTc3MzkyMjY3M30.mdBPnnBO5Auwj-h1-ro0ndF47WgmakRY_WrOWwQFiFI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:17:53.891454','2026-03-20 01:17:53.891454',NULL,NULL,1,0,'2026-03-19 01:17:53.891454',NULL,NULL,NULL,NULL,NULL,NULL),(82,'a407badb-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4OTEsImV4cCI6MTc3MzkyMjY5MX0.hAw7Wh2zCpSxRDBE_FX5Vk6Sk8ABR7-tJD59kCwTBfU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:18:11.171812','2026-03-20 01:18:11.171812',NULL,NULL,1,0,'2026-03-19 01:18:11.171812',NULL,NULL,NULL,NULL,NULL,NULL),(83,'2253416f-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxMDMsImV4cCI6MTc3MzkyMjkwM30.MuE2l9617U93NCrowzGR_-Eu6AEh7PIMuqguX6dH4s4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:21:43.059699','2026-03-20 01:21:43.059699',NULL,NULL,1,0,'2026-03-19 01:21:43.059699',NULL,NULL,NULL,NULL,NULL,NULL),(84,'3a87ba86-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxNDMsImV4cCI6MTc3MzkyMjk0M30.m9CR0MQDPQB_Xj0u1NWgzlRFKc6I-yLwJVs82EgBgcM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:22:23.668904','2026-03-20 01:22:23.668904',NULL,NULL,1,0,'2026-03-19 01:22:23.668904',NULL,NULL,NULL,NULL,NULL,NULL),(85,'8bd193cd-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQyODAsImV4cCI6MTc3MzkyMzA4MH0.uzCjkX4jCPYFtlRJATxdx4qKlG64HL1bR2VueJLaw6Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:24:40.048329','2026-03-20 01:24:40.048329',NULL,NULL,1,0,'2026-03-19 01:24:40.048329',NULL,NULL,NULL,NULL,NULL,NULL),(86,'ddf05a6e-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ0MTcsImV4cCI6MTc3MzkyMzIxN30.YyqewlducVMkzvA3K31Wu2YWD5219J1h8vrDw7gXksg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:26:57.823193','2026-03-20 01:26:57.823193',NULL,NULL,1,0,'2026-03-19 01:26:57.823193',NULL,NULL,NULL,NULL,NULL,NULL),(87,'b7e93564-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ3ODMsImV4cCI6MTc3Mzg5ODM4M30.MvVHy2_1mE7CYYvoRlQJF0-47KoWZd4QgD7qSM1CoMU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:33:03.519678','2026-03-20 01:33:03.519678',NULL,NULL,1,0,'2026-03-19 01:33:03.519678',NULL,NULL,NULL,NULL,NULL,NULL),(88,'f623921c-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ4ODcsImV4cCI6MTc3Mzg5ODQ4N30.ny-59Ux4z6Qumy1tcWgNHMiTi1oTisnZANrc-w4_wQU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:34:47.920900','2026-03-20 01:34:47.920900',NULL,NULL,1,0,'2026-03-19 01:34:47.920900',NULL,NULL,NULL,NULL,NULL,NULL),(89,'807c65ef-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1NDksImV4cCI6MTc3Mzg5OTE0OX0.j9KbSZ9aKspBoblfo6m8IL54hdxPG2AZzXFNneUH6NM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:45:49.525350','2026-03-20 01:45:49.525350',NULL,NULL,1,0,'2026-03-19 01:45:49.525350',NULL,NULL,NULL,NULL,NULL,NULL),(90,'9713279e-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1ODcsImV4cCI6MTc3Mzg5OTE4N30.3uRLQ3w__cnPLEx2DZ4wU0JKCn-flXbSIc1RjMNdabA',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:46:27.423224','2026-03-20 01:46:27.423224',NULL,NULL,1,0,'2026-03-19 01:46:27.423224',NULL,NULL,NULL,NULL,NULL,NULL),(91,'f4823728-2350-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTY2MDMsImV4cCI6MTc3MzkwMDIwM30.ROXuwACgFYKfhhnKbIrWPxbTDZ-8qykclCAEr5s-s-I',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:03:23.172639','2026-03-20 02:03:23.172639',NULL,NULL,1,0,'2026-03-19 02:03:23.172639',NULL,NULL,NULL,NULL,NULL,NULL),(92,'05e86b18-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTgzNTAsImV4cCI6MTc3MzkwMTk1MH0.5e_Jo-MJrXheKXJ76zPbmBKwyUtXZoymHZBdGoMKib0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:32:30.350621','2026-03-20 02:32:30.350621',NULL,NULL,1,0,'2026-03-19 02:32:30.350621',NULL,NULL,NULL,NULL,NULL,NULL),(93,'6bbc96e5-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg1MjEsImV4cCI6MTc3MzkwMjEyMX0.AXOatB6alSgWn9s7ouThQiSD6RSWsi7sKg7CRU_qqLM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:35:21.190987','2026-03-20 02:35:21.190987',NULL,NULL,1,0,'2026-03-19 02:35:21.190987',NULL,NULL,NULL,NULL,NULL,NULL),(94,'d6dfd7e6-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg3MDAsImV4cCI6MTc3MzkwMjMwMH0.M_eq_NnB1GD2Yz6guy_d92JXJBuLQ9mxybPFQ9HEnaE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:38:20.938238','2026-03-20 02:38:20.938238',NULL,NULL,1,0,'2026-03-19 02:38:20.938238',NULL,NULL,NULL,NULL,NULL,NULL),(95,'8e718d15-2356-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTkwMDgsImV4cCI6MTc3MzkwMjYwOH0.x5w-LQQT0tf7t2Kf8rMNc6Dat-XDaMQTW-oZzsXft2Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:43:28.916202','2026-03-20 02:43:28.916202',NULL,NULL,1,0,'2026-03-19 02:43:28.916202',NULL,NULL,NULL,NULL,NULL,NULL),(96,'bbd4c3c5-2357-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk1MTQsImV4cCI6MTc3MzkwMzExNH0.V_8jJqkHOxZ4b2ERbwbSsIGQtybGC3ro09ZFlpEMw28',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:51:54.560610','2026-03-20 02:51:54.560610',NULL,NULL,1,0,'2026-03-19 02:51:54.560610',NULL,NULL,NULL,NULL,NULL,NULL),(97,'c67d7bbf-2358-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk5NjEsImV4cCI6MTc3MzkwMzU2MX0.ZoY3A7wDnBVhHwrJV3yEbo4mcNLGNo3kOdd2bEgkbqE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:59:21.940270','2026-03-20 02:59:21.940270',NULL,NULL,1,0,'2026-03-19 02:59:21.940270',NULL,NULL,NULL,NULL,NULL,NULL),(98,'fa983a96-2359-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDA0NzgsImV4cCI6MTc3MzkwNDA3OH0.ClzU14UooBL1tuYmPX2ja7E0mdCp-xFf3fHMycauJx0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:07:58.853802','2026-03-20 03:07:58.853802',NULL,NULL,1,0,'2026-03-19 03:07:58.853802',NULL,NULL,NULL,NULL,NULL,NULL),(99,'eef123e8-235c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDE3NDcsImV4cCI6MTc3MzkwNTM0N30.83IYHRGpQcuZstgyVBXzPv3cjglWBa74sfaHZmI_XCg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:29:07.794022','2026-03-20 03:29:07.794022',NULL,NULL,1,0,'2026-03-19 03:29:07.794022',NULL,NULL,NULL,NULL,NULL,NULL),(100,'092c6d95-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyMjEsImV4cCI6MTc3MzkwNTgyMX0.HnfUJAYvDHJ4B35si8QCph0UIjEFFex6pKyaenTHtk4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:01.300062','2026-03-20 03:37:01.300062',NULL,NULL,1,0,'2026-03-19 03:37:01.300062',NULL,NULL,NULL,NULL,NULL,NULL),(101,'22b406fb-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyNjQsImV4cCI6MTc3MzkwNTg2NH0.Fm7uXm1ddAZlVLoZGC82zECvOyGvHCGcHwggPzFEopQ',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:44.131764','2026-03-20 03:37:44.131764',NULL,NULL,1,0,'2026-03-19 03:37:44.131764',NULL,NULL,NULL,NULL,NULL,NULL),(102,'52c7c313-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIzNDQsImV4cCI6MTc3MzkwNTk0NH0.7hZPPoxhOuV3X_8pfOFsCUTAxlgi4ZUyTS0Kru4WwnI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:39:04.791734','2026-03-20 03:39:04.791734',NULL,NULL,1,0,'2026-03-19 03:39:04.791734',NULL,NULL,NULL,NULL,NULL,NULL),(103,'c557739f-2360-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDMzOTUsImV4cCI6MTc3MzkwNjk5NX0.Pi-i7G43HaRH3m-1lxERRKpu6aw541AxtatGoG3ZA5s',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:56:35.987141','2026-03-20 03:56:35.987141',NULL,NULL,1,0,'2026-03-19 03:56:35.987141',NULL,NULL,NULL,NULL,NULL,NULL),(104,'2be94184-2364-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDQ4NTYsImV4cCI6MTc3MzkwODQ1Nn0.mOE3hSflaxGaiGw6I_vf2sBz6cMtXneSvulADYcnEQE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 04:20:56.560475','2026-03-20 04:20:56.560475',NULL,NULL,1,0,'2026-03-19 04:20:56.560475',NULL,NULL,NULL,NULL,NULL,NULL),(105,'3546ebdb-b7a4-4b7b-8cf4-0f0926be1893',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 04:20:56.967102','2026-03-20 04:20:56.963000',NULL,NULL,1,0,'2026-03-19 04:20:56.967102',NULL,NULL,NULL,NULL,NULL,NULL),(106,'b141994e-236d-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDg5NDUsImV4cCI6MTc3MzkxMjU0NX0.21n99e5T9nLpiU2J4FbQdmAesm6NM2iCmTyu8Rmmosk',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:29:05.746978','2026-03-20 05:29:05.746978',NULL,NULL,1,0,'2026-03-19 05:29:05.746978',NULL,NULL,NULL,NULL,NULL,NULL),(107,'d3d57e7a-81f4-4022-a178-d6a327f2042d',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:29:05.753761','2026-03-20 05:29:05.753000',NULL,NULL,1,0,'2026-03-19 05:29:05.753761',NULL,NULL,NULL,NULL,NULL,NULL),(108,'3a9d926a-2370-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTAwMzUsImV4cCI6MTc3MzkxMzYzNX0.ee1i2TSJqxBwdjTdo_FM4ILdH7MrNOXhG8iyoMA6hZ8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:47:15.191052','2026-03-20 05:47:15.191052',NULL,NULL,1,0,'2026-03-19 05:47:15.191052',NULL,NULL,NULL,NULL,NULL,NULL),(109,'5ca0b438-93dd-49ed-81f4-53e07203fad2',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:47:15.261044','2026-03-20 05:47:15.258000',NULL,NULL,1,0,'2026-03-19 05:47:15.261044',NULL,NULL,NULL,NULL,NULL,NULL),(110,'ad463124-2378-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTM2NjMsImV4cCI6MTc3MzkxNzI2M30.3-pM_a8yKIW76voMl3BkpDeizUQMTEOHRzmf7-p7dow',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 06:47:43.530219','2026-03-20 06:47:43.530219',NULL,NULL,1,0,'2026-03-19 06:47:43.530219',NULL,NULL,NULL,NULL,NULL,NULL),(111,'620be80c-7487-4cec-871a-b0ea17a477b1',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 06:47:44.034757','2026-03-20 06:47:44.033000',NULL,NULL,1,0,'2026-03-19 06:47:44.034757',NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `sessao_usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14282,7 +14392,7 @@ CREATE TABLE `tipo_local` (
   `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_tipo_local`),
   UNIQUE KEY `uk_tipo_local_codigo` (`codigo`)
-) ENGINE=InnoDB AUTO_INCREMENT=322 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=298 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14372,7 +14482,7 @@ CREATE TABLE `totem_evento` (
   PRIMARY KEY (`id_totem_evento`),
   KEY `idx_te_totem` (`id_totem`),
   CONSTRAINT `fk_te_totem` FOREIGN KEY (`id_totem`) REFERENCES `totem` (`id_totem`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14381,7 +14491,7 @@ CREATE TABLE `totem_evento` (
 
 LOCK TABLES `totem_evento` WRITE;
 /*!40000 ALTER TABLE `totem_evento` DISABLE KEYS */;
-INSERT INTO `totem_evento` VALUES (1,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:37'),(2,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:39'),(3,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:41'),(4,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:11'),(5,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:27'),(6,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:28'),(7,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:37'),(8,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:38'),(9,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39'),(10,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39'),(11,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:40'),(12,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:41'),(13,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:01'),(14,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:02'),(15,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:03'),(16,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:20'),(17,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:21'),(18,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:22'),(19,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:53:59'),(20,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:55:09'),(21,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:15'),(22,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:29'),(23,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:06:32'),(24,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:07:30'),(25,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:12:15'),(26,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:35:09'),(27,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:41:39'),(28,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 03:00:34'),(29,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:10:27'),(30,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:24:10'),(31,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42'),(32,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42'),(33,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 23:35:46');
+INSERT INTO `totem_evento` VALUES (1,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:37'),(2,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:39'),(3,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:41'),(4,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:11'),(5,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:27'),(6,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:28'),(7,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:37'),(8,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:38'),(9,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39'),(10,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39'),(11,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:40'),(12,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:41'),(13,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:01'),(14,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:02'),(15,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:03'),(16,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:20'),(17,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:21'),(18,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:22'),(19,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:53:59'),(20,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:55:09'),(21,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:15'),(22,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:29'),(23,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:06:32'),(24,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:07:30'),(25,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:12:15'),(26,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:35:09'),(27,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:41:39'),(28,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 03:00:34'),(29,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:10:27'),(30,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:24:10'),(31,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42'),(32,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42'),(33,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 23:35:46'),(34,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 01:33:12'),(35,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:05:48'),(36,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:05:56'),(37,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:04'),(38,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:15'),(39,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:21');
 /*!40000 ALTER TABLE `totem_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14628,7 +14738,7 @@ CREATE TABLE `unidade` (
   KEY `idx_unidade_cidade` (`id_cidade`),
   CONSTRAINT `fk_unidade_cidade` FOREIGN KEY (`id_cidade`) REFERENCES `cidade` (`id_cidade`),
   CONSTRAINT `fk_unidade_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14637,7 +14747,7 @@ CREATE TABLE `unidade` (
 
 LOCK TABLES `unidade` WRITE;
 /*!40000 ALTER TABLE `unidade` DISABLE KEYS */;
-INSERT INTO `unidade` VALUES (1,1,1,'UPA CENTRAL','UPA',1,'2026-03-05 06:59:15.269884'),(2,1,1,'UBS VILA GALVAO','UBS',1,'2026-03-10 23:36:32.576205'),(3,1,1,'PA MUNICIPAL','PA',1,'2026-03-10 23:36:32.576205');
+INSERT INTO `unidade` VALUES (1,1,1,'UPA CENTRAL','UPA',1,'2026-03-05 06:59:15.269884'),(2,1,1,'UBS VILA GALVAO','UBS',1,'2026-03-10 23:36:32.576205'),(3,1,1,'PA MUNICIPAL','PA',1,'2026-03-10 23:36:32.576205'),(4,1,NULL,'UBS Sul','UBS',1,'2026-03-17 06:43:40.000000'),(5,1,NULL,'Centro de Especialidades','AMBULATORIO',1,'2026-03-17 06:43:40.000000');
 /*!40000 ALTER TABLE `unidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14664,7 +14774,7 @@ CREATE TABLE `usuario` (
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `login` (`login`),
   KEY `idx_usuario_login` (`login`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14673,7 +14783,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,NULL,NULL,'evandro.andrade','$2a$10$Qf8vD2tC.4BmsoseuYU4DOETo./bUvHtFbBKQ4Ooq6D4q8AZ0PH2K',1,0,NULL,NULL,NULL,'2026-03-11 04:46:48.000000',NULL);
+INSERT INTO `usuario` VALUES (1,NULL,NULL,'evandro.andrade','$2a$10$Qf8vD2tC.4BmsoseuYU4DOETo./bUvHtFbBKQ4Ooq6D4q8AZ0PH2K',1,0,NULL,NULL,NULL,'2026-03-11 04:46:48.000000',NULL),(2,2,NULL,'maria.silva','$2a$10$uXuCam0bl/36gRyC2tjJ5eUsUR8eUzwI0fndGuT/WsNKJLcaykJl6',1,0,NULL,NULL,NULL,'2026-03-17 06:46:37.000000',NULL),(3,3,NULL,'joao.santos','$2a$10$iQxOtGfY9BAiLWhgY/R0D.misWxW94LSmQwnwmIM.n4ZZRvwAXI36',1,0,NULL,NULL,NULL,'2026-03-17 06:46:37.000000',NULL),(4,4,NULL,'ana.paula','$2a$10$JyVHzlj.pI8Uw3gghownku.3MUwJIYvHFN8L8M4.TSvGjmyFnmgCW',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(5,5,NULL,'carlos.pereira','$2a$10$fD.ZAyBjlFz6O5sjifRMaOAINkQPJq9LOx4Sx8JuQ7rnmrIJX.saG',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(6,6,NULL,'juliana.costa','$2a$10$Z/WTZYs.Yc9CFHNFlSPOFeKRVTzJR3y8rU5r620/fn9qJM5QHc8yu',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(7,7,NULL,'roberto.ferreira','$2a$10$xBoXIH0X2suhlh5OYkQZeOUorHEcY.ZjMAYo2IyW5LgbrJS.nk7vG',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(8,8,NULL,'patricia.almeida','$2a$10$T4iNpyCwCHGDBOM86l2t2uShiUmGAbpL0anATYwxbYNX6SR/pBi3.',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(9,9,NULL,'marcos.rodrigues','$2a$10$GPlVB5uYWaZ/lzWnbhpQi.gcJf8L7/gnWVCqPBk1V.vhp171J7HBu',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(10,10,NULL,'luciana.martins','$2a$10$BAKDkyk5tj/86l3UhISWkuVNIyvwvBiXirpscvPNoLf4yQbGuT.0C',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(11,11,NULL,'fernanda.souza','$2a$10$gIJlG0QLphA3zyZphkdKr.KUwLRPksVZ8eg2wi8hrC8Y33yfnXJde',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(12,12,NULL,'ricardo.lima','$2a$10$/TqJd1PNTMZXzNrIqLBP5.A8ubTy/zvI7vzpsLHSeJvSo2goBYp9.',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(13,13,NULL,'carla.dias','$2a$10$YIpPU15c79RKWWnrsUtIB.ENT1W7ZqV.GsVoO9og734WgZormSOZ6',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(14,14,NULL,'bruno.castro','$2a$10$zRPiQybIzxbSVqbP3GlqlO1gCDHW1kC.zvu2F05rsrfl17ld4a1Fq',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(15,15,NULL,'tatiana.reis','$2a$10$wNZNAt1mCEnQs5B.dNIso.AjaHvI4uPWO10Y/WeaIeecZ1yAT6nDi',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL);
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14729,7 +14839,7 @@ CREATE TABLE `usuario_contexto` (
   KEY `fk_uc_perfil` (`id_perfil`),
   CONSTRAINT `fk_uc_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
   CONSTRAINT `fk_uc_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14738,7 +14848,7 @@ CREATE TABLE `usuario_contexto` (
 
 LOCK TABLES `usuario_contexto` WRITE;
 /*!40000 ALTER TABLE `usuario_contexto` DISABLE KEYS */;
-INSERT INTO `usuario_contexto` VALUES (1,1,1,1,1,42,1,'2026-03-09 00:38:21.976238'),(2,3,1,1,1,1,1,'2026-03-09 02:32:59.658880'),(3,201,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(4,202,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(5,203,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(6,301,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(7,302,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(8,303,4,1,NULL,2,1,'2026-03-09 02:52:10.848236'),(9,401,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(10,402,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(11,403,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(12,501,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(13,502,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(14,503,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(15,5,1,1,1,1,1,'2026-03-09 03:43:17.787827'),(16,4,1,1,1,1,1,'2026-03-09 05:00:02.591093'),(17,1,1,1,1,1,1,'2026-03-11 04:46:48.664126');
+INSERT INTO `usuario_contexto` VALUES (2,3,1,1,1,1,1,'2026-03-09 02:32:59.658880'),(3,201,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(4,202,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(5,203,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(6,301,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(7,302,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(8,303,4,1,NULL,2,1,'2026-03-09 02:52:10.848236'),(9,401,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(10,402,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(11,403,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(12,501,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(13,502,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(14,503,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(15,5,1,1,1,1,1,'2026-03-09 03:43:17.787827'),(16,4,1,1,1,1,1,'2026-03-09 05:00:02.591093'),(18,1,1,1,1,42,1,'2026-03-18 22:46:14.032359');
 /*!40000 ALTER TABLE `usuario_contexto` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14788,7 +14898,7 @@ CREATE TABLE `usuario_local` (
   KEY `idx_ul_local` (`id_local`),
   CONSTRAINT `fk_ul_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`),
   CONSTRAINT `fk_ul_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14797,6 +14907,7 @@ CREATE TABLE `usuario_local` (
 
 LOCK TABLES `usuario_local` WRITE;
 /*!40000 ALTER TABLE `usuario_local` DISABLE KEYS */;
+INSERT INTO `usuario_local` VALUES (1,1,1,1,'2026-03-17 06:46:39'),(2,2,1,1,'2026-03-17 06:46:39'),(3,3,2,1,'2026-03-17 06:46:39'),(4,4,3,1,'2026-03-17 06:46:39'),(5,5,9,1,'2026-03-17 06:46:39'),(6,6,8,1,'2026-03-17 06:46:39'),(7,7,2,1,'2026-03-17 06:46:39'),(8,8,10,1,'2026-03-17 06:46:39'),(9,9,15,1,'2026-03-17 06:46:39'),(10,10,17,1,'2026-03-17 06:46:39'),(11,11,16,1,'2026-03-17 06:46:39'),(12,12,18,1,'2026-03-17 06:46:39'),(13,13,23,1,'2026-03-17 06:46:39'),(14,14,22,1,'2026-03-17 06:46:39'),(15,15,21,1,'2026-03-17 06:46:39');
 /*!40000 ALTER TABLE `usuario_local` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14858,7 +14969,7 @@ CREATE TABLE `usuario_perfil` (
 
 LOCK TABLES `usuario_perfil` WRITE;
 /*!40000 ALTER TABLE `usuario_perfil` DISABLE KEYS */;
-INSERT INTO `usuario_perfil` VALUES (1,42,'2026-03-17 00:17:58.039188');
+INSERT INTO `usuario_perfil` VALUES (1,1,'2026-03-17 07:02:03.000000'),(1,42,'2026-03-17 00:17:58.039188'),(2,2,'2026-03-17 06:46:39.000000'),(3,3,'2026-03-17 06:46:39.000000'),(4,4,'2026-03-17 06:46:39.000000'),(5,5,'2026-03-17 06:46:39.000000'),(6,6,'2026-03-17 06:46:39.000000'),(7,7,'2026-03-17 06:46:39.000000'),(8,8,'2026-03-17 06:46:39.000000'),(9,9,'2026-03-17 06:46:39.000000'),(10,10,'2026-03-17 06:46:39.000000'),(11,11,'2026-03-17 06:46:39.000000'),(12,12,'2026-03-17 06:46:39.000000'),(13,13,'2026-03-17 06:46:39.000000'),(14,14,'2026-03-17 06:46:39.000000'),(15,15,'2026-03-17 06:46:39.000000');
 /*!40000 ALTER TABLE `usuario_perfil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15417,6 +15528,45 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary view structure for view `vw_fila_painel`
+--
+
+DROP TABLE IF EXISTS `vw_fila_painel`;
+/*!50001 DROP VIEW IF EXISTS `vw_fila_painel`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_fila_painel` AS SELECT 
+ 1 AS `id_senha`,
+ 1 AS `codigo_visual`,
+ 1 AS `contexto_fluxo`,
+ 1 AS `prioridade`,
+ 1 AS `risco_dinamico`,
+ 1 AS `tempo_espera`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_gestao_fluxo_tempo_real`
+--
+
+DROP TABLE IF EXISTS `vw_gestao_fluxo_tempo_real`;
+/*!50001 DROP VIEW IF EXISTS `vw_gestao_fluxo_tempo_real`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_gestao_fluxo_tempo_real` AS SELECT 
+ 1 AS `id_senha`,
+ 1 AS `codigo_visual`,
+ 1 AS `contexto_fluxo`,
+ 1 AS `id_fluxo_status`,
+ 1 AS `hora_chegada`,
+ 1 AS `hora_chamada`,
+ 1 AS `minutos_espera`,
+ 1 AS `alerta_gestao`,
+ 1 AS `prioridade`,
+ 1 AS `id_atendimento`,
+ 1 AS `nao_compareceu`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary view structure for view `vw_laboratorio_protocolos_pendentes`
 --
 
@@ -15695,6 +15845,27 @@ UNLOCK TABLES;
 --
 -- Dumping events for database 'pronto_atendimento'
 --
+/*!50106 SET @save_time_zone= @@TIME_ZONE */ ;
+/*!50106 DROP EVENT IF EXISTS `ev_motor_manchester` */;
+DELIMITER ;;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;;
+/*!50003 SET character_set_client  = utf8mb4 */ ;;
+/*!50003 SET character_set_results = utf8mb4 */ ;;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;;
+/*!50003 SET @saved_time_zone      = @@time_zone */ ;;
+/*!50003 SET time_zone             = 'SYSTEM' */ ;;
+/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `ev_motor_manchester` ON SCHEDULE EVERY 1 MINUTE STARTS '2026-03-18 22:21:09' ON COMPLETION NOT PRESERVE ENABLE DO CALL sp_motor_manchester_runtime() */ ;;
+/*!50003 SET time_zone             = @saved_time_zone */ ;;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;;
+/*!50003 SET character_set_results = @saved_cs_results */ ;;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;;
+DELIMITER ;
+/*!50106 SET TIME_ZONE= @save_time_zone */ ;
 
 --
 -- Dumping routines for database 'pronto_atendimento'
@@ -17563,6 +17734,41 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_emitir_evento_manchester` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_emitir_evento_manchester`()
+BEGIN
+
+    INSERT INTO painel_consumo_evento (
+        origem,
+        id_evento,
+        painel_tipo,
+        id_local_operacional,
+        consumido_em
+    )
+    SELECT 
+        'FILA_OPERACIONAL_EVENTO',
+        s.id_senha,
+        'MANCHESTER',
+        s.id_local,
+        NOW()
+    FROM senha s
+    WHERE s.risco_dinamico_em >= NOW() - INTERVAL 5 SECOND;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_estoque_fluxo_his` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -18345,6 +18551,582 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_executor_assistencial_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_assistencial_runtime`(
+    IN p_id_sessao BIGINT,
+    IN p_acao VARCHAR(100),
+    IN p_id_referencia BIGINT,
+    IN p_payload JSON
+)
+    SQL SECURITY INVOKER
+main: BEGIN
+    -- Variáveis de suporte
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_perfil BIGINT;
+    DECLARE v_resultado_interno JSON;
+    DECLARE v_sucesso_interno BOOLEAN DEFAULT FALSE;
+    DECLARE v_msg_interna VARCHAR(500);
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_snapshot_ffa JSON;
+    DECLARE v_snapshot_atendimento JSON;
+
+    -- 1. Capturar contexto da sessão
+    SELECT id_usuario, id_perfil INTO v_id_usuario, v_id_perfil
+    FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao;
+
+    -- 2. Roteamento de Ações Assistenciais
+    CASE p_acao
+        WHEN 'REGISTRAR_TRIAGEM' THEN
+            CALL sp_triagem_registrar(
+                p_id_sessao, v_id_usuario, v_id_perfil, 
+                p_payload, v_resultado_interno, v_sucesso_interno, v_msg_interna
+            );
+
+        WHEN 'REGISTRAR_EVOLUCAO' THEN
+            CALL sp_atendimento_evolucao_salvar(
+                p_id_sessao, v_id_usuario, v_id_perfil, 
+                p_payload, v_resultado_interno, v_sucesso_interno, v_msg_interna
+            );
+
+        WHEN 'FINALIZAR_ATENDIMENTO' THEN
+            CALL sp_master_atendimento_finalizar(
+                p_id_sessao, v_id_usuario, v_id_perfil, 
+                p_payload, v_resultado_interno, v_sucesso_interno, v_msg_interna
+            );
+
+        WHEN 'REGISTRAR_EVASAO' THEN
+            START TRANSACTION;
+
+            -- 2.1 Captura snapshot do FFA
+            SELECT JSON_OBJECT(
+                'id_ffa', id, 
+                'id_paciente', id_paciente, 
+                'status', status,
+                'criado_em', criado_em,
+                'atualizado_em', atualizado_em
+            ) INTO v_snapshot_ffa
+            FROM ffa WHERE id = p_id_referencia FOR UPDATE;
+
+            -- 2.2 Encerrar atendimentos abertos vinculados
+            SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                'id_atendimento', id_atendimento,
+                'status', status,
+                'data_inicio', data_inicio
+            )) INTO v_snapshot_atendimento
+            FROM atendimento 
+            WHERE id_ffa = p_id_referencia AND status NOT IN ('CONCLUIDO','CANCELADO','ENCERRADO_EVASAO')
+            FOR UPDATE;
+
+            UPDATE atendimento
+            SET status = 'ENCERRADO_EVASAO', data_fim = NOW()
+            WHERE id_ffa = p_id_referencia AND status NOT IN ('CONCLUIDO','CANCELADO','ENCERRADO_EVASAO');
+
+            -- 2.3 Atualiza FFA como EVASÃO
+            UPDATE ffa 
+            SET status = 'EVASAO', encerrado_em = NOW()
+            WHERE id = p_id_referencia;
+
+            -- 2.4 Log imutável no Ledger
+            CALL sp_ledger_evento_log(
+                v_uuid_transacao,
+                v_id_usuario,
+                v_id_perfil,
+                'REGISTRAR_EVASAO',
+                v_snapshot_ffa,
+                'EXECUTADO',
+                p_payload,
+                'SUCESSO',
+                CONCAT('Paciente evadido, atendimentos encerrados: ', IFNULL(v_snapshot_atendimento,'[]'))
+            );
+
+            COMMIT;
+            SET v_sucesso_interno = TRUE;
+
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ação assistencial desconhecida no Executor';
+    END CASE;
+
+    -- 3. Validação de saída do motor
+    IF v_sucesso_interno = FALSE THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg_interna;
+    END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_executor_estoque_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_estoque_runtime`(
+    IN p_id_sessao BIGINT,
+    IN p_acao VARCHAR(100),
+    IN p_id_referencia BIGINT, -- ID do Item ou Atendimento
+    IN p_payload JSON
+)
+    SQL SECURITY INVOKER
+main: BEGIN
+    -- 1. DECLARAÇÕES (Padrão de Segurança)
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_perfil BIGINT;
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_sucesso_interno BOOLEAN DEFAULT FALSE;
+    DECLARE v_error_msg_final TEXT;
+
+    DECLARE v_quantidade DECIMAL(10,3);
+    DECLARE v_id_lote INT;
+    DECLARE v_id_local INT;
+    DECLARE v_snapshot_antes JSON;
+    DECLARE v_dupla_baixa TINYINT DEFAULT 0;
+
+    -- Handler Global: Captura erros e formata a mensagem para o Front
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 @msg = MESSAGE_TEXT;
+        ROLLBACK;
+        SET v_error_msg_final = CONCAT('MOTOR_ESTOQUE_FALHA: ', @msg);
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg_final;
+    END;
+
+    -- 2. CONTEXTO E IDEMPOTÊNCIA
+    SELECT id_usuario, id_perfil INTO v_id_usuario, v_id_perfil
+    FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao;
+
+    IF EXISTS (
+        SELECT 1 FROM ledger_evento_log
+        WHERE id_referencia = p_id_referencia AND acao = p_acao
+          AND status = 'SUCESSO' AND criado_em > NOW() - INTERVAL 1 MINUTE
+    ) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ERRO_IDEMPOTENCIA: Operação já realizada recentemente.';
+    END IF;
+
+    -- 3. ROTEAMENTO DE EIXOS
+    CASE p_acao
+
+        /* =============================================================
+           EIXO 1: FARMÁCIA (CLÍNICO / PACIENTE)
+        ============================================================= */
+        WHEN 'DISPENSAR_MEDICAMENTO' THEN
+            START TRANSACTION;
+            SET v_id_lote = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_lote'));
+            SET v_quantidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.quantidade'));
+
+            SELECT JSON_OBJECT('saldo', quantidade_atual, 'lote', numero_lote)
+            INTO v_snapshot_antes
+            FROM farmacia_estoque_lote WHERE id = v_id_lote FOR UPDATE;
+
+            IF (JSON_EXTRACT(v_snapshot_antes, '$.saldo') < v_quantidade) THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SALDO_INSUFICIENTE_NA_FARMACIA';
+            END IF;
+
+            SELECT dupla_baixa INTO v_dupla_baixa FROM farm_operacao WHERE id_lote = v_id_lote LIMIT 1;
+
+            UPDATE farmacia_estoque_lote SET quantidade_atual = quantidade_atual - v_quantidade WHERE id = v_id_lote;
+
+            INSERT INTO farmacia_atendimento_externo_dispensacao
+                (id_atendimento, id_lote, quantidade, id_usuario_dispensou, data_dispensacao)
+            VALUES (p_id_referencia, v_id_lote, v_quantidade, v_id_usuario, NOW());
+
+            IF v_dupla_baixa = 1 THEN
+                -- Registro de conferência/dupla checagem conforme regra do banco
+                INSERT INTO farmacia_atendimento_externo_dispensacao
+                    (id_atendimento, id_lote, quantidade, id_usuario_dispensou, data_dispensacao)
+                VALUES (p_id_referencia, v_id_lote, v_quantidade, v_id_usuario, NOW());
+            END IF;
+
+            CALL sp_ledger_evento_log(v_uuid_transacao, v_id_usuario, v_id_perfil, p_acao, v_snapshot_antes, 'EXECUTADO', p_payload, 'SUCESSO', 'Baixa Farmácia concluída');
+            COMMIT;
+            SET v_sucesso_interno = TRUE;
+
+        /* =============================================================
+           EIXO 2: ALMOXARIFADO CENTRAL (OPERACIONAL)
+           Uso: Limpeza, EPIs, Papelaria, Manutenção.
+        ============================================================= */
+        WHEN 'CONSUMO_ALMOXARIFADO' THEN
+            START TRANSACTION;
+            
+            SET v_id_local = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_local')); -- Ex: Central, Setor A, Copa
+            SET v_quantidade = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.quantidade'));
+
+            -- Trava e Snapshot (Tabela almoxarifado_central do seu dump)
+            SELECT JSON_OBJECT('saldo', quantidade_atual, 'minimo', quantidade_minima)
+            INTO v_snapshot_antes
+            FROM almoxarifado_central 
+            WHERE id_item = p_id_referencia AND id_local = v_id_local FOR UPDATE;
+
+            IF (JSON_EXTRACT(v_snapshot_antes, '$.saldo') < v_quantidade) THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SALDO_INSUFICIENTE_NO_ALMOXARIFADO';
+            END IF;
+
+            -- Baixa Operacional
+            UPDATE almoxarifado_central 
+            SET quantidade_atual = quantidade_atual - v_quantidade 
+            WHERE id_item = p_id_referencia AND id_local = v_id_local;
+
+            -- Verificação de Nível Crítico (Regra de 100 unidades ou valor da tabela)
+            IF (SELECT quantidade_atual FROM almoxarifado_central WHERE id_item = p_id_referencia AND id_local = v_id_local) <= JSON_EXTRACT(v_snapshot_antes, '$.minimo') THEN
+                INSERT INTO sistema_alerta (tipo, mensagem, nivel, criado_em)
+                VALUES ('ESTOQUE_CRITICO', CONCAT('Item ', p_id_referencia, ' atingiu o estoque mínimo no local ', v_id_local), 'ALTO', NOW());
+            END IF;
+
+            CALL sp_ledger_evento_log(v_uuid_transacao, v_id_usuario, v_id_perfil, p_acao, v_snapshot_antes, 'EXECUTADO', p_payload, 'SUCESSO', 'Consumo almoxarifado registrado');
+            COMMIT;
+            SET v_sucesso_interno = TRUE;
+
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ACAO_ESTOQUE_DESCONHECIDA';
+    END CASE;
+
+    IF NOT v_sucesso_interno THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ERRO_FATAL_MOTOR_ESTOQUE';
+    END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_executor_faturamento_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_faturamento_runtime`(
+    IN p_id_sessao BIGINT,
+    IN p_acao VARCHAR(100),
+    IN p_id_referencia BIGINT, -- ID do Atendimento (id_atendimento / id_ffa)
+    IN p_payload JSON          -- { "id_item": 123, "tipo": "MEDICAMENTO", "valor_un": 50.00, "qtd": 2 }
+)
+    SQL SECURITY INVOKER
+main: BEGIN
+    -- 1. DECLARAÇÕES TÉCNICAS
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_perfil BIGINT;
+    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
+    DECLARE v_sucesso_interno BOOLEAN DEFAULT FALSE;
+    DECLARE v_error_msg_final TEXT;
+    
+    DECLARE v_snapshot_antes JSON;
+    DECLARE v_id_conta_hospitalar BIGINT;
+    DECLARE v_valor_total DECIMAL(15,2);
+
+    -- Handler Global de Erro
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 @msg = MESSAGE_TEXT;
+        ROLLBACK;
+        SET v_error_msg_final = CONCAT('MOTOR_FATURAMENTO_FALHA: ', @msg);
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg_final;
+    END;
+
+    -- 2. CONTEXTO
+    SELECT id_usuario, id_perfil INTO v_id_usuario, v_id_perfil
+    FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao;
+
+    -- 3. LOCALIZA OU CRIA CONTA HOSPITALAR (Vínculo com Atendimento)
+    -- Tentamos pegar a conta ativa para este atendimento
+    SELECT id_conta INTO v_id_conta_hospitalar 
+    FROM fat_conta_hospitalar 
+    WHERE id_atendimento = p_id_referencia AND status = 'ABERTA' LIMIT 1;
+
+    -- Se não existir, a gente provisiona uma nova conta
+    IF v_id_conta_hospitalar IS NULL THEN
+        INSERT INTO fat_conta_hospitalar (id_atendimento, status, criado_em, id_usuario_abertura)
+        VALUES (p_id_referencia, 'ABERTA', NOW(), v_id_usuario);
+        SET v_id_conta_hospitalar = LAST_INSERT_ID();
+    END IF;
+
+    -- 4. INÍCIO DA TRANSAÇÃO
+    START TRANSACTION;
+
+    -- Capturamos o saldo atual da conta para o Snapshot
+    SELECT JSON_OBJECT('id_conta', v_id_conta_hospitalar, 'total_atual', total_acumulado)
+    INTO v_snapshot_antes
+    FROM fat_conta_hospitalar WHERE id_conta = v_id_conta_hospitalar FOR UPDATE;
+
+    -- 5. ROTEAMENTO FINANCEIRO
+    CASE p_acao
+
+        -- LANÇAR ITEM (Vindo da Farmácia ou Almoxarifado)
+        WHEN 'LANCAR_CONSUMO' THEN
+            SET v_valor_total = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.valor_un')) * JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.qtd'));
+
+            INSERT INTO fat_conta_itens (id_conta, id_item, tipo_item, quantidade, valor_unitario, valor_total, data_lancamento)
+            VALUES (
+                v_id_conta_hospitalar, 
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_item')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.tipo')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.qtd')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.valor_un')),
+                v_valor_total,
+                NOW()
+            );
+
+            -- Atualiza o total da conta
+            UPDATE fat_conta_hospitalar 
+            SET total_acumulado = total_acumulado + v_valor_total 
+            WHERE id_conta = v_id_conta_hospitalar;
+
+            SET v_sucesso_interno = TRUE;
+
+        -- LANÇAR TAXA / HONORÁRIO (Vindo da Fila/Atendimento Médico)
+        WHEN 'LANCAR_PROCEDIMENTO' THEN
+            -- Lógica para Tabela TUSS/Honorários
+            INSERT INTO fat_conta_procedimentos (id_conta, id_procedimento, valor, data_execucao)
+            VALUES (
+                v_id_conta_hospitalar,
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_procedimento')),
+                JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.valor')),
+                NOW()
+            );
+            
+            UPDATE fat_conta_hospitalar 
+            SET total_acumulado = total_acumulado + JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.valor'))
+            WHERE id_conta = v_id_conta_hospitalar;
+
+            SET v_sucesso_interno = TRUE;
+
+        -- FECHAR CONTA PARA AUDITORIA
+        WHEN 'FECHAR_CONTA' THEN
+            UPDATE fat_conta_hospitalar SET status = 'AGUARDANDO_FATURAMENTO', data_fechamento = NOW()
+            WHERE id_conta = v_id_conta_hospitalar;
+            SET v_sucesso_interno = TRUE;
+
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ACAO_FATURAMENTO_NAO_MAPEADA';
+    END CASE;
+
+    -- 6. AUDITORIA E FINALIZAÇÃO
+    IF v_sucesso_interno THEN
+        CALL sp_ledger_evento_log(
+            v_uuid_transacao, v_id_usuario, v_id_perfil, p_acao,
+            v_snapshot_antes, 'EXECUTADO', p_payload, 'SUCESSO', 'Lançamento financeiro concluído'
+        );
+        COMMIT;
+    ELSE
+        ROLLBACK;
+    END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_executor_fila_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_fila_runtime`(
+    IN p_id_sessao BIGINT,
+    IN p_acao VARCHAR(100),
+    IN p_id_referencia BIGINT,
+    IN p_payload JSON
+)
+BEGIN
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_unidade BIGINT;
+    DECLARE v_estado_destino VARCHAR(50);
+
+    -- 2. Recupera contexto básico da sessão
+    SELECT id_usuario, id_unidade INTO v_id_usuario, v_id_unidade
+    FROM sessao_usuario 
+    WHERE id_sessao_usuario = p_id_sessao;
+
+    -- 3. Extrai destino se houver transição de estado
+    SET v_estado_destino = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.estado_destino'));
+
+    -- 4. Roteamento de Ações de Fila
+    CASE UPPER(p_acao)
+        
+        WHEN 'CHAMAR_SENHA' THEN
+            UPDATE senha SET 
+                contexto_fluxo = IFNULL(v_estado_destino, 'CHAMADO'),
+                ultima_atualizacao = NOW()
+            WHERE id_senha = p_id_referencia;
+
+        WHEN 'INICIAR_TRIAGEM' THEN
+            UPDATE senha SET 
+                contexto_fluxo = 'EM_TRIAGEM',
+                ultima_atualizacao = NOW()
+            WHERE id_senha = p_id_referencia;
+
+        WHEN 'FINALIZAR_TRIAGEM' THEN
+            UPDATE senha SET 
+                contexto_fluxo = 'AGUARDANDO_MEDICO',
+                ultima_atualizacao = NOW()
+            WHERE id_senha = p_id_referencia;
+            
+        WHEN 'EVASAO' THEN
+            UPDATE senha SET 
+                contexto_fluxo = 'EVADIDO',
+                ativo = 0,
+                ultima_atualizacao = NOW()
+            WHERE id_senha = p_id_referencia;
+
+        ELSE
+            IF v_estado_destino IS NOT NULL THEN
+                UPDATE senha SET 
+                    contexto_fluxo = v_estado_destino,
+                    ultima_atualizacao = NOW()
+                WHERE id_senha = p_id_referencia;
+            END IF;
+    END CASE;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_executor_manchester_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_manchester_runtime`(
+    IN p_id_sessao BIGINT
+)
+    SQL SECURITY INVOKER
+BEGIN
+
+    -- =========================
+    -- 1. DECLARAÇÕES
+    -- =========================
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_perfil BIGINT;
+
+    DECLARE v_uuid CHAR(36);
+
+    DECLARE v_msg TEXT;
+    DECLARE v_msg_final TEXT;
+
+    -- =========================
+    -- 2. HANDLER
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_msg = MESSAGE_TEXT;
+        ROLLBACK;
+
+        SET v_msg_final = CONCAT('MANCHESTER_FAIL: ', v_msg);
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = v_msg_final;
+    END;
+
+    -- =========================
+    -- 3. CONTEXTO
+    -- =========================
+    SELECT id_usuario, id_perfil
+    INTO v_id_usuario, v_id_perfil
+    FROM sessao_usuario
+    WHERE id_sessao_usuario = p_id_sessao
+    LIMIT 1;
+
+    START TRANSACTION;
+
+    -- =========================
+    -- 4. ESCALONAMENTO DINÂMICO
+    -- =========================
+    UPDATE senha s
+    JOIN fluxo_transicao_matriz f
+        ON f.dominio_fluxo = 'FILA'
+       AND f.estado_origem COLLATE utf8mb4_0900_ai_ci = s.contexto_fluxo
+       AND f.ativo = 1
+
+    SET 
+        s.risco_dinamico = JSON_UNQUOTE(JSON_EXTRACT(f.condicao_validacao, '$.risco_resultante')),
+        s.risco_dinamico_em = NOW(6),
+        s.risco_dinamico_origem = 'SISTEMA',
+
+        s.prioridade = CASE JSON_UNQUOTE(JSON_EXTRACT(f.condicao_validacao, '$.risco_resultante'))
+            WHEN 'VERMELHO' THEN 100
+            WHEN 'LARANJA' THEN 80
+            WHEN 'AMARELO' THEN 50
+            WHEN 'VERDE' THEN 20
+            ELSE s.prioridade
+        END
+
+    WHERE
+        s.executado_em IS NULL
+        AND s.cancelado = 0
+        AND s.nao_compareceu = 0
+        AND TIMESTAMPDIFF(MINUTE, s.criado_em, NOW()) >
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(f.condicao_validacao, '$.tempo_max')) AS UNSIGNED);
+
+    -- =========================
+    -- 5. REORDENAÇÃO
+    -- =========================
+    SET @ordem := 0;
+
+    UPDATE senha
+    SET ordem_fila = (@ordem := @ordem + 1)
+    WHERE executado_em IS NULL
+      AND cancelado = 0
+      AND nao_compareceu = 0
+    ORDER BY prioridade DESC, criado_em ASC;
+
+    -- =========================
+    -- 6. LEDGER
+    -- =========================
+    SET v_uuid = UUID();
+
+    CALL sp_ledger_evento_log(
+        v_uuid,
+        v_id_usuario,
+        v_id_perfil,
+        'MANCHESTER_AUTO',
+        NULL,
+        'EXECUTADO',
+        JSON_OBJECT('tipo', 'RECLASSIFICACAO_AUTOMATICA'),
+        'SUCESSO',
+        'ESCALONAMENTO_SLA'
+    );
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_farmacia_dispensar_registrar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -18717,96 +19499,6 @@ proc_block: BEGIN
     SET p_resultado = JSON_OBJECT(
         'id_item', p_id_item,
         'id_ffa', p_id_ffa,
-        'uuid_transacao', v_uuid_transacao
-    );
-
-    COMMIT;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_ffa_criar` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ffa_criar`(
-    IN p_id_sessao BIGINT,
-    IN p_id_usuario BIGINT,
-    IN p_id_perfil BIGINT,
-    IN p_id_senha BIGINT,
-    OUT p_id_ffa BIGINT,
-    OUT p_resultado JSON,
-    OUT p_sucesso BOOLEAN,
-    OUT p_mensagem VARCHAR(500)
-)
-    SQL SECURITY INVOKER
-proc_block: BEGIN
-    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
-    DECLARE v_error_msg VARCHAR(500);
-    DECLARE v_id_local BIGINT;
-    DECLARE v_id_paciente BIGINT;
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
-        SET p_sucesso = FALSE;
-        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
-        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
-        ROLLBACK;
-    END;
-
-    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
-        SET p_sucesso = FALSE;
-        SET p_mensagem = 'Sessão inválida';
-        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
-        LEAVE proc_block;
-    END IF;
-
-    START TRANSACTION;
-
-    -- Obter paciente e local da senha
-    SELECT id_paciente, id_local INTO v_id_paciente, v_id_local
-    FROM senha
-    WHERE id_senha = p_id_senha;
-
-    -- Criar FFA
-    INSERT INTO ffa (
-        id_senha,
-        id_paciente,
-        id_local,
-        criado_por,
-        criado_em
-    ) VALUES (
-        p_id_senha,
-        v_id_paciente,
-        v_id_local,
-        p_id_usuario,
-        NOW(6)
-    );
-
-    SET p_id_ffa = LAST_INSERT_ID();
-
-    -- Ledger
-    CALL sp_ledger_evento_log(
-        v_uuid_transacao, p_id_usuario, p_id_perfil, 'FFA_CRIAR',
-        NULL, p_id_ffa,
-        JSON_OBJECT('id_senha', p_id_senha, 'id_paciente', v_id_paciente),
-        'SUCESSO', 'FFA criada a partir da senha'
-    );
-
-    SET p_sucesso = TRUE;
-    SET p_mensagem = 'FFA criada com sucesso';
-    SET p_resultado = JSON_OBJECT(
-        'id_ffa', p_id_ffa,
-        'id_senha', p_id_senha,
         'uuid_transacao', v_uuid_transacao
     );
 
@@ -21742,6 +22434,133 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_atendimento` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_atendimento`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON
+)
+    SQL SECURITY INVOKER
+proc: BEGIN
+    -- Variáveis de Controle
+    DECLARE v_action VARCHAR(50);
+    DECLARE v_id_atendimento BIGINT;
+    DECLARE v_id_paciente BIGINT;
+    DECLARE v_id_ffa BIGINT;
+    DECLARE v_status_novo VARCHAR(50);
+    
+    -- Variáveis de Dados Clínicos
+    DECLARE v_queixa_principal TEXT;
+    DECLARE v_evolucao_texto TEXT;
+    DECLARE v_diagnostico_cid VARCHAR(20);
+
+    -- Handler de Erro Global (Sua Lei)
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN
+        GET DIAGNOSTICS CONDITION 1 @msg = MESSAGE_TEXT;
+        ROLLBACK;
+        SET p_resultado = JSON_OBJECT(
+            'sucesso', FALSE, 
+            'mensagem', CONCAT('ERRO_MASTER_ATENDIMENTO: ', @msg),
+            'timestamp', NOW()
+        );
+    END;
+
+    -- 1. Guardião de Runtime (Sessão)
+    CALL sp_sessao_assert(p_id_sessao);
+
+    -- 2. Extração de Intenção e Dados
+    SET v_action = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.action'));
+    SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
+    SET v_id_paciente = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_paciente'));
+    SET v_id_ffa = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_ffa'));
+    
+    START TRANSACTION;
+
+    -- =========================================================================
+    -- FLUXO: INICIAR (Antiga sp_atendimento_iniciar)
+    -- =========================================================================
+    IF v_action = 'INICIAR' THEN
+        -- Cria o atendimento vinculado ao paciente e ao fluxo (FFA)
+        INSERT INTO atendimento (id_paciente, id_ffa, id_profissional, data_inicio, status)
+        VALUES (v_id_paciente, v_id_ffa, p_id_usuario, NOW(), 'EM_ATENDIMENTO');
+        
+        SET v_id_atendimento = LAST_INSERT_ID();
+        
+        -- Atualiza o status no FFA (Sincronia de Fluxo)
+        UPDATE ffa SET status = 'EM_CONSULTA', atualizado_em = NOW() WHERE id_ffa = v_id_ffa;
+        
+        SET v_status_novo = 'INICIADO';
+
+    -- =========================================================================
+    -- FLUXO: EVOLUIR (Antiga sp_atendimento_adicionar_evolucao)
+    -- =========================================================================
+    ELSEIF v_action = 'EVOLUIR' THEN
+        SET v_evolucao_texto = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data.evolucao'));
+        
+        INSERT INTO atendimento_evolucao (id_atendimento, id_profissional, texto_evolucao, criado_em)
+        VALUES (v_id_atendimento, p_id_usuario, v_evolucao_texto, NOW());
+        
+        SET v_status_novo = 'EVOLUCAO_ADICIONADA';
+
+    -- =========================================================================
+    -- FLUXO: FINALIZAR (Antiga sp_atendimento_finalizar)
+    -- =========================================================================
+    ELSEIF v_action = 'FINALIZAR' THEN
+        SET v_diagnostico_cid = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data.cid'));
+        
+        UPDATE atendimento SET 
+            data_fim = NOW(), 
+            status = 'CONCLUIDO',
+            cid_principal = v_diagnostico_cid
+        WHERE id_atendimento = v_id_atendimento;
+        
+        -- Libera o FFA
+        UPDATE ffa SET status = 'ALTA_MEDICA', atualizado_em = NOW() WHERE id_ffa = v_id_ffa;
+        
+        SET v_status_novo = 'CONCLUIDO';
+
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'AÇÃO NÃO RECONHECIDA NA MASTER ATENDIMENTO';
+    END IF;
+
+    -- 3. Auditoria Imutável Unificada
+    CALL sp_auditoria_evento_registrar(
+        p_id_sessao, 
+        'ATENDIMENTO', 
+        v_id_atendimento, 
+        v_action, 
+        p_payload, -- Salva o payload completo para rastreabilidade total
+        p_id_usuario, 
+        'atendimento', 
+        NULL
+    );
+
+    COMMIT;
+
+    -- 4. Output padronizado para o Front (React)
+    SET p_resultado = JSON_OBJECT(
+        'sucesso', TRUE,
+        'id_atendimento', v_id_atendimento,
+        'novo_status', v_status_novo,
+        'mensagem', 'Operação de atendimento processada com sucesso'
+    );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_master_atendimento_cancelar` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -22197,115 +23016,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_master_atualizar_paciente` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_atualizar_paciente`(
-    IN p_id_sessao BIGINT,
-    IN p_id_usuario BIGINT,
-    IN p_id_perfil BIGINT,
-    IN p_payload JSON,
-    OUT p_resultado JSON,
-    OUT p_sucesso BOOLEAN,
-    OUT p_mensagem VARCHAR(500)
-)
-    SQL SECURITY INVOKER
-proc_block: BEGIN
-    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
-    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
-    DECLARE v_id_paciente BIGINT DEFAULT NULL;
-    DECLARE v_nome_anterior VARCHAR(255) DEFAULT NULL;
-    DECLARE v_nome_novo VARCHAR(255) DEFAULT NULL;
-
-    -- =========================
-    -- HANDLER GLOBAL DE ERRO
-    -- =========================
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
-        SET p_sucesso = FALSE;
-        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
-        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
-        ROLLBACK;
-
-        CALL sp_ledger_evento_log(
-            v_uuid_transacao, p_id_usuario, p_id_perfil, 'PACIENTE_ATUALIZAR',
-            v_nome_anterior, v_nome_novo, p_payload, 'ERRO', v_error_msg
-        );
-    END;
-
-    -- =========================
-    -- VALIDAR SESSÃO
-    -- =========================
-    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
-        SET p_sucesso = FALSE;
-        SET p_mensagem = 'Sessão inválida';
-        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
-        LEAVE proc_block;
-    END IF;
-
-    -- =========================
-    -- INICIAR TRANSAÇÃO
-    -- =========================
-    START TRANSACTION;
-
-    -- =========================
-    -- OBTER PACIENTE E VALORES NOVOS
-    -- =========================
-    SET v_id_paciente = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_paciente'));
-    SET v_nome_novo = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.nome'));
-
-    SELECT nome INTO v_nome_anterior
-    FROM paciente
-    WHERE id_paciente = v_id_paciente;
-
-    -- =========================
-    -- ATUALIZAR PACIENTE
-    -- =========================
-    UPDATE paciente
-    SET nome = v_nome_novo,
-        atualizado_em = NOW(6)
-    WHERE id_paciente = v_id_paciente;
-
-    -- =========================
-    -- REGISTRAR LEDGER
-    -- =========================
-    CALL sp_ledger_evento_log(
-        v_uuid_transacao, p_id_usuario, p_id_perfil, 'PACIENTE_ATUALIZAR',
-        v_nome_anterior, v_nome_novo, p_payload, 'SUCESSO',
-        CONCAT('Paciente atualizado: ', v_nome_anterior, ' -> ', v_nome_novo)
-    );
-
-    -- =========================
-    -- RETORNO PADRÃO
-    -- =========================
-    SET p_sucesso = TRUE;
-    SET p_mensagem = CONCAT('Paciente atualizado com sucesso');
-    SET p_resultado = JSON_OBJECT(
-        'id_paciente', v_id_paciente,
-        'nome_anterior', v_nome_anterior,
-        'nome_novo', v_nome_novo,
-        'uuid_transacao', v_uuid_transacao
-    );
-
-    -- =========================
-    -- COMMIT TRANSAÇÃO
-    -- =========================
-    COMMIT;
-
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_master_cancelar_administracao_medicacao` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -22585,72 +23295,156 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb3_general_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_dispatcher`(
-    IN p_id_sessao_usuario BIGINT,
-    IN p_dominio VARCHAR(60),
-    IN p_acao VARCHAR(60),
+    IN p_id_sessao BIGINT,
+    IN p_uuid_transacao CHAR(36),
+    IN p_dominio VARCHAR(50),
+    IN p_acao VARCHAR(100),
     IN p_id_referencia BIGINT,
-    IN p_payload TEXT
+    IN p_payload JSON
 )
     SQL SECURITY INVOKER
-BEGIN
-
+main: BEGIN
     DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_unidade BIGINT;
+    DECLARE v_id_local BIGINT;
+    DECLARE v_tipo_local VARCHAR(50);
+    DECLARE v_id_painel BIGINT;
+    DECLARE v_id_perfil BIGINT;
+    DECLARE v_ativo TINYINT;
+    DECLARE v_estado_atual VARCHAR(50);
+    DECLARE v_estado_destino VARCHAR(50);
+    DECLARE v_nome_sp VARCHAR(120);
+    DECLARE v_msg TEXT;
+    DECLARE v_msg_final TEXT;
+    DECLARE v_id_evento BIGINT;
+    DECLARE v_payload_hash CHAR(64);
+    DECLARE v_lista_permissoes JSON;
+    DECLARE v_lista_rotas JSON;
+    DECLARE v_sp_queue JSON DEFAULT JSON_ARRAY();
 
-    /* ===============================
-       Guardião absoluto
-    =============================== */
+    -- Handler global de erro
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_msg = MESSAGE_TEXT;
+        SET p_payload = IF(JSON_VALID(p_payload), p_payload, JSON_OBJECT('raw','invalid'));
+        SET v_msg_final = CONCAT('DISPATCHER_FAIL: ', v_msg);
 
-    CALL sp_guardiao_absoluto(
-        p_id_sessao_usuario,
-        'DISPATCHER'
-    );
+        -- Chama SP de registro de erro parrudo
+        CALL sp_master_registrar_erro(
+            p_id_sessao,
+            NULL,                   -- id_erro_catalogo opcional
+            p_dominio,
+            p_acao,
+            v_msg,
+            JSON_OBJECT('stack_trace', v_sp_queue), -- ex: últimas ações antes do erro
+            p_payload,
+            IFNULL(p_uuid_transacao, UUID())
+        );
 
-    SELECT id_usuario
-    INTO v_id_usuario
-    FROM sessao_usuario
-    WHERE id_sessao_usuario = p_id_sessao_usuario
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg_final;
+    END;
+
+    -- 1. GET USUARIO FULL
+    SELECT
+        s.id_usuario, s.id_unidade, s.id_local, l.tipo_local,
+        COALESCE(pr.id_painel,0), u.id_perfil, u.ativo, u.nome, u.login
+    INTO
+        v_id_usuario, v_id_unidade, v_id_local, v_tipo_local,
+        v_id_painel, v_id_perfil, v_ativo, @v_nome_usuario, @v_login_usuario
+    FROM sessao_usuario s
+    LEFT JOIN usuario u ON u.id_usuario = s.id_usuario
+    LEFT JOIN local l ON l.id_local = s.id_local
+    LEFT JOIN painel_recepcao pr ON pr.id_unidade = s.id_unidade AND pr.ativo = 1
+    WHERE s.id_sessao_usuario = p_id_sessao
     LIMIT 1;
 
-    /* ===============================
-       Dispatcher de domínio
-    =============================== */
+    IF v_id_usuario IS NULL OR v_ativo = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SESSAO_INVALIDA_OU_INATIVA';
+    END IF;
 
-    CASE p_dominio
+    -- 2. HASH DO PAYLOAD
+    SET v_payload_hash = SHA2(CAST(p_payload AS CHAR), 256);
 
-        WHEN 'FILA' THEN
-            CALL sp_executor_fila_runtime(
-                p_id_sessao_usuario,
-                p_acao,
-                p_id_referencia,
-                p_payload
-            );
+    -- 3. PERMISSÕES E ROTAS
+    SELECT JSON_ARRAYAGG(JSON_OBJECT('codigo', p.codigo, 'nome', p.nome, 'dominio', p.dominio))
+    INTO v_lista_permissoes
+    FROM permissao p
+    JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao
+    JOIN usuario_perfil up ON up.id_perfil = pp.id_perfil
+    WHERE up.id_usuario = v_id_usuario AND p.ativo = 1;
 
-        WHEN 'ESTOQUE' THEN
-            CALL sp_executor_estoque_runtime(
-                p_id_sessao_usuario,
-                p_acao,
-                p_id_referencia,
-                p_payload
-            );
+    SELECT JSON_ARRAYAGG(r.nome_rota)
+    INTO v_lista_rotas
+    FROM rota r
+    JOIN permissao_rota pr ON pr.id_rota = r.id_rota
+    JOIN perfil_permissao pp ON pp.id_permissao = pr.id_permissao
+    JOIN usuario_perfil up ON up.id_perfil = pp.id_perfil
+    WHERE up.id_usuario = v_id_usuario AND r.ativo = 1;
 
-        WHEN 'ASSISTENCIAL' THEN
-            CALL sp_executor_assistencial_runtime(
-                p_id_sessao_usuario,
-                p_acao,
-                p_id_referencia,
-                p_payload
-            );
+    -- 4. IDEMPOTÊNCIA
+    IF p_uuid_transacao IS NOT NULL AND EXISTS (
+        SELECT 1 FROM auditoria_evento WHERE uuid_transacao = p_uuid_transacao LIMIT 1
+    ) THEN
+        LEAVE main;
+    END IF;
 
+    -- 5. VALIDAÇÃO DE ESTADO
+    IF UPPER(p_dominio) = 'FILA' AND p_id_referencia > 0 THEN
+        SELECT contexto_fluxo INTO v_estado_atual FROM senha WHERE id_senha = p_id_referencia LIMIT 1;
+    END IF;
+
+    SET v_estado_destino = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.estado_destino'));
+
+    IF v_estado_destino IS NOT NULL THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM fluxo_transicao_matriz
+            WHERE dominio_fluxo = UPPER(p_dominio)
+              AND estado_origem COLLATE utf8mb4_0900_ai_ci = v_estado_atual
+              AND estado_destino COLLATE utf8mb4_0900_ai_ci = v_estado_destino
+              AND ativo = 1
+        ) THEN
+            SET v_msg_final = CONCAT('TRANSICAO_INVALIDA: ', IFNULL(v_estado_atual,'NULL'), ' -> ', v_estado_destino);
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg_final;
+        END IF;
+    END IF;
+
+    -- 6. RESOLVE SP EXECUTOR
+    SELECT nome_procedure INTO v_nome_sp FROM permissao
+    WHERE codigo = CONCAT(UPPER(p_dominio), '.', UPPER(p_acao)) AND ativo = 1 LIMIT 1;
+
+    IF v_nome_sp IS NULL THEN
+        IF UPPER(p_dominio) = 'FILA' THEN SET v_nome_sp = 'sp_executor_fila_runtime';
+        ELSEIF UPPER(p_dominio) = 'ASSISTENCIAL' THEN SET v_nome_sp = 'sp_executor_assistencial_runtime';
+        ELSEIF UPPER(p_dominio) = 'ESTOQUE' THEN SET v_nome_sp = 'sp_executor_estoque_runtime';
+        ELSEIF UPPER(p_dominio) = 'FATURAMENTO' THEN SET v_nome_sp = 'sp_executor_faturamento_runtime';
         ELSE
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Domínio runtime não suportado';
+            SET v_msg_final = CONCAT('DOMINIO_NAO_SUPORTADO: ', p_dominio);
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg_final;
+        END IF;
+    END IF;
 
-    END CASE;
+    -- 7. REGISTRO MASTER UNIVERSAL
+    CALL sp_master_registrar_evento(
+        p_id_sessao,
+        p_dominio,
+        p_acao,
+        p_payload,
+        JSON_OBJECT('usuario', JSON_OBJECT('id', v_id_usuario, 'nome', @v_nome_usuario), 'hash', v_payload_hash),
+        p_id_referencia,
+        IFNULL(p_uuid_transacao, UUID()),
+        v_id_evento
+    );
+
+    -- 8. EXECUÇÃO DINÂMICA
+    SET @sql_exec = CONCAT('CALL ', v_nome_sp, '(', p_id_sessao, ', ', QUOTE(p_acao), ', ', p_id_referencia, ', ', QUOTE(CAST(p_payload AS CHAR)), ')');
+    PREPARE stmt FROM @sql_exec;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
 
 END ;;
 DELIMITER ;
@@ -22658,7 +23452,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_master_dispatcher_runtime` */;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_ffa` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -22668,147 +23462,159 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_dispatcher_runtime`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_ffa`(
     IN p_id_sessao BIGINT,
     IN p_id_usuario BIGINT,
-    IN p_id_perfil BIGINT,
-    IN p_acao VARCHAR(100),
-    IN p_contexto VARCHAR(50),
     IN p_payload JSON,
-    OUT p_resultado JSON,
-    OUT p_sucesso BOOLEAN,
-    OUT p_mensagem VARCHAR(500)
+    OUT p_resultado JSON
 )
     SQL SECURITY INVOKER
-proc_block: BEGIN
-    DECLARE v_uuid_transacao CHAR(36) DEFAULT UUID();
-    DECLARE v_error_msg VARCHAR(500) DEFAULT NULL;
-    DECLARE v_estado_origem VARCHAR(50) DEFAULT NULL;
-    DECLARE v_estado_destino VARCHAR(50) DEFAULT NULL;
-    DECLARE v_id_atendimento BIGINT DEFAULT NULL;
-    DECLARE v_id_senha BIGINT DEFAULT NULL;
+proc: BEGIN
+    -- Variáveis de Ambiente e Controle
+    DECLARE v_action VARCHAR(50);
+    DECLARE v_id_ffa BIGINT;
+    DECLARE v_id_paciente BIGINT;
+    DECLARE v_id_senha BIGINT;
+    DECLARE v_status_anterior VARCHAR(50);
+    DECLARE v_status_novo VARCHAR(50);
+    DECLARE v_classificacao VARCHAR(20); -- Manchester (VERDE, AMARELO, etc)
 
-    -- =========================
-    -- HANDLER GLOBAL DE ERRO
-    -- =========================
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1 v_error_msg = MESSAGE_TEXT;
-        SET p_sucesso = FALSE;
-        SET p_mensagem = CONCAT('ERRO: ', v_error_msg);
-        SET p_resultado = JSON_OBJECT('error', v_error_msg, 'uuid_transacao', v_uuid_transacao);
+    -- Handler de Erro Global (Padrão de Segurança Imutável)
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN
+        GET DIAGNOSTICS CONDITION 1 @msg = MESSAGE_TEXT;
         ROLLBACK;
-
-        CALL sp_ledger_evento_log(
-            v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-            v_estado_origem, v_estado_destino, p_payload, 'ERRO', v_error_msg
+        SET p_resultado = JSON_OBJECT(
+            'sucesso', FALSE, 
+            'mensagem', CONCAT('ERRO_MASTER_FFA: ', @msg),
+            'timestamp', NOW()
         );
     END;
 
-    -- =========================
-    -- VALIDAR SESSÃO
-    -- =========================
-    IF p_id_sessao IS NULL OR p_id_sessao = 0 THEN
-        SET p_sucesso = FALSE;
-        SET p_mensagem = 'Sessão inválida';
-        SET p_resultado = JSON_OBJECT('error', 'Sessão inválida', 'uuid_transacao', v_uuid_transacao);
-        LEAVE proc_block;
-    END IF;
+    -- 1. Validação de Sessão (Obrigatória em todas as Masters)
+    CALL sp_sessao_assert(p_id_sessao);
 
-    -- =========================
-    -- INICIAR TRANSAÇÃO
-    -- =========================
+    -- 2. Extração do Payload
+    SET v_action = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.action'));
+    SET v_id_ffa = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_ffa'));
+    SET v_id_paciente = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_paciente'));
+    SET v_classificacao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.classificacao'));
+
     START TRANSACTION;
 
-    -- =========================
-    -- VALIDAR PERMISSÃO
-    -- =========================
-    IF NOT EXISTS (
-        SELECT 1 FROM fluxo_transicao ft
-        WHERE ft.id_perfil_requerido = p_id_perfil
-          AND ft.ativo = 1
-          AND EXISTS (
-              SELECT 1 FROM fluxo_status fs_origem
-              WHERE fs_origem.id_fluxo_status = ft.id_status_origem
-                AND fs_origem.codigo LIKE CONCAT(p_contexto, '%')
-          )
-    ) AND p_acao != 'SESSION_HEARTBEAT' THEN
-        SET p_mensagem = CONCAT('AVISO: Perfil ', p_id_perfil, ' pode não ter permissão para ', p_acao);
-        CALL sp_ledger_evento_log(
-            v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-            NULL, NULL, p_payload, 'AVISO', p_mensagem
-        );
+    -- =========================================================================
+    -- FLUXO: CRIAR (Antiga sp_ffa_criar)
+    -- =========================================================================
+    IF v_action = 'CRIAR' THEN
+        -- Validação de duplicidade (Antiga sp_ffa_validar_paciente)
+        IF EXISTS (SELECT 1 FROM ffa WHERE id_paciente = v_id_paciente AND status NOT IN ('CONCLUIDO', 'CANCELADO', 'EVASAO')) THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PACIENTE_JA_EM_FLUXO_ATIVO';
+        END IF;
+
+        INSERT INTO ffa (id_paciente, status, classificacao_cor, criado_em, atualizado_em)
+        VALUES (v_id_paciente, 'AGUARDANDO_TRIAGEM', COALESCE(v_classificacao, 'VERDE'), NOW(), NOW());
+        
+        SET v_id_ffa = LAST_INSERT_ID();
+        SET v_status_novo = 'AGUARDANDO_TRIAGEM';
+
+    -- =========================================================================
+    -- FLUXO: MOVIMENTAR (Antiga sp_ffa_movimentar_status)
+    -- =========================================================================
+    ELSEIF v_action = 'MOVIMENTAR' THEN
+        SET v_status_novo = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.novo_status'));
+        
+        -- Snapshot para auditoria
+        SELECT status INTO v_status_anterior FROM ffa WHERE id = v_id_ffa FOR UPDATE;
+
+        UPDATE ffa SET 
+            status = v_status_novo, 
+            classificacao_cor = COALESCE(v_classificacao, classificacao_cor),
+            atualizado_em = NOW() 
+        WHERE id = v_id_ffa;
+
+        -- Registro no Workflow semântico (Tabela workflow_ffa_evento do dump)
+        INSERT INTO workflow_ffa_evento (id_ffa, tipo_evento, detalhe, id_sessao_usuario)
+        VALUES (v_id_ffa, 'STATUS_CHANGE', JSON_OBJECT('de', v_status_anterior, 'para', v_status_novo), p_id_sessao);
+
+    -- =========================================================================
+    -- FLUXO: CANCELAR / EVASÃO (Regra de Negócio: Evasão = Desaparecimento)
+    -- =========================================================================
+    ELSEIF v_action = 'CANCELAR' OR v_action = 'EVASAO' THEN
+        UPDATE ffa SET 
+            status = v_action, 
+            atualizado_em = NOW(),
+            observacao = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.motivo'))
+        WHERE id = v_id_ffa;
+        
+        SET v_status_novo = v_action;
+
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ACAO_INVALIDA_FFA';
     END IF;
 
-    -- =========================
-    -- EXECUTAR AÇÃO
-    -- =========================
-    CASE
-        WHEN p_acao = 'SESSION_HEARTBEAT' THEN
-            UPDATE sessao_usuario
-            SET ultimo_heartbeat = NOW(6)
-            WHERE id_sessao_usuario = p_id_sessao;
+    -- 3. Auditoria Imutável (Sua Lei)
+    CALL sp_auditoria_evento_registrar(
+        p_id_sessao, 
+        'FFA', 
+        v_id_ffa, 
+        v_action, 
+        p_payload, 
+        p_id_usuario, 
+        'ffa', 
+        NULL
+    );
 
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Heartbeat registrado';
-            SET p_resultado = JSON_OBJECT('id_sessao', p_id_sessao, 'timestamp', NOW(6));
-
-        WHEN p_acao = 'ATENDIMENTO_INICIAR' THEN
-            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
-
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                NULL, 'INICIADO', p_payload, 'SUCESSO', 'Atendimento iniciado'
-            );
-
-            SET p_sucesso = TRUE;
-            SET p_mensagem = 'Atendimento iniciado';
-            SET p_resultado = JSON_OBJECT('id_atendimento', v_id_atendimento, 'uuid_transacao', v_uuid_transacao);
-
-        WHEN p_acao = 'ATENDIMENTO_TRANSICIONAR' THEN
-            SET v_id_atendimento = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_atendimento'));
-            SET v_estado_destino = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.status'));
-
-            SELECT id_fluxo_status INTO v_estado_origem
-            FROM senha
-            WHERE id_atendimento = v_id_atendimento
-            ORDER BY criado_em DESC
-            LIMIT 1;
-
-            INSERT INTO senha (id_atendimento, id_fluxo_status, criado_em)
-            VALUES (v_id_atendimento, (SELECT id_fluxo_status FROM fluxo_status WHERE codigo = v_estado_destino LIMIT 1), NOW(6));
-
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                v_estado_origem, v_estado_destino, p_payload, 'SUCESSO',
-                CONCAT('Transição: ', v_estado_origem, ' -> ', v_estado_destino)
-            );
-
-            SET p_sucesso = TRUE;
-            SET p_mensagem = CONCAT('Atendimento transicionado para ', v_estado_destino);
-            SET p_resultado = JSON_OBJECT(
-                'id_atendimento', v_id_atendimento,
-                'status_anterior', v_estado_origem,
-                'status_novo', v_estado_destino,
-                'uuid_transacao', v_uuid_transacao
-            );
-
-        ELSE
-            CALL sp_ledger_evento_log(
-                v_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,
-                NULL, NULL, p_payload, 'SUCESSO', 'Ação genérica executada'
-            );
-
-            SET p_sucesso = TRUE;
-            SET p_mensagem = CONCAT('Ação ', p_acao, ' executada');
-            SET p_resultado = JSON_OBJECT('acao', p_acao, 'contexto', p_contexto, 'uuid_transacao', v_uuid_transacao);
-    END CASE;
-
-    -- =========================
-    -- COMMIT TRANSAÇÃO
-    -- =========================
     COMMIT;
 
+    -- 4. Resposta JSON para o Front
+    SET p_resultado = JSON_OBJECT(
+        'sucesso', TRUE,
+        'id_ffa', v_id_ffa,
+        'status_atual', v_status_novo,
+        'timestamp', NOW()
+    );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_ffa_movimentar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_ffa_movimentar`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_id_ffa INT,
+    IN p_novo_status VARCHAR(50),
+    OUT p_resultado JSON
+)
+    SQL SECURITY INVOKER
+proc: BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN
+        GET DIAGNOSTICS CONDITION 1 @msg = MESSAGE_TEXT;
+        ROLLBACK;
+        SET p_resultado = JSON_OBJECT('sucesso', FALSE, 'mensagem', @msg);
+    END;
+
+    START TRANSACTION;
+
+    -- Atualiza o workflow (FFA)
+    UPDATE ffa SET status = p_novo_status, atualizado_em = NOW() WHERE id_ffa = p_id_ffa;
+
+    -- Registro no Ledger de Movimentação (Workflow Evento)
+    INSERT INTO workflow_ffa_evento (id_ffa, tipo_evento, detalhe, id_sessao_usuario)
+    VALUES (p_id_ffa, 'STATUS_CHANGE', CONCAT('Status alterado para: ', p_novo_status), p_id_sessao);
+
+    COMMIT;
+    SET p_resultado = JSON_OBJECT('sucesso', TRUE, 'mensagem', 'Fluxo atualizado');
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -23031,6 +23837,140 @@ proc: BEGIN
     ELSE
         SET p_mensagem = 'ACAO_INVALIDA';
     END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_paciente` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_paciente`(
+    IN p_id_sessao BIGINT,
+    IN p_id_usuario BIGINT,
+    IN p_payload JSON,
+    OUT p_resultado JSON
+)
+    SQL SECURITY INVOKER
+proc: BEGIN
+    -- Variáveis de Fluxo
+    DECLARE v_action VARCHAR(50);
+    DECLARE v_id_paciente BIGINT;
+    DECLARE v_nome VARCHAR(255);
+    DECLARE v_cpf VARCHAR(14);
+    DECLARE v_data_nascimento DATE;
+    DECLARE v_nome_mae VARCHAR(255);
+    DECLARE v_genero VARCHAR(20);
+    DECLARE v_status_registro VARCHAR(20);
+    
+    -- Variáveis de Auditoria/Erro
+    DECLARE v_info_anterior JSON;
+    DECLARE v_id_audit BIGINT;
+
+    -- Handler Global de Erros (Padrão Parrudo)
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN
+        GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT;
+        ROLLBACK;
+        SET p_resultado = JSON_OBJECT(
+            'sucesso', FALSE, 
+            'erro', JSON_OBJECT('codigo', @errno, 'estado', @sqlstate, 'mensagem', @text),
+            'contexto', 'sp_master_paciente'
+        );
+        -- Log de erro na auditoria imutável
+        INSERT INTO log_erros (id_usuario, rotina, erro_msg, payload_origem) 
+        VALUES (p_id_usuario, 'sp_master_paciente', @text, p_payload);
+    END;
+
+    -- 1. Validação de Sessão (Lei Imutável)
+    CALL sp_sessao_assert(p_id_sessao);
+
+    -- 2. Extração de Parâmetros do Payload
+    SET v_action = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.action'));
+    SET v_id_paciente = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_paciente'));
+    
+    -- Mapeamento dos dados do paciente dentro do objeto 'data'
+    SET v_nome = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data.nome'));
+    SET v_cpf = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data.cpf'));
+    SET v_data_nascimento = CAST(JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data.data_nascimento')) AS DATE);
+    SET v_nome_mae = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data.nome_mae'));
+    SET v_genero = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.data.genero'));
+
+    START TRANSACTION;
+
+    -- =========================================================================
+    -- FLUXO: SALVAR (INSERT OU UPDATE)
+    -- =========================================================================
+    IF v_action = 'SALVAR' THEN
+        
+        -- Captura estado anterior para auditoria (se existir)
+        IF v_id_paciente IS NOT NULL THEN
+            SELECT JSON_OBJECT('nome', nome, 'cpf', cpf, 'nome_mae', nome_mae) 
+            INTO v_info_anterior FROM paciente WHERE id = v_id_paciente FOR UPDATE;
+        END IF;
+
+        IF v_id_paciente IS NULL OR v_id_paciente = 0 THEN
+            -- Lógica de Inserção (Substitui sp_paciente_cadastrar_basico)
+            INSERT INTO paciente (nome, cpf, data_nascimento, nome_mae, genero, criado_em)
+            VALUES (v_nome, v_cpf, v_data_nascimento, v_nome_mae, v_genero, NOW());
+            
+            SET v_id_paciente = LAST_INSERT_ID();
+            SET v_status_registro = 'CRIADO';
+        ELSE
+            -- Lógica de Atualização (Substitui sp_update_nome_paciente)
+            UPDATE paciente SET 
+                nome = IFNULL(v_nome, nome),
+                cpf = IFNULL(v_cpf, cpf),
+                data_nascimento = IFNULL(v_data_nascimento, data_nascimento),
+                nome_mae = IFNULL(v_nome_mae, nome_mae),
+                genero = IFNULL(v_genero, genero),
+                atualizado_em = NOW()
+            WHERE id = v_id_paciente;
+            
+            SET v_status_registro = 'ATUALIZADO';
+        END IF;
+
+    -- =========================================================================
+    -- FLUXO: INATIVAR/BLOQUEAR
+    -- =========================================================================
+    ELSEIF v_action = 'INATIVAR' THEN
+        UPDATE paciente SET ativo = 0, atualizado_em = NOW() WHERE id = v_id_paciente;
+        SET v_status_registro = 'INATIVADO';
+
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ação (action) inválida ou não informada na Master Paciente.';
+    END IF;
+
+    -- 3. Registro de Auditoria (Sua Lei: sp_auditoria_evento_registrar)
+    -- Registra quem, quando, onde e o que mudou (com snapshot anterior se for update)
+    CALL sp_auditoria_evento_registrar(
+        p_id_sessao, 
+        'PACIENTE', 
+        v_id_paciente, 
+        v_action, 
+        JSON_OBJECT('status', v_status_registro, 'anterior', v_info_anterior), 
+        p_id_usuario, 
+        'paciente', 
+        NULL
+    );
+
+    COMMIT;
+
+    -- 4. Retorno Estruturado para o Front-end (React)
+    SET p_resultado = JSON_OBJECT(
+        'sucesso', TRUE,
+        'id_paciente', v_id_paciente,
+        'action', v_action,
+        'mensagem', CONCAT('Paciente ', v_status_registro, ' com sucesso.')
+    );
 
 END ;;
 DELIMITER ;
@@ -23280,6 +24220,286 @@ proc_block: BEGIN
     -- COMMIT TRANSAÇÃO
     -- =========================
     COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_registrar_erro` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_registrar_erro`(
+    IN p_id_sessao BIGINT,
+    IN p_id_erro_catalogo BIGINT,
+    IN p_dominio VARCHAR(50),
+    IN p_acao VARCHAR(100),
+    IN p_mensagem_erro TEXT,
+    IN p_stack_trace JSON,
+    IN p_payload_tentativa JSON,
+    IN p_uuid_transacao CHAR(36)
+)
+    SQL SECURITY INVOKER
+main: BEGIN
+    DECLARE v_id_erro BIGINT;
+
+    -- 1️⃣ Idempotência: verifica se já existe o registro com esse UUID
+    IF p_uuid_transacao IS NOT NULL THEN
+        SELECT id_erro INTO v_id_erro
+        FROM erro_evento
+        WHERE uuid_transacao = p_uuid_transacao
+        LIMIT 1;
+
+        IF v_id_erro IS NOT NULL THEN
+            -- Já existe, sai sem inserir
+            LEAVE main;
+        END IF;
+    END IF;
+
+    -- 2️⃣ Inserção do evento de erro
+    INSERT INTO erro_evento (
+        id_sessao_usuario,
+        id_erro_catalogo,
+        dominio,
+        acao,
+        mensagem_erro,
+        stack_trace,
+        payload_tentativa,
+        uuid_transacao,
+        criado_em
+    ) VALUES (
+        p_id_sessao,
+        p_id_erro_catalogo,
+        p_dominio,
+        p_acao,
+        p_mensagem_erro,
+        p_stack_trace,
+        p_payload_tentativa,
+        IFNULL(p_uuid_transacao, UUID()),
+        NOW(6)
+    );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_master_registrar_evento` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_registrar_evento`(
+    IN p_id_sessao_usuario BIGINT,
+    IN p_dominio VARCHAR(50),
+    IN p_tipo_evento VARCHAR(100),
+    IN p_payload JSON,
+    IN p_metadata JSON,
+    IN p_id_referencia BIGINT,
+    IN p_uuid_transacao CHAR(36),
+    OUT p_id_evento BIGINT
+)
+    SQL SECURITY INVOKER
+main: BEGIN
+
+    -- =========================
+    -- DECLARAÇÕES
+    -- =========================
+    DECLARE v_id_usuario BIGINT;
+    DECLARE v_id_unidade BIGINT;
+    DECLARE v_id_local BIGINT;
+    DECLARE v_tipo_local VARCHAR(50);
+    DECLARE v_id_painel BIGINT;
+    DECLARE v_nome_usuario VARCHAR(120);
+    DECLARE v_login_usuario VARCHAR(80);
+    DECLARE v_ativo TINYINT;
+    DECLARE v_msg TEXT;
+    DECLARE v_payload JSON;
+    DECLARE v_metadata JSON;
+
+    -- Permissões e rotas/páginas
+    DECLARE v_lista_permissoes JSON;
+    DECLARE v_lista_rotas JSON;
+    DECLARE v_tem_permissao_especifica TINYINT DEFAULT 0;
+
+    -- Hash de integridade
+    DECLARE v_hash_integridade CHAR(64);
+
+    -- Mensagem final para SIGNAL
+    DECLARE v_msg_final TEXT;
+
+    -- =========================
+    -- HANDLER DE ERRO ROBUSTO
+    -- =========================
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_msg = MESSAGE_TEXT;
+
+        SET v_payload = IF(JSON_VALID(p_payload), p_payload, JSON_OBJECT('raw','invalid'));
+        SET v_metadata = IF(JSON_VALID(p_metadata), p_metadata, JSON_OBJECT());
+
+        INSERT INTO erro_evento(
+            id_sessao_usuario, dominio, tipo_evento, payload, metadata,
+            mensagem_erro, uuid_transacao, criado_em
+        ) VALUES (
+            p_id_sessao_usuario, p_dominio, p_tipo_evento, v_payload, v_metadata,
+            v_msg, p_uuid_transacao, NOW(6)
+        );
+
+        SET v_msg_final = CONCAT('SP_MASTER_FAIL: ', v_msg);
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg_final;
+    END;
+
+    -- =========================
+    -- 1. GET USUARIO FULL
+    -- =========================
+    SELECT
+        s.id_usuario,
+        s.id_unidade,
+        s.id_local,
+        l.tipo_local,
+        COALESCE(painel.id_painel, 0),
+        u.nome,
+        u.login,
+        s.ativo
+    INTO
+        v_id_usuario,
+        v_id_unidade,
+        v_id_local,
+        v_tipo_local,
+        v_id_painel,
+        v_nome_usuario,
+        v_login_usuario,
+        v_ativo
+    FROM sessao_usuario s
+    LEFT JOIN usuario u ON u.id_usuario = s.id_usuario
+    LEFT JOIN local l ON l.id_local = s.id_local
+    LEFT JOIN painel_recepcao painel ON painel.id_unidade = s.id_unidade AND painel.ativo = 1
+    WHERE s.id_sessao_usuario = p_id_sessao_usuario
+    LIMIT 1;
+
+    IF v_id_usuario IS NULL OR v_ativo = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SESSAO_INVALIDA_OU_INATIVA';
+    END IF;
+
+    -- =========================
+    -- 2. GET LISTA DE PERMISSÕES
+    -- =========================
+    SELECT JSON_ARRAYAGG(p.codigo)
+    INTO v_lista_permissoes
+    FROM permissao p
+    JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao
+    JOIN usuario_perfil up ON up.id_perfil = pp.id_perfil
+    WHERE up.id_usuario = v_id_usuario AND p.ativo = 1;
+
+    -- =========================
+    -- 3. GET ROTAS/PAGINAS
+    -- =========================
+    SELECT JSON_ARRAYAGG(r.nome_rota)
+    INTO v_lista_rotas
+    FROM rota r
+    JOIN permissao_rota pr ON pr.id_rota = r.id_rota
+    JOIN perfil_permissao pp ON pp.id_permissao = pr.id_permissao
+    JOIN usuario_perfil up ON up.id_perfil = pp.id_perfil
+    WHERE up.id_usuario = v_id_usuario AND r.ativo = 1;
+
+    -- =========================
+    -- 4. GET PERMISSÃO ESPECÍFICA
+    -- =========================
+    SELECT IF(COUNT(*)>0,1,0)
+    INTO v_tem_permissao_especifica
+    FROM permissao p
+    JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao
+    JOIN usuario_perfil up ON up.id_perfil = pp.id_perfil
+    WHERE up.id_usuario = v_id_usuario
+      AND p.dominio = UPPER(p_dominio)
+      AND p.ativo = 1;
+
+    -- =========================
+    -- 5. IDEMPOTÊNCIA (UUID + referência)
+    -- =========================
+    SELECT id_evento INTO p_id_evento
+    FROM evento_geral
+    WHERE (id_referencia = p_id_referencia OR uuid_transacao = p_uuid_transacao)
+      AND dominio = UPPER(p_dominio)
+      AND tipo_evento = UPPER(p_tipo_evento)
+      AND criado_em > DATE_SUB(NOW(6), INTERVAL 5 SECOND)
+    ORDER BY id_evento DESC
+    LIMIT 1;
+
+    IF p_id_evento IS NOT NULL THEN
+        LEAVE main;
+    END IF;
+
+    -- =========================
+    -- 6. VALIDAÇÃO E ENRIQUECIMENTO JSON
+    -- =========================
+    SET v_payload = IF(JSON_VALID(p_payload), p_payload, JSON_OBJECT());
+    SET v_metadata = IF(JSON_VALID(p_metadata), p_metadata, JSON_OBJECT());
+
+    -- Injeta dados do usuário, permissões, rotas e local
+    SET v_metadata = JSON_SET(v_metadata,
+        '$.auth', JSON_OBJECT(
+            'login', v_login_usuario,
+            'nome', v_nome_usuario,
+            'permissoes', IFNULL(v_lista_permissoes, JSON_ARRAY()),
+            'rotas', IFNULL(v_lista_rotas, JSON_ARRAY()),
+            'authorized_domain', CAST(v_tem_permissao_especifica AS UNSIGNED),
+            'local', JSON_OBJECT(
+                'id_local', v_id_local,
+                'tipo_local', v_tipo_local,
+                'id_painel', v_id_painel
+            )
+        )
+    );
+
+    -- =========================
+    -- 7. HASH DE INTEGRIDADE
+    -- =========================
+    SET v_hash_integridade = SHA2(CONCAT(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(v_payload,'$')),''), 
+                                         COALESCE(JSON_UNQUOTE(JSON_EXTRACT(v_metadata,'$')),'')), 256);
+
+    -- =========================
+    -- 8. INSERÇÃO NO LEDGER
+    -- =========================
+    INSERT INTO evento_geral (
+        id_usuario, id_unidade, dominio, tipo_evento,
+        id_referencia, payload, metadata, uuid_transacao,
+        hash_integridade, criado_em
+    ) VALUES (
+        v_id_usuario, v_id_unidade, UPPER(p_dominio), UPPER(p_tipo_evento),
+        p_id_referencia, v_payload, v_metadata, p_uuid_transacao,
+        v_hash_integridade, NOW(6)
+    );
+
+    SET p_id_evento = LAST_INSERT_ID();
+
+    -- =========================
+    -- 9. INSERÇÃO NA AUDITORIA
+    -- =========================
+    INSERT INTO auditoria_evento (
+        id_usuario, id_sessao_usuario, id_unidade, dominio,
+        tipo_evento, id_referencia, payload, metadata, status,
+        uuid_transacao, hash_integridade, criado_em
+    ) VALUES (
+        v_id_usuario, p_id_sessao_usuario, v_id_unidade, UPPER(p_dominio),
+        UPPER(p_tipo_evento), p_id_referencia, v_payload, v_metadata, 'OK',
+        p_uuid_transacao, v_hash_integridade, NOW(6)
+    );
 
 END ;;
 DELIMITER ;
@@ -24298,6 +25518,77 @@ BEGIN
     SET retorno_permitido_ate = p_data_limite,
         retorno_utilizado = 0
     WHERE id = p_id_senha;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_motor_manchester_runtime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_motor_manchester_runtime`()
+main: BEGIN
+
+    DECLARE v_now DATETIME(6);
+    SET v_now = NOW(6);
+
+    -- =========================================
+    -- 1. ATUALIZA RISCO DINÂMICO (COM COLLATE)
+    -- =========================================
+    UPDATE senha s
+    JOIN fluxo_transicao_matriz f
+      ON f.estado_origem COLLATE utf8mb4_0900_ai_ci = s.contexto_fluxo
+     AND f.dominio_fluxo = 'FILA'
+     AND f.ativo = 1
+    SET
+        s.risco_dinamico = JSON_UNQUOTE(
+            JSON_EXTRACT(f.condicao_validacao, '$.risco_resultante')
+        ),
+        s.risco_dinamico_em = v_now,
+        s.risco_dinamico_origem = 'SISTEMA'
+    WHERE
+        s.executado_em IS NULL
+        AND s.cancelado = 0
+        AND s.nao_compareceu = 0
+        AND JSON_EXTRACT(f.condicao_validacao, '$.tempo_max') IS NOT NULL
+        AND TIMESTAMPDIFF(
+            MINUTE,
+            s.criado_em,
+            v_now
+        ) >= JSON_EXTRACT(f.condicao_validacao, '$.tempo_max')
+        AND (
+            s.risco_dinamico IS NULL
+            OR s.risco_dinamico != JSON_UNQUOTE(
+                JSON_EXTRACT(f.condicao_validacao, '$.risco_resultante')
+            )
+        );
+
+    -- =========================================
+    -- 2. REPRIORIZAÇÃO INTELIGENTE
+    -- =========================================
+    UPDATE senha
+    SET prioridade =
+        CASE risco_dinamico
+            WHEN 'VERMELHO' THEN 100
+            WHEN 'LARANJA' THEN 80
+            WHEN 'AMARELO' THEN 50
+            WHEN 'VERDE' THEN 10
+            ELSE prioridade
+        END
+    WHERE
+        executado_em IS NULL
+        AND cancelado = 0
+        AND nao_compareceu = 0
+        AND risco_dinamico IS NOT NULL;
 
 END ;;
 DELIMITER ;
@@ -29862,6 +31153,42 @@ DELIMITER ;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `vw_fila_painel`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_fila_painel`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_fila_painel` AS select `s`.`id_senha` AS `id_senha`,`s`.`codigo_visual` AS `codigo_visual`,`s`.`contexto_fluxo` AS `contexto_fluxo`,`s`.`prioridade` AS `prioridade`,`s`.`risco_dinamico` AS `risco_dinamico`,timestampdiff(MINUTE,`s`.`criado_em`,now()) AS `tempo_espera` from `senha` `s` where ((`s`.`executado_em` is null) and (`s`.`cancelado` = 0) and (`s`.`nao_compareceu` = 0)) order by `s`.`prioridade` desc,`s`.`criado_em` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_gestao_fluxo_tempo_real`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_gestao_fluxo_tempo_real`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_gestao_fluxo_tempo_real` AS select `s`.`id_senha` AS `id_senha`,`s`.`codigo_visual` AS `codigo_visual`,`s`.`contexto_fluxo` AS `contexto_fluxo`,`s`.`id_fluxo_status` AS `id_fluxo_status`,`s`.`criado_em` AS `hora_chegada`,`s`.`chamada_em` AS `hora_chamada`,(case when (`s`.`chamada_em` is not null) then timestampdiff(MINUTE,`s`.`criado_em`,`s`.`chamada_em`) else timestampdiff(MINUTE,`s`.`criado_em`,now()) end) AS `minutos_espera`,(case when (timestampdiff(MINUTE,`s`.`criado_em`,ifnull(`s`.`chamada_em`,now())) > 60) then 'CRÍTICO' when (timestampdiff(MINUTE,`s`.`criado_em`,ifnull(`s`.`chamada_em`,now())) > 30) then 'ATENÇÃO' else 'NORMAL' end) AS `alerta_gestao`,`s`.`prioridade` AS `prioridade`,`s`.`id_atendimento` AS `id_atendimento`,`s`.`nao_compareceu` AS `nao_compareceu` from `senha` `s` where ((`s`.`criado_em` >= curdate()) and (`s`.`cancelado` = 0) and (`s`.`nao_compareceu` = 0)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vw_laboratorio_protocolos_pendentes`
 --
 
@@ -30053,8 +31380,8 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_workflow_ffa_completo` AS select `f`.`id` AS `id_ffa`,'SENHA' AS `origem`,'senha' AS `entidade`,`se`.`id_senha` AS `id_entidade`,`se`.`tipo_evento` AS `tipo_evento`,`se`.`detalhe` AS `detalhe`,`se`.`id_sessao_usuario` AS `id_sessao_usuario`,`se`.`criado_em` AS `criado_em`,NULL AS `payload_json` from (`senha_eventos` `se` join `ffa` `f` on((`f`.`id_senha` = `se`.`id_senha`))) union all select `fo`.`id_ffa` AS `id_ffa`,'FILA' AS `origem`,'fila_operacional' AS `entidade`,`fe`.`id_fila` AS `id_entidade`,`fe`.`tipo_evento` AS `tipo_evento`,`fe`.`detalhe` AS `detalhe`,`fe`.`id_sessao_usuario` AS `id_sessao_usuario`,`fe`.`criado_em` AS `criado_em`,NULL AS `payload_json` from (`fila_operacional_evento` `fe` join `fila_operacional` `fo` on((`fo`.`id_fila` = `fe`.`id_fila`))) union all select (case when (`ae`.`entidade` = 'ffa') then `ae`.`id_entidade` when (`ae`.`entidade` = 'pedido_medico') then `pm`.`id_ffa` when (`ae`.`entidade` = 'pedido_medico_item') then `pm2`.`id_ffa` when (`ae`.`entidade` = 'gpat') then `g`.`id_ffa` when (`ae`.`entidade` = 'pep_registro') then `pr`.`id_ffa` when (`ae`.`entidade` = 'cat_notificacao') then `cn`.`id_ffa` when (`ae`.`entidade` = 'sinan_notificacao') then `sn`.`id_ffa` else NULL end) AS `id_ffa`,'AUD' AS `origem`,`ae`.`entidade` AS `entidade`,`ae`.`id_entidade` AS `id_entidade`,`ae`.`acao` AS `tipo_evento`,`ae`.`detalhe` AS `detalhe`,`ae`.`id_sessao_usuario` AS `id_sessao_usuario`,`ae`.`criado_em` AS `criado_em`,NULL AS `payload_json` from (((((((`auditoria_evento` `ae` left join `pedido_medico` `pm` on(((`ae`.`entidade` = 'pedido_medico') and (`pm`.`id_pedido_medico` = `ae`.`id_entidade`)))) left join `pedido_medico_item` `pmi` on(((`ae`.`entidade` = 'pedido_medico_item') and (`pmi`.`id_pedido_item` = `ae`.`id_entidade`)))) left join `pedido_medico` `pm2` on((`pmi`.`id_pedido_medico` = `pm2`.`id_pedido_medico`))) left join `gpat` `g` on(((`ae`.`entidade` = 'gpat') and (`g`.`id_gpat` = `ae`.`id_entidade`)))) left join `pep_registro` `pr` on(((`ae`.`entidade` = 'pep_registro') and (`pr`.`id_pep_registro` = `ae`.`id_entidade`)))) left join `cat_notificacao` `cn` on(((`ae`.`entidade` = 'cat_notificacao') and (`cn`.`id_cat` = `ae`.`id_entidade`)))) left join `sinan_notificacao` `sn` on(((`ae`.`entidade` = 'sinan_notificacao') and (`sn`.`id_sinan` = `ae`.`id_entidade`)))) */;
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
+/*!50001 VIEW `vw_workflow_ffa_completo` AS select `f`.`id` AS `id_ffa`,'SENHA' AS `origem`,'senha' AS `entidade`,`se`.`id_senha` AS `id_entidade`,`se`.`tipo_evento` AS `tipo_evento`,`se`.`detalhe` AS `detalhe`,`se`.`id_sessao_usuario` AS `id_sessao_usuario`,`se`.`criado_em` AS `criado_em`,NULL AS `payload_json` from (`senha_eventos` `se` join `ffa` `f` on((`f`.`id_senha` = `se`.`id_senha`))) union all select `fo`.`id_ffa` AS `id_ffa`,'FILA' AS `origem`,'fila_operacional' AS `entidade`,`fe`.`id_fila` AS `id_entidade`,`fe`.`tipo_evento` AS `tipo_evento`,`fe`.`detalhe` AS `detalhe`,`fe`.`id_sessao_usuario` AS `id_sessao_usuario`,`fe`.`criado_em` AS `criado_em`,NULL AS `payload_json` from (`fila_operacional_evento` `fe` join `fila_operacional` `fo` on((`fo`.`id_fila` = `fe`.`id_fila`))) union all select (case when (`ae`.`dominio` = 'ffa') then `ae`.`id_referencia` when (`ae`.`dominio` = 'pedido_medico') then `pm`.`id_ffa` when (`ae`.`dominio` = 'pedido_medico_item') then `pm2`.`id_ffa` when (`ae`.`dominio` = 'gpat') then `g`.`id_ffa` when (`ae`.`dominio` = 'pep_registro') then `pr`.`id_ffa` when (`ae`.`dominio` = 'cat_notificacao') then `cn`.`id_ffa` when (`ae`.`dominio` = 'sinan_notificacao') then `sn`.`id_ffa` else NULL end) AS `id_ffa`,'AUD' AS `origem`,`ae`.`dominio` AS `entidade`,`ae`.`id_referencia` AS `id_entidade`,`ae`.`tipo_evento` AS `tipo_evento`,ifnull(cast(json_unquote(json_extract(`ae`.`payload`,'$.observacao')) as char charset utf8mb4),'Log de Auditoria') AS `detalhe`,`ae`.`id_sessao_usuario` AS `id_sessao_usuario`,`ae`.`criado_em` AS `criado_em`,`ae`.`payload` AS `payload_json` from (((((((`auditoria_evento` `ae` left join `pedido_medico` `pm` on(((`ae`.`dominio` = 'pedido_medico') and (`pm`.`id_pedido_medico` = `ae`.`id_referencia`)))) left join `pedido_medico_item` `pmi` on(((`ae`.`dominio` = 'pedido_medico_item') and (`pmi`.`id_pedido_item` = `ae`.`id_referencia`)))) left join `pedido_medico` `pm2` on((`pmi`.`id_pedido_medico` = `pm2`.`id_pedido_medico`))) left join `gpat` `g` on(((`ae`.`dominio` = 'gpat') and (`g`.`id_gpat` = `ae`.`id_referencia`)))) left join `pep_registro` `pr` on(((`ae`.`dominio` = 'pep_registro') and (`pr`.`id_pep_registro` = `ae`.`id_referencia`)))) left join `cat_notificacao` `cn` on(((`ae`.`dominio` = 'cat_notificacao') and (`cn`.`id_cat` = `ae`.`id_referencia`)))) left join `sinan_notificacao` `sn` on(((`ae`.`dominio` = 'sinan_notificacao') and (`sn`.`id_sinan` = `ae`.`id_referencia`)))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -30086,4 +31413,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-17  3:45:05
+-- Dump completed on 2026-03-19  6:56:35

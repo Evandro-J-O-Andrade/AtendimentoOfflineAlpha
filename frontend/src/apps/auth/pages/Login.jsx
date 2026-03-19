@@ -47,19 +47,22 @@ export default function Login() {
 
       setContextosDisponiveis(sessao.contextos || []);
 
-      const ctxUnico = sessao.contextos?.length === 1 ? sessao.contextos[0] : null;
-      if (ctxUnico) {
-        selecionarContexto(ctxUnico);
-        setPermissoes(ctxUnico.permissoes || []);
-        const temPainelAdmin = (ctxUnico.permissoes || []).some(
-          (p) => String(p.acao_frontend || "").toLowerCase() === "painel_admin"
-        );
-        navigate(temPainelAdmin ? "/admin" : "/dashboard", { replace: true });
+      // SEMPRE ir para seleção de contexto se houver contextos disponíveis
+      // Isso permite que o usuário escolha unidade/sala mesmo com apenas 1 opção
+      if (sessao.contextos && sessao.contextos.length > 0) {
+        // Se há apenas 1 contexto, já seleciona mas mostra a tela
+        if (sessao.contextos.length === 1) {
+          selecionarContexto(sessao.contextos[0]);
+          setPermissoes(sessao.contextos[0].permissoes || []);
+        }
+        // Sempre redirecionar para /contexto para confirmar/selecionar
+        navigate("/contexto", { replace: true });
         setLoading(false);
         return;
       }
 
-      navigate("/contexto", { replace: true });
+      // Fallback: se não há contextos, tenta ir para admin ou dashboard
+      navigate("/admin", { replace: true });
     } catch (err) {
       console.error(err);
       setError(traduzirErro(err.message || err));

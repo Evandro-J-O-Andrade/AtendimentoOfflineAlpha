@@ -6,7 +6,7 @@ import "./SelecionarContexto.css";
 
 export default function SelecionarContexto() {
     const navigate = useNavigate();
-    const { hydrateSession } = useApp();
+    const { hydrateSession, contextosDisponiveis } = useApp();
     const [contextos, setContextos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedUnidade, setSelectedUnidade] = useState("");
@@ -16,6 +16,14 @@ export default function SelecionarContexto() {
     const [credenciaisPendentes, setCredenciaisPendentes] = useState(null);
 
     useEffect(() => {
+        // Primeiro tenta buscar do AppContext
+        if (contextosDisponiveis && contextosDisponiveis.length > 0) {
+            setContextos(contextosDisponiveis);
+            setLoading(false);
+            return;
+        }
+        
+        // Se não tem no AppContext, tenta sessionStorage
         const pending = sessionStorage.getItem("pending_context");
         if (!pending) {
             setLoading(false);
@@ -31,7 +39,7 @@ export default function SelecionarContexto() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [contextosDisponiveis]);
 
     const contextosDaUnidade = contextos.filter(
         (ctx) => String(ctx.id_unidade) === String(selectedUnidade)

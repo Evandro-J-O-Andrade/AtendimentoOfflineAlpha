@@ -28,7 +28,7 @@ app.use("/api/contexto", contextoRoutes);
 app.use("/api/painel", painelRoutes);
 app.use("/api/permissoes", permissaoRoutes);
 app.use("/api", ledgerRoutes);
-app.use("/api/runtime", dispatcherRoutes);
+app.use("/api", dispatcherRoutes);
 app.use("/api", sessionRoutes);
 
 module.exports = app;

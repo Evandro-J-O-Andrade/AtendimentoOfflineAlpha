@@ -114,6 +114,7 @@ async function authMiddleware(req, res, next) {
             id_unidade: decoded.id_unidade,
             id_local_operacional: decoded.id_local_operacional,
             id_cidade: decoded.id_cidade,
+            id_perfil: decoded.id_perfil,
             perfil: decoded.perfil
         };
 

@@ -1,59 +1,107 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../auth/authMiddleware");
+const db = require("../config/database");
 
 /**
  * ======================================
- * ROTAS DE FILA OPERACIONAL
- * Sistema de gerenciamento de fila de atendimento
+ * ROTAS DE FILA - PADRÃO CANÔNICO
+ * Frontend -> API -> sp_master_dispatcher -> executores
  * ======================================
+ * 
+ * Assinatura: sp_master_dispatcher(
+ *     p_id_sessao BIGINT,
+ *     p_dominio VARCHAR(50),      -- 'FILA', 'ASSISTENCIAL', 'ESTOQUE', 'FATURAMENTO'
+ *     p_acao VARCHAR(100),        -- 'GERAR_SENHA', 'CHAMAR_PAINEL', etc
+ *     p_id_referencia BIGINT,    -- ID da senha/atendimento
+ *     p_payload JSON,             -- Dados complementares
+ *     OUT p_resultado JSON,
+ *     OUT p_sucesso BOOLEAN,
+ *     OUT p_mensagem TEXT
+ * )
  */
 
 /**
+ * POST /api/fila/gerar
+ * Gerar nova senha na fila
+ * Backend chama: sp_master_dispatcher(p_id_sessao, 'FILA', 'GERAR_SENHA', NULL, payload)
+ */
+router.post("/gerar", authMiddleware, async (req, res) => {
+    let conn;
+    try {
+        conn = await db.getConnection();
+        
+        const { tipo, prioridade, origem } = req.body;
+        const id_sessao = req.user.id_sessao_usuario;
+        const uuid_transacao = require('uuid').v4();
+        
+        const payload = JSON.stringify({
+            tipo: tipo || 'NORMAL',
+            prioridade: prioridade || 0,
+            origem: origem || 'FILA'
+        });
+
+        // Chamar sp_master_dispatcher (6 params - sem OUTPUT)
+        // sp_master_dispatcher(p_id_sessao, p_uuid_transacao, p_dominio, p_acao, p_id_referencia, p_payload)
+        await conn.query(
+            `CALL sp_master_dispatcher(?, ?, ?, ?, ?, ?)`,
+            [id_sessao, uuid_transacao, 'FILA', 'GERAR_SENHA', null, payload]
+        );
+
+        // Buscar resultado da auditoria
+        const [[resultado]] = await conn.query(
+            `SELECT * FROM auditoria_evento WHERE uuid_transacao = ? LIMIT 1`,
+            [uuid_transacao]
+        );
+
+        res.json({
+            sucesso: resultado?.status === 'SUCESSO',
+            mensagem: resultado?.status || 'OK',
+            dados: resultado?.detalhe ? JSON.parse(resultado.detalhe) : null
+        });
+
+    } catch (err) {
+        console.error("Erro ao gerar senha:", err);
+        res.status(500).json({ sucesso: false, mensagem: "Erro ao gerar senha", erro: err.message });
+    } finally {
+        if (conn) conn.release();
+    }
+});
+
+/**
  * GET /api/fila
- * Lista todos os pacientes na fila
+ * Listar fila de atendimento
+ * Backend chama: view vw_gestao_fluxo_tempo_real
  */
 router.get("/", authMiddleware, async (req, res) => {
     let conn;
     try {
-        conn = await require("../config/database").getConnection();
+        conn = await db.getConnection();
         
-        const [fila] = await conn.query(`
-            SELECT 
-                fo.id_fila,
-                fo.id_paciente,
-                fo.id_unidade,
-                fo.id_local_operacional,
-                fo.status,
-                fo.prioridade,
-                fo.posicao,
-                fo.data_entrada,
-                fo.data_atendimento,
-                p.nome as paciente_nome,
-                p.cns as paciente_cns,
-                lo.nome as local_nome,
-                u.nome as unidade_nome
-            FROM fila_operacional fo
-            LEFT JOIN paciente p ON p.id = fo.id_paciente
-            LEFT JOIN local_operacional lo ON lo.id_local_operacional = fo.id_local_operacional
-            LEFT JOIN unidade u ON u.id_unidade = fo.id_unidade
-            WHERE fo.id_unidade = ?
-            AND fo.status IN ('AGUARDANDO', 'EM_ATENDIMENTO', 'CHAMADO')
-            ORDER BY 
-                CASE fo.prioridade
-                    WHEN 'EMERGENCIA' THEN 1
-                    WHEN 'URGENTE' THEN 2
-                    WHEN 'PREFERENCIAL' THEN 3
-                    ELSE 4
-                END,
-                fo.posicao ASC
-        `, [req.user.id_unidade]);
+        const id_unidade = req.user.id_unidade;
 
-        res.json({ fila });
+        // Busca via view (mais eficiente para leitura)
+        const [fila] = await conn.query(`
+            SELECT * FROM vw_gestao_fluxo_tempo_real
+            WHERE id_unidade = ?
+            AND status IN ('AGUARDANDO', 'CHAMADO', 'EM_ATENDIMENTO')
+            ORDER BY 
+                CASE nivel_risco
+                    WHEN 'VERMELHO' THEN 1
+                    WHEN 'LARANJA' THEN 2
+                    WHEN 'AMARELO' THEN 3
+                    WHEN 'VERDE' THEN 4
+                    WHEN 'AZUL' THEN 5
+                    ELSE 6
+                END,
+                posicao ASC
+        `, [id_unidade]);
+
+        res.json({ sucesso: true, fila });
 
     } catch (err) {
         console.error("Erro ao buscar fila:", err);
-        res.status(500).json({ error: "ERRO_AO_BUSCAR_FILA" });
+        res.status(500).json({ sucesso: false, mensagem: "Erro ao buscar fila" });
     } finally {
         if (conn) conn.release();
     }
@@ -61,94 +109,82 @@ router.get("/", authMiddleware, async (req, res) => {
 
 /**
  * POST /api/fila/chamar
- * Chama próximo paciente da fila
+ * Chamar próximo paciente da fila
+ * Backend chama: sp_master_dispatcher(p_id_sessao, 'FILA', 'CHAMAR_PAINEL', id_senha, payload)
  */
 router.post("/chamar", authMiddleware, async (req, res) => {
     let conn;
     try {
-        conn = await require("../config/database").getConnection();
+        conn = await db.getConnection();
         
-        const { id_local_operacional } = req.body;
+        const { id_senha, id_guiche } = req.body;
+        const id_sessao = req.user.id_sessao_usuario;
         
-        // Busca próximo paciente da fila
-        const [paciente] = await conn.query(`
-            SELECT id_fila, id_paciente, posicao, prioridade
-            FROM fila_operacional
-            WHERE id_unidade = ?
-            AND status = 'AGUARDANDO'
-            ORDER BY 
-                CASE prioridade
-                    WHEN 'EMERGENCIA' THEN 1
-                    WHEN 'URGENTE' THEN 2
-                    WHEN 'PREFERENCIAL' THEN 3
-                    ELSE 4
-                END,
-                posicao ASC
-            LIMIT 1
-        `, [req.user.id_unidade]);
+        const payload = JSON.stringify({
+            estado_destino: 'CHAMADO',
+            id_guiche: id_guiche || 1
+        });
 
-        if (paciente.length === 0) {
-            return res.status(404).json({ error: "FILA_VAZIA" });
-        }
+        // Chamar sp_master_dispatcher
+        await conn.query(
+            `CALL sp_master_dispatcher(?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
+            [id_sessao, 'FILA', 'CHAMAR_PAINEL', id_senha, payload]
+        );
 
-        // Atualiza status para CHAMADO
-        await conn.query(`
-            UPDATE fila_operacional
-            SET status = 'CHAMADO', data_atendimento = NOW()
-            WHERE id_fila = ?
-        `, [paciente[0].id_fila]);
+        const [[output]] = await conn.query(
+            `SELECT @resultado as resultado, @sucesso as sucesso, @mensagem as mensagem`
+        );
 
-        // Registra evento
-        await conn.query(`
-            INSERT INTO fila_operacional_evento 
-            (id_fila, evento, id_usuario, ip_acesso)
-            VALUES (?, 'CHAMADO', ?, ?)
-        `, [paciente[0].id_fila, req.user.id_usuario, req.ip]);
-
-        res.json({ 
-            success: true, 
-            paciente: paciente[0],
-            mensagem: "Paciente chamado"
+        res.json({
+            sucesso: output.sucesso === 1 || output.sucesso === true,
+            mensagem: output.mensagem,
+            dados: output.resultado ? JSON.parse(output.resultado) : null
         });
 
     } catch (err) {
         console.error("Erro ao chamar paciente:", err);
-        res.status(500).json({ error: "ERRO_AO_CHAMAR" });
+        res.status(500).json({ sucesso: false, mensagem: "Erro ao chamar paciente" });
     } finally {
         if (conn) conn.release();
     }
 });
 
 /**
- * POST /api/fila/iniciar-atendimento
- * Inicia atendimento do paciente chamado
+ * POST /api/fila/iniciar
+ * Iniciar atendimento
+ * Backend chama: sp_master_dispatcher(p_id_sessao, 'FILA', 'INICIAR_ATENDIMENTO', id_senha, payload)
  */
-router.post("/iniciar-atendimento", authMiddleware, async (req, res) => {
+router.post("/iniciar", authMiddleware, async (req, res) => {
     let conn;
     try {
-        conn = await require("../config/database").getConnection();
+        conn = await db.getConnection();
         
-        const { id_fila } = req.body;
+        const { id_senha } = req.body;
+        const id_sessao = req.user.id_sessao_usuario;
         
-        // Atualiza status para EM_ATENDIMENTO
-        await conn.query(`
-            UPDATE fila_operacional
-            SET status = 'EM_ATENDIMENTO', data_atendimento = NOW()
-            WHERE id_fila = ?
-        `, [id_fila]);
+        const payload = JSON.stringify({
+            estado_destino: 'EM_ATENDIMENTO'
+        });
 
-        // Registra evento
-        await conn.query(`
-            INSERT INTO fila_operacional_evento 
-            (id_fila, evento, id_usuario, ip_acesso)
-            VALUES (?, 'INICIADO', ?, ?)
-        `, [id_fila, req.user.id_usuario, req.ip]);
+        // Chamar sp_master_dispatcher
+        await conn.query(
+            `CALL sp_master_dispatcher(?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
+            [id_sessao, 'FILA', 'INICIAR_ATENDIMENTO', id_senha, payload]
+        );
 
-        res.json({ success: true, mensagem: "Atendimento iniciado" });
+        const [[output]] = await conn.query(
+            `SELECT @resultado as resultado, @sucesso as sucesso, @mensagem as mensagem`
+        );
+
+        res.json({
+            sucesso: output.sucesso === 1 || output.sucesso === true,
+            mensagem: output.mensagem,
+            dados: output.resultado ? JSON.parse(output.resultado) : null
+        });
 
     } catch (err) {
         console.error("Erro ao iniciar atendimento:", err);
-        res.status(500).json({ error: "ERRO_AO_INICIAR" });
+        res.status(500).json({ sucesso: false, mensagem: "Erro ao iniciar atendimento" });
     } finally {
         if (conn) conn.release();
     }
@@ -156,34 +192,41 @@ router.post("/iniciar-atendimento", authMiddleware, async (req, res) => {
 
 /**
  * POST /api/fila/finalizar
- * Finaliza atendimento e remove da fila
+ * Finalizar atendimento
+ * Backend chama: sp_master_dispatcher(p_id_sessao, 'FILA', 'FINALIZAR_ATENDIMENTO', id_senha, payload)
  */
 router.post("/finalizar", authMiddleware, async (req, res) => {
     let conn;
     try {
-        conn = await require("../config/database").getConnection();
+        conn = await db.getConnection();
         
-        const { id_fila, destino } = req.body; // destino: ALTA, ENCAMINHAMENTO, RETORNO
+        const { id_senha, destino } = req.body;
+        const id_sessao = req.user.id_sessao_usuario;
         
-        // Atualiza status para FINALIZADO
-        await conn.query(`
-            UPDATE fila_operacional
-            SET status = 'FINALIZADO', data_atendimento = NOW()
-            WHERE id_fila = ?
-        `, [id_fila]);
+        const payload = JSON.stringify({
+            estado_destino: 'CONCLUIDO',
+            destino: destino || 'ALTA'
+        });
 
-        // Registra evento
-        await conn.query(`
-            INSERT INTO fila_operacional_evento 
-            (id_fila, evento, id_usuario, ip_acesso)
-            VALUES (?, ?, ?, ?)
-        `, [id_fila, `FINALIZADO_${destino || 'ALTA'}`, req.user.id_usuario, req.ip]);
+        // Chamar sp_master_dispatcher
+        await conn.query(
+            `CALL sp_master_dispatcher(?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
+            [id_sessao, 'FILA', 'FINALIZAR_ATENDIMENTO', id_senha, payload]
+        );
 
-        res.json({ success: true, mensagem: "Atendimento finalizados" });
+        const [[output]] = await conn.query(
+            `SELECT @resultado as resultado, @sucesso as sucesso, @mensagem as mensagem`
+        );
+
+        res.json({
+            sucesso: output.sucesso === 1 || output.sucesso === true,
+            mensagem: output.mensagem,
+            dados: output.resultado ? JSON.parse(output.resultado) : null
+        });
 
     } catch (err) {
-        console.error("Erro ao finalizar:", err);
-        res.status(500).json({ error: "ERRO_AO_FINALIZAR" });
+        console.error("Erro ao finalizar atendimento:", err);
+        res.status(500).json({ sucesso: false, mensagem: "Erro ao finalizar" });
     } finally {
         if (conn) conn.release();
     }
@@ -191,36 +234,82 @@ router.post("/finalizar", authMiddleware, async (req, res) => {
 
 /**
  * POST /api/fila/encaminhar
- * Encaminha paciente para outro local
+ * Encaminhar paciente para outro local
+ * Backend chama: sp_master_dispatcher(p_id_sessao, 'FILA', 'ENCAMINHAR', id_senha, payload)
  */
 router.post("/encaminhar", authMiddleware, async (req, res) => {
     let conn;
     try {
-        conn = await require("../config/database").getConnection();
+        conn = await db.getConnection();
         
-        const { id_fila, id_local_destino, motivo } = req.body;
+        const { id_senha, id_local_destino, motivo } = req.body;
+        const id_sessao = req.user.id_sessao_usuario;
         
-        // Atualiza local operacional
-        await conn.query(`
-            UPDATE fila_operacional
-            SET id_local_operacional = ?, 
-                status = 'AGUARDANDO',
-                prioridade = 'URGENTE'
-            WHERE id_fila = ?
-        `, [id_local_destino, id_fila]);
+        const payload = JSON.stringify({
+            id_local_destino,
+            motivo
+        });
 
-        // Registra evento
-        await conn.query(`
-            INSERT INTO fila_operacional_evento 
-            (id_fila, evento, id_usuario, ip_acesso)
-            VALUES (?, 'ENCAMINHAMENTO', ?, ?)
-        `, [id_fila, req.user.id_usuario, req.ip]);
+        // Chamar sp_master_dispatcher
+        await conn.query(
+            `CALL sp_master_dispatcher(?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
+            [id_sessao, 'FILA', 'ENCAMINHAR', id_senha, payload]
+        );
 
-        res.json({ success: true, mensagem: "Paciente encaminhados" });
+        const [[output]] = await conn.query(
+            `SELECT @resultado as resultado, @sucesso as sucesso, @mensagem as mensagem`
+        );
+
+        res.json({
+            sucesso: output.sucesso === 1 || output.sucesso === true,
+            mensagem: output.mensagem,
+            dados: output.resultado ? JSON.parse(output.resultado) : null
+        });
 
     } catch (err) {
         console.error("Erro ao encaminhar:", err);
-        res.status(500).json({ error: "ERRO_AO_ENCAMINHAR" });
+        res.status(500).json({ sucesso: false, mensagem: "Erro ao encaminhar" });
+    } finally {
+        if (conn) conn.release();
+    }
+});
+
+/**
+ * POST /api/fila/cancelar
+ * Cancelar senha
+ * Backend chama: sp_master_dispatcher(p_id_sessao, 'FILA', 'CANCELAR_SENHA', id_senha, payload)
+ */
+router.post("/cancelar", authMiddleware, async (req, res) => {
+    let conn;
+    try {
+        conn = await db.getConnection();
+        
+        const { id_senha, motivo } = req.body;
+        const id_sessao = req.user.id_sessao_usuario;
+        
+        const payload = JSON.stringify({
+            motivo: motivo || 'Cancelado pelo atendente'
+        });
+
+        // Chamar sp_master_dispatcher
+        await conn.query(
+            `CALL sp_master_dispatcher(?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
+            [id_sessao, 'FILA', 'CANCELAR_SENHA', id_senha, payload]
+        );
+
+        const [[output]] = await conn.query(
+            `SELECT @resultado as resultado, @sucesso as sucesso, @mensagem as mensagem`
+        );
+
+        res.json({
+            sucesso: output.sucesso === 1 || output.sucesso === true,
+            mensagem: output.mensagem,
+            dados: output.resultado ? JSON.parse(output.resultado) : null
+        });
+
+    } catch (err) {
+        console.error("Erro ao cancelar senha:", err);
+        res.status(500).json({ sucesso: false, mensagem: "Erro ao cancelar" });
     } finally {
         if (conn) conn.release();
     }

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useRuntimeAuth } from "../../auth/RuntimeAuthContext";
+import { useDispatcher } from "../../../../hooks/useDispatcher";
 import Layout from "../../layout/Layout";
 import PatientQueue from "../../components/PatientQueue";
 import "./Recepcao.css";
 
 export default function Recepcao() {
     const { authFetch } = useRuntimeAuth();
+    const { gerarSenha, error: dispatcherError } = useDispatcher();
     const [searchTerm, setSearchTerm] = useState("");
     const [patient, setPatient] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -72,30 +74,23 @@ export default function Recepcao() {
         }
     }
 
-    // Gera nova senha
+    // Gera nova senha via Dispatcher
     async function handleGenerateTicket() {
         setLoading(true);
         setError("");
         setNewTicket(null);
 
         try {
-            const res = await authFetch("/api/operacional/senhas", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    tipo: "CONSULTA"
-                })
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                setNewTicket(data.senha);
+            // Usando o hook do dispatcher - rota canônica /api/fila/gerar
+            const resultado = await gerarSenha({ tipo: 'NORMAL', origem: 'RECEPCAO' });
+            
+            if (resultado.sucesso && resultado.dados) {
+                setNewTicket(resultado.dados);
             } else {
-                setError(data.error || "Erro ao gerar senha");
+                setError(resultado.mensagem || "Erro ao gerar senha");
             }
         } catch {
-            setError("Erro ao gerar senha");
+            setError(dispatcherError || "Erro ao gerar senha");
         } finally {
             setLoading(false);
         }
@@ -179,3 +174,4 @@ export default function Recepcao() {
         </Layout>
     );
 }
+ 
