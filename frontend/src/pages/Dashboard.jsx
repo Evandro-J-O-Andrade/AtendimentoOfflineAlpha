@@ -7,70 +7,52 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../context/AppContext";
+import { useAuth } from "../apps/operacional/auth/AuthProvider";
 import { useMenu } from "../hooks/useMenu";
-import MenuDinamico from "../components/MenuDinamico";
 import "./Dashboard.css";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { usuario, contexto, sessao, permissoes, logout, hasPermission } = useApp();
+  const { session, logout } = useAuth();
+  const { menu, loading } = useMenu();
   const [itemAtivo, setItemAtivo] = useState(null);
-  const [dadosDashboard, setDadosDashboard] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  // Carrega menu baseado no perfil do contexto
-  const { menu, carregando, erro, temPermissao } = useMenu(contexto?.id_perfil);
-
-  // Se não tem contexto, redireciona para seleção
+  // Se não tem sessão, redireciona para login
   useEffect(() => {
-    if (!contexto && !loading) {
+    if (!session && !loading) {
+      navigate("/login");
+    }
+  }, [session, navigate, loading]);
+
+  // Se não tem contexto definido, redireciona para seleção
+  useEffect(() => {
+    if (session && !session.contexto_definido) {
       navigate("/contexto");
     }
-  }, [contexto, navigate, loading]);
-
-  // Função executada quando clica em um item do menu
-  const handleAction = async (acao, resultado) => {
-    console.log("Ação executada:", acao, resultado);
-    
-    // Atualiza dados do dashboard se necessário
-    if (resultado?.dados) {
-      setDadosDashboard(resultado.dados);
-    }
-  };
-
-  // Clique em item do menu
-  const handleItemClick = (item) => {
-    setItemAtivo(item.codigo);
-    
-    // Se tem URL definida, navega
-    if (item.url) {
-      navigate(item.url);
-    }
-  };
+  }, [session, navigate]);
 
   // Logout
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
 
+  // Clique em item do menu
+  const handleItemClick = (acao) => {
+    setItemAtivo(acao.codigo);
+    
+    // Se tem ação frontend, navega
+    if (acao.acao_frontend) {
+      navigate("/" + acao.acao_frontend);
+    }
+  };
+
   // Se está carregando, mostra tela de loading
-  if (carregando) {
+  if (loading) {
     return (
       <div className="dashboard-loading">
         <div className="loading-spinner">⏳</div>
         <p>Carregando permissões...</p>
-      </div>
-    );
-  }
-
-  // Se tem erro, mostra mensagem
-  if (erro) {
-    return (
-      <div className="dashboard-erro">
-        <p>Erro ao carregar menu: {erro}</p>
-        <button onClick={() => window.location.reload()}>Recarregar</button>
       </div>
     );
   }
@@ -84,9 +66,10 @@ export default function Dashboard() {
         </div>
         <div className="header-right">
           <div className="user-info">
-            <span className="user-name">{usuario?.nome || "Usuário"}</span>
+            <span className="user-name">{session?.usuario?.login || "Usuário"}</span>
             <span className="user-context">
-              {contexto?.perfil || "Sem perfil"} - {contexto?.unidade || "Sem unidade"}
+              {session?.id_perfil ? `Perfil: ${session.id_perfil}` : "Sem perfil"}
+              {session?.id_unidade ? ` - Unidade: ${session.id_unidade}` : ""}
             </span>
           </div>
           <button className="btn-logout" onClick={handleLogout}>
@@ -98,11 +81,25 @@ export default function Dashboard() {
       <div className="dashboard-body">
         {/* Sidebar com Menu Dinâmico */}
         <aside className="dashboard-sidebar">
-          <MenuDinamico 
-            menu={menu} 
-            onAction={handleAction}
-            ativo={itemAtivo}
-          />
+          <div className="menu-list">
+            {menu.map((mod) => (
+              <div key={mod.modulo} className="menu-modulo">
+                <h3 className="menu-titulo">{mod.nome || mod.modulo}</h3>
+                <div className="menu-acoes">
+                  {mod.acoes?.map((acao) => (
+                    <button 
+                      key={acao.codigo} 
+                      className={`menu-item ${itemAtivo === acao.codigo ? 'active' : ''}`}
+                      onClick={() => handleItemClick(acao)}
+                    >
+                      {acao.nome}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {!menu.length && <p className="menu-vazio">Nenhuma permissão encontrada</p>}
+          </div>
         </aside>
 
         {/* Área de Trabalho */}
@@ -115,7 +112,6 @@ export default function Dashboard() {
             {itemAtivo ? (
               <div className="workarea-module">
                 <p>Módulo: {itemAtivo}</p>
-                {/* Aqui cada página será renderizada conforme a rota */}
               </div>
             ) : (
               <div className="workarea-welcome">
@@ -125,16 +121,16 @@ export default function Dashboard() {
                 {/* Stats rápidas */}
                 <div className="quick-stats">
                   <div className="stat">
-                    <span className="stat-label">Permissões</span>
-                    <span className="stat-value">{permissoes?.length || 0}</span>
+                    <span className="stat-label">Módulos</span>
+                    <span className="stat-value">{menu.length}</span>
                   </div>
                   <div className="stat">
                     <span className="stat-label">Perfil</span>
-                    <span className="stat-value">{contexto?.perfil || "-"}</span>
+                    <span className="stat-value">{session?.id_perfil || "-"}</span>
                   </div>
                   <div className="stat">
                     <span className="stat-label">Unidade</span>
-                    <span className="stat-value">{contexto?.unidade || "-"}</span>
+                    <span className="stat-value">{session?.id_unidade || "-"}</span>
                   </div>
                 </div>
               </div>

@@ -53,50 +53,59 @@ async function authMiddleware(req, res, next) {
         // 3️⃣ Validar sessão no banco (server-side)
         // Isso garante que a sessão existe, está ativa e não expirou
         try {
-            await pool.execute(
+            // Primeiro verifica se a sessão existe na tabela
+            const [sessaoRows] = await pool.execute(
                 "SELECT id_sessao_usuario, ativo, expira_em FROM sessao_usuario WHERE id_sessao_usuario = ?",
                 [decoded.id_sessao_usuario]
             );
             
-            // A procedure sp_sessao_assert já faz toda validação
-            // Se não existir, vai抛出 erro
-            await pool.query("CALL sp_sessao_assert(?)", [decoded.id_sessao_usuario]);
-            
-        } catch (sessionError) {
-            console.error("Erro na validação de sessão:", sessionError.message);
-            
-            // Erros comuns da procedure
-            if (sessionError.message.includes('inexistente') || 
-                sessionError.message.includes('não encontrada')) {
+            if (!sessaoRows.length) {
                 return res.status(401).json({
                     error: "SESSAO_INEXISTENTE",
-                    message: "Sessão não encontrada"
+                    message: "Sessão não encontrada no banco"
                 });
             }
             
-            if (sessionError.message.includes('inativa') || sessionError.message.includes('inativo')) {
+            const sessao = sessaoRows[0];
+            
+            // Verifica se está ativa
+            if (sessao.ativo !== 1) {
                 return res.status(401).json({
                     error: "SESSAO_INATIVA",
                     message: "Sessão foi encerrada"
                 });
             }
             
-            if (sessionError.message.includes('expirada')) {
+            // Verifica se expirou
+            if (new Date(sessao.expira_em) < new Date()) {
                 return res.status(401).json({
                     error: "SESSAO_EXPIRADA",
                     message: "Sessão expirou. Faça login novamente."
                 });
             }
             
-            if (sessionError.message.includes('bloqueada')) {
-                return res.status(403).json({
-                    error: "SESSAO_BLOQUEADA",
-                    message: "Sessão temporariamente bloqueada"
-                });
+            // A procedure sp_sessao_assert faz validação extra (opcional em modo dev)
+            try {
+                await pool.query(
+                    "SET @p_resultado = NULL, @p_sucesso = FALSE, @p_mensagem = NULL; CALL sp_sessao_assert(?, NULL, @p_resultado, @p_sucesso, @p_mensagem); SELECT @p_sucesso AS sucesso, @p_mensagem AS mensagem",
+                    [decoded.id_sessao_usuario]
+                );
+            } catch (spError) {
+                // Se a SP falhar em modo dev, continua apenas com validação básica
+                if (process.env.NODE_ENV === 'production') {
+                    console.error("Erro na sp_sessao_assert:", spError.message);
+                    return res.status(401).json({
+                        error: "SESSAO_INVALIDA",
+                        message: "Falha na validação de sessão"
+                    });
+                }
+                console.warn("Aviso: sp_sessao_assert falhou, usando validação básica:", spError.message);
             }
             
-            // Se for outro erro, permite continuar em modo desenvolvimento
-            // (para evitar quebra se procedure não existir)
+        } catch (sessionError) {
+            console.error("Erro na validação de sessão:", sessionError.message);
+            
+            // Se for erro de tabela não existente, permite continuar em modo desenvolvimento
             if (process.env.NODE_ENV === 'production') {
                 return res.status(401).json({
                     error: "SESSAO_INVALIDA",
@@ -118,9 +127,13 @@ async function authMiddleware(req, res, next) {
             perfil: decoded.perfil
         };
 
-        // 5️⃣ Atualizar heartbeat da sessão
+        // 5️⃣ Atualizar heartbeat da sessão (opcional - não bloqueia requisição)
         try {
-            await pool.query("CALL sp_sessao_heartbeat(?)", [decoded.id_sessao_usuario]);
+            // sp_sessao_heartbeat pode não existir, então usa query simples
+            await pool.execute(
+                "UPDATE sessao_usuario SET ultimo_acesso = NOW(6) WHERE id_sessao_usuario = ?",
+                [decoded.id_sessao_usuario]
+            );
         } catch (e) {
             // Ignora erro de heartbeat - não bloqueia requisição
         }

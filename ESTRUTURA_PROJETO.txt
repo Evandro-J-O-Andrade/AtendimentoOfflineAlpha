@@ -1,0 +1,329 @@
+# Estrutura Completa do Projeto - AtendimentoOfflineAlpha
+
+================================================================================
+RAIZ (d:/AtendimentoOfflineAlpha)
+================================================================================
+
+Arquivos de Configuração:
+- .env.example
+- .gitignore
+- .htaccess
+- package.json
+- package-lock.json
+
+Documentação (MAPAs):
+- ANALISE_LANDING_PAGES_SETORES.md
+- ANALISE_SISTEMA_COMPLETA.md
+- ARQUITETURA_SISTEMA_ANALISE.md
+- MAPA_6_MOTORES_SISTEMA.md
+- MAPA_BANCO_DADOS_COMPLETO.md
+- MAPA_BANCO_SETORES_COMPLETO.md
+- MAPA_FRONTEND_SP_SERVICES.md
+- MAPA_FRONTEND_TABELAS_CAMPOS.md
+- MAPA_INTEGRACAO_FRONTEND_SP_BANCO_COMPLETO.md
+- MAPA_INTEGRACAO_FRONTEND_SP_BANCO.md
+- MAPA_SETORES_PAGINAS_COMPLETO.md
+- MAPA_SP_FRONTEND.md
+- MAPA_SP_TABELAS_CAMPOS_COMPLETO.md
+- PROJECT_COMPLETE_STATUS.md
+- base64.txt
+
+================================================================================
+backend/
+================================================================================
+
+Arquivos de Execução:
+- server.js
+- package.json
+- package-lock.json
+- apply-sp-dispatcher.js
+- apply-sp-master-login.js
+- check-procedures.js
+- check_perfil.js
+- check_permissao.js
+- check_unidade.js
+- generate-seed.js
+- patch.js
+- run-seed-admin.js
+- run-seed.js
+- seed_acoes.js
+- seed_completo.js
+- MAPA_FRONEND_SP_INTEGRACAO.md
+- README.md
+
+backend/src/
+- app.js
+
+backend/src/auth/
+- authController.js
+- authController_bkp.js
+- authMiddleware.js
+- authRoutes.js
+- authService.js
+- loginContextService.js
+- permissionMiddleware.js
+- permissionService.js
+- runtimeContextMiddleware.js
+
+backend/src/config/
+- database.js
+- jwt.js
+
+backend/src/routes/
+- contextoRoutes.js
+- dispatcherRoutes.js
+- farmaciaRoutes.js
+- fila.js
+- filaRoutes.js
+- operacionalRoutes.js
+- painelRoutes.js
+- permissaoRoutes.js
+- sessionRoutes.js
+- spRoutes.js ★ (NOVO)
+- totemRoutes.js
+- triagemRoutes.js
+
+backend/src/services/
+- atendimento_service.js
+- auditoria_service.js
+- dispatcherService.js
+- farmacia_service.js
+- senha_service.js
+- spService.js ★ (NOVO)
+- triagem_service.js
+
+backend/src/kernel/
+- authz_client.js
+- dispatcher_gateway.js
+- ledger_client.js
+- worker_runner.js
+- config/kernel_auth_config.js
+- worker/runtime_worker_processor.js
+
+backend/src/context/
+- contextService.js
+
+backend/src/controllers/
+- farmaciaController.js
+- auth/loginController.js
+
+backend/src/runtime/
+- oracleEngine.js
+- runtimeGuard.js
+- sessionGuard.js
+- snapshotValidator.js
+- syncQueueManager.js
+
+backend/src/ledger/
+- ledgerRoutes.js
+- ledgerService.js
+
+backend/src/middlewares/
+- authMiddleware.js
+
+backend/sql/
+- Dump20260321 (2).sql (1.5MB)
+
+backend/docs/
+- FLUXO_SENHAS_SEQUENCIA.md
+
+================================================================================
+frontend/
+================================================================================
+
+Arquivos Principais:
+- vite.config.js
+
+frontend/src/
+- main.jsx
+- index.css
+- App.jsx
+- App.css
+
+frontend/src/api/
+- api.js
+- spApi.js ★ (NOVO)
+
+frontend/src/apps/
+- admin/
+  - pages/
+    - Admin.css
+    - Admin.jsx
+    - AdminModulePage.css
+    - AdminModulePage.jsx
+  - security/
+    - AdminGuard.jsx
+
+- auth/
+  - pages/
+    - Login.jsx
+
+- operacional/
+  - auth/
+    - RuntimeAuthContext.jsx
+  - components/
+    - PatientQueue.css
+    - PatientQueue.jsx
+  - hooks/
+  - layout/
+    - Layout.css
+    - Layout.jsx
+    - sidebar.css
+  - pages/
+    - Dashboard.jsx
+    - Login.css
+    - Login.jsx
+    - Painel.jsx
+    - ambulancia/
+      - Ambulancia.css
+      - Ambulancia.jsx
+    - assistencia_social/
+      - AssistenciaSocial.css
+      - AssistenciaSocial.jsx
+    - cat/
+      - Cat.css
+      - Cat.jsx
+    - contexto/
+      - SelecionarContexto.css
+      - SelecionarContexto.jsx
+    - enfermagem/
+      - Enfermagem.css
+      - Enfermagem.jsx
+    - estoque/
+      - Estoque.css
+      - Estoque.jsx
+    - farmacia/
+      - Farmacia.css
+      - Farmacia.jsx
+    - faturamento/
+      - Faturamento.css
+      - Faturamento.jsx
+    - gasoterapia/
+      - Gasoterapia.css
+      - Gasoterapia.jsx
+    - interconsulta/
+      - Interconsulta.css
+      - Interconsulta.jsx
+    - internacao/
+      - Internacao.css
+      - Internacao.jsx
+    - laboratorio/
+      - Laboratorio.css
+      - Laboratorio.jsx
+    - manutencao/
+      - Manutencao.css
+      - Manutencao.jsx
+    - medico/
+      - Medico.css
+      - Medico.jsx
+    - nutricao/
+      - Nutricao.css
+      - Nutricao.jsx
+    - obito/
+      - Obito.css
+      - Obito.jsx
+    - pdv/
+      - Pdv.css
+      - Pdv.jsx
+    - recepcao/
+      - Recepcao.css
+      - Recepcao.jsx
+    - remocao/
+      - Remocao.css
+      - Remocao.jsx
+    - triagem/
+      - Triagem.css
+      - Triagem.jsx
+  - runtime/
+  - security/
+    - SecurityGuard.jsx
+
+- painel/
+  - pages/
+    - Painel.css
+    - Painel.jsx
+    - PainelUsuario.css
+    - PainelUsuario.jsx
+
+- totem/
+  - pages/
+    - Totem.css
+    - Totem.jsx
+
+frontend/src/contexts/
+- AuthContext.jsx
+
+frontend/src/hooks/
+- useApp.js
+- useDispatcher.js
+- useFilaRealtime.js
+- useMenu.js
+
+frontend/src/pages/
+- Dashboard.css
+- Dashboard.jsx
+
+frontend/src/router/
+- index.jsx
+- operacionalRoutes.js
+
+frontend/src/runtime/
+- dispatcher.js
+- RuntimeActionRouter.jsx
+
+frontend/src/services/
+- AssistencialService.js ★ (NOVO)
+- dispatcherClient.js
+- dispatcherService.js
+- FilaService.js ★ (NOVO)
+- index.js ★ (NOVO)
+- loginService.js
+- PacienteService.js ★ (NOVO)
+- PermissionService.js ★ (NOVO)
+- runtimeService.js
+- sessionService.js
+- syncService.js
+- UserService.js ★ (NOVO)
+
+================================================================================
+OUTRAS PASTAS
+================================================================================
+
+Captures/ (~70 imagens/screenshots e vídeos)
+- *.png (múltiplas capturas de tela)
+- *.pdf (documentos)
+- video de paineis e atendimentos.MP4
+
+Cypress/
+- .htaccess
+- e2e/users.spec.js
+- users.spec.js/ (pasta com screenshots de testes)
+- videos/users.spec.js.mp4
+
+docs/
+(pasta de documentação adicional)
+
+================================================================================
+ARQUIVOS CRIADOS NESTA SESSÃO
+================================================================================
+
+Backend:
+- backend/src/services/spService.js
+- backend/src/routes/spRoutes.js
+
+Frontend:
+- frontend/src/api/spApi.js
+- frontend/src/services/UserService.js
+- frontend/src/services/PacienteService.js
+- frontend/src/services/PermissionService.js
+- frontend/src/services/AssistencialService.js
+- frontend/src/services/FilaService.js
+- frontend/src/services/index.js
+
+Documentação:
+- MAPA_FRONTEND_SP_SERVICES.md
+- ESTRUTURA_PROJETO.txt
+
+================================================================================
+TOTAL: ~150+ arquivos
+================================================================================

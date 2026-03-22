@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Páginas
-import Login from "../apps/auth/pages/Login.jsx";
+import LoginPage from "../pages/LoginPage.jsx";
 import SelecionarContexto from "../apps/operacional/pages/contexto/SelecionarContexto.jsx";
 import PainelUsuario from "../apps/painel/pages/PainelUsuario.jsx";
 import Admin from "../apps/admin/pages/Admin.jsx";
@@ -45,7 +45,7 @@ export default function AppRouter() {
             <Routes>
                 {/* Rota pública - Login */}
                 <Route path="/" element={<Navigate to="/login" />} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<LoginPage />} />
 
                 {/* Rota de totem (pública, sem autenticação) */}
                 <Route path="/totem" element={<Totem />} />
@@ -168,7 +168,7 @@ export default function AppRouter() {
                 <Route
                     path="/ambulancia"
                     element={
-                        <SecurityGuard acao="painel_ambulancia">
+                        <SecurityGuard>
                             <Ambulancia />
                         </SecurityGuard>
                     }
@@ -176,7 +176,7 @@ export default function AppRouter() {
                 <Route
                     path="/remocao"
                     element={
-                        <SecurityGuard acao="painel_remocao">
+                        <SecurityGuard>
                             <Remocao />
                         </SecurityGuard>
                     }
@@ -184,7 +184,7 @@ export default function AppRouter() {
                 <Route
                     path="/manutencao"
                     element={
-                        <SecurityGuard acao="painel_manutencao">
+                        <SecurityGuard>
                             <Manutencao />
                         </SecurityGuard>
                     }
@@ -192,7 +192,7 @@ export default function AppRouter() {
                 <Route
                     path="/gasoterapia"
                     element={
-                        <SecurityGuard acao="painel_gasoterapia">
+                        <SecurityGuard>
                             <Gasoterapia />
                         </SecurityGuard>
                     }
@@ -200,7 +200,7 @@ export default function AppRouter() {
                 <Route
                     path="/assistencia-social"
                     element={
-                        <SecurityGuard acao="painel_assistencia_social">
+                        <SecurityGuard>
                             <AssistenciaSocial />
                         </SecurityGuard>
                     }
@@ -208,7 +208,7 @@ export default function AppRouter() {
                 <Route
                     path="/faturamento"
                     element={
-                        <SecurityGuard acao="painel_faturamento">
+                        <SecurityGuard>
                             <Faturamento />
                         </SecurityGuard>
                     }
@@ -216,7 +216,7 @@ export default function AppRouter() {
                 <Route
                     path="/cat"
                     element={
-                        <SecurityGuard acao="painel_cat">
+                        <SecurityGuard>
                             <Cat />
                         </SecurityGuard>
                     }
@@ -224,7 +224,7 @@ export default function AppRouter() {
                 <Route
                     path="/obito"
                     element={
-                        <SecurityGuard acao="painel_obito">
+                        <SecurityGuard>
                             <Obito />
                         </SecurityGuard>
                     }
@@ -232,7 +232,7 @@ export default function AppRouter() {
                 <Route
                     path="/pdv"
                     element={
-                        <SecurityGuard acao="painel_pdv">
+                        <SecurityGuard>
                             <Pdv />
                         </SecurityGuard>
                     }
@@ -240,7 +240,7 @@ export default function AppRouter() {
                 <Route
                     path="/nutricao"
                     element={
-                        <SecurityGuard acao="painel_nutricao">
+                        <SecurityGuard>
                             <Nutricao />
                         </SecurityGuard>
                     }
@@ -248,7 +248,7 @@ export default function AppRouter() {
                 <Route
                     path="/interconsulta"
                     element={
-                        <SecurityGuard acao="painel_interconsulta">
+                        <SecurityGuard>
                             <Interconsulta />
                         </SecurityGuard>
                     }
@@ -258,7 +258,7 @@ export default function AppRouter() {
                 <Route
                     path="/admin"
                     element={
-                        <SecurityGuard acao="painel_admin">
+                        <SecurityGuard>
                             <Admin />
                         </SecurityGuard>
                     }
@@ -267,7 +267,7 @@ export default function AppRouter() {
                 <Route
                     path="/admin/modulo/:moduloId"
                     element={
-                        <SecurityGuard acao="painel_admin">
+                        <SecurityGuard>
                             <AdminModulePage />
                         </SecurityGuard>
                     }

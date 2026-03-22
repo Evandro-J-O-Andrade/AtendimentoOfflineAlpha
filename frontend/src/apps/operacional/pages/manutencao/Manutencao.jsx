@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../context/AuthProvider';
+import spApi from '../../../../api/spApi';
 import './Manutencao.css';
 
 const Manutencao = () => {
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [chamados, setChamados] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,14 +15,15 @@ const Manutencao = () => {
   }, []);
 
   const carregarDados = async () => {
+    if (!session?.id_sessao) return;
+    
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/operacional/manutencao', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const data = await spApi.call('sp_manutencao_listar', {
+        p_id_sessao: session.id_sessao,
+        p_id_unidade: session?.id_unidade
       });
-      const data = await response.json();
-      setChamados(data?.dados || []);
+      setChamados(data?.resultado || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -49,6 +53,14 @@ const Manutencao = () => {
     const s = map[status] || { class: 'badge-default', text: status };
     return <span className={`badge ${s.class}`}>{s.text}</span>;
   };
+
+  if (loading) {
+    return (
+      <div className="manutencao-container">
+        <div className="loading">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="manutencao-container">

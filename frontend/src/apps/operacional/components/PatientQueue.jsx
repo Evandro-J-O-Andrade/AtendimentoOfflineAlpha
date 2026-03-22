@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useRuntimeAuth } from "../auth/RuntimeAuthContext";
+import { useAuth } from "../../../context/AuthProvider";
+import { getFilaTriagem, getFilaEspera } from "../../../services/FilaService";
 import "./PatientQueue.css";
 
 export default function PatientQueue({ 
@@ -9,7 +10,7 @@ export default function PatientQueue({
     selectedPatient,
     showActions = true 
 }) {
-    const { authFetch } = useRuntimeAuth();
+    const { sessao } = useAuth();
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -23,13 +24,22 @@ export default function PatientQueue({
 
     async function fetchPatients() {
         try {
-            const res = await authFetch(`/api/operacional/atendimentos?status=${status}`);
-            const data = await res.json();
-            
-            if (res.ok) {
-                setPatients(data.atendimentos || []);
+            const idSessao = sessao?.id_sessao_usuario;
+            if (!idSessao) {
+                setPatients([]);
+                setError("Sessão operacional não encontrada");
+                return;
+            }
+
+            const data = status === "AGUARDANDO_TRIAGEM"
+                ? await getFilaTriagem(idSessao)
+                : await getFilaEspera(idSessao);
+
+            if (data.ok) {
+                setPatients(data.resultado || data.data || []);
+                setError("");
             } else {
-                setError(data.error || "Erro ao carregar pacientes");
+                setError(data.erro || data.mensagem || "Erro ao carregar pacientes");
             }
         } catch {
             setError("Erro de comunicação");

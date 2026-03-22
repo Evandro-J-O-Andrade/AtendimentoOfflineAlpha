@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useRuntimeAuth } from "../../auth/RuntimeAuthContext";
+import { useAuth } from "../../../../context/AuthProvider";
 import Layout from "../../layout/Layout";
+import spApi from "../../../../api/spApi";
 import "./Farmacia.css";
 
 export default function Farmacia() {
-    const { authFetch } = useRuntimeAuth();
+    const { session } = useAuth();
     const [searchTerm, setSearchTerm] = useState("");
     const [prescription, setPrescription] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -21,14 +22,13 @@ export default function Farmacia() {
     // Carregar histórico de dispensação
     async function loadHistory() {
         try {
-            const res = await authFetch(`/api/operacional/farmacia/historico`);
-            const data = await res.json();
-            
-            if (res.ok && data.historico) {
-                setHistory(data.historico);
-            }
-        } catch {
-            // Silencioso - histórico é secundário
+            const data = await spApi.call('sp_historico_dispensacao', {
+                p_id_sessao: session?.id_sessao
+            });
+
+            setHistory(Array.isArray(data) ? data : []);
+        } catch (e) {
+            console.error('Erro ao carregar histórico:', e);
         }
     }
 
@@ -43,16 +43,19 @@ export default function Farmacia() {
         setDispendedItems([]);
 
         try {
-            const res = await authFetch(`/api/operacional/farmacia/buscar?termo=${encodeURIComponent(searchTerm)}`);
-            const data = await res.json();
+            const data = await spApi.call('sp_buscar_prescricao', {
+                p_id_sessao: session?.id_sessao,
+                p_termo: searchTerm
+            });
 
-            if (res.ok && data.prescricoes && data.prescricoes.length > 0) {
-                setPrescription(data.prescricoes[0]);
+            const prescricoes = Array.isArray(data) ? data : [];
+            if (prescricoes.length > 0) {
+                setPrescription(prescricoes[0]);
             } else {
                 setError("Nenhuma prescrição encontrada para este termo");
             }
-        } catch {
-            setError("Erro ao buscar prescrição");
+        } catch (e) {
+            setError(e.message || "Erro ao buscar prescrição");
         } finally {
             setLoading(false);
         }
@@ -64,25 +67,16 @@ export default function Farmacia() {
         setError("");
 
         try {
-            const res = await authFetch("/api/operacional/farmacia/dispensar", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id_prescricao_item: item.id,
-                    lote: item.lote
-                })
+            await spApi.call('sp_baixa_receita', {
+                p_id_sessao: session?.id_sessao,
+                p_id_prescricao_item: item.id,
+                p_lote: item.lote
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                setDispendedItems(prev => [...prev, item.id]);
-                setSuccess(`${item.medicamento} dispensado com sucesso!`);
-            } else {
-                setError(data.error || "Erro ao dispensar");
-            }
-        } catch {
-            setError("Erro ao dispensar");
+            setDispendedItems(prev => [...prev, item.id]);
+            setSuccess(`${item.medicamento} dispensado com sucesso!`);
+        } catch (e) {
+            setError(e.message || "Erro ao dispensar");
         } finally {
             setLoading(false);
         }
@@ -94,23 +88,17 @@ export default function Farmacia() {
         setError("");
 
         try {
-            const res = await authFetch(`/api/operacional/farmacia/${prescription.id}/finalizar`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
+            await spApi.call('sp_finalizar_dispensacao', {
+                p_id_sessao: session?.id_sessao,
+                p_id_prescricao: prescription.id
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                setSuccess("Dispensação finalizada!");
-                setPrescription(null);
-                setSearchTerm("");
-                setDispendedItems([]);
-            } else {
-                setError(data.error || "Erro ao finalizar");
-            }
-        } catch {
-            setError("Erro ao finalizar");
+            setSuccess("Dispensação finalizada!");
+            setPrescription(null);
+            setSearchTerm("");
+            setDispendedItems([]);
+        } catch (e) {
+            setError(e.message || "Erro ao finalizar");
         } finally {
             setLoading(false);
         }

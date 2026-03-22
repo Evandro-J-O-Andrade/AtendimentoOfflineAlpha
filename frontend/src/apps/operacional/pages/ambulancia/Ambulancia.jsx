@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../context/AuthProvider';
+import spApi from '../../../../api/spApi';
 import './Ambulancia.css';
 
 const Ambulancia = () => {
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [viaturas, setViaturas] = useState([]);
   const [solicitacoes, setSolicitacoes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,23 +17,24 @@ const Ambulancia = () => {
   }, []);
 
   const carregarDados = async () => {
+    if (!session?.id_sessao) return;
+    
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       
       // Carregar viaturas
-      const vtrResponse = await fetch('/api/operacional/viaturas', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const vtrData = await spApi.call('sp_ambulancia_listar_viaturas', {
+        p_id_sessao: session.id_sessao,
+        p_id_unidade: session?.id_unidade
       });
-      const vtrData = await vtrResponse.json();
-      setViaturas(vtrData?.dados || []);
+      setViaturas(vtrData?.resultado || []);
 
       // Carregar solicitações de transporte
-      const solResponse = await fetch('/api/operacional/transporte-ambulancia', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const solData = await spApi.call('sp_ambulancia_listar_solicitacoes', {
+        p_id_sessao: session.id_sessao,
+        p_id_unidade: session?.id_unidade
       });
-      const solData = await solResponse.json();
-      setSolicitacoes(solData?.dados || []);
+      setSolicitacoes(solData?.resultado || []);
       
       setErro(null);
     } catch (err) {
@@ -42,27 +46,25 @@ const Ambulancia = () => {
 
   const aceitarSolicitacao = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(`/api/operacional/transporte-ambulancia/${id}/aceitar`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      await spApi.call('sp_ambulancia_aceitar_solicitacao', {
+        p_id_sessao: session.id_sessao,
+        p_id_solicitacao: id
       });
       carregarDados();
     } catch (err) {
-      alert('Erro ao aceitar solicitação');
+      alert('Erro ao aceitar solicitação: ' + err.message);
     }
   };
 
   const finalizarTransporte = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(`/api/operacional/transporte-ambulancia/${id}/finalizar`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      await spApi.call('sp_ambulancia_finalizar_transporte', {
+        p_id_sessao: session.id_sessao,
+        p_id_solicitacao: id
       });
       carregarDados();
     } catch (err) {
-      alert('Erro ao finalizar transporte');
+      alert('Erro ao finalizar transporte: ' + err.message);
     }
   };
 

@@ -3,6 +3,7 @@
 
 import { getUserData, getToken } from "./loginService";
 import { useState, useEffect } from "react";
+import { consultarFilaEspera } from "../api/spApi";
 
 const API_BASE = "http://localhost:3001/api";
 
@@ -87,19 +88,10 @@ export async function syncFila(idFila) {
       return { success: false, reason: "not_authenticated" };
     }
 
-    const response = await fetch(`${API_BASE}/fila/${idFila}/senhas`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const senhas = await response.json();
+    const dadosUsuario = getUserData();
+    const idSessao = dadosUsuario?.runtime?.[0]?.id_sessao_usuario || dadosUsuario?.id_sessao_usuario || idFila;
+    const resposta = await consultarFilaEspera(idSessao);
+    const senhas = resposta?.resultado || resposta?.data || [];
 
     // Salvar no cache offline
     const cacheKey = `fila_cache_${idFila}`;

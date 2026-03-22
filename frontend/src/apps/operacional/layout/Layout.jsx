@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useRuntimeAuth } from "../auth/RuntimeAuthContext";
+import { useAuth } from "../../../context/AuthProvider";
+import spApi from "../../../api/spApi";
 import "./Layout.css";
 
 export default function Layout({ children }) {
-    const { session, logout, authFetch } = useRuntimeAuth();
+    const { session, logout } = useAuth();
     const location = useLocation();
-    const [contextNames, setContextNames] = useState({});
+    const [perfilNome, setPerfilNome] = useState("");
+    const [unidadeNome, setUnidadeNome] = useState("");
     const [currentTime, setCurrentTime] = useState(new Date());
 
     // Atualiza o relógio a cada segundo
@@ -18,24 +20,33 @@ export default function Layout({ children }) {
     // Busca nomes do contexto
     useEffect(() => {
         async function fetchContextNames() {
+            if (!session?.id_sessao) return;
             try {
-                const res = await authFetch("/api/auth/contextos");
-                if (res.ok) {
-                    const data = await res.json();
-                    setContextNames(data);
+                const data = await spApi.call('sp_auth_listar_contextos', {
+                    p_id_sessao: session.id_sessao
+                });
+                if (data && data.resultado) {
+                    const perfis = data.resultado.perfis || {};
+                    const unidades = data.resultado.unidades || {};
+                    
+                    if (session.id_perfil) {
+                        setPerfilNome(perfis[session.id_perfil] || `Perfil ${session.id_perfil}`);
+                    }
+                    if (session.id_unidade) {
+                        setUnidadeNome(unidades[session.id_unidade] || `Unidade ${session.id_unidade}`);
+                    }
                 }
             } catch (e) {
                 console.log("Erro ao buscar nomes:", e);
+                setPerfilNome(`Perfil ${session?.id_perfil || "-"}`);
+                setUnidadeNome(`Unidade ${session?.id_unidade || "-"}`);
             }
         }
         fetchContextNames();
-    }, [authFetch]);
+    }, [session]);
 
-    const user = session?.user || {};
-    const perfilNome = contextNames.perfis?.[user.id_perfil] || `Perfil ${user.id_perfil || "-"}`;
-    const unidadeNome = contextNames.unidades?.[user.id_unidade] || `Unidade ${user.id_unidade || "-"}`;
-    const localNome = user.id_local_operacional 
-        ? (contextNames.locais?.[user.id_local_operacional] || `Local ${user.id_local_operacional}`)
+    const localNome = session?.id_local 
+        ? `Local ${session.id_local}`
         : null;
 
     // Itens de menu baseados no perfil
@@ -50,7 +61,7 @@ export default function Layout({ children }) {
 
     // Filtra itens por perfil
     const filteredMenu = menuItems.filter(item => 
-        !item.perfis || item.perfis.includes(Number(user.id_perfil))
+        !item.perfis || item.perfis.includes(Number(session?.id_perfil))
     );
 
     function handleLogout() {
@@ -109,7 +120,7 @@ export default function Layout({ children }) {
                         </div>
                     </div>
                     <div className="header-user">
-                        <span className="user-id">Usuário: {user.id_usuario}</span>
+                        <span className="user-id">Usuário: {session?.id_sessao || "-"}</span>
                     </div>
                 </header>
 

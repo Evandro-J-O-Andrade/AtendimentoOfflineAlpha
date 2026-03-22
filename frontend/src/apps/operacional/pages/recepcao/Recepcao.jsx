@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useRuntimeAuth } from "../../auth/RuntimeAuthContext";
-import { useDispatcher } from "../../../../hooks/useDispatcher";
+import { useAuth } from "../../../../context/AuthProvider";
 import Layout from "../../layout/Layout";
 import PatientQueue from "../../components/PatientQueue";
+import spApi from "../../../../api/spApi";
 import "./Recepcao.css";
 
 export default function Recepcao() {
-    const { authFetch } = useRuntimeAuth();
-    const { gerarSenha, error: dispatcherError } = useDispatcher();
+    const { session } = useAuth();
     const [searchTerm, setSearchTerm] = useState("");
     const [patient, setPatient] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -26,16 +25,21 @@ export default function Recepcao() {
         setPatient(null);
 
         try {
-            const res = await authFetch(`/api/operacional/pacientes?termo=${encodeURIComponent(searchTerm)}`);
-            const data = await res.json();
+            const data = await spApi.call('sp_consultar_pacientes', {
+                p_id_sessao: session?.id_sessao,
+                p_nome: searchTerm,
+                p_cpf: searchTerm
+            });
 
-            if (res.ok && data.pacientes && data.pacientes.length > 0) {
-                setPatient(data.pacientes[0]);
+            const pacientes = Array.isArray(data) ? data : [];
+
+            if (pacientes.length > 0) {
+                setPatient(pacientes[0]);
             } else {
                 setError("Paciente não encontrado");
             }
-        } catch {
-            setError("Erro ao buscar paciente");
+        } catch (e) {
+            setError(e.message || "Erro ao buscar paciente");
         } finally {
             setLoading(false);
         }
@@ -49,26 +53,17 @@ export default function Recepcao() {
         setError("");
 
         try {
-            const res = await authFetch("/api/operacional/atendimentos", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id_paciente: patient.id,
-                    tipo_atendimento: "FFA"
-                })
+            await spApi.call('sp_paciente_salvar', {
+                p_id_sessao: session?.id_sessao,
+                p_id_paciente: patient.id,
+                p_tipo_atendimento: "FFA"
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                setSuccess("FFA aberto com sucesso!");
-                setPatient(null);
-                setSearchTerm("");
-            } else {
-                setError(data.error || "Erro ao abrir FFA");
-            }
-        } catch {
-            setError("Erro ao abrir FFA");
+            setSuccess("FFA aberto com sucesso!");
+            setPatient(null);
+            setSearchTerm("");
+        } catch (e) {
+            setError(e.message || "Erro ao abrir FFA");
         } finally {
             setLoading(false);
         }
@@ -81,16 +76,19 @@ export default function Recepcao() {
         setNewTicket(null);
 
         try {
-            // Usando o hook do dispatcher - rota canônica /api/fila/gerar
-            const resultado = await gerarSenha({ tipo: 'NORMAL', origem: 'RECEPCAO' });
-            
-            if (resultado.sucesso && resultado.dados) {
-                setNewTicket(resultado.dados);
+            const resultado = await spApi.call('sp_fila_gerar_senha', {
+                p_id_sessao: session?.id_sessao,
+                p_tipo: 'NORMAL',
+                p_origem: 'RECEPCAO'
+            });
+             
+            if (resultado) {
+                setNewTicket(resultado);
             } else {
-                setError(resultado.mensagem || "Erro ao gerar senha");
+                setError("Erro ao gerar senha");
             }
-        } catch {
-            setError(dispatcherError || "Erro ao gerar senha");
+        } catch (e) {
+            setError(e.message || "Erro ao gerar senha");
         } finally {
             setLoading(false);
         }

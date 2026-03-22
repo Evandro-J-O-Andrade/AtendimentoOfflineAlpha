@@ -1,44 +1,39 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { useApp } from "../context/AppContext";
-import { executeRuntimeAction } from "../services/runtimeService";
+import { useAuth } from "../apps/operacional/auth/AuthProvider";
+import spApi from "../api/spApi";
 
 export default function RuntimeActionRouter() {
   const { acao } = useParams();
-  const { contexto, permissoes, isAuthenticated } = useApp();
+  const { session } = useAuth();
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(null);
   const [carregando, setCarregando] = useState(true);
 
-  const temPermissao = useMemo(() => {
-    if (!acao) return false;
-    return (permissoes || []).some((p) => {
-      const cod = String(p.codigo || "").toLowerCase();
-      const af = String(p.acao_frontend || "").toLowerCase();
-      const alvo = String(acao || "").toLowerCase();
-      return cod === alvo || af === alvo;
-    });
-  }, [permissoes, acao]);
-
   useEffect(() => {
     const executar = async () => {
-      if (!contexto || !acao) return;
+      if (!session?.id_sessao || !acao) return;
       try {
-        const res = await executeRuntimeAction(acao, {}, contexto?.id || contexto?.id_contexto || contexto?.id_unidade);
+        // Usar spApi.callRoute para executar a ação
+        const res = await spApi.callRoute({
+          metodo: 'POST',
+          rota: acao,
+          id_sessao: session.id_sessao,
+          payload: {}
+        });
         setDados(res);
       } catch (err) {
         console.error(err);
-        setErro(err?.response?.data?.erro || err?.message || "Erro ao executar ação");
+        setErro(err?.message || "Erro ao executar ação");
       } finally {
         setCarregando(false);
       }
     };
     executar();
-  }, [acao, contexto]);
+  }, [acao, session?.id_sessao]);
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!contexto) return <Navigate to="/contexto" replace />;
-  if (!temPermissao) return <div>Acesso negado para ação: {acao}</div>;
+  if (!session?.id_sessao) return <Navigate to="/login" replace />;
+  if (!session?.contexto_definido) return <Navigate to="/contexto" replace />;
   if (carregando) return <div>Carregando...</div>;
   if (erro) return <div>Erro: {erro}</div>;
 

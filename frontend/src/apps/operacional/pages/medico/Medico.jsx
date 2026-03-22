@@ -1,15 +1,20 @@
-import { useState } from "react";
-import { useRuntimeAuth } from "../../auth/RuntimeAuthContext";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../../../context/AuthProvider";
 import Layout from "../../layout/Layout";
 import PatientQueue from "../../components/PatientQueue";
+import spApi from "../../../../api/spApi";
+import { finalizarAtendimento, iniciarAtendimento, registrarPrescricao, salvarEvolucao } from "../../../../services/AssistencialService";
+import { chamarProximo } from "../../../../services/FilaService";
+import Timeline from "./Timeline";
 import "./Medico.css";
 
 export default function Medico() {
-    const { authFetch } = useRuntimeAuth();
+    const { session } = useAuth();
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [timeline, setTimeline] = useState(null);
 
     // Formulário médico
     const [complaint, setComplaint] = useState("");
@@ -25,24 +30,69 @@ export default function Medico() {
     const [prescription, setPrescription] = useState("");
     const [examRequest, setExamRequest] = useState("");
 
-    // Chamar próximo paciente
+    const idSessao = session?.id_sessao;
+
+    useEffect(() => {
+        async function carregarTimeline() {
+            if (!idSessao || !selectedPatient?.id_ffa) {
+                setTimeline(null);
+                return;
+            }
+
+            try {
+                const resposta = await spApi.call('sp_consultar_timeline_paciente', {
+                    p_id_sessao: idSessao,
+                    p_id_ffa: selectedPatient.id_ffa
+                });
+                setTimeline(resposta);
+            } catch (e) {
+                console.error('Erro ao carregar timeline:', e);
+            }
+        }
+
+        carregarTimeline();
+    }, [idSessao, selectedPatient]);
+
+    // Chamar próximo paciente da fila automaticamente
     async function handleCallNext() {
         setLoading(true);
         setError("");
 
         try {
-            const res = await authFetch("/api/operacional/atendimentos/chamar", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tipo_local: "MEDICO" })
-            });
+            if (!idSessao) {
+                setError("Sessão não encontrada");
+                return;
+            }
 
-            const data = await res.json();
+            // Chamar próximo paciente da fila
+            const chamada = await chamarProximo(idSessao, null);
+            
+            if (!chamada.ok) {
+                setError(chamada.erro || "Erro ao chamar próximo paciente");
+                return;
+            }
 
-            if (res.ok) {
-                setSelectedPatient(data.atendimento);
+            // Obter o paciente chamado
+            const pacienteChamado = chamada.data || chamada.resultado;
+            
+            if (pacienteChamado) {
+                // Selecionar automaticamente o paciente
+                setSelectedPatient({
+                    ...pacienteChamado,
+                    id: pacienteChamado.id_ffa || pacienteChamado.id,
+                    nome_paciente: pacienteChamado.nome_paciente || pacienteChamado.paciente,
+                    senha: pacienteChamado.senha
+                });
+                
+                // Iniciar atendimento automaticamente
+                const inicio = await iniciarAtendimento(idSessao, pacienteChamado.id_ffa || pacienteChamado.id);
+                if (inicio.ok) {
+                    setSuccess(`Paciente ${pacienteChamado.nome_paciente || pacienteChamado.paciente} chamado e atendimento iniciado!`);
+                } else {
+                    setSuccess(`Paciente ${pacienteChamado.nome_paciente || pacienteChamado.paciente} chamado!`);
+                }
             } else {
-                setError(data.error || "Erro ao chamar paciente");
+                setError("Nenhum paciente na fila para atendimento");
             }
         } catch {
             setError("Erro de comunicação");
@@ -64,28 +114,42 @@ export default function Medico() {
         setError("");
 
         try {
-            const res = await authFetch(`/api/operacional/atendimentos/${selectedPatient.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    status: "ATENDIDO",
-                    queixa_principal: complaint,
-                    diagnostico: diagnosis,
-                    conduta: conduct,
+            const idFfa = selectedPatient.id_ffa || selectedPatient.id;
+            const evolucaoPayload = {
+                id_ffa: idFfa,
+                queixa_principal: complaint,
+                diagnostico: diagnosis,
+                conduta: conduct,
+                solicitacao_exame: examRequest,
+                observacao: diagnosis,
+                id_unidade: session?.id_unidade,
+                id_saas_entidade: 1,
+                device_info: 'frontend-medico'
+            };
+
+            const evolucao = await salvarEvolucao(idSessao, evolucaoPayload);
+            if (!evolucao.ok) {
+                setError(evolucao.erro || "Erro ao salvar evolução");
+                return;
+            }
+
+            if (prescription) {
+                await registrarPrescricao(idSessao, {
+                    id_ffa: idFfa,
                     prescricao: prescription,
-                    solicitacao_exame: examRequest,
-                    acao: "FINALIZAR_ATENDIMENTO"
-                })
-            });
+                    conduta: conduct
+                });
+            }
 
-            const data = await res.json();
+            const data = await finalizarAtendimento(idSessao, idFfa);
 
-            if (res.ok) {
+            if (data.ok) {
                 setSuccess("Atendimento finalizado com sucesso!");
                 setSelectedPatient(null);
+                setTimeline(null);
                 resetForm();
             } else {
-                setError(data.error || "Erro ao finalizar atendimento");
+                setError(data.erro || "Erro ao finalizar atendimento");
             }
         } catch {
             setError("Erro ao finalizar atendimento");
@@ -94,31 +158,32 @@ export default function Medico() {
         }
     }
 
-    // Encaminhar
+    // Encaminhar paciente para outro setor
     async function handleForward(destination) {
-        if (!selectedPatient) return;
+        if (!selectedPatient || !idSessao) {
+            setError("Nenhum paciente selecionado");
+            return;
+        }
 
         setLoading(true);
         setError("");
 
         try {
-            const res = await authFetch(`/api/operacional/atendimentos/${selectedPatient.id}/encaminhar`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ destino: destination })
+            const idFfa = selectedPatient.id_ffa || selectedPatient.id;
+            
+            await spApi.call('sp_encaminhar_paciente', {
+                p_id_sessao: idSessao,
+                p_id_ffa: idFfa,
+                p_destino: destination,
+                p_id_unidade: session?.id_unidade
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                setSuccess(`Pacienteionado para ${destination}!`);
-                setSelectedPatient(null);
-                resetForm();
-            } else {
-                setError(data.error || "Erro ao encaminhar");
-            }
+            setSuccess(`Pacienteencaminhado para ${destination} com sucesso!`);
+            setSelectedPatient(null);
+            setTimeline(null);
+            resetForm();
         } catch {
-            setError("Erro ao encaminhar");
+            setError("Erro de comunicação");
         } finally {
             setLoading(false);
         }
@@ -181,6 +246,18 @@ export default function Medico() {
                                         </span>
                                     )}
                                 </div>
+
+                                {timeline && (
+                                    <div className="form-section history-panel">
+                                        <h3>Histórico / Resumo Clínico</h3>
+                                        <div className="history-box">
+                                            <p><strong>Status Atual:</strong> {timeline.status_atual || '-'}</p>
+                                            <p><strong>Abertura:</strong> {timeline.abertura_ficha || '-'}</p>
+                                            <p><strong>Triagem:</strong> {timeline.triagem?.queixa || timeline.triagem?.classificacao || '-'}</p>
+                                        </div>
+                                        <Timeline eventos={timeline.eventos || []} />
+                                    </div>
+                                )}
 
                                 {/* Queixa Principal */}
                                 <div className="form-section">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useRuntimeAuth } from "../../operacional/auth/RuntimeAuthContext";
+import { useAuth } from "../../operacional/auth/AuthProvider";
+import spApi from "../../../api/spApi";
 import "./AdminModulePage.css";
 
 const FALLBACK_MODULES = {
@@ -68,7 +69,7 @@ const FALLBACK_MODULES = {
 
 export default function AdminModulePage() {
     const navigate = useNavigate();
-    const { logout, authFetch } = useRuntimeAuth();
+    const { logout, session } = useAuth();
     const { moduloId } = useParams();
 
     const [catalogo, setCatalogo] = useState({});
@@ -79,21 +80,22 @@ export default function AdminModulePage() {
         let mounted = true;
         async function carregarCatalogo() {
             try {
-                const res = await authFetch("/api/painel/admin/catalogo-acoes");
-                if (!res.ok) return;
-                const data = await res.json();
-                if (mounted) setCatalogo(data.catalogo || {});
-            } catch {
-                // fallback silencioso
+                const data = await spApi.call('sp_catalogo_acoes', {
+                    p_id_sessao: session?.id_sessao
+                });
+                if (mounted) setCatalogo(data || {});
+            } catch (e) {
+                console.error('Erro ao carregar catálogo:', e);
             } finally {
                 if (mounted) setLoading(false);
             }
         }
-        carregarCatalogo();
+        if (session?.id_sessao) carregarCatalogo();
+        else setLoading(false);
         return () => {
             mounted = false;
         };
-    }, [authFetch]);
+    }, [session]);
 
     const moduleData = useMemo(() => {
         const fallback = FALLBACK_MODULES[moduloId] || FALLBACK_MODULES.usuarios;
@@ -124,19 +126,13 @@ export default function AdminModulePage() {
         }
 
         try {
-            const res = await authFetch("/api/painel/admin/executar-acao", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ codigo: acao.codigo, payload })
+            await spApi.call(acao.sp, {
+                p_id_sessao: session?.id_sessao,
+                p_payload: payload
             });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok || data.sucesso === false) {
-                setMsg(data.mensagem || data.erro || "Falha ao executar a acao.");
-                return;
-            }
             setMsg(`OK: ${acao.titulo} (${acao.sp})`);
-        } catch {
-            setMsg("Erro de conexao ao executar a acao.");
+        } catch (e) {
+            setMsg(`Erro: ${e.message}`);
         }
     }
 

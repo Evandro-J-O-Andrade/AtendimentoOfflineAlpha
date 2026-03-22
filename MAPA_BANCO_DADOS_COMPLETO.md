@@ -1,1731 +1,1226 @@
-# MAPA ESTRUTURADO DO BANCO DE DADOS - SISTEMA PRONTO ATENDIMENTO
+# MAPA COMPLETO DO BANCO DE DADOS
 
-**Data:** Fevereiro 2026  
-**Versão MySQL:** 8.0.44  
-**Database:** `pronto_atendimento`  
-**Encoding:** UTF8MB4  
-**Propósito:** Sistema de Gerenciamento de Pronto Atendimento/UPA com Farmácia, Estoque, Lab e Internação  
+## Resumo Executivo
 
----
-
-## 📊 ÍNDICE
-
-- [1. VISÃO GERAL DO SISTEMA](#visão-geral)
-- [2. MÓDULOS FUNCIONAIS](#módulos)
-- [3. TABELAS PRINCIPAIS POR MÓDULO](#tabelas)
-- [4. ENUMS E VALORES CONSTANTES](#enums)
-- [5. PROCEDURES E FUNCTIONS](#procedures)
-- [6. FLUXOS DE NEGÓCIO PRINCIPAIS](#fluxos)
+- **Banco**: `pronto_atendimento`
+- **Total Tabelas**: 478
+- **Total Views**: 20
+- **Total Stored Procedures**: 224
+- **Total Functions**: 3
+- **Engine**: MySQL 8.0+ (utf8mb4)
+- **Dump**: `backend/sql/Dump20260322 (2).sql` (29.333 linhas)
 
 ---
 
-## 🎯 VISÃO GERAL DO SISTEMA {#visão-geral}
+# 🔐 AUTENTICAÇÃO E AUTORIZAÇÃO (AUTH)
 
-O banco de dados `pronto_atendimento` implementa um **sistema integrado de pronto atendimento (PA/UPA)** com os seguintes componentes principais:
+## Tabelas de Authentication
 
-### Características Técnicas:
-- **Storage Engine:** InnoDB (todas as tabelas)
-- **Collation:** utf8mb4_0900_ai_ci (padrão)
-- **Padrão de Design:** Domain-Driven Design (DDD)
-- **Auditoria:** Completa em nível de transação e entidade
-- **Segurança:** LGPD-compliance com auditoria de acesso a registros
-- **Versionamento:** Master Data com competências (CID-10, CNES, SIGTAP, SIGPAT)
+| Tabela | Descrição |
+|--------|-----------|
+| `auth_sessao` | Sessões ativas de usuários |
+| `auth_token` | Tokens de acesso JWT |
+| `auth_log` | Log de operações auth |
+| `auth_bloqueio` | Bloqueios de conta |
+| `auth_tentativa_login` | Tentativas de login |
+| `auth_notificacao` | Notificações do sistema |
+| `auth_parametro` | Parâmetros de configuração |
+| `auth_audit` | Auditoria de acesso |
+| `auth_grupo` | Grupos de usuários |
+| `auth_grupo_usuario` | Associação usuário-grupo |
+| `auth_grupo_permissao` | Associação grupo-permissão |
 
-### Capacidades Operacionais:
-- ✅ Gerenciamento de Filas e Senhas (Recepção/Triagem/Serviços)
-- ✅ Fluxo de Atendimento Completo (Triagem → Médico → Alta/Transferência)
-- ✅ Prescrição e Dispensação de Medicamentos
-- ✅ Gestão de Estoque e Almoxarifado
-- ✅ Requisições e Resultados de Laboratorial
-- ✅ Internação e Cuidados Hospitalares
-- ✅ Relatórios e Faturamento
-- ✅ Integrações Externas (HL7, FHIR, SINAN, CAT, etc.)
+## Tabelas de Usuário
 
----
+| Tabela | Descrição |
+|--------|-----------|
+| `usuario` | Usuários do sistema |
+| `usuario_perfil` | Associação usuário-perfil |
+| `usuario_unidade` | Associação usuário-unidade |
+| `usuario_local` | Associação usuário-local |
+| `usuario_setor` | Associação usuário-setor |
+| `usuario_contexto` | Contextos do usuário |
+| `usuario_sistema` | Sistemas que o usuário acesso |
+| `usuario_sistema_acl_evento` | Events de ACL |
+| `usuario_alocacao` | Alocações do usuário |
+| `usuario_historico_senha` | Histórico de senhas |
+| `usuario_reset_senha` | Pedidos de reset senha |
+| `usuario_refresh_token` | Refresh tokens |
+| `usuario_log_acesso` | Log de acesso |
 
-## 🏢 MÓDULOS FUNCIONAIS {#módulos}
+## Tabelas de Perfil e Permissão
 
-| Módulo | Objetivo | Tabelas | Status |
-|--------|----------|---------|--------|
-| **Autenticação & Sessão** | Controle de acesso e contexto de usuário | 4 | ✅ |
-| **Paciente & Pessoa** | Dados demográficos e clínicos do paciente | 6 | ✅ |
-| **Fila & Atendimento** | Gerenciamento de fila, senhas, triagem | 12 | ✅ |
-| **Clínico & Prescrição** | Evolução clínica, vital signs, diagnósticos | 15 | ✅ |
-| **Farmácia** | Medicamentos, dispensação, GPAT | 10 | ✅ |
-| **Estoque & Inventário** | Gestão de produtos, movimentação, consumo | 12 | ✅ |
-| **Laboratório** | Pedidos, amostras, resultados | 6 | ✅ |
-| **Internação** | Hospitalizações, leitos, prescrições | 13 | ✅ |
-| **Auditoria & Segurança** | Logs, acessos, eventos, rastreabilidade | 11 | ✅ |
-| **Alertas & Notificações** | Sistema de alertas, SINAN, CAT, Violência | 8 | ✅ |
-| **Configuração e Master Data** | Setores, especialidades, referências SUS | 22 | ✅ |
-| **Faturamento & Financeiro** | Documentos, formas pagto, repasse médico | 4 | ✅ |
-
-**Total: 122+ tabelas | ~80 Procedures | ~30 Functions | ~5 Views**
-
----
-
-## 📋 TABELAS PRINCIPAIS POR MÓDULO {#tabelas}
-
-### 1️⃣ MÓDULO: AUTENTICAÇÃO & SESSÃO
-
-#### Tabela: `usuario`
-```
-Objetivo: Registro centralizado de usuários do sistema
-Campos Principais:
-  - id_usuario (PK, AUTO_INCREMENT)
-  - id_pessoa (FK → pessoa)
-  - login (UNIQUE)
-  - senha_hash (bcrypt/SHA256)
-  - id_conselho (FK → conselho_profissional) [opcional]
-  - registro_profissional VARCHAR(20) [CRM/COREN/CRF/etc]
-  - ativo TINYINT(1)
-  - primeiro_login, forcar_troca_senha
-  - senha_atualizada_em, bloqueado_ate, tentativas_login
-  
-Índices:
-  - idx: login, id_pessoa
-```
-
-#### Tabela: `sessao_usuario`
-```
-Objetivo: Rastreamento de sessões ativas com contexto operacional
-Campos Principais:
-  - id_sessao_usuario (PK, AUTO_INCREMENT)
-  - id_usuario (FK → usuario)
-  - id_sistema (FK → sistema)
-  - id_unidade (FK → unidade)
-  - id_local_operacional (FK → local_operacional)
-  - token TEXT (JWT único)
-  - ip_acesso, user_agent
-  - iniciado_em, expira_em, encerrado_em
-  - ativo = 1 (flag de validade)
-
-Índices:
-  - idx: id_usuario, id_sessao_token, ativo + expira_em
-```
-
-#### Tabela: `perfil`
-```
-Objetivo: Perfis de acesso e permissões
-Campos: id_perfil, nome, descricao, ativo
-```
-
-#### Tabela: `usuario_perfil`
-```
-Objetivo: Mapeamento N:N usuario → perfil (permissões)
-Campos: id_usuario (FK), id_perfil (FK) - PK composto
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `perfil` | Perfis de acesso |
+| `permissao` | Permissões individuais |
+| `perfil_permissao` | Associação perfil-permissão |
 
 ---
 
-### 2️⃣ MÓDULO: PACIENTE & PESSOA
+# 🏥 ATENDIMENTO CLÍNICO
 
-#### Tabela: `pessoa`
-```
-Objetivo: Entidade base de pessoas (pacientes, usuários, acompanhantes)
-Campos Principais:
-  - id_pessoa (PK)
-  - nome_completo VARCHAR(200) [required]
-  - nome_social VARCHAR(200)
-  - cpf VARCHAR(14) [unique quando preenchido]
-  - cns VARCHAR(20) [Cartão Nac. Saúde]
-  - rg VARCHAR(20), data_nascimento DATE
-  - sexo ENUM('M','F','O')
-  - nome_mae VARCHAR(200)
-  - email, telefone
-  - criado_em, atualizado_em (timestamps)
+## Tabelas Principais de Atendimento
 
-Índices:
-  - idx: cpf, cns, rg (para merge)
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `atendimento` | Atendimentos principais |
+| `atendimento_evento` | Eventos do atendimento |
+| `atendimento_evolucao` | Evolução clínica |
+| `atendimento_triagem` | Dados de triagem |
+| `atendimento_recepcao` | Recepção de pacientes |
+| `atendimento_profissional` | Profissional responsável |
+| `atendimento_movimentacao` | Movimentação |
+| `atendimento_diagnostico` | Diagnósticos |
+| `atendimento_prescricao` | Prescrições |
+| `atendimento_exame_fisico` | Exame físico |
+| `atendimento_sumario_alta` | Sumário de alta |
+| `atendimento_balanco_hidrico` | Balanço hídrico |
+| `atendimento_checagem` | Checagens de enfermagem |
+| `atendimento_identidade_fluxo` | Identidade no fluxo |
+| `atendimento_observacao` | Observações |
+| `atendimento_estado_ativo` | Estado ativo |
+| `atendimento_vinculo` | Vínculos |
 
-#### Tabela: `paciente`
-```
-Objetivo: Extensão de pessoa com dados clínicos de paciente
-Campos Principais:
-  - id (PK/AUTO_INCREMENT)
-  - id_pessoa (FK → pessoa, UNIQUE)
-  - prontuario VARCHAR(30) [gerado: "PR" + id_pessoa]
-  - cns_vigente VARCHAR(20)
-  - criado_em, atualizado_em
+## Triagem
 
-Observação: Relação 1:1 com pessoa; permite paciente ser referenciado sem ser usuário
-```
-
-#### Tabela: `paciente_cns`
-```
-Objetivo: Histórico e validação de CNS (SUS)
-Campos: id, id_paciente (FK), cns, status (ATIVO/INATIVO), validado, origem, data_validacao
-```
-
-#### Tabela: `pessoa_endereco`
-```
-Objetivo: Endereços de pessoa (múltiplos, com flag principal)
-Campos: id, id_pessoa (FK), principal, cep, logradouro, numero, complemento, bairro, cidade, uf, criado_em, atualizado_em
-```
-
-#### Tabela: `acompanhante`
-```
-Objetivo: Registro de acompanhantes/responsáveis vinculados a paciente
-Campos:
-  - id (PK)
-  - id_paciente (FK → paciente)
-  - id_pessoa (FK → pessoa)
-  - tipo ENUM('PAI','MAE','RESPONSAVEL_LEGAL','ACOMPANHANTE','OUTRO')
-  - criado_em, atualizado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `triagem` | Triagem de pacientes |
+| `classificacao_risco` | Classificação de risco |
+| `atendimento_escalas_risco` | Escalas de risco |
 
 ---
 
-### 3️⃣ MÓDULO: FILA, SENHAS & ATENDIMENTO
+# 👤 PESSOA E PACIENTE
 
-#### Tabela: `senhas`
-```
-Objetivo: CENTRAL - Controle de senhas/tickets de fila da recepção
-Campos Principais:
-  - id (PK/AUTO_INCREMENT)
-  - id_sistema, id_unidade (FK)
-  - numero INT (diário por prefixo)
-  - prefixo VARCHAR(5) [A, P, PR, X, V, E]
-  - codigo VARCHAR(10) [humano: A001, P001, PR001]
-  - data_ref DATE [data da emissão]
-  
-  Status Control:
-  - status ENUM: GERADA → AGUARDANDO → CHAMANDO → EM_COMPLEMENTACAO → ENCAMINHADO → 
-                 EM_ATENDIMENTO → NAO_COMPARECEU → FINALIZADO | CANCELADO
-  - tipo_atendimento ENUM: CLINICO, PEDIATRICO, PRIORITARIO, EMERGENCIA, VISITA, EXAME
-  - lane ENUM: ADULTO, PEDIATRICO, PRIORITARIO
-  - prioridade INT (0=normal, >0=prioritário)
-  - origem ENUM: TOTEM, RECEPCAO, ADMIN, SAMU
-  
-  Patient Link:
-  - id_paciente (FK → paciente) [NULL até complementação]
-  - id_ffa (FK → ffa) [NULL até abertura FFA]
-  
-  Timeline:
-  - criada_em, posicionado_em, chamada_em, inicio_complementacao_em, fim_complementacao_em
-  - inicio_atendimento_em, finalizada_em, nao_compareceu_em
-  
-  Return Window:
-  - retorno_permitido_ate DATETIME [vence janela de retorno]
-  - retorno_utilizado TINYINT [flag do retorno] 
-  - retorno_em DATETIME [quando retornou]
-  
-  Operador Control:
-  - id_usuario_operador, id_usuario_chamada, id_usuario_complementacao, id_usuario_complementacao_fim (FKs)
-  - id_local_operacional (FK → local_operacional)
+## Pessoa (Base)
 
-Índices:
-  - UK: (id_sistema, id_unidade, data_ref, codigo) - identpara hoje
-  - idx: id_paciente, id_ffa, status, lane, prioridade + criada_em
-  - idx: id_usuario_chamada, id_local_operacional + status
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `pessoa` | Pessoas físicas |
+| `pessoa_documento` | Documentos |
+| `pessoa_endereco` | Endereços |
+| `pessoa_telefone` | Telefones |
+| `pessoa_email` | E-mails |
+| `pessoa_identificador` | Identificadores |
+| `pessoa_contato` | Contatos |
+| `pessoa_alergias` | Alergias |
+| `pessoa_conselho_registro` | Conselhos profissionais |
+| `pessoa_logradouro` | Logradouros |
+| `pessoa_vinculo` | Vínculos |
 
-#### Tabela: `fila_senha`
-```
-Objetivo: Status de fila (recepção/painel pública)
-Campos: id_senha (PK/FK → senhas), status ENUM: AGUARDANDO, CHAMANDO, EM_COMPLEMENTACAO, ENCAMINHADO
-Propósito: Sincronização com painel público / recepção
-```
+## Paciente
 
-#### Tabela: `senha_eventos`
-```
-Objetivo: Auditoria de transições de estado da senha
-Campos:
-  - id (PK)
-  - id_sessao_usuario (FK)
-  - id_senha (FK)
-  - tipo_evento VARCHAR(60) [EMITIR, CHAMAR, INICIAR_COMPLEMENTACAO, COMPLEMENTAR_E_ABRIR_FFA, MARCAR_RETORNO, NAO_COMPARECEU, CANCELAR, FINALIZAR, RECHAMAR]
-  - detalhe TEXT [contexto]
-  - status_de, status_para VARCHAR(50)
-  - criado_em DATETIME
-```
-
-#### Tabela: `ffa` (Ficha de Fila de Atendimento)
-```
-Objetivo: CENTRAL - Documento primário de atendimento; ONE-TO-ONE com atendimento
-Campos Principais:
-  - id (PK)
-  - id_atendimento (FK → atendimento, UNIQUE) [1:1]
-  - id_paciente (FK → paciente)
-  - id_senha (FK → senhas)
-  
-  Status & Priority:
-  - status ENUM: ABERTO, EM_TRIAGEM, AGUARDANDO_CHAMADA_MEDICO, AGUARDANDO_RX, 
-                 AGUARDANDO_COLETA, AGUARDANDO_ECG, AGUARDANDO_RETORNO, 
-                 EM_ATENDIMENTO_MEDICO, ENCAMINHADO, INTERNADO, FINALIZADO
-  - classificacao_cor ENUM: VERMELHO (emergência),  LARANJA, AMARELO, VERDE, AZUL
-  - motivo TEXT [razão do atendimento]
-  - retorno_ativo TINYINT [permite retorno]
-  
-  Timeline:
-  - criado_em, atualizado_em, data_triagem, data_chamada_medico, data_alta_em
-  - id_usuario_abertura, id_usuario_alteracao (FKs → usuario)
-```
-
-#### Tabela: `atendimento`
-```
-Objetivo: Registro de visita/consulta do paciente
-Campos Principais:
-  - id (PK)
-  - id_unidade (FK → unidade)
-  - id_paciente (FK → paciente)
-  - id_senha (FK → senhas)
-  - origem VARCHAR(20) [TOTEM, RECEPCAO, SAMU, etc]
-  - protocolo VARCHAR(30) [UNIQUE, ex: GPAT-20260215-0000000001]
-  - status ENUM: ABERTO, FINALIZANDO, FINALIZADO
-  - criado_em, atualizado_em, id_usuario_abertura
-  
-Relação: Tem 1:1 com ffa via atendimento.id ↔ ffa.id_atendimento
-```
-
-#### Tabela: `fila_operacional`
-```
-Objetivo: Fila operacional por setor (TRIAGEM, MEDICO, RX, ECG, MEDICACAO, EXAME, COLETA, PROCEDIMENTO, OBSERVACAO)
-Campos:
-  - id_fila (PK)
-  - id_ffa (FK → ffa) [qual paciente]
-  - tipo VARCHAR(20) [setor]
-  - substatus VARCHAR(30): AGUARDANDO, CHAMANDO, EM_EXECUCAO, FINALIZADO, NAO_COMPARECEU, SUSPENSO, REAVALIAR
-  - prioridade ENUM: VERMELHO, LARANJA, AMARELO, VERDE, AZUL
-  - data_entrada, entrada_original_em (quando entrou nesta fila)
-  - data_inicio, data_fim, nao_compareceu_em
-  - reavaliar_em (timeout tracking)
-  - id_responsavel (FK → usuario) [quem está atendendo]
-  - observacao TEXT
-  - id_local_operacional (FK)
-```
-
-#### Tabela: `fila_operacional_evento`
-```
-Objetivo: Auditoria de fila operacional
-Campos: id_fila (FK), id_sessao_usuario (FK), tipo_evento, detalhe, criado_em
-```
-
-#### Tabela: `fila_retorno`
-```
-Objetivo: Agendamentos de retorno
-Campos: id, id_ffa (FK), data_retorno_agendada, status, criado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `paciente` | Pacientes |
+| `paciente_canonico` | Paciente canônico (master) |
+| `paciente_cns` | Cartão Nacional de Saúde |
+| `paciente_cns_evento` | Eventos CNS |
+| `paciente_alertas` | Alertas do paciente |
 
 ---
 
-### 4️⃣ MÓDULO: CONSULTA & CLÍNICO
+# 🏢 UNIDADE, LOCAL E SETOR
 
-#### Tabela: `triagem`
-```
-Objetivo: Avaliação inicial de risco
-Campos:
-  - id_triagem (PK)
-  - id_atendimento (FK, UNIQUE)
-  - id_risco (FK → classificacao_risco)
-  - queixa TEXT [motivo principal]
-  - sinais_vitais JSON [PA, FC, FR]
-  - observacao TEXT
-  - id_enfermeiro (FK → usuario)
-  - data_hora DATETIME
-```
+## Estrutura Organizacional
 
-#### Tabela: `atendimento_sinais_vitais`
-```
-Objetivo: Monitoramento de sinais vitais ao longo do atendimento
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - pressao_sistolica, pressao_diastolica INT [mmHg]
-  - frequencia_cardiaca INT [bpm]
-  - frequencia_respiratoria INT [irpm]
-  - temperatura DECIMAL(4,2) [°C]
-  - saturacao_o2 INT [%]
-  - hgt DECIMAL [glicemia]
-  - dor INT [0-10]
-  - id_usuario (FK)
-  - criado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `unidade` | Unidades hospitalares |
+| `local` | Locais internos |
+| `setor` | Setores |
+| `tipo_local` | Tipos de local |
+| `sala` | Salas |
+| `leito` | Leitos |
+| `hospital_leitos` | Leitos hospitalares |
+| `local_capacidade` | Capacidade |
+| `local_fila` | Filas por local |
+| `local_runtime` | Runtime do local |
+| `local_turno` | Turnos |
+| `local_dispositivo` | Dispositivos por local |
+| `config_locais` | Configuração de locais |
+| `config_leitos` | Configuração de leitos |
 
-#### Tabela: `atendimento_evolucao`
-```
-Objetivo: Notas de progresso clínico (médico/enfermeiro)
-Campos:
-  - id_evolucao (PK)
-  - id_atendimento (FK)
-  - tipo_profissional ENUM: MEDICO, ENFERMEIRO, TECNICO, OUTROS
-  - descricao TEXT [narrativa clínica]
-  - id_usuario (FK)
-  - criado_em
-```
+## Endereço
 
-#### Tabela: `atendimento_exame_fisico`
-```
-Objetivo: Registro padronizado de exame físico
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - estado_geral ENUM [BOM, REGULAR, GRAVE]
-  - nivel_consciencia ENUM [ALERTA, LETARGICO, ESTUPOR, COMA]
-  - mucosas ENUM [NORMOCORADAS, PÁLIDAS, CIANÓTICAS, ICTÉRICAS]
-  - estado_nutricional ENUM [EUTRÓFICO, DESNUTRIDO, OBESO]
-  - edema TINYINT(1)
-  - observacao TEXT
-  - id_usuario (FK)
-  - criado_em
-```
-
-#### Tabela: `atendimento_diagnosticos`
-```
-Objetivo: CIDs associados ao atendimento
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - cid10 VARCHAR(10) [FK → md_cid10]
-  - tipo ENUM: PRINCIPAL, SECUNDARIO, HIPOTESE
-  - observacao TEXT
-  - id_usuario (FK)
-  - criado_em
-```
-
-#### Tabela: `atendimento_escalas_risco`
-```
-Objetivo: Escalas de risco padronizadas
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - tipo ENUM: MORSE_QUEDA, BRADEN_LESÃO_PELE, GLASGOW
-  - score INT
-  - classificacao ENUM [por tipo]
-  - criado_em
-```
-
-#### Tabela: `atendimento_pedidos_exame`
-```
-Objetivo: Solicitações de exame (Lab/Imagem)
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - tipo ENUM: LABORATORIO, RX, ECG, ULTRASSOM, TOMOGRAFIA, etc
-  - status ENUM: SOLICITADO, COLETADO, EM_ANALISE, LAUDADO, ENTREGUE, CANCELADO
-  - descricao TEXT
-  - id_usuario_solicitante (FK)
-  - data_solicitacao, data_execucao, data_entrega
-```
-
-#### Tabela: `atendimento_prescricao`
-``` 
-Objetivo: Prescrições de medicamentos/procedimentos
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - id_medicamento (FK → farmaco)
-  - dose, via, frequencia VARCHAR() [posologia]
-  - dias INT [duração]
-  - status ENUM: ATIVO, SUSPENSO, CONCLUIDO
-  - id_usuario_prescritor (FK)
-  - criado_em
-```
-
-#### Tabela: `atendimento_desfecho`
-```
-Objetivo: Resultado do atendimento (alta/transferência/óbito)
-Campos:
-  - id (PK)
-  - id_atendimento (FK, UNIQUE)
-  - tipo_desfecho ENUM: ALTA_MEDICA, ALTA_A_PEDIDO, TRANSFERENCIA, OBITO, EVASAO
-  - motivo TEXT
-  - destino VARCHAR [se transferência]
-  - data_desfecho DATETIME
-  - id_usuario_responsavel (FK)
-```
-
-#### Tabela: `atendimento_sumario_alta`
-```
-Objetivo: Resumo de alta hospitalar
-Campos:
-  - id (PK)
-  - id_atendimento (FK, UNIQUE)
-  - motivo_internacao TEXT
-  - resumo_clinico TEXT
-  - procedimentos_realizados TEXT
-  - orientacoes_pos_alta TEXT
-  - medicamentos_receitados TEXT
-  - id_usuario_redator (FK)
-  - criado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `logradouro` | Logradouros |
+| `cidade` | Cidades |
 
 ---
 
-### 5️⃣ MÓDULO: FARMÁCIA & MEDICAMENTOS
+# 👨‍⚕️ PROFISSIONAL DE SAÚDE
 
-#### Tabela: `farmaco`
-```
-Objetivo: Catálogo de medicamentos
-Campos:
-  - id (PK)
-  - codigo VARCHAR(30) [UNIQUE]
-  - nome VARCHAR(255)
-  - principio_ativo TEXT
-  - concentracao VARCHAR(50)
-  - unidade_padrao VARCHAR(20) [COMPRIMIDO, AMPOLA, FRASCO, etc]
-  - fabricante VARCHAR(100)
-  - lote VARCHAR(50)
-  - validade DATE
-  - preco_unitario DECIMAL(10,2)
-  - ativo TINYINT(1)
-```
-
-#### Tabela: `farmaco_lote`
-```
-Objetivo: Rastreamento de lotes de medicamentos
-Campos:
-  - id (PK)
-  - id_farmaco (FK)
-  - lote VARCHAR(50) [UNIQUE compound]
-  - fabricacao DATE
-  - validade DATE [CRITICAL]
-  - quantidade INT [entrada]
-  - quantidade_saldo INT [saldo atual]
-  - status ENUM: ATIVO, QUARENTENA, DEVOLVIDO, VENCIDO
-  - nf_entrada VARCHAR(50)
-  - fornecedor_id (FK → fornecedor)
-  - criado_em, atualizado_em
-```
-
-#### Tabela: `administracao_medicacao`
-```
-Objetivo: Registro real que medicamento foi administrado ao paciente
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - id_prescricao (FK → atendimento_prescricao)
-  - id_farmaco (FK)
-  - dose_administrada DECIMAL
-  - via ENUM [ORAL, IV, IM, SC, TOPICA, INALATORIA]
-  - data_hora_administracao DATETIME
-  - id_usuario_administrador (FK) [quem deu]
-  - id_usuario_verificador (FK) [quem vericou dupla conferência]
-  - observacao TEXT
-  - criado_em
-```
-
-#### Tabela: `dispensacao_medicacao`
-```
-Objetivo: Saída de medicamento da farmácia (baixa de estoque)
-Campos:
-  - id (PK)
-  - id_atendimento (FK)
-  - id_farmaco (FK)
-  - id_lote (FK → farmaco_lote)
-  - quantidade DECIMAL
-  - status ENUM: DISPENSADO, DEVOLVIDO, PERDIDO
-  - id_usuario_dispensador (FK)
-  - criado_em
-```
-
-#### Tabela: `gpat_atendimento` (Gerador de Prescrição Assistida)
-```
-Objetivo: Formulário de prescrição externa/interna
-Campos:
-  - id (PK)
-  - id_ffa (FK) [qual paciente]
-  - tipo_prescritor ENUM: INTERNO (médico do PA), EXTERNO (receita manuscrita)
-  - data_emissao DATE
-  - data_validade DATE
-  - data_dispensacao DATE
-  - status ENUM: ABERTO, DISPENSADO, CANCELADO, EXPIRADO
-  - cpf_prescritor VARCHAR(14)
-  - nome_prescritor VARCHAR(255)
-```
-
-#### Tabela: `gpat_item`
-```
-Objetivo: Medicamentos em prescrição GPAT
-Campos:
-  - id (PK)
-  - id_gpat (FK → gpat_atendimento)
-  - id_farmaco (FK)
-  - quantidade_total DECIMAL
-  - dias INT [duração]
-  - posologia VARCHAR(255) [instruções]
-  - status ENUM: PENDENTE_DISPENSACAO, DISPENSADO, CANCELADO
-```
-
-#### Tabela: `gpat_dispensacao`
-```
-Objetivo: Saída de medicamento via prescrição GPAT
-Campos:
-  - id (PK)
-  - id_gpat_item (FK → gpat_item)
-  - quantidade_dispensada DECIMAL
-  - status ENUM: ENTREGUE, ESTORNADO
-  - data_dispensacao DATETIME
-  - id_usuario_dispensador (FK)
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `funcionario` | Funcionários |
+| `funcionario_especialidade` | Especialidades |
+| `funcionario_unidade` | Unidades |
+| `funcionario_conselho_profissional` | Conselhos |
+| `medico` | Médicos |
+| `medico_especialidade` | Especialidades médicas |
+| `profissional_registro` | Registros profissionais |
+| `conselho_profissional` | Conselhos profissionais |
 
 ---
 
-### 6️⃣ MÓDULO: ESTOQUE & ALMOXARIFADO
+# 📋 PRESCRIÇÃO E MEDICAÇÃO
 
-#### Tabela: `estoque_produto`
-```
-Objetivo: Catálogo de produtos do estoque (não medicamentos)
-Campos:
-  - id (PK)
-  - codigo VARCHAR(30) [UNIQUE]
-  - nome VARCHAR(255)
-  - descricao TEXT
-  - unidade_padrao VARCHAR(20) [CAIXA, UNIDADE, KG, LITRO, etc]
-  - fabricante VARCHAR(100)
-  - preco_unitario DECIMAL
-  - ativo TINYINT(1)
-```
+## Prescrição
 
-#### Tabela: `estoque_almoxarifado`
-```
-Objetivo: Saldo por local/almoxarifado
-Campos:
-  - id (PK)
-  - id_produto (FK → estoque_produto)
-  - id_local_operacional (FK)
-  - quantidade_atual DECIMAL [saldo]
-  - min_estoque DECIMAL [ponto de reposição]
-  - max_estoque DECIMAL
-  - criado_em, atualizado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `prescricao` | Prescrições médicas |
+| `prescricao_medica` | Prescrição médica |
+| `prescricao_medicacao` | Medicações prescritas |
+| `prescricao_item` | Itens da prescrição |
+| `prescricao_itens` | Itens (alternativo) |
+| `prescricao_continua` | Prescrições contínuas |
+| `prescricao_internacao` | Prescrição de internação |
+| `prescricao_kit_master` | Kits de prescrição |
+| `prescricao_kit_itens` | Itens do kit |
+| `prescricao_checagem` | Checagens |
+| `prescricao_checagem_dupla` | Checagem dupla |
 
-#### Tabela: `estoque_almoxarifado_central`
-```
-Objetivo: Estoque centralizado com rastreamento de lote/validade
-Campos:
-  - id (PK)
-  - id_produto (FK)
-  - lote VARCHAR(50)
-  - validade DATE
-  - quantidade INT
-  - nf_entrada VARCHAR(50)
-  - fornecedor_id (FK)
-  - status ENUM: ATIVO, BLOQUEADO, VENCIDO, DESCARTADO
-  - criado_em
-```
+## Administração
 
-#### Tabela: `estoque_movimento`
-```
-Objetivo: Auditoria de todas as movimentações
-Campos:
-  - id (PK)
-  - id_produto (FK)
-  - tipo ENUM: ENTRADA, SAIDA, AJUSTE, DEVOLUCAO
-  - quantidade DECIMAL
-  - saldo_anterior, saldo_posterior DECIMAL
-  - motivo TEXT
-  - id_usuario (FK)
-  - id_sessao_usuario (FK)
-  - criado_em
-```
-
-#### Tabela: `estoque_inventario`
-```
-Objetivo: Contagem física períodica
-Campos:
-  - id (PK)
-  - data_inventario DATE
-  - status ENUM: ABERTO, EM_CONTAGEM, FECHADO, CANCELADO
-  - quantidade_esperada DECIMAL
-  - quantidade_realizada DECIMAL
-  - diferenca DECIMAL
-  - criado_em, encerrado_em
-```
-
-#### Tabela: `estoque_alerta`
-```
-Objetivo: Alertas de baixο estoque / vencimento
-Campos:
-  - id (PK)
-  - id_produto (FK)
-  - tipo_alerta ENUM: BAIXO_ESTOQUE, CRITICO, VENCIMENTO
-  - quantidade_alerta DECIMAL
-  - status ENUM: ABERTO, ATUADO, CANCELADO
-  - criado_em, atualizado_em
-```
-
-#### Tabela: `consumo_insumo`
-```
-Objetivo: Rastreamento de consumo real (farmácia/almoxarifado/manutencao)
-Campos:
-  - id (PK)
-  - id_produto (FK)
-  - origem ENUM: FARMACIA, ALMOXARIFADO, MANUTENCAO
-  - quantidade DECIMAL
-  - motivo TEXT [ROTINA, REPOSICAO, COMPRA, DOACAO, etc]
-  - id_usuario (FK)
-  - criado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `administracao_medicacao` | Administração de medicação |
+| `administracao_medicacao_ordem` | Ordens de administração |
+| `enfermagem_aprazamento` | Aprazamento |
+| `medicacao_reavaliacao` | Reavaliação de medicação |
 
 ---
 
-### 7️⃣ MÓDULO: LABORATÓRIO
+# 💊 FARMÁCIA
 
-#### Tabela: `lab_pedido`
-```
-Objetivo: Requisição de teste laboratorial
-Campos:
-  - id_pedido (PK)
-  - id_atendimento (FK)
-  - protocol_interno VARCHAR(30) [UNIQUE]
-  - status ENUM: SOLICITADO, COLETADO, ENVIADO, RECEBIDO_LAB, FINALIZADO, CANCELADO
-  - data_solicitacao DATETIME
-  - data_coleta DATETIME
-  - observacao TEXT
-  - id_usuario_solicitante (FK)
-```
+## Dispensação
 
-#### Tabela: `lab_amostra`
-```
-Objetivo: Amostra biológica coletada
-Campos:
-  - id (PK)
-  - id_pedido (FK)
-  - codigo_amostra VARCHAR(30) [UNIQUE]
-  - tipo_material VARCHAR(30) [SANGUE, URINA, FEZES, etc]
-  - volume DECIMAL
-  - status ENUM: RECEBIDA, ANALISANDO, UTILIZADA, DESCARTADA
-  - data_coleta DATETIME
-```
-
-#### Tabela: `lab_resultado`
-```
-Objetivo: Resultado de teste
-Campos:
-  - id (PK)
-  - id_amostra (FK)
-  - teste_codigo VARCHAR(50)
-  - teste_nome VARCHAR(255)
-  - resultado_texto TEXT [valor + unidade]
-  - resultado_link DECIMAL [valor numérico se aplicável]
-  - referencia VARCHAR(50) [range normal]
-  - critico TINYINT(1) [valor anormal?]
-  - data_resultado DATETIME
-```
-
-#### Tabela: `laboratorio_protocolo`
-```
-Objetivo: Protocolo/rastreamento com sistema externo
-Campos:
-  - id (PK)
-  - codigo VARCHAR(30) [UNIQUE]
-  - barcode VARCHAR(100) [UNIQUE]
-  - status ENUM: ATIVO, CANCELADO
-  - sistema_externo VARCHAR(100) [nome do laboratorio]
-  - id_protocolo_externo VARCHAR(50)
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `farm_dispensacao` | Dispensação |
+| `farm_dispensacao_item` | Itens |
+| `farmacia_dispensacao_log` | Log |
+| `farmacia_atendimento_externo_dispensacao` | Dispensação externa |
+| `farmacia_atendimento_externo_item` | Itens externa |
+| `farm_receita_controlada` | Receitas controladas |
+| `farm_atendimento_externo` | Atendimento externo |
+| `farm_operacao` | Operações |
+| `farmaco_unidade` | Farmacos por unidade |
+| `farmaco_movimentacao` | Movimentação |
+| `farmaco_auditoria` | Auditoria |
+| `farmaco_auditoria_bloqueio` | Bloqueio |
 
 ---
 
-### 8️⃣ MÓDULO: INTERNAÇÃO & HOSPITALIZAÇAO
+# 🏥 INTERNAÇÃO
 
-#### Tabela: `internacao`
-```
-Objetivo: Registro de hospitalização
-Campos:
-  - id_internacao (PK)
-  - id_ffa (FK) [qual paciente]
-  - id_leito (FK → leito)
-  - tipo ENUM: OBSERVACAO (< 24h), INTERNACAO (≥ 24h)
-  - status ENUM: ATIVA, ENCERRADA, TRANSFERIDA, OBITO
-  - precaucao ENUM: PADRAO, CONTATO, GOTICULAS, AEROSSOIS
-  - previsao_alta DATE
-  - data_entrada DATETIME
-  - data_saida DATETIME
-  - id_usuario_responsavel (FK)
-```
-
-#### Tabela: `internacao_prescricao`
-```
-Objetivo: Prescrições de leito (medicamentos/dietas/gases)
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - data_prescricao DATE
-  - status ENUM: ATIVA, SUSPENSA, ENCERRADA
-  - prescrito_por (FK → usuario)
-```
-
-#### Tabela: `internacao_prescricao_item`
-```
-Objetivo: Item individual da prescrição
-Campos:
-  - id (PK)
-  - id_prescricao (FK → internacao_prescricao)
-  - tipo ENUM: MEDICAMENTO, DIETA, CUIDADO, OUTRO
-  - descricao TEXT
-  - frequencia VARCHAR(50)
-  - status ENUM: ATIVA, SUSPENSA, CONCLUIDA
-```
-
-#### Tabela: `internacao_medicacao_administracao`
-```
-Objetivo: Medicação real administrada  
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - id_medicamento (FK)
-  - dose, via ENUM
-  - horario_prescrito DATETIME
-  - horario_executado DATETIME
-  - status ENUM: ADMINISTRADO, RECUSADO, SUSPENSO, NAO_DISPONIVEL
-  - id_usuario_executador (FK)
-  - observacao TEXT
-```
-
-#### Tabela: `internacao_dietas`
-```
-Objetivo: Prescrição de dieta hospitalar
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - tipo ENUM: LIVRE, BRANDAS, PASTOSA, LIQUIDA, ZERO, ENTERAL, PARENTERAL
-  - observacao TEXT
-  - prescrito_por (FK → usuario)
-  - criado_em
-```
-
-#### Tabela: `internacao_dispositivos`
-```
-Objetivo: Rastreamento de tubos/cateteres/sondas
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - tipo ENUM: CVC, SVD (cateter urinário), SNG (sonda nasogastrica), SNE, DRENO, CATETER_PERIFERICO, CANULA_TRAQUEO
-  - local TEXT [onde inserido]
-  - data_insercao DATETIME
-  - intervalo_troca INT [dias]
-  - status ENUM: ATIVO, REMOVIDO, RETIRADO
-```
-
-#### Tabela: `internacao_cuidados`
-```
-Objetivo: Ordens de cuidados especiais
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - tipo ENUM: FERIDA, DRENAGEM, SONDA, OXIGENIO, SINAIS_VITAIS, MOVILIZACAO, OUTRO
-  - frequencia VARCHAR(50) [2H, 4H, 6H, 12H, TURNO, EVENTUAL]
-  - descricao TEXT
-  - prescrito_por (FK)
-```
-
-#### Tabela: `internacao_ferida_avaliacao`
-```
-Objetivo: Avaliação de feridas (LPP, cirúrgicas, etc)
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - tipo ENUM: FERIDA, LPP (lesão por pressão), CIRURGICA, OUTRA
-  - localizacao TEXT
-  - estagio_lpp ENUM: I, II, III, IV, NAO_CLASSIFICAVEL, TECIDO_PROFUNDO [se LPP]
-  - dimensoes TEXT
-  - drenagem TEXT
-  - appearancia TEXT
-  - observacao TEXT
-  - criado_em
-```
-
-#### Tabela: `internacao_braden_avaliacao`
-```
-Objetivo: Escala de Braden (prevenção de LPP)
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - score_total INT [6-23]
-  - risco ENUM: SEM_RISCO, LEVE, MODERADO, ALTO, MUITO_ALTO
-  - data_avaliacao DATETIME
-```
-
-#### Tabela: `internacao_registro_enfermagem`
-```
-Objetivo: Notas de enfermagem por turno
-Campos:
-  - id (PK)
-  - id_internacao (FK)
-  - turno VARCHAR(20) [MANHA, TARDE, NOITE]
-  - periodicidade ENUM: 2H, 4H, 6H, TURNO, EVENTUAL
-  - observacoes TEXT
-  - sinais_vitais JSON [PA, FC, etc]
-  - protusis TINYINT(1) [teve protusão?]
-  - criado_em
-```
-
-#### Tabela: `leito`
-```
-Objetivo: Catálogo de leitos disponíveis
-Campos:
-  - id_leito (PK)
-  - id_setor (FK → setor)
-  - numero INT
-  - identificacao VARCHAR(20) [Ex: A01, B02]
-  - tipo ENUM: COMUM, ISOLAMENTO, CTI, SEMI_UTI
-  - status ENUM: DISPONIVEL, OCUPADO, RESERVADO, LIMPEZA, MANUTENCAO, INTERDITADO
-  - criado_em, atualizado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `internacao` | Internações |
+| `internacao_historico` | Histórico |
+| `internacao_movimentacao` | Movimentação |
+| `internacao_prescricao` | Prescrições |
+| `internacao_prescricao_item` | Itens prescrição |
+| `internacao_medicacao_administracao` | Admin medicação |
+| `internacao_dietas` | Dietas |
+| `internacao_cuidados` | Cuidados |
+| `internacao_dispositivos` | Dispositivos |
+| `internacao_registro_enfermagem` | Registro enfermagem |
+| `internacao_turno_registro` | Registro por turno |
+| `internacao_braden_avaliacao` | Escala Braden |
+| `internacao_ferida_avaliacao` | Avaliação de feridas |
 
 ---
 
-### 9️⃣ MÓDULO: AUDITORIA & SEGURANÇA
+# 🧪 LABORATÓRIO
 
-#### Tabela: `auditoria_evento`
-```
-Objetivo: CENTRAL - Log de eventos de negócio por transação
-Campos:
-  - id (PK)
-  - id_sessao_usuario (FK)
-  - entidade VARCHAR(50) [qual tabela/entidade]
-  - id_entidade BIGINT [qual registro]
-  - acao VARCHAR(50) [CRIAR, MODIFICAR, DELETAR, CHAMAR, ENCAMINHAR, etc]
-  - detalhe TEXT [o que mudou/contexto]
-  - tabela VARCHAR(50) [nome técnico]
-  - id_usuario_espelho BIGINT [denormalizado para query rápida]
-  - criado_em DATETIME
-
-Índices:
-  - idx: entidade + id_entidade + criado_em
-  - idx: id_sessao_usuario + criado_em
-  - idx: id_usuario_espelho + criado_em
-```
-
-#### Tabela: `auditoria_erro`
-```
-Objetivo: Log de erros SQL/aplicação
-Campos:
-  - id (PK)
-  - id_sessao_usuario (FK)
-  - rotina VARCHAR(100) [nome do SP/procedure]
-  - sqlstate VARCHAR(10)
-  - errno INT
-  - mensagem TEXT
-  - contexto TEXT
-  - criado_em
-```
-
-#### Tabela: `auditoria_acesso`
-```
-Objetivo: Auditoria de acesso a dados (READ/SEARCH/EXPORT/PRINT)
-Campos:
-  - id (PK)
-  - id_sessao_usuario (FK)
-  - acao VARCHAR(20) ENUM: READ, SEARCH, EXPORT, PRINT, DOWNLOAD, VIEW
-  - tabela VARCHAR(50)
-  - filtros TEXT [quais registros acessados]
-  - ip VARCHAR(45)
-  - user_agent TEXT
-  - criado_em
-```
-
-#### Tabela: `auditoria_visualizacao_prontuario`
-```
-Objetivo: LGPD - Auditoria de quem acessou prontuário (CRITICAL)
-Campos:
-  - id (PK)
-  - id_paciente (FK)
-  - id_usuario_acesso (FK)
-  - id_sessao_usuario (FK)
-  - tipo_acesso ENUM: VISUALIZADO, IMPRESSO, EXPORTADO
-  - motivo TEXT [por que acessou?]
-  - criado_em
-```
-
-#### Tabela: `auditoria_ffa`
-```
-Objetivo: Auditoria específica de FFA
-Campos:
-  - id (PK)
-  - id_ffa (FK)
-  - id_sessao_usuario (FK)
-  - acao VARCHAR(50)
-  - detalhe TEXT
-  - criado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `exame` | Exames |
+| `exame_pedido` | Pedidos de exame |
+| `exame_pedido_item` | Itens do pedido |
+| `exame_historico` | Histórico |
+| `exame_fisico` | Exame físico |
+| `lab_pedido` | Pedidos laboratório |
+| `lab_amostra` | Amostras |
+| `lab_resultado` | Resultados |
+| `lab_evento` | Eventos |
+| `lab_protocolo` | Protocolos |
+| `lab_protocolo_evento` | Eventos de protocolo |
+| `laboratorio_protocolo` | Protocolo laboratório |
+| `laboratorio_protocolo_evento` | Eventos |
 
 ---
 
-### 🔟 MÓDULO: ALERTAS & NOTIFICAÇÕES
+# 🩺 EXAMES E DIAGNÓSTICOS
 
-#### Tabela: `alerta`
-```
-Objetivo: Sistema de alertas genéricos (paciente complexo, baixo estoque, etc)
-Campos:
-  - id (PK)
-  - tipo VARCHAR(50) [PACIENTE_COMPLEXO, ESTOQUE_CRITICO, MEDICAMENTO_VENCENDO, etc]
-  - titulo VARCHAR(255)
-  - descricao TEXT
-  - severidade ENUM: INFO, ATENCAO, ALTA
-  - status ENUM: ABERTO, LIDO, EM_ATENDIMENTO, RESOLVIDO, CANCELADO
-  - id_usuario_criador (FK)
-  - criado_em, atualizado_em
-```
-
-#### Tabela: `alerta_destinatario`
-```
-Objetivo: Roteamento de alertas
-Campos:
-  - id (PK)
-  - id_alerta (FK)
-  - tipo_destino ENUM: USUARIO, PERFIL, PAINEL, LOCAL, UNIDADE, SISTEMA
-  - id_destino BIGINT
-```
-
-#### Tabela: `notificacao_epidemiologica` (SINAN)
-```
-Objetivo: Notificações ao SINAN
-Campos:
-  - id (PK)
-  - id_ffa (FK)
-  - id_paciente (FK)
-  - doenca_notificavel VARCHAR(50) [CID]
-  - data_notificacao DATE
-  - status_notificacao ENUM: PENDENTE, ENVIADO_MS, ARQUIVADO
-  - protocolo_ms VARCHAR(30)
-  - criado_em
-```
-
-#### Tabela: `notificacao_violencia`
-```
-Objetivo: Notificações de violência
-Campos:
-  - id (PK)
-  - id_ffa (FK)
-  - id_paciente (FK)
-  - categoria ENUM: VIOLENCIA, AGRESSAO, ABUSO, TRANSITO, OUTRA
-  - descricao TEXT
-  - status ENUM: ABERTA, EM_INVESTIGACAO, ENVIADA, ARQUIVADA
-  - criado_em
-```
-
-#### Tabela: `cat_acidente_trabalho`
-```
-Objetivo: Comunicação de Acidente de Trabalho
-Campos:
-  - id (PK)
-  - id_ffa (FK)
-  - tipo_acidente ENUM: TIPICO, TRAJETO, DOENCA_OCUPACIONAL, OUTRO
-  - data_acidente DATE
-  - descricao TEXT
-  - status_cat ENUM: ABERTA, EMITIDA, ENVIADA, ARQUIVADA
-  - criado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `atendimento_pedidos_exame` | Pedidos de exame |
+| `solicitacao_exame` | Solicitação de exame |
+| `atendimento_diagnosticos` | Diagnósticos |
+| `hipotese_diagnostica` | Hipótese diagnóstica |
+| `diagnostico` | Diagnósticos |
+| `md_cid10` | CID-10 |
+| `cid10_competencia` | Competência CID-10 |
 
 ---
 
-### 1️⃣1️⃣ MÓDULO: CONFIGURAÇÃO & MASTER DATA
+# 🚑 EMERGÊNCIA E REMOÇÃO
 
-#### Tabela: `local_operacional`
-```
-Objetivo: Locais onde atendimento ocorre (Recepção, Triagem, Consultório, RX, etc)
-Campos:
-  - id_local_operacional (PK)
-  - id_unidade (FK)
-  - id_sistema (FK)
-  - codigo VARCHAR(10) [REC01, TRI01, MEDC1, RX01, MED01, MEDP01, etc]
-  - nome VARCHAR(255)
-  - tipo VARCHAR(50) [RECEPCAO, TRIAGEM, CONSULTORIO, RX, LABORATORIO, FARMACIA, MEDICACAO, etc]
-  - exibe_em_painel_publico TINYINT(1) [mostra na TV?]
-  - gera_tts_publico TINYINT(1) [anuncia em voz?]
-  - eh_nao_definida TINYINT(1) [flag local genérico]
-  - ativo TINYINT(1)
-  - criado_em
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `remocao` | Remoções |
+| `remocao_evento` | Eventos |
+| `remocao_logistica` | Logística |
+| `transporte_ambulancia` | Ambulâncias |
+| `transporte_ambulancia_evento` | Eventos |
+| `viatura` | Viaturas |
+| `ambulancia_evento` | Eventos ambulância |
 
-#### Tabela: `setor`
-```
-Objetivo: Departamentos/setores (Pronto Socorro, Observação, UTI, etc)
-Campos:
-  - id_setor (PK)
-  - id_unidade (FK)
-  - nome VARCHAR(100)
-  - tipo ENUM: PRONTO_SOCORRO, OBSERVACAO, INTERNACAO, UTI_ADULTO, UTI_PEDIATRICA, CENTRO_CIRURGICO
-  - responsavel_id (FK → usuario)
-  - ativo TINYINT(1)
-```
+---
 
-#### Tabela: `unidade`
-```
-Objetivo: Unidades de negócio deoperação (hospital, UPA, PA)
-Campos:
-  - id_unidade (PK)
-  - id_sistema (FK)
-  - id_cidade (FK → cidade)
-  - nome VARCHAR(150)
-  - cnes CHAR(7) [cadastro no CNES]
-  - tipo ENUM: UPA, HOSPITAL, PA, CLINICA
-  - ativo TINYINT(1)
-```
+# 🏥 ENFERMAGEM
 
-#### Tabela: `sistema`
-```
-Objetivo: Sistemas de TI (Pronto Atendimento, UBS, etc)
-Campos:
-  - id_sistema (PK)
-  - codigo VARCHAR(20)
-  - nome VARCHAR(150)
-  - descricao VARCHAR(255)
-  - ativo TINYINT(1)
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `enfermagem` | Dados de enfermagem |
+| `enfermagem_diagnosticos` | Diagnósticos |
+| `evolucao_enfermagem` | Evolução |
+| `anotacao_enfermagem` | Anotações |
+| `atendimento_sinais_vitais` | Sinais vitais |
+| `sinais_vitais` | Sinais vitais (alternativo) |
+| `ordem_assistencial` | Ordens assistenciais |
+| `ordem_assistencial_item` | Itens |
+| `ordem_assistencial_execucao` | Execução |
+| `ordem_assistencial_aprazamento` | Aprazamento |
 
-#### Tabela: `especialidade`
-```
-Objetivo: Especialidades médicas
-Campos:
-  - id (PK)
-  - nome VARCHAR(255)
-  - codigo VARCHAR(50)
-  - ativo TINYINT(1)
-```
+---
 
-#### Tabela: `conselho_profissional`
-```
-Objetivo: Conselhos de classe para validação de registro
-Campos:
-  - id (PK)
-  - sigla VARCHAR(10) [CRM, COREN, CRF, CRO, CREFITO, CRP, CRN, OUTRO]
-  - nome VARCHAR(255)
-  - ativo TINYINT(1)
-```
+# 📊 PAINEL E FILA
 
-#### Tabela: `classificacao_risco`
-```
-Objetivo: Cores de classificação de risco (Manchester)
-Campos:
-  - id_risco (PK)
-  - cor ENUM: VERMELHO, LARANJA, AMARELO, VERDE, AZUL
-  - descricao VARCHAR(100)
-  - tempo_max_minutos INT [tempo até atendimento]
-  - ordem INT [para ordenação]
-```
+## Filas
 
-#### Tabela: `md_cid10` (Master Data)
-```
-Objetivo: Referência de CIDs vigentes do SUS
-Campos:
-  - cid10 VARCHAR(10) (PK combination)
-  - descricao VARCHAR(255)
-  - sexo_restricao ENUM('A'=ambos,'M','F')
-  - idade_min_meses INT
-  - idade_max_meses INT
-  - ativo TINYINT(1)
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `fila` | Filas |
+| `fila_senha` | Senhas |
+| `fila_evento` | Eventos |
+| `fila_operacional` | Fila operacional |
+| `fila_operacional_evento` | Eventos |
+| `fila_retorno` | Retorno |
+| `local_fila` | Filas por local |
 
-#### Tabela: `md_cnes_estabelecimento`
-```
-Objetivo: Referência de CNES do Brasil
-Campos:
-  - cnes VARCHAR(7) (PK combination)
-  - nome VARCHAR(255)
-  - municipio VARCHAR(120)
-  - uf CHAR(2)
-```
+## Senhas
 
-#### Tabela: `md_sigtap_procedimento`
-```
-Objetivo: Referência de procedimentos SUS (SIGTAP)
-Campos:
-  - codigo VARCHAR(20)
-  - descricao VARCHAR(255)
-  - complexidade ENUM: BASICA, MEDIA, ALTA
-  - exige_cat_default TINYINT(1)
-  - exige_sinan_default TINYINT(1)
-```
+| Tabela | Descrição |
+|--------|-----------|
+| `senha` | Senhas |
+| `senha_eventos` | Eventos |
+| `senha_status` | Status |
+| `senha_sequencia` | Sequência |
+| `senha_transicao_matriz` | Transições |
 
-#### Tabela: `painel`
-```
-Objetivo: Configuração de painéis públicos (TV, Totem)
-Campos:
-  - id_painel (PK)
-  - codigo VARCHAR(60) [UNIQUE]
-  - tipo ENUM: PAINEL, TOTEM, TV
-  - nome VARCHAR(255)
-  - id_unidade (FK)
-  - id_sistema (FK)
-  - intervalo_segundos INT [atualização]
-  - emite_som TINYINT(1)
-  - tts_habilitado TINYINT(1) [text-to-speech]
-  - intervalo_pisca INT [blinking time]
-  - ativo TINYINT(1)
-```
+## Painel
 
-#### Tabela: `painel_config`
+| Tabela | Descrição |
+|--------|-----------|
+| `painel` | Painéis |
+| `painel_evento_stream` | Stream de eventos |
+| `painel_config` | Configuração |
+| `painel_config_def` | Definição |
+| `painel_grupo` | Grupos |
+| `painel_grupo_local` | Grupos por local |
+| `painel_local` | Paineis por local |
+| `painel_mensagem` | Mensagens |
+| `painel_mensagem_consumo` | Consumo |
+| `painel_alertas_tempo` | Alertas |
+| `painel_fila_tipo` | Tipos de fila |
+| `painel_lane` | Faixas |
+| `painel_monitoramento_especialidade` | Monitoramento |
+
+---
+
+# 📦 ESTOQUE
+
+## Estrutura de Estoque
+
+| Tabela | Descrição |
+|--------|-----------|
+| `estoque_produto` | Produtos |
+| `estoque_local` | Locais de estoque |
+| `estoque_lote` | Lotes |
+| `estoque_lote_snapshot` | Snapshot |
+| `estoque_saldo` | Saldos |
+| `estoque_saldo_central` | Saldo central |
+| `estoque_saldo_master` | Saldo master |
+| `estoque_item` | Itens |
+| `estoque_conta` | Contas |
+| `estoque_almoxarifado_central` | Almoxarifado |
+| `almoxarifado_central` | Almoxarifado |
+
+## Movimentação
+
+| Tabela | Descrição |
+|--------|-----------|
+| `estoque_movimento` | Movimentos |
+| `estoque_movimento_item` | Itens movimento |
+| `estoque_movimentacao` | Movimentação |
+| `estoque_movimentacao_itens` | Itens |
+| `consumo_insumo` | Consumo de insumos |
+| `consumo_limpeza` | Consumo limpeza |
+| `consumo_manutencao` | Consumo manutenção |
+
+## Reservas e Pipeline
+
+| Tabela | Descrição |
+|--------|-----------|
+| `estoque_reserva` | Reservas |
+| `estoque_reserva_evento` | Eventos |
+| `estoque_execucao` | Execução |
+| `estoque_execucao_pipeline` | Pipeline |
+| `estoque_pipeline_estado` | Estado pipeline |
+| `estoque_fluxo_assistencial` | Fluxo assistencial |
+| `estoque_documento_execucao` | Documentos |
+
+## Auditoria
+
+| Tabela | Descrição |
+|--------|-----------|
+| `estoque_audit_stream` | Stream auditoria |
+| `auditoria_estoque` | Auditoria |
+| `auditoria_estoque_sanitario` | Auditoria sanitaria |
+| `alerta_consumo` | Alertas consumo |
+| `alerta_destinatario` | Destinatários alerta |
+| `alerta_regra` | Regras alerta |
+| `alerta` | Alertas |
+
+---
+
+# 💰 FATURAMENTO
+
+| Tabela | Descrição |
+|--------|-----------|
+| `faturamento_conta` | Contas |
+| `faturamento_conta_item` | Itens |
+| `faturamento_conta_paciente` | Paciente |
+| `faturamento_conta_seq` | Sequência |
+| `faturamento_convenio` | Convênios |
+| `faturamento_convenios` | Convênios |
+| `faturamento_evento` | Eventos |
+| `faturamento_item` | Itens |
+| `faturamento_insumo` | Insumos |
+| `faturamento_producao` | Produção |
+| `faturamento_producao_sus` | Produção SUS |
+| `faturamento_codigo` | Códigos |
+| `faturamento_regras_validacao` | Regras |
+| `faturamento_sus_config` | Config SUS |
+| `faturamento_sigtap` | SIGTAP |
+| `conta_pagamento` | Pagamentos |
+
+---
+
+# 📈 FLUXO E WORKFLOW
+
+| Tabela | Descrição |
+|--------|-----------|
+| `fluxo_orquestrador_canonico` | Orquestrador |
+| `fluxo_status` | Status |
+| `fluxo_transicao` | Transições |
+| `fluxo_transicao_matriz` | Matriz |
+| `eventos_fluxo` | Eventos |
+| `contexto_atendimento` | Contexto |
+| `atendimento_transicao_ledger` | Ledger transição |
+
+---
+
+# 🔧 MANUTENÇÃO E INFRAESTRUTURA
+
+| Tabela | Descrição |
+|--------|-----------|
+| `chamado` | Chamados |
+| `chamado_evento` | Eventos |
+| `chamado_manutencao` | Manutenção |
+| `manutencao_execucao` | Execução |
+| `dispositivo` | Dispositivos |
+| `dispositivo_tipo` | Tipos |
+| `sistema` | Sistemas |
+| `configuracao` | Configurações |
+| `config_sistema` | Configuração sistema |
+
+---
+
+# 🔒 KERNEL E RUNTIME
+
+## Runtime
+
+| Tabela | Descrição |
+|--------|-----------|
+| `runtime_contexto` | Contexto |
+| `runtime_dispositivo` | Dispositivos |
+| `runtime_evento_provisional` | Eventos |
+| `runtime_execution_queue` | Fila execução |
+| `runtime_kernel_locks` | Locks |
+| `runtime_lock_semantico` | Locks semânticos |
+| `runtime_sync_queue` | Fila sync |
+| `runtime_sync_log` | Log sync |
+| `runtime_snapshot_metadata` | Snapshot metadata |
+| `runtime_snapshot_governanca` | Governança |
+| `runtime_estado_sobrevivencia` | Estado |
+| `runtime_concurrency_guard` | Concorrência |
+| `runtime_api_session_token` | Tokens API |
+| `runtime_edge_evento` | Eventos edge |
+
+## Kernel
+
+| Tabela | Descrição |
+|--------|-----------|
+| `kernel_ledger` | Ledger |
+| `kernel_runtime_evento` | Eventos |
+| `kernel_runtime_heartbeat` | Heartbeat |
+| `kernel_single_writer_lock` | Lock writer |
+| `kernel_identity_trust_chain` | Cadeia identidade |
+| `kernel_authz_policy` | Políticas |
+| `guardiao_runtime_final` | Guardião |
+| `guardiao_acl_runtime` | ACL runtime |
+
+## Ledger
+
+| Tabela | Descrição |
+|--------|-----------|
+| `ledger_evento_sincronizacao` | Sync eventos |
+| `ledger_evento_sincronizacao_local` | Sync local |
+| `ledger_global_sincronismo` | Sincronismo global |
+| `atendimento_evento_ledger` | Eventos ledger |
+
+---
+
+# 📝 DOCUMENTAÇÃO E REGISTROS
+
+| Tabela | Descrição |
+|--------|-----------|
+| `documento_tipo_config` | Tipos documento |
+| `documento_emissao` | Emissão |
+| `documento_emissao_evento` | Eventos |
+| `documento_arquivo` | Arquivos |
+| `assinatura_digital_documentos` | Assinatura digital |
+| `assinatura_digital_prontuario` | Prontuário |
+| `pep_registro` | Registro PEP |
+| `pep_assinatura_digital` | Assinatura |
+| `reg_anexo` | Anexos |
+| `reg_formulario_snapshot` | Snapshot formulário |
+
+---
+
+# 🏥 ASSISTENCIAL
+
+| Tabela | Descrição |
+|--------|-----------|
+| `assistencial_checkpoint_global` | Checkpoint |
+| `assistencial_circuit_breaker` | Circuit breaker |
+| `assistencial_evento_hash` | Hash eventos |
+| `assistencial_minipal_metric` | Métricas |
+| `assistencial_raim_metric` | Métricas RAIM |
+| `assistencial_runtime_federado` | Runtime federado |
+| `assistencial_runtime_panel` | Painel runtime |
+| `assistencial_simulacao_futura` | Simulação |
+| `assistencial_snapshot_runtime` | Snapshot |
+| `assistencial_telemetria_runtime` | Telemetria |
+| `assistencial_watchdog_fila` | Watchdog |
+
+---
+
+# 🔔 EVENTOS E NOTIFICAÇÕES
+
+| Tabela | Descrição |
+|--------|-----------|
+| `evento_geral` | Eventos gerais |
+| `evento_ffa` | Eventos FFA |
+| `evento_limpeza` | Limpeza |
+| `sala_notificacao` | Notificações |
+| `sala_notificacao_evento` | Eventos |
+| `sincronizacao_federada_evento` | Sync federado |
+| `tombstone_evento_assistencial` | Tombstone |
+
+---
+
+# 👶 PEDIATRIA E ACOMPANHANTE
+
+| Tabela | Descrição |
+|--------|-----------|
+| `acompanhante` | Acompanhantes |
+| `paciente_vinculo` | Vínculos |
+
+---
+
+# 🏥 SERVIÇOS ESPECIALIZADOS
+
+## Ambulância
+
+| Tabela | Descrição |
+|--------|-----------|
+| `ambulancia` | Ambulâncias |
+| `ambulancia_evento` | Eventos |
+
+## Gasoterapia
+
+| Tabela | Descrição |
+|--------|-----------|
+| `gaso_solicitacao` | Solicitações |
+| `gaso_evento` | Eventos |
+| `gasoterapia_consumo` | Consumo |
+| `gasoterapia_consumo_evento` | Eventos |
+
+## Ambulatório
+
+| Tabela | Descrição |
+|--------|-----------|
+| `ambulatorio_atendimento` | Atendimento |
+| `retorno_atendimento` | Retorno |
+
+---
+
+# 📋 AGENDAMENTO
+
+| Tabela | Descrição |
+|--------|-----------|
+| `agendamento` | Agendamentos |
+| `agenda_disponibilidade` | Disponibilidade |
+| `agendamentos_eventos` | Eventos |
+| `servico_agendamento` | Serviços |
+
+---
+
+# 🌐 INTEGRAÇÃO E EXTERNO
+
+| Tabela | Descrição |
+|--------|-----------|
+| `codigo_externo_map` | Mapeamento códigos |
+| `codigo_externo_vinculo` | Vínculos |
+| `codigo_universal` | Códigos universais |
+| `codigo_prefixo_config` | Prefixos |
+| `codigo_prefixo_regra` | Regras prefixo |
+| `identificador_global_assistencial` | Identificador global |
+| `integracao_mensageria_externa` | Mensageria |
+| `operacao_idempotencia` | Idempotência |
+
+---
+
+# 📊 PRODUVIDADES E RELATÓRIOS
+
+| Tabela | Descrição |
+|--------|-----------|
+| `produtividade_evento` | Eventos produtividade |
+| `plantao` | Plantões |
+| `plantao_escala` | Escalas |
+| `plantao_modelo` | Modelos |
+| `escala_medica` | Escala médica |
+| `escala_plantao` | Escala plantão |
+| `escala_plantao_atual` | Atual |
+| `escala_profissional` | Escala profissional |
+
+---
+
+# 📋 OUTRAS TABELAS IMPORTANTES
+
+| Tabela | Descrição |
+|--------|-----------|
+| `gpat` | GPAT |
+| `gpat_atendimento` | GPAT atendimento |
+| `gpat_item` | Itens |
+| `gpat_dispensacao` | Dispensação |
+| `gpat_evento` | Eventos |
+| `ffa` | FFA |
+| `ffa_item` | Itens |
+| `ffa_evento` | Eventos |
+| `ffa_diagnostico` | Diagnóstico |
+| `ffa_estado` | Estado |
+| `ffa_evolucao` | Evolução |
+| `ffa_extra` | Extra |
+| `ffa_procedimento` | Procedimento |
+| `ffa_substatus` | Substatus |
+| `ffa_prioridade` | Prioridade |
+| `cat` | CAT |
+| `cat_acidente_trabalho` | Acidente trabalho |
+| `cat_evento` | Eventos |
+| `notificacao_epidemiologica` | Notificação |
+| `notificacao_violencia` | Violência |
+| `obito` | Óbito |
+| `obito_evento` | Eventos |
+| `interconsulta` | Interconsulta |
+| `intercorrencia` | Intercorrência |
+| `reabertura_atendimento` | Reabertura |
+| `prioridade_social` | Prioridade social |
+| `protocolo_assistencial_global` | Protocolo global |
+| `protocolo_emissao` | Emissão |
+| `protocolo_sequencia` | Sequência |
+| `qualidade_eventos_adversos` | Eventos adversos |
+| `caixa` | Caixa |
+| `caixa_evento` | Eventos |
+| `contrato` | Contratos |
+| `fornecedor` | Fornecedores |
+| `forma_pagamento` | Forma pagamento |
+| `produto` | Produtos |
+| `tenant_registry` | Multi-tenant |
+| `rh_evento` | RH eventos |
+| `rh_pessoa_vinculo` | RH vínculo |
+| `rh_registro_profissional` | Registro |
+
+---
+
+# 👁️ VIEWS DO BANCO
+
+| View | Descrição |
+|------|-----------|
+| `vw_conciliacao_faturamento` | Conciliação |
+| `vw_estoque_assistencial` | Estoque assistencial |
+| `vw_estoque_central` | Estoque central |
+| `vw_estoque_farmacia` | Estoque pharmacy |
+| `vw_fila_painel` | Fila para painel |
+| `vw_gestao_fluxo_tempo_real` | Fluxo tempo real |
+| `vw_laboratorio_protocolos_pendentes` | Protocolos pendentes |
+| `vw_laboratorio_protocolos_por_gpat` | Por GPAT |
+| `vw_painel_config_efetiva` | Config efetiva |
+| `vw_painel_config_json` | Config JSON |
+| `vw_painel_senhas_chamando_por_painel` | Senhas chiamndo |
+| `vw_rastreio_cat_por_ffa` | Rastreio CAT |
+| `vw_rastreio_ffa_gpat` | Rastreio FFA |
+| `vw_senhas_ativas` | Senhas ativas |
+| `vw_usuario_contextos` | Contextos usuário |
+| `vw_usuario_permissoes` | Permissões usuário |
+| `vw_workflow_ffa_completo` | Workflow completo |
+| `vw_workflow_ffa_eventos_materializado` | Eventos materializados |
+
+---
+
+# 🗂️ STORED PROCEDURES (SP) DO SISTEMA
+
+> **Total: 224 procedures + 3 functions** (extraídas do dump `Dump20260322 (2).sql`)
+
+---
+
+## 📌 FUNCTIONS (3)
+
+| Function | Descrição |
+|----------|-----------|
+| `fn_decision_fingerprint` | Fingerprint de decisão |
+| `fn_runtime_chain_fingerprint` | Fingerprint de cadeia runtime |
+| `fn_sha256i_hash` | Hash SHA256 |
+
+---
+
+## 🔐 AUTH E SESSÃO
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_auth_contexto_get` | Buscar contexto |
+| `sp_auth_contexto_set` | Definir contexto |
+| `sp_auth_menu_get` | Buscar menu do usuário |
+| `sp_master_login` | Login master |
+| `sp_sessao_abrir` | Abrir sessão |
+| `sp_sessao_assert` | Validar sessão |
+| `sp_sessao_contexto_get` | Buscar contexto da sessão |
+| `sp_sessao_contexto_set` | Definir contexto da sessão |
+| `sp_sessao_encerrar` | Encerrar sessão |
+| `sp_sessao_tem_permissao` | Verificar permissão |
+| `sp_admin_sessao_revogar` | Revogar sessão |
+| `sp_usuario_refresh_token_emitir` | Emitir refresh token |
+| `sp_usuario_refresh_token_revogar` | Revogar refresh token |
+| `sp_usuario_refresh_token_validar` | Validar refresh token |
+
+---
+
+## 👤 USUÁRIO
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_master_admin_gerenciar_usuarios` | Gerenciar usuários |
+| `sp_usuario_criar_contexto` | Criar contexto |
+| `sp_usuario_definir_senha` | Definir senha |
+| `sp_usuario_hash_gerar` | Gerar hash |
+| `sp_usuario_hash_verificar` | Verificar hash |
+| `sp_usuario_log_acesso_registrar` | Registrar acesso |
+| `sp_usuario_possui_acesso_setor` | Verificar acesso setor |
+| `sp_usuario_reset_senha_ti` | Reset senha TI |
+| `sp_usuario_tem_permissao` | Verificar permissão |
+| `sp_usuario_trocar_senha` | Trocar senha |
+| `sp_usuario_vincular_local` | Vincular local |
+| `sp_usuario_vincular_sistema` | Vincular sistema |
+| `sp_usuario_vincular_unidade` | Vincular unidade |
+
+---
+
+## 🚀 MASTER DISPATCHER
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_master_dispatcher` | **Dispatcher principal** |
+| `sp_master_routes` | Rotas do sistema |
+| `sp_master_query_dispatcher` | Query dispatcher |
+| `sp_master_orquestradora` | Orquestradora master |
+| `sp_master_administracao_medicacao` | Admin medicação |
+| `sp_master_administracao_medicacao_ordem` | Ordem medicação |
+| `sp_master_agenda_disponibilidade` | Agenda disponibilidade |
+| `sp_master_agendamento_eventos` | Agendamento |
+| `sp_master_alerta_consumo` | Alerta consumo |
+| `sp_master_assistencial_salvar_orquestradora` | Assistencial |
+| `sp_master_atendimento` | Atendimento master |
+| `sp_master_atendimento_cancelar` | Cancelar |
+| `sp_master_atendimento_finalizar` | Finalizar |
+| `sp_master_atendimento_iniciar` | Iniciar |
+| `sp_master_atendimento_transicionar` | Transicionar |
+| `sp_master_cancelar_administracao_medicacao` | Cancelar medicação |
+| `sp_master_chamar_senha` | Chamar senha |
+| `sp_master_ffa_movimentar` | Movimentar FFA |
+| `sp_master_registrar_administracao_medicacao` | Registrar admin |
+| `sp_master_registrar_alerta` | Registrar alerta |
+| `sp_master_registrar_erro` | Registrar erro |
+| `sp_master_registrar_evento` | Registrar evento |
+| `sp_master_senha_emitir` | Emitir senha |
+| `sp_master_senha_recepcao` | Senha recepção |
+| `sp_master_vincular_atendimento_paciente` | Vincular paciente |
+
+---
+
+## 🏥 ATENDIMENTO
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_atendimento_finalizar_evasao` | Finalizar evasão |
+| `sp_atendimento_senha_nao_compareceu` | Não compareceu |
+| `sp_atendimento_transicionar` | Transicionar |
+| `sp_executor_assistencial_atendimento_finalizar` | Finalizar |
+| `sp_executor_assistencial_atendimento_iniciar` | Iniciar |
+| `sp_executor_recepcao_abrir_atendimento` | Abrir recepção |
+| `sp_medico_encaminhar` | Encaminhar médico |
+| `sp_medico_finalizar` | Finalizar médico |
+| `sp_medico_marcar_retorno` | Marcar retorno |
+| `sp_worker_atendimento` | Worker atendimento |
+
+---
+
+## 🎫 TRIAGEM
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_executor_assistencial_triagem_finalizar` | Finalizar triagem |
+| `sp_executor_assistencial_triagem_iniciar` | Iniciar triagem |
+| `sp_executor_assistencial_triagem_salvar` | Salvar triagem |
+| `sp_triagem_classificar_senha` | Classificar senha |
+| `sp_triagem_finalizar` | Finalizar triagem |
+
+---
+
+## 📋 FILA E SENHA
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_chamar_senha` | Chamar senha |
+| `sp_complementar_senha` | Complementar senha |
+| `sp_criar_senha` | Criar senha |
+| `sp_fila_chamar_proxima` | Chamar próxima |
+| `sp_fila_finalizar` | Finalizar fila |
+| `sp_fila_tipo_por_local` | Tipo por local |
+| `sp_finalizar_senha` | Finalizar senha |
+| `sp_finalizar_procedimento_ecg` | Finalizar ECG |
+| `sp_finalizar_procedimento_geral` | Procedimento geral |
+| `sp_finalizar_procedimento_laboratorio` | Procedimento lab |
+| `sp_recepcao_complementar_e_abrir_ffa` | Complementar e abrir |
+| `sp_recepcao_encaminhar_ffa` | Encaminhar FFA |
+| `sp_recepcao_gerar_senha` | Gerar senha |
+| `sp_recepcao_iniciar_complementacao` | Iniciar complementação |
+| `sp_recepcao_nao_compareceu` | Não compareceu |
+| `sp_rechamar_procedimento` | Rechamar |
+| `sp_senha_cancelar` | Cancelar senha |
+| `sp_senha_chamar` | Chamar senha |
+| `sp_senha_chamar_proxima` | Chamar próxima |
+| `sp_senha_chamar_setor` | Chamar setor |
+| `sp_senha_emitir` | Emitir senha |
+| `sp_senha_finalizar` | Finalizar senha |
+| `sp_senha_iniciar_complementacao` | Iniciar complementação |
+| `sp_senha_nao_atendida` | Não atendida |
+| `sp_senha_nao_compareceu` | Não compareceu |
+| `sp_senha_rechamar` | Rechamar senha |
+| `sp_senha_retorno_reinserir` | Retorno reinserir |
+| `sp_senha_transicionar_status` | Transicionar status |
+| `sp_totem_gerar_senha` | Gerar totem |
+| `sp_painel_cancelar_senha` | Cancelar painel |
+| `sp_painel_chamar_senha` | Chamar painel |
+| `sp_painel_inserir_senha` | Inserir painel |
+
+---
+
+## 🏥 ASSISTENCIAL
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_execucao_assistencial` | Execução |
+| `sp_executor_assistencial_anamnese_salvar` | Salvar anamnese |
+| `sp_executor_assistencial_evolucao_salvar` | Salvar evolução |
+| `sp_executor_assistencial_runtime` | Runtime assistencial |
+| `sp_executor_cadastro_paciente_salvar` | Salvar paciente |
+| `sp_executor_estoque_runtime` | Runtime estoque |
+| `sp_executor_faturamento_runtime` | Runtime faturamento |
+| `sp_executor_fila_runtime` | Runtime fila |
+| `sp_executor_manchester_runtime` | Runtime Manchester |
+| `sp_gatekeeper_assistencial` | Gatekeeper |
+| `sp_oraculo_assistencial` | Oracle |
+| `sp_orquestrador_assistencial` | Orquestrador |
+
+---
+
+## 💊 FARMÁCIA
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_farm_dispensacao_criar` | Criar dispensação |
+| `sp_farm_dispensacao_registrar` | Registrar dispensação |
+| `sp_farm_reserva_confirmar` | Confirmar reserva |
+| `sp_farmacia_dispensar_registrar` | Registrar dispensar |
+| `sp_medicacao_cancelar` | Cancelar medicação |
+| `sp_medicacao_complementar` | Complementar medicação |
+| `sp_medicacao_em_execucao_obs` | Em execução |
+| `sp_medicacao_finalizar` | Finalizar medicação |
+| `sp_medicacao_marcar_executado` | Marcar executado |
+| `sp_medicacao_nao_respondeu` | Não respondeu |
+
+---
+
+## 🏥 INTERNAÇÃO
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_internacao_registrar_evasao` | Registrar evasão |
+
+---
+
+## 🧪 LABORATÓRIO
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_gera_protocolo_lab` | Gerar protocolo |
+| `sp_lab_protocolo_criar_ou_mapear` | Criar/mapear protocolo |
+| `sp_laboratorio_protocolo_evento_add` | Adicionar evento |
+| `sp_procedimento_protocolo_criar` | Criar protocolo |
+| `sp_protocolo_emitir` | Emitir protocolo |
+
+---
+
+## 📦 ESTOQUE
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_estoque_fluxo_his` | Fluxo histórico |
+| `sp_estoque_movimentar` | Movimentar |
+| `sp_estoque_movimentar_extremo` | Movimentar extremo |
+| `sp_estoque_movimento_criar` | Criar movimento |
+| `sp_estoque_movimento_item_add` | Adicionar item |
+| `sp_estoque_produto_criar_com_codigo` | Criar produto |
+| `sp_estoque_produto_set_codigo` | Setar código |
+| `sp_conciliador_estoque_faturamento` | Conciliar |
+| `sp_fluxo_estoque` | Fluxo estoque |
+
+---
+
+## 🏥 FFA (Fluxo de Atendimento)
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_ffa_adicionar_item` | Adicionar item |
+| `sp_ffa_gpat_garantir` | Garantir GPAT |
+| `sp_ffa_gpat_gerar` | Gerar GPAT |
+| `sp_ffa_orquestrador_transicao` | Transição FFA |
+| `sp_timeout_ffa` | Timeout FFA |
+| `sp_workflow_ffa_rebuild` | Rebuild workflow |
+
+---
+
+## 💰 FATURAMENTO
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_pdv_venda_criar` | Criar venda PDV |
+
+---
+
+## 🔄 KERNEL E RUNTIME
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_dispatcher_kernel` | Dispatcher kernel |
+| `sp_emitir_evento_manchester` | Emitir evento Manchester |
+| `sp_motor_manchester_runtime` | Motor Manchester |
+| `sp_coordenador_global` | Coordenador global |
+| `sp_checkpoint_global_validar` | Validar checkpoint |
+| `sp_contexto_assert_permissao` | Assert permissão |
+| `sp_contexto_assert_transicao` | Assert transição |
+| `sp_invariant_engine` | Engine invariante |
+| `sp_kernel_cleanup_expired` | Cleanup expired |
+| `sp_kernel_identity_chain_register` | Registrar identidade |
+| `sp_kernel_runtime_heartbeat` | Heartbeat |
+| `sp_kernel_writer_lock` | Lock writer |
+| `sp_kernel_writer_unlock` | Unlock writer |
+| `sp_runtime_clinico_exec` | Exec clínico |
+| `sp_runtime_decision_engine` | Decision engine |
+| `sp_runtime_edge_executor` | Edge executor |
+| `sp_runtime_escudo_total` | Escudo total |
+| `sp_runtime_feedback` | Feedback |
+| `sp_runtime_resiliente_execucao` | Execução resiliente |
+| `sp_reconciliar_runtime` | Reconciliar runtime |
+| `sp_sync_federado_executor` | Sync federado |
+| `sp_retry_semantico_worker` | Retry worker |
+
+---
+
+## 🛡️ GUARDIÃO (GUARD)
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_guardiao_absoluto` | Guardião absoluto |
+| `sp_guardiao_runtime_assert` | Runtime assert |
+| `sp_guardiao_runtime_decidir` | Runtime decidir |
+| `sp_guardiao_runtime_final` | Runtime final |
+| `sp_fluxo_guardiao_transicao` | Transição guardião |
+| `sp_fluxo_verificar_autorizacao` | Verificar autorização |
+
+---
+
+## 🔀 FLUXO E WORKFLOW
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_fluxo_executor_matriz` | Executor matriz |
+| `sp_validar_transicao_fluxo` | Validar transição |
+| `sp_operacao_encaminhar` | Encaminhar operação |
+| `sp_nome_operacao` | Nome operação |
+
+---
+
+## 🏥 PROCEDIMENTOS
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_iniciar_execucao_procedimento_rx` | Iniciar RX |
+| `sp_finalizar_procedimento_rx` | Finalizar RX |
+| `sp_rechamar_procedimento` | Rechamar |
+| `sp_timeout_procedimento_rx` | Timeout RX |
+| `sp_raim_calcular` | Calcular RAIM |
+
+---
+
+## 📋 CÓDIGOS
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_codigo_emitir_interno` | Emitir interno |
+| `sp_codigo_mapear_externo` | Mapear externo |
+| `sp_codigo_prefixo_resolver` | Resolver prefixo |
+| `sp_codigo_prefixo_set` | Setar prefixo |
+| `sp_cat_abrir_por_item` | Abrir CAT |
+
+---
+
+## 📊 LEDGER
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_auditoria_evento_registrar` | Registrar auditoria |
+| `sp_ledger_evento_log` | Log evento |
+| `sp_ledger_registrar_evento` | Registrar evento |
+| `sp_auditar_erro_sql` | Auditar erro SQL |
+
+---
+
+## 🔒 PERMISSÃO
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_permissao_assert` | Assert permissão |
+| `sp_permissao_validar` | Validar permissão |
+| `sp_acl_registrar_evento` | Registrar ACL |
+
+---
+
+## 🔧 SEEDS E ADMIN
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `seed_usuarios_teste` | Seed usuários teste |
+| `sp_local_operacional_seed_padrao` | Seed local operacional |
+| `sp_painel_filtro_locais_seed` | Seed filtros painel |
+| `sp_painel_seed_especialidades` | Seed especialidades |
+| `sp_patch_log` | Log patch |
+| `sp_patch_permissao` | Patch permissão |
+| `sp_patch_usuario_fk_idx` | Patch índice |
+| `sp_schema_add_column_if_missing` | Add coluna |
+| `sp_schema_add_index_if_missing` | Add índice |
+| `sp_seed_admin_root_runtime` | Seed admin root |
+| `sp_seed_clinico_sintetico_hardcore` | Seed clínico |
+| `sp_seed_dummy_funcionario_500` | Seed 500 funcionários |
+| `sp_seed_dummy_paciente_500` | Seed 500 pacientes |
+| `sp_seed_dummy_senha_fila_500` | Seed 500 senhas |
+| `sp_seed_dummy_usuarios_500` | Seed 500 usuários |
+| `sp_seed_runtime_assistencial` | Seed runtime assistencial |
+| `sp_seed_runtime_funcionario_full` | Seed funcionário full |
+| `sp_seed_saas_federado` | Seed SAAS federado |
+| `sp_admin_painel_filtros_seed_all` | Seed todos filtros |
+
+---
+
+## 🔀 SEQUÊNCIA
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_sequencia_proximo_numero` | Próximo número |
+
+---
+
+## 📋 REGISTRO DE EVENTOS
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_registrar_evento` | Registrar evento |
+| `sp_assert_not_null` | Assert not null |
+| `sp_assert_true` | Assert true |
+
+---
+
+## 👁️ AUXILIARES
+
+| Procedure | Descrição |
+|-----------|-----------|
+| `sp_paciente_cns_set` | Setar CNS |
+| `sp_raise` | Raise erro |
+| `sp_pedido_medico_criar` | Criar pedido médico |
+| `sp_pedido_medico_item_add` | Add item pedido |
+
+---
+
+# 📋 ÍNDICES PRINCIPAIS
+
+## Auth
+
+- `auth_sessao.id_sessao` (PK)
+- `auth_sessao.token` (UNIQUE)
+- `auth_sessao.id_usuario`
+- `usuario.login` (UNIQUE)
+- `usuario.email`
+
+## Atendimento
+
+- `atendimento.id_atendimento` (PK)
+- `atendimento.id_paciente`
+- `atendimento.id_profissional`
+- `atendimento.id_local`
+- `atendimento.data_entrada`
+
+## Paciente
+
+- `paciente.id_paciente` (PK)
+- `paciente.cpf` (UNIQUE)
+- `paciente.cns` (UNIQUE)
+- `paciente.nome`
+
+## Local
+
+- `local.id_local` (PK)
+- `local.id_unidade`
+- `local.codigo`
+
+---
+
+# 🔗 RELACIONAMENTOS PRINCIPAIS
+
 ```
-Objetivo: Configurações dinâmicas de painel (KEY-VALUE flexível)
-Campos:
-  - id_painel (FK, PK)
-  - chave VARCHAR(80) (PK)
-  - valor_bool TINYINT
-  - valor_int INT
-  - valor_decimal DECIMAL(12,4)
-  - valor_text TEXT
-  - valor_json JSON
-  - valor_enum VARCHAR(80)
-  - atualizado_em DATETIME
+usuario (1:N) usuario_perfil (N:1) perfil
+usuario (1:N) usuario_unidade (N:1) unidade
+usuario (1:N) usuario_local (N:1) local
+
+perfil (1:N) perfil_permissao (N:1) permissao
+
+atendimento (N:1) paciente
+atendimento (N:1) unidade
+atendimento (N:1) local
+atendimento (N:1) profissional
+
+atendimento_triagem (N:1) atendimento
+atendimento_triagem (N:1) classificacao_risco
+
+prescricao (N:1) atendimento
+prescricao_item (N:1) prescricao
+prescricao_item (N:1) produto
+
+estoque_movimento (N:1) estoque_local
+estoque_movimento_item (N:1) estoque_movimento
+estoque_movimento_item (N:1) produto
 ```
 
 ---
 
-### 1️⃣2️⃣ MÓDULO: FATURAMENTO & FINANCEIRO
+# 📌 PROCEDURES DO DISPATCHER (sp_master_dispatcher)
 
-#### Tabela: `forma_pagamento`
-```
-Objetivo: Métodos de pagamento disponíveis
-Campos:
-  - id (PK)
-  - descricao VARCHAR(100) [DINHEIRO, PIX, DEBITO, CREDITO, CARTAO_DEBITO, CARTAO_CREDITO, CONVENIO, OUTRO]
-  - ativo TINYINT(1)
-```
+Parâmetros de entrada:
+- `p_id_sessao` - ID da sessão
+- `p_uuid_transacao` - UUID da transação
+- `p_dominio` - Domínio (auth, operacional, cadastros, etc)
+- `p_acao` - Ação a executar
+- `p_id_referencia` - ID de referência
+- `p_payload` - Payload JSON
 
-#### Tabela: `documento_tipo_config`
-```
-Objetivo: Tipos de documentos gerados (receita, atestado, encaminhamento, etc)
-Campos:
-  - id (PK)
-  - tipo ENUM: ATESTADO, ENCAMINHAMENTO, RECEITA_CONTROLADO, RECEITUARIO_CASA, REGISTRO_ATENDIMENTO, SOLIC_EXAME, MEDICACAO_INTERNA
-  - descricao VARCHAR(255)
-  - template TEXT [HTML/markup]
-  - ativo TINYINT(1)
-```
-
-#### Tabela: `documento_emissao`
-```
-Objetivo: Rastreamento de documentos emitidos
-Campos:
-  - id (PK)
-  - tipo_documento VARCHAR(50)
-  - numeroDocumento VARCHAR(50)
-  - id_atendimento (FK, nullable)
-  - id_usuario_gerador (FK)
-  - status ENUM: GERADO, IMPRESSO, CANCELADO
-  - hash_documento CHAR(64) [SHA256]
-  - criado_em, data_cancelamento
-```
-
-#### Tabela: `financeiro_repasse_medico`
-```
-Objetivo: Pagamentos a médicos
-Campos:
-  - id (PK)
-  - id_medico (FK → usuario)
-  - periodo_mes VARCHAR(7)
-  - valor_procedimento DECIMAL
-  - percentual_repasse DECIMAL [%]
-  - valor_repasse DECIMAL [calculado]
-  - status_pagamento ENUM: PREVIA, APROVADO, PAGO, GLOSADO
-  - criado_em, data_pagamento
+ Estrutura de resposta:
+```json
+{
+  "sucesso": true,
+  "mensagem": "...",
+  "resultado": {},
+  "metadata": {}
+}
 ```
 
 ---
 
-## 📌 ENUMS E CONSTANTES {#enums}
+# 🎯 TABELAS CRÍTICAS PARA O SISTEMA
 
-### Principais ENUM Types:
-
-#### STATUS DE SENHA:
-```
-GERADA → AGUARDANDO → CHAMANDO → EM_COMPLEMENTACAO → ENCAMINHADO → 
-EM_ATENDIMENTO → NAO_COMPARECEU → FINALIZADO | CANCELADO
-```
-
-#### STATUS DE FFA:
-```
-ABERTO → EM_TRIAGEM → AGUARDANDO_CHAMADA_MEDICO → AGUARDANDO_RX → 
-AGUARDANDO_COLETA → AGUARDANDO_ECG → AGUARDANDO_RETORNO → 
-EM_ATENDIMENTO_MEDICO → ENCAMINHADO → INTERNADO → FINALIZADO
-```
-
-#### CLASSIFICAÇÃO DE RISCO (MANCHESTER):
-```
-VERMELHO (emergência 0 min)
-LARANJA (muito urgente, 10 min)
-AMARELO (urgente, 60 min)
-VERDE (pouco urgente, 120 min)
-AZUL (não urgente, 240 min)
-```
-
-#### TIPO DE ATENDIMENTO (SENHAS):
-```
-CLINICO, PEDIATRICO, PRIORITARIO, EMERGENCIA, VISITA, EXAME
-```
-
-#### VIA DE ADMINISTRAÇÃO:
-```
-ORAL, IV, IM, SC, TOPICA, INALATORIA
-```
-
-#### TIPO DE INTERNAÇÃO:
-```
-OBSERVACAO (< 24h)
-INTERNACAO (≥ 24h)
-```
-
-#### STATUS DE INTERNAÇÃO:
-```
-ATIVA, ENCERRADA, TRANSFERIDA, OBITO
-```
-
-#### DESFECHO DE ATENDIMENTO:
-```
-ALTA_MEDICA, ALTA_A_PEDIDO, TRANSFERENCIA, OBITO, EVASAO
-```
-
-#### DISPOSITIVOS HOSPITALARES:
-```
-CVC (Central Venous Catheter)
-SVD (Catheter Urinary)
-SNG (Nasogastric probe)
-SNE (Nasoenteral probe)
-DRENO
-CATETER_PERIFERICO
-CANULA_TRAQUEO
-```
+| Prioridade | Tabelas |
+|------------|---------|
+| 🔴 Crítica | `auth_sessao`, `usuario`, `perfil`, `permissao`, `perfil_permissao` |
+| 🟠 Alta | `atendimento`, `paciente`, `local`, `unidade`, `senha`, `fila` |
+| 🟡 Média | `prescricao`, `estoque_produto`, `estoque_movimento`, `faturamento_conta` |
+| 🟢 Normal | Demais tabelas |
 
 ---
 
-## 🔧 PROCEDURES E FUNCTIONS {#procedures}
+# 📝 RESUMO POR MÓDULO
 
-### Procedures Principais (54 identificadas):
-
-#### Autenticação:
-```
-sp_sessao_abrir        → Abre nova sessão de usuário
-sp_sessao_assert       → Valida sessão ativa/vigente (usado em todas operações)
-sp_sessao_encerrar     → Encerra sessão
-sp_sessao_contexto_get → Retorna contexto (usuário, unidade, local)
-sp_sessao_tem_permissao → Valida permissão de operação
-sp_permissao_assert    → Afirma terção de permissão
-```
-
-#### Senha & Fila:
-```
-sp_senha_emitir                      → Gera nova senha na recepção
-sp_senha_chamar_proxima              → Chama próxima da fila (com concorrência)
-sp_recepcao_iniciar_complementacao   → Inicia preenchimento de dados
-sp_recepcao_complementar_e_abrir_ffa → Completa dados + abre FFA
-sp_recepcao_encaminhar_ffa           → Encaminha para triagem/setor
-sp_recepcao_nao_compareceu           → Marca não compareceu + abre janela retorno
-sp_senha_nao_compareceu              → Helper de nao_compareceu
-sp_senha_finalizar                   → Finaliza senha
-sp_senha_cancelar                    → Cancela senha
-sp_senha_rechamar                    → Rechama (novo chamado)
-sp_senha_iniciar_complementacao      → Inicia complementação dados (helper)
-sp_senha_retorno_reinserir           → Retorno na janela (reinserir ou nova)
-```
-
-#### Triagem:
-```
-sp_triagem_chamar      → Chama paciente para triagem
-```
-
-#### Médico/Consultório:
-```
-sp_medico_chamar               → Chama para consulta médica
-sp_medico_marcar_retorno       → Agenda retorno (janela de tempo)
-sp_medico_encaminhar           → Encaminha para exame/procedimento
-sp_medico_finalizar            → Finaliza atendimento médico
-sp_operacao_encaminhar         → Core: encaminha para outro local
-```
-
-#### RX/Imagem:
-```
-sp_rx_chamar              → Chama para RX
-sp_rx_finalizar           → Finaliza RX
-```
-
-#### Medicação:
-```
-sp_medicacao_marcar_executado  → Marca medicação como dada
-sp_medicacao_finalizar         → Finaliza setor medicação
-sp_medicacao_nao_respondeu     → Paciente não compareceu em medicação
-```
-
-#### Paciente & Dados:
-```
-sp_paciente_cns_set → Atualiza/registra CNS do paciente
-```
-
-#### Configuração:
-```
-sp_painel_config_set                   → Set de configuração de painel (type-safe)
-sp_painel_filtro_locais_seed           → Seed de filtros de painel por local
-sp_painel_seed_especialidades          → Cria estrutura de painéis (especialidades/ligas)
-```
-
-#### PDV/Venda:
-```
-sp_pdv_venda_criar     → Cria venda de varejo
-```
-
-#### Pedidos Médicos:
-```
-sp_pedido_medico_criar      → Cria pedido médico (com GPAT)
-sp_pedido_medico_item_add   → Adiciona item ao pedido
-```
-
-#### Procedimentos/Protocolos:
-```
-sp_procedimento_protocolo_criar  → Cria protocolo de procedure (RX/EXAME)
-sp_rechamar_procedimento         → Rechama procedimento
-sp_protocolo_emitir              → Emite protocolo com número sequencial
-sp_sequencia_proximo_numero      → Helper: próximo número em sequência
-```
-
-#### Timeout & Limpeza:
-```
-sp_timeout_ffa              → Finaliza FFAs abandonadas (timeout)
-sp_timeout_procedimento_rx  → Marca RX para reavaliar (timeout)
-```
-
-#### Auditoria & Logging (Core):
-```
-sp_auditar_erro_sql           → Log erro SQL
-sp_auditoria_evento_registrar → Log evento de negócio (CENTRAL)
-```
-
-#### Helpers de Controle:
-```
-sp_assert_true        → Afirmação com exceção
-sp_assert_not_null    → Não nulo
-sp_raise              → Lança exceção (SQLSTATE 45000)
-```
-
-#### Fila Operacional (Internos):
-```
-sp_fila_chamar_proxima         → Core: chama próxima da fila
-sp_fila_tipo_por_local         → Mapeia tipo de fila por local
-sp_fila_finalizar              → Finaliza fila operacional
-```
-
-#### Schema Helpers:
-```
-sp_schema_add_column_if_missing → Migração: adiciona coluna se não existe
-sp_schema_add_index_if_missing  → Migração: adiciona índice se não existe
-```
-
-### Functions (Não identificadas explicitamente, mas inferidas):
-- Funções de cálculo (idade, score Braden, etc)
-- Funções de formatação
-- Funções de validação (CPF, CNPJ, etc)
-- Funções de geração de barcode
+| Módulo | Tabelas |
+|--------|---------|
+| Auth | 12 |
+| Usuário | 14 |
+| Perfil/Permissão | 3 |
+| Pessoa/Paciente | 18 |
+| Estrutura Organizacional | 16 |
+| Profissional | 7 |
+| Atendimento | 18 |
+| Triagem | 3 |
+| Prescrição | 11 |
+| Farmácia | 11 |
+| Internação | 13 |
+| Laboratório | 12 |
+| Estoque | 26 |
+| Faturamento | 16 |
+| Fluxo/Workflow | 6 |
+| Manutenção | 6 |
+| Kernel/Runtime | 22 |
+| Painel/Fila | 21 |
+| Documentação | 6 |
+| Outros | 40+ |
 
 ---
 
-## 🔄 FLUXOS DE NEGÓCIO PRINCIPAIS {#fluxos}
-
-### 1️⃣ FLUXO: EMISSÃO DE SENHA → ATENDIMENTO COMPLETO
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ 1. CHEGADA & EMISSÃO (Recepção)                                │
-├──────────────────────────────────────────────────────────────────┤
-  → Paciente chega e pega senha (TOTEM ou RECEPCAO)
-     ↓
-  CALL sp_senha_emitir(
-     p_tipo_atendimento = 'CLINICO'|'PEDIATRICO'|'PRIORITARIO'|'EMERGENCIA',
-     p_origem = 'TOTEM'|'RECEPCAO'|'ADMIN'|'SAMU',
-     out p_id_senha, out p_codigo  ← Senha gerada (ex: A001)
-  )
-     ↓
-  Senha criada: status = GERADA → AGUARDANDO
-  Registra em fila_senha (recepção/painel pública)
-│
-├──────────────────────────────────────────────────────────────────┤
-│ 2. CHAMADA & COMPLEMENTAÇÃO (Recepção)                          │
-├──────────────────────────────────────────────────────────────────┤
-  → Operador chama: status AGUARDANDO → CHAMANDO
-     ↓
-  CALL sp_senha_chamar_proxima(
-     p_id_local_operacional = REC01,
-     p_lane = 'ADULTO'|'PEDIATRICO'|'PRIORITARIO'|NULL,
-     out p_id_senha, out p_codigo
-  )
-     ↓
-  Inicia chamada: status = CHAMANDO (painel grita)
-     ↓
-  Operador abre complementação:
-  CALL sp_recepcao_iniciar_complementacao(p_id_senha)
-     ↓
-  Status = EM_COMPLEMENTACAO (operador coleta dados)
-     ↓
-  Operador submete dados (nome, CPF, CNS, data_nascimento, etc):
-  CALL sp_recepcao_complementar_e_abrir_ffa(
-     p_id_senha,
-     p_nome_completo, p_cpf, p_cns, p_data_nascimento, p_sexo,
-     p_email, p_telefone,
-     p_logradouro, p_numero, p_complemento, p_bairro, p_cidade, p_uf,
-     out p_id_pessoa, out p_id_paciente, out p_id_atendimento, 
-     out p_id_ffa, out p_gpat
-  )
-     ↓
-  Operações:
-  - Encuentra pessoa por CPF/CNS (merge se existe)
-  - Cria/atualiza paciente
-  - Cria atendimento (protocolo = GPAT)
-  - Cria FFA (documento primário)
-  - Atualiza senha: status = ENCAMINHADO
-     ↓
-  Status final: FFA ABERTO, pronto para triagem
-│
-├──────────────────────────────────────────────────────────────────┤
-│ 3. ENCAMINHAMENTO (Recepção → Triagem)                          │
-├──────────────────────────────────────────────────────────────────┤
-  → Operador encaminha para triagem:
-     ↓
-  CALL sp_recepcao_encaminhar_ffa(p_id_ffa)
-     ↓
-  Cria fila_operacional:
-  - tipo = TRIAGEM
-  - substatus = AGUARDANDO
-  - id_ffa = paciente
-  - id_local_operacional = TRI01 (local triagem)
-     ↓
-  FFA status = EM_TRIAGEM
-│
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 2️⃣ FLUXO: TRIAGEM → AVALIAÇÃO INICIAL
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ 4. TRIAGEM (Enfermeiro)                                         │
-├──────────────────────────────────────────────────────────────────┤
-  → Enfermeiro chama de triagem:
-     ↓
-  CALL sp_triagem_chamar(p_id_local_operacional = TRI01)
-     ↓
-  Seleciona próxima fila_operacional com tipo=TRIAGEM
-  Status = AQUARDANDO → CHAMANDO
-  Senha status = CHAMANDO (painel grita "TRIAGEM")
-     ↓
-  Enfermeiro coleta dados:
-  - Sinais vitais (PA, FC, FR, Temp, O2, HGT)
-  - Queixa principal
-  - Classificação Manchester (VERMELHO/LARANJA/AMARELO/VERDE/AZUL)
-     ↓
-  INSERT triagem:
-  - id_atendimento, id_risco, queixa, sinais_vitais JSON
-  
-  UPDATE ffa: status = AGUARDANDO_CHAMADA_MEDICO
-  UPDATE fila_operacional (TRIAGEM): substatus = FINALIZADO
-│
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 3️⃣ FLUXO: CONSULTA MÉDICA → PRESCRIÇÃO
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ 5. CONSULTÓRIO MÉDICO (Médico)                                  │
-├──────────────────────────────────────────────────────────────────┤
-  → Médico chama para consulta:
-     ↓
-  CALL sp_medico_chamar(p_id_local_operacional = MEDC1)
-     ↓
-  Seleciona próxima fila_operacional com tipo=MEDICO
-  Status AGUARDANDO → CHAMANDO
-  Senha status = CHAMANDO
-     ↓
-  Médico examina:
-  - Exame físico (estado geral, nível consciência, etc)
-  - Prescreve: medicamentos, exames (RX, Lab), procedimentos
-  - Registra diagnóstico (CID-10)
-     ↓
-  INSERT atendimento_evolucao (notas médicas)
-  INSERT atendimento_exame_fisico
-  INSERT atendimento_diagnosticos (CID)
-  INSERT atendimento_prescricao (medicamentos)
-  INSERT atendimento_pedidos_exame (requisição Lab/RX)
-     ↓
-  Médico encaminha:
-  - Se medicação urgente → MEDICACAO
-  - Se RX → RX
-  - Se Lab → COLETA
-  - Se procedimento → PROCEDIMENTO
-  - Se repouso → OBSERVACAO
-     ↓
-  CALL sp_medico_encaminhar(
-     p_id_ffa,
-     p_id_local_operacional_destino = MED01 (próx local)
-  )
-     ↓
-  Cria nova fila_operacional para próximo setor
-  FFA status = AGUARDANDO_RX | AGUARDANDO_COLETA | ...
-│
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 4️⃣ FLUXO: FARMÁCIA (MEDICAÇÃO URGENTE)
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ 6. SETOR MEDICAÇÃO (Farm + Enfermeiro)                          │
-├──────────────────────────────────────────────────────────────────┤
-  → FFA encaminhado para MEDICACAO
-  → Fila_operacional criada: tipo = MEDICACAO, substatus = AGUARDANDO
-     ↓
-  Trabalho N1: Farmacêutico prepara (seleciona lote, valida posologia)
-  - Confere:  prescrição → medicamento → lote (validade)
-  - INSERT dispensacao_medicacao (saída de estoque)
-  - UPDATE estoque_almoxarifado_central: quantidade -= quantidadeDispensada
-     ↓
-  Trabalho N2: Enfermeiro administra
-  - Insert administracao_medicacao (data/hora, dose, via[IV/IM/VO])
-  - Dupla conferência (enfermeiro + técnico)
-     ↓
-  CALL sp_medicacao_marcar_executado(p_id_fila)
-     ↓
-  Fila_operacional: substatus = FINALIZADO
-  FFA pronta para próximo setor ou alta
-│
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 5️⃣ FLUXO: ALTA / DESFECHO
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ 7. DESFECHO/ALTA (Médico)                                       │
-├──────────────────────────────────────────────────────────────────┤
-  → Após exames/tratamentos concluídos:
-     ↓
-  Médico registra desfecho:
-  INSERT atendimento_desfecho:
-  - tipo_desfecho = ALTA_MEDICA | ALTA_A_PEDIDO | TRANSFERENCIA | OBITO
-  - motivo, destino (se transferência)
-     ↓
-  Se ALTA normal:
-  - INSERT atendimento_sumario_alta (resumo clínico)
-  - INSERT documento_emissao (receita, atestado, etc)
-     ↓
-  FFA status = FINALIZADO
-  Senha status = FINALIZADO
-     ↓
-  Paciente segue com receitas + encaminhamentos
-│
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 6️⃣ FLUXO: NÃO COMPARECIMENTO & RETORNO
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ 8. NÃO COMPARECIMENTO (Qualquer setor)                          │
-├──────────────────────────────────────────────────────────────────┤
-  → Paciente não responde chamado:
-     ↓
-  CALL sp_recepcao_nao_compareceu(
-     p_id_senha,
-     p_janela_minutos = 60 (padrão)
-  )
-     ↓
-  UPDATE senhas:
-  - status = NAO_COMPARECEU
-  - retorno_permitido_ate = NOW() + 60 min
-  - retorno_utilizado = 0 (ainda não usou)
-     ↓
-  Paciente pode retornar em até 60 min sem nova senha
-│
-├──────────────────────────────────────────────────────────────────┤
-│ 9. RETORNO NA JANELA                                            │
-├──────────────────────────────────────────────────────────────────┤
-  → Paciente volta em tempo:
-     ↓
-  CALL sp_senha_retorno_reinserir(
-     p_id_senha,
-     p_janela_retorno_min = 60,
-     out p_id_senha_result, out p_codigo_result
-  )
-     ↓
-  Se dentro da janela (retorno_permitido_ate >= NOW()):
-    UPDATE senhas: status = AGUARDANDO, posicionado_em = NOW()
-    Reinserir ao fim da fila
-  Se expirado:
-    UPDATE senhas (velha): status = FINALIZADA
-    CALL sp_senha_emitir (nova senha)
-│
-└──────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📊 ESTRUTURA DE DADOS COMPLEMENTAR
-
-### Tabelas de Auditoria (Padrão em todas operações):
-
-Toda operação registra em:
-1. **auditoria_evento** - Log de negócio (entidade, ação, detalhe)
-2. **senha_eventos** - Histórico de transição de estado
-3. **fila_operacional_evento** - Histórico de fila
-4. **log_auditoria** - Log geral
-
-**Padrão de chamada (em todo SP):**
-```sql
-CALL sp_auditoria_evento_registrar(
-    p_id_sessao_usuario,
-    'ENTIDADE',           -- ex: 'SENHA', 'FFA', 'FILA_OPERACIONAL'
-    p_id_entidade,        -- id do registro
-    'ACAO',               -- ex: 'CHAMAR', 'ENCAMINHAR', 'FINALIZAR'
-    'contexto/detalhe',   -- informações
-    NULL,                 -- valor anterior (JSON)
-    'tabela',             -- nome técnico
-    NULL                  -- id_usuario_espelho
-);
-```
-
----
-
-## 📈 MÉTRICAS DO BANCO
-
-| Métrica | Valor |
-|---------|-------|
-| **Total de Tabelas** | 122+ |
-| **Total de Stored Procedures** | 80+ |
-| **Total de Functions** | ~30 |
-| **Total de Views** | ~5 |
-| **Campos de Total** | ~2000+ |
-| **Índices** | ~180+ |
-| **Foreign Keys** | ~150+ |
-| **Enums (Tipos)** | ~35+ |
-
----
-
-## 🎯 PRÓXIMOS PASSOS PARA DESENVOLVIMENTO
-
-### Backend (API):
-1. Implementar endpoints REST para login/sessão
-2. CRUD operations para main entities (paciente, atendimento, ffa)
-3. Integração com Procedures via prepared statements
-4. Validações de permissão (RBAC)
-5. Error handling e mapeamento de exceções SQL
-
-### Frontend (Web/Mobile):
-1. Telas de Recepção (emissão de senha, chamada)
-2. Telas de Triagem (sinais vitais, classificação risco)
-3. Telas de Médico (consulta, prescrição, encaminhamento)
-4. Telas de Farmácia (dispensação, administração)
-5. Painéis de Monitoramento (Público/Operacional)
-6. Dashboard de Métricas
-
-### Integrations:
-1. SINAN (notificações epidemiológicas)
-2. CAT (acidentes do trabalho)
-3. HL7/FHIR (laboratorial eletrônico)
-4. Payment gateways (faturamento)
-
----
-
-## 📝 NOTAS FINAIS
-
-- **Versionamento:** Banco usa master data com competências (CID-10 v2024, CNES, SIGTAP)
-- **Compliance:** LGPD implementado via `auditoria_visualizacao_prontuario`
-- **Performance:** Índices em força relações críticas, denormalização seletiva (id_usuario_espelho)
-- **Escalabilidade:** Partidas por data em tabelas de eventos (timestamp clustering)
-- **Security:** Senhas hasheadas (bcrypt/SHA256), RBAC via perfil
-- **Concorrência:** Locks pessimistas (FOR UPDATE) em operações críticas
-
----
-
-**Documento gerado:** 2026-02-20
-**Status:** COMPLETO - Pronto para Implementação Frontend & Backend
+*Documento gerado automaticamente a partir do dump `Dump20260322 (2).sql`*
+*Total: 478 tabelas + 20 views*

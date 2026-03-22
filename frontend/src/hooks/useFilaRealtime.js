@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import { consultarFilaEspera } from "../api/spApi";
 
 /**
  * Hook para fila em tempo real com cache offline
@@ -16,25 +16,22 @@ export const useFilaRealtime = (runtime) => {
       return;
     }
 
-    const id_local_operacional = runtime.contextos[0]?.id_local_operacional;
-    
-    if (!id_local_operacional) {
+    const id_sessao_usuario = runtime.contextos[0]?.id_sessao_usuario || runtime.id_sessao_usuario;
+
+    if (!id_sessao_usuario) {
       setLoading(false);
       return;
     }
 
     const fetchFila = async () => {
       try {
-        const response = await api.get(
-          `/fila/atual`,
-          { params: { id_local_operacional } }
-        );
-        
-        setFila(response.data);
+        const response = await consultarFilaEspera(id_sessao_usuario);
+
+        setFila(response?.resultado || response?.data || []);
         setError(null);
         
         // Salvar no cache offline
-        localStorage.setItem("fila_cache", JSON.stringify(response.data));
+        localStorage.setItem("fila_cache", JSON.stringify(response?.resultado || response?.data || []));
       } catch (err) {
         console.warn("Erro ao buscar fila, usando cache offline:", err.message);
         setError(err.message);

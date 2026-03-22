@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../context/AuthProvider';
+import spApi from '../../../../api/spApi';
 import './Remocao.css';
 
 const Remocao = () => {
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [remocoes, setRemocoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
@@ -13,14 +16,15 @@ const Remocao = () => {
   }, []);
 
   const carregarDados = async () => {
+    if (!session?.id_sessao) return;
+    
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/operacional/remocao', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const data = await spApi.call('sp_remocao_listar', {
+        p_id_sessao: session.id_sessao,
+        p_id_unidade: session?.id_unidade
       });
-      const data = await response.json();
-      setRemocoes(data?.dados || []);
+      setRemocoes(data?.resultado || []);
       setErro(null);
     } catch (err) {
       setErro('Erro ao carregar dados: ' + err.message);
@@ -31,27 +35,25 @@ const Remocao = () => {
 
   const iniciarRemocao = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(`/api/operacional/remocao/${id}/iniciar`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      await spApi.call('sp_remocao_iniciar', {
+        p_id_sessao: session.id_sessao,
+        p_id_remocao: id
       });
       carregarDados();
     } catch (err) {
-      alert('Erro ao iniciar remoção');
+      alert('Erro ao iniciar remoção: ' + err.message);
     }
   };
 
   const finalizarRemocao = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(`/api/operacional/remocao/${id}/finalizar`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      await spApi.call('sp_remocao_finalizar', {
+        p_id_sessao: session.id_sessao,
+        p_id_remocao: id
       });
       carregarDados();
     } catch (err) {
-      alert('Erro ao finalizar remoção');
+      alert('Erro ao finalizar remoção: ' + err.message);
     }
   };
 

@@ -1,123 +1,137 @@
 import { useState } from "react";
-import { useRuntimeAuth } from "../auth/RuntimeAuthContext";
-import "./Login.css";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthProvider";
 
 export default function Login() {
-
-    const { setSession } = useRuntimeAuth();
-
-    const [login, setLogin] = useState("");
-    const [senha, setSenha] = useState("");
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [usuario, setUsuario] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState(null);
 
-    function extractToken(data) {
-        if (!data) return null;
-        if (typeof data === "string") return data;
-        return data.token || data.token_jwt || data.access_token || null;
-    }
+    const traduzirErro = (erro) => {
+        if (!erro) return "Erro desconhecido";
+        const e = String(erro).toUpperCase();
+        if (e.includes("USER_NOT_FOUND") || e.includes("USUARIO_NAO_ENCONTRADO")) return "Usuário não encontrado";
+        if (e.includes("INVALID_PASSWORD") || e.includes("SENHA_INCORRETA") || e.includes("SENHA_INVALIDA")) return "Senha incorreta";
+        if (e.includes("INACTIVE") || e.includes("USUARIO_INATIVO")) return "Usuário inativo";
+        if (e.includes("CONNECTION") || e.includes("CONEXAO")) return "Erro de conexão com o servidor";
+        return erro;
+    };
 
-    async function handleLogin(e) {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("");
+        if (loading) return;
+        setLoading(true);
+        setError(null);
 
         try {
-            setLoading(true);
-
-            const res = await fetch("http://localhost:3001/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    login,
-                    senha,
-                    usar_novo_contexto: true  // Usa o novo serviço de contexto
-                })
-            });
-
-            const data = await res.json();
-
-            const token = extractToken(data);
-            if (token) {
-                const ok = setSession(token);
-                if (!ok) {
-                    setError("Token sem contexto operacional. Refaça o login.");
-                    setLoading(false);
-                    return;
-                }
-
-                window.location.href = "/contexto";
+            const result = await login({ login: usuario });
+            
+            if (!result) {
+                setError("Erro ao fazer login");
                 return;
             }
 
-            // if we get here, login failed
-            const apiError = data?.error;
-            
-            // Traduz erros técnicos para mensagens amigáveis
-            let erroMensagem = apiError;
-            if (apiError === "USUARIO_NAO_ENCONTRADO" || apiError === "USUARIO_NAO_ENCONTRADO") {
-                erroMensagem = "Usuário não encontrado";
-            } else if (apiError === "SENHA_INCORRETA" || apiError === "SENHA_INVALIDA") {
-                erroMensagem = "Senha incorreta";
-            } else if (apiError === "SEM_CONTEXTO" || apiError === "USUARIO_SEM_CONTEXTO") {
-                erroMensagem = "Seu usuário não possui contexto de acesso (sistema/unidade/local).";
-            } else {
-                erroMensagem = apiError || (res.ok ? "Credenciais inválidas" : "Falha ao autenticar");
-            }
-            
-            setError(erroMensagem);
-            setLoading(false);
-
-        } catch {
-            setError("Erro ao realizar login");
+            // Ir para contexto após login
+            navigate("/operacional/contexto", { replace: true });
+        } catch (err) {
+            console.error(err);
+            setError(traduzirErro(err.message || err));
+        } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
-        <div className="login-wrap">
-            <div className="page-banner">
-                <div className="container">
-                    <img src="/assets/img/logosenfundo.png" alt="Alpha logo" className="header-logo" />
-                    <h1>Gestão de Pronto Atendimento Alpha</h1>
-                </div>
+        <div style={styles.container}>
+            <div style={styles.logosContainer}>
+                <img src="/assets/img/prefeitura.png" alt="Prefeitura" style={styles.logoPrefeitura} />
+                <img src="/assets/img/sistema.png" alt="Alpha" style={styles.logoAlpha} />
             </div>
-            <div className="login-card">
-                <div className="login-banner">
-                    <img src="/assets/img/prefeitura.png" alt="Prefeitura" />
-                    <img src="/assets/img/sistema.png" alt="Sistema" />
-                </div>
-                <form onSubmit={handleLogin}>
 
-                    <label>
-                        👤 <span>Usuário</span>
-                        <input
-                            placeholder="Digite seu usuário"
-                            value={login}
-                            onChange={e => { setLogin(e.target.value); setError(""); }}
-                        />
-                    </label>
+            <div style={styles.card}>
+                <h1 style={styles.title}>Hospital Guido Guido</h1>
+                <p style={styles.subtitle}>Pronto Atendimento Alpha</p>
 
-                    <label>
-                        🔐 <span>Senha</span>
-                        <input
-                            type="password"
-                            placeholder="Digite sua senha"
-                            value={senha}
-                            onChange={e => { setSenha(e.target.value); setError(""); }}
-                        />
-                    </label>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        placeholder="Usuário"
+                        value={usuario}
+                        onChange={(e) => setUsuario(e.target.value)}
+                        style={styles.input}
+                        required
+                    />
 
-                    {error && <div className="error-msg">{error}</div>}
 
-                    <button type="submit" disabled={loading}>
-                        {loading ? <span className="spinner"/> : "Entrar"}
+                    {error && <p style={styles.error}>{error}</p>}
+
+                    <button type="submit" style={styles.button} disabled={loading}>
+                        {loading ? "Conectando..." : "Entrar"}
                     </button>
-
-                    <div className="login-footer">Suporte: contato@exemplo.com</div>
                 </form>
             </div>
+
+            <p style={styles.footer}>Sistema de Gestão Hospitalar Alpha</p>
         </div>
     );
 }
+
+const styles = {
+    container: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #e2e8f0, #f8fafc)",
+        color: "#0f172a",
+        fontFamily: "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        padding: "24px",
+    },
+    logosContainer: {
+        display: "flex",
+        gap: "32px",
+        alignItems: "center",
+        marginBottom: "32px",
+    },
+    logoPrefeitura: { height: "70px", objectFit: "contain" },
+    logoAlpha: { height: "70px", objectFit: "contain" },
+    card: {
+        width: "100%",
+        maxWidth: "420px",
+        background: "#ffffff",
+        border: "1px solid #e2e8f0",
+        borderRadius: "16px",
+        padding: "32px",
+        boxShadow: "0 20px 60px rgba(15,23,42,0.12)",
+    },
+    title: { fontSize: "28px", margin: 0, marginBottom: "8px", fontWeight: 700, color: "#0f172a" },
+    subtitle: { margin: 0, marginBottom: "24px", color: "#334155" },
+    input: {
+        width: "100%",
+        padding: "14px 16px",
+        marginBottom: "12px",
+        borderRadius: "10px",
+        border: "1px solid #cbd5e1",
+        background: "#f8fafc",
+        color: "#0f172a",
+        fontSize: "15px",
+        outline: "none",
+    },
+    button: {
+        width: "100%",
+        padding: "14px 16px",
+        marginTop: "4px",
+        borderRadius: "10px",
+        border: "none",
+        background: "#0ea5e9",
+        color: "#f8fafc",
+        fontSize: "16px",
+        fontWeight: 700,
+        cursor: "pointer",
+    },
+    error: { color: "#b91c1c", marginBottom: "8px" },
+    footer: { marginTop: "20px", color: "#475569" },
+};

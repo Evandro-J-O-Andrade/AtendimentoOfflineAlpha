@@ -1,64 +1,46 @@
-import { useState, useEffect, useCallback } from "react";
-import { useApp } from "../context/AppContext";
+import { useEffect, useState } from "react";
+import { useAuth } from "../apps/operacional/auth/AuthProvider";
+import spApi from "../api/spApi";
 
 export function useMenu() {
-  const { permissoes: permissoesContexto } = useApp();
-  const [menu, setMenu] = useState({});
-  const [permissoes, setPermissoes] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState(null);
+    const { session } = useAuth();
+    const [menu, setMenu] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  const carregarPermissoes = useCallback(() => {
-    try {
-      setCarregando(true);
-      setErro(null);
+    useEffect(() => {
+        if (!session?.id_sessao) {
+            setMenu([]);
+            setLoading(false);
+            return;
+        }
 
-      const perms = permissoesContexto || [];
-      setPermissoes(perms);
+        async function load() {
+            try {
+                // Usa o modelo canônico: metodo + rota + id_sessao + payload
+                const res = await spApi.callRoute({
+                    metodo: "GET",
+                    rota: "AUTH.MENU",
+                    id_sessao: session.id_sessao,
+                    payload: {}
+                });
 
-      const menuMontado = {};
-      perms.forEach((perm) => {
-        const grupo = perm.grupo_menu || "Geral";
-        const ordem = perm.ordem_menu || 999;
-        if (!menuMontado[grupo]) menuMontado[grupo] = [];
-        menuMontado[grupo].push({
-          codigo: perm.codigo,
-          nome: perm.nome,
-          icone: perm.icone,
-          ordem,
-          acao: perm.acao_frontend,
-          url: perm.url_menu,
-        });
-      });
-      Object.keys(menuMontado).forEach((g) =>
-        menuMontado[g].sort((a, b) => a.ordem - b.ordem)
-      );
-      setMenu(menuMontado);
-    } catch (err) {
-      console.error("Erro ao carregar menu:", err);
-      setErro(err.message);
-    } finally {
-      setCarregando(false);
-    }
-  }, [permissoesContexto]);
+                if (res && res.modulos) {
+                    setMenu(res.modulos);
+                } else if (Array.isArray(res)) {
+                    setMenu(res);
+                } else {
+                    setMenu([]);
+                }
+            } catch (err) {
+                console.error("Erro ao carregar menu:", err);
+                setMenu([]);
+            } finally {
+                setLoading(false);
+            }
+        }
 
-  useEffect(() => {
-    carregarPermissoes();
-  }, [carregarPermissoes]);
+        load();
+    }, [session?.id_sessao]);
 
-  const verificarPermissao = useCallback(
-    (codigo) => permissoes.some((p) => p.codigo === codigo),
-    [permissoes]
-  );
-
-  return {
-    menu,
-    permissoes,
-    carregando,
-    erro,
-    temPermissao: verificarPermissao,
-    recarregar: carregarPermissoes,
-  };
+    return { menu, loading };
 }
-
-export default useMenu;

@@ -9,9 +9,10 @@ const farmaciaRoutes = require("./routes/farmaciaRoutes");
 const contextoRoutes = require("./routes/contextoRoutes");
 const painelRoutes = require("./routes/painelRoutes");
 const ledgerRoutes = require("./ledger/ledgerRoutes");
-const dispatcherRoutes = require("./routes/dispatcherRoutes");
 const permissaoRoutes = require("./routes/permissaoRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
+const spRoutes = require("./routes/spRoutes");
+const contextosRoutes = require("./routes/contextosRoutes");
 
 const app = express();
 
@@ -28,7 +29,8 @@ app.use("/api/contexto", contextoRoutes);
 app.use("/api/painel", painelRoutes);
 app.use("/api/permissoes", permissaoRoutes);
 app.use("/api", ledgerRoutes);
-app.use("/api", dispatcherRoutes);
 app.use("/api", sessionRoutes);
+app.use("/api", spRoutes);
+app.use("/api/contextos", contextosRoutes);
 
 module.exports = app;

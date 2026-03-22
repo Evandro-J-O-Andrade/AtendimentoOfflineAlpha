@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
-import { useRuntimeAuth } from "../auth/RuntimeAuthContext.jsx";
+import { useAuth } from "../../../context/AuthProvider";
+import spApi from "../../../api/spApi";
 
 export default function Dashboard() {
-    const { authFetch, session } = useRuntimeAuth();
+    const { session } = useAuth();
     const [runtimeInfo, setRuntimeInfo] = useState(null);
     const [erro, setErro] = useState("");
 
@@ -11,26 +12,28 @@ export default function Dashboard() {
         let ativo = true;
 
         async function carregarRuntime() {
+            if (!session?.id_sessao) return;
+            
             try {
-                const res = await authFetch("/api/painel/painel");
-                const data = await res.json();
+                const data = await spApi.call('sp_painel_operacional', {
+                    p_id_sessao: session.id_sessao
+                });
 
-                if (!res.ok) {
-                    if (ativo) setErro(data?.erro || data?.error || "Falha ao carregar contexto do runtime");
-                    return;
+                if (data?.sucesso && data?.resultado) {
+                    if (ativo) {
+                        setRuntimeInfo(data.resultado);
+                    }
+                } else {
+                    if (ativo) setErro(data?.mensagem || "Falha ao carregar contexto do runtime");
                 }
-
-                if (ativo) {
-                    setRuntimeInfo(data?.runtime || null);
-                }
-            } catch {
-                if (ativo) setErro("Erro de comunicação com API");
+            } catch (e) {
+                if (ativo) setErro(e.message || "Erro de comunicação com API");
             }
         }
 
         carregarRuntime();
         return () => { ativo = false; };
-    }, [authFetch]);
+    }, [session]);
 
     return (
         <div style={{display:'flex',minHeight:'100vh'}}>
@@ -41,10 +44,10 @@ export default function Dashboard() {
 
                 <h2 style={{ marginTop: 24 }}>Sessão operacional</h2>
                 <p>
-                    Usuário: <strong>{session?.user?.id_usuario ?? "-"}</strong> | Sessão: <strong>{session?.user?.id_sessao_usuario ?? "-"}</strong>
+                    Usuário: <strong>{session?.id_usuario ?? "-"}</strong> | Sessão: <strong>{session?.id_sessao ?? "-"}</strong>
                 </p>
                 <p>
-                    Sistema: <strong>{session?.user?.id_sistema ?? "-"}</strong> | Unidade: <strong>{session?.user?.id_unidade ?? "-"}</strong> | Local: <strong>{session?.user?.id_local_operacional ?? "-"}</strong>
+                    Sistema: <strong>{session?.id_sistema ?? "-"}</strong> | Unidade: <strong>{session?.id_unidade ?? "-"}</strong> | Local: <strong>{session?.id_local ?? "-"}</strong>
                 </p>
 
                 {erro && <p style={{ color: "#b91c1c" }}>{erro}</p>}

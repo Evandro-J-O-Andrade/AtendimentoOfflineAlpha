@@ -6,7 +6,8 @@ const pool = mysql.createPool({
     password: "root",
     database: "pronto_atendimento",
     waitForConnections: true,
-    connectionLimit: 10
+    connectionLimit: 10,
+    multipleStatements: true  // Necessário para executar SPs com múltiplos statements
 });
 
 module.exports = pool;

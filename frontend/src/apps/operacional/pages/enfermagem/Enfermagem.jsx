@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useRuntimeAuth } from "../../auth/RuntimeAuthContext";
+import { useAuth } from "../../../../context/AuthProvider";
+import spApi from "../../../../api/spApi";
 import Layout from "../../layout/Layout";
 import PatientQueue from "../../components/PatientQueue";
 import "./Enfermagem.css";
 
 export default function Enfermagem() {
-    const { authFetch } = useRuntimeAuth();
+    const { session } = useAuth();
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -21,21 +22,19 @@ export default function Enfermagem() {
         setError("");
 
         try {
-            const res = await authFetch("/api/operacional/atendimentos/chamar", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tipo_local: "ENFERMAGEM" })
+            const data = await spApi.call('sp_atendimento_chamar_proximo', {
+                p_id_sessao: session?.id_sessao,
+                p_id_unidade: session?.id_unidade,
+                p_tipo_local: "ENFERMAGEM"
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                setSelectedPatient(data.atendimento);
+            if (data?.sucesso && data?.resultado) {
+                setSelectedPatient(data.resultado);
             } else {
-                setError(data.error || "Erro ao chamar paciente");
+                setError(data?.mensagem || "Erro ao chamar paciente");
             }
-        } catch {
-            setError("Erro de comunicação");
+        } catch (e) {
+            setError(e.message || "Erro de comunicação");
         } finally {
             setLoading(false);
         }
@@ -49,29 +48,29 @@ export default function Enfermagem() {
         setError("");
 
         try {
-            const res = await authFetch(`/api/operacional/atendimentos/${selectedPatient.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    status: "ATENDIDO",
-                    observacoes_enfermagem: observations,
-                    procedimentos: procedures,
-                    acao: "FINALIZAR_ENFERMAGEM"
-                })
+            const payload = {
+                id_atendimento: selectedPatient.id,
+                status: "ATENDIDO",
+                observacoes_enfermagem: observations,
+                procedimentos: procedures,
+                acao: "FINALIZAR_ENFERMAGEM"
+            };
+
+            const data = await spApi.call('sp_atendimento_finalizar_enfermagem', {
+                p_id_sessao: session?.id_sessao,
+                p_payload: JSON.stringify(payload)
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
+            if (data?.sucesso) {
                 setSuccess("Atendimento de enfermagem finalizado!");
                 setSelectedPatient(null);
                 setObservations("");
                 setProcedures([]);
             } else {
-                setError(data.error || "Erro ao finalizar");
+                setError(data?.mensagem || "Erro ao finalizar");
             }
-        } catch {
-            setError("Erro ao finalizar");
+        } catch (e) {
+            setError(e.message || "Erro ao finalizar");
         } finally {
             setLoading(false);
         }

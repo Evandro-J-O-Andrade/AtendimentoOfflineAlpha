@@ -22,17 +22,23 @@ router.get("/contextos", AuthController.listarContextos);
 // ROTAS AUTENTICADAS
 // ============================
 
+// Menu do usuário (baseado em permissões)
+router.get("/menu", authMiddleware, AuthController.getMenu);
+
 // Permissões por perfil
 router.get("/permissoes/:idPerfil", authMiddleware, AuthController.permissoesPorPerfil);
 
 // Usuário atual
 router.get("/me", authMiddleware, AuthController.me);
 
-// Meus contextos disponíveis
-router.get("/meus-contextos", authMiddleware, AuthController.listarContextos);
+// Meus contextos disponíveis (via SP Master)
+router.get("/meus-contextos", authMiddleware, AuthController.meusContextosSP);
 
 // Selecionar contexto (quando há múltiplas escolhas)
 router.post("/selecionar-contexto", authMiddleware, AuthController.selecionarContexto);
+
+// Refresh token
+router.post("/refresh", AuthController.refreshToken);
 
 // Logout
 router.post("/logout", authMiddleware, AuthController.logout);
@@ -47,4 +53,3 @@ router.get("/runtime", authMiddleware, runtimeContextMiddleware, AuthController.
 router.post("/sync", authMiddleware, AuthController.sync);
 
 module.exports = router;
-

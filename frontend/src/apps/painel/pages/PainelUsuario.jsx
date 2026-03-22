@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
-import { useRuntimeAuth } from "../../operacional/auth/RuntimeAuthContext";
+import { useAuth } from "../../../context/AuthProvider";
+import spApi from "../../../api/spApi";
 import "./PainelUsuario.css";
 
 export default function PainelUsuario() {
-    const { session, authFetch } = useRuntimeAuth();
+    const { sessao, contexto } = useAuth();
     const [pacientes, setPacientes] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchDados() {
             try {
-                const res = await authFetch("/api/painel/painel");
-                if (res.ok) {
-                    const data = await res.json();
-                    setPacientes(data.pacientes || []);
-                }
+                const data = await spApi.call('sp_painel_pacientes', {
+                    p_id_sessao: sessao?.id_sessao_usuario
+                });
+                setPacientes(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error("Erro ao buscar dados:", err);
             } finally {
@@ -22,10 +22,10 @@ export default function PainelUsuario() {
             }
         }
 
-        if (session?.token) {
+        if (sessao?.id_sessao_usuario) {
             fetchDados();
         }
-    }, [session, authFetch]);
+    }, [sessao]);
 
     if (loading) {
         return <div className="painel-loading">Carregando painel...</div>;
@@ -36,8 +36,8 @@ export default function PainelUsuario() {
             <header className="painel-header">
                 <h1>🏥 Painel do Usuário</h1>
                 <div className="painel-info">
-                    <span>Perfil: {session?.user?.perfil}</span>
-                    <span>Unidade: {session?.user?.id_unidade || "Não definida"}</span>
+                    <span>Perfil: {contexto?.perfil}</span>
+                    <span>Unidade: {contexto?.id_unidade || "Não definida"}</span>
                 </div>
             </header>
 

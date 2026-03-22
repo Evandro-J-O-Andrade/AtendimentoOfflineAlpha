@@ -1,37 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../../api/api";
-import { useApp } from "../../../context/AppContext";
+import { useAuth } from "../../operacional/auth/AuthProvider";
 import "./Admin.css";
 
 export default function Admin() {
     const navigate = useNavigate();
-    const { contexto, usuario, getToken, logout } = useApp();
-    const [adminData, setAdminData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { session, logout } = useAuth();
+    const [loading] = useState(false);
     const [activeSection, setActiveSection] = useState("dashboard");
-
-    useEffect(() => {
-        async function fetchAdminData() {
-            try {
-                const res = await api.get("/painel/admin");
-                setAdminData(res.data);
-            } catch (err) {
-                const apiErr = err?.response?.data?.error || err?.response?.data?.erro;
-                if (apiErr === "TOKEN_EXPIRADO") {
-                    logout();
-                    navigate("/login", { replace: true });
-                    return;
-                }
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchAdminData();
-    }, [usuario, getToken]);
 
     if (loading) {
         return <div className="admin-loading">Carregando painel administrativo...</div>;
@@ -90,9 +66,9 @@ export default function Admin() {
                 <header className="admin-header">
                     <h1>Sistema de Atendimento Alpha Hospitalar - Unidade Guido Guida</h1>
                     <div className="admin-user">
-                        <span>Perfil: <strong>{adminData?.usuario?.perfil || contexto?.id_perfil}</strong></span>
+                        <span>Perfil: <strong>{session?.id_perfil || 'Admin'}</strong></span>
                         <div className="user-avatar">
-                            {getInitials(adminData?.usuario?.nome || usuario?.login)}
+                            {getInitials(session?.usuario?.login || 'A')}
                         </div>
                     </div>
                 </header>
