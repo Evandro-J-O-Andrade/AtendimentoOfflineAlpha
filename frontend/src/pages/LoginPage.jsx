@@ -21,12 +21,10 @@ export default function LoginPage() {
         return;
       }
       
-      // Se há múltiplos contextos, redireciona para seleção
-      if (resultado.temContexto) {
-        navigate("/contexto");
-      } else {
-        navigate("/operacional");
-      }
+      // SEMPRE redireciona para seleção de contexto após login
+      // O usuário precisa escolher: unidade, guichê e perfil
+      navigate("/contexto");
+      
     } catch (err) {
       console.error(err);
       setError("Erro interno, tente novamente");

@@ -15,8 +15,15 @@ router.post("/checkUser", AuthController.checkUser);
 // Login padrão
 router.post("/login", AuthController.login);
 
+// Refresh token
+router.post("/refresh", AuthController.refreshToken);
+
+// ============================
+// ROTAS AUTENTICADAS
+// ============================
+
 // Listar contextos disponíveis (para tela de seleção)
-router.get("/contextos", AuthController.listarContextos);
+router.get("/contextos", authMiddleware, AuthController.listarContextos);
 
 // ============================
 // ROTAS AUTENTICADAS

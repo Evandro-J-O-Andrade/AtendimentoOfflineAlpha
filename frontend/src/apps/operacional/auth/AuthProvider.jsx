@@ -102,8 +102,8 @@ export const AuthProvider = ({ children }) => {
   // Buscar contexto/disponíveis
   const getContexto = useCallback(async () => {
     try {
-      const response = await api.get("/auth/contextos");
-      return response.data;
+      const response = await api.get("/contexto");
+      return response.data.resultado;
     } catch (err) {
       console.error("Erro getContexto:", err);
       throw err;
@@ -113,17 +113,27 @@ export const AuthProvider = ({ children }) => {
   // Definir contexto selecionado
   const setContexto = useCallback(async (contextoData) => {
     try {
-      const response = await api.post("/auth/selecionar-contexto", contextoData);
+      const response = await api.post("/contexto", contextoData);
+      
       if (response.data.sucesso) {
-        setSession(response.data.sessao);
+        // Atualiza a sessão com os dados do resultado
+        const resultado = response.data.resultado || {};
+        setSession({
+          id_sessao_usuario: session?.id_sessao_usuario,
+          id_unidade: resultado.id_unidade,
+          id_local_operacional: resultado.id_local_operacional,
+          id_perfil: resultado.id_perfil,
+          id_sala: resultado.id_sala,
+          contexto_definido: true
+        });
         return response.data;
       }
-      throw new Error(response.data.mensagem || "Erro ao definir contexto");
+      throw new Error(response.data.mensagem || response.data.erro || "Erro ao definir contexto");
     } catch (err) {
       console.error("Erro setContexto:", err);
       throw err;
     }
-  }, []);
+  }, [session]);
 
   // Inicializa ao montar
   useEffect(() => {

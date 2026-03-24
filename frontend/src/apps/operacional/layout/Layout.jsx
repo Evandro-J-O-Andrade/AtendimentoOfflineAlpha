@@ -49,20 +49,59 @@ export default function Layout({ children }) {
         ? `Local ${session.id_local}`
         : null;
 
-    // Itens de menu baseados no perfil
+    // Itens de menu completos organizados por categoria
     const menuItems = [
-        { path: "/operacional", label: "Início", icon: "🏠" },
-        { path: "/operacional/recepcao", label: "Recepção", icon: "📋", perfis: [1, 2] },
-        { path: "/operacional/triagem", label: "Triagem", icon: "🩺", perfis: [2, 3] },
-        { path: "/operacional/medico", label: "Médico", icon: "⚕️", perfis: [3] },
-        { path: "/operacional/farmacia", label: "Farmácia", icon: "💊", perfis: [4] },
-        { path: "/operacional/enfermagem", label: "Enfermagem", icon: "🏥", perfis: [2, 5] },
+        // === ASSISTENCIAL ===
+        { path: "/operacional", label: "Início", icon: "🏠", modulo: "Sistema" },
+        { path: "/operacional/recepcao", label: "Recepção", icon: "📋", modulo: "Assistencial", perfis: [1, 2] },
+        { path: "/operacional/triagem", label: "Triagem", icon: "🩺", modulo: "Assistencial", perfis: [2, 3] },
+        { path: "/operacional/enfermagem", label: "Enfermagem", icon: "🏥", modulo: "Assistencial", perfis: [2, 5] },
+        { path: "/operacional/medico", label: "Médico", icon: "⚕️", modulo: "Assistencial", perfis: [3] },
+        { path: "/operacional/internacao", label: "Internação", icon: "🛏️", modulo: "Assistencial", perfis: [1, 3, 5] },
+        { path: "/operacional/ambulancia", label: "Ambulância", icon: "🚑", modulo: "Assistencial", perfis: [1, 2] },
+        { path: "/operacional/remocao", label: "Remoção", icon: "🚒", modulo: "Assistencial", perfis: [1, 2] },
+        
+        // === SERVIÇOS ===
+        { path: "/operacional/farmacia", label: "Farmácia", icon: "💊", modulo: "Serviços", perfis: [4] },
+        { path: "/operacional/laboratorio", label: "Laboratório", icon: "🧪", modulo: "Serviços", perfis: [1, 3, 4] },
+        { path: "/operacional/manutencao", label: "Manutenção", icon: "🔧", modulo: "Serviços", perfis: [1] },
+        
+        // === ESPECIALIDADES ===
+        { path: "/operacional/gasoterapia", label: "Gasoterapia", icon: "💨", modulo: "Especialidades", perfis: [1, 3, 5] },
+        { path: "/operacional/nutricao", label: "Nutrição", icon: "🥗", modulo: "Especialidades", perfis: [1, 3, 5] },
+        { path: "/operacional/assistencia-social", label: "Assist. Social", icon: "🤝", modulo: "Especialidades", perfis: [1, 5] },
+        { path: "/operacional/interconsulta", label: "Interconsulta", icon: "📞", modulo: "Especialidades", perfis: [1, 3] },
+        
+        // === ADMINISTRATIVO ===
+        { path: "/operacional/faturamento", label: "Faturamento", icon: "💰", modulo: "Administrativo", perfis: [1, 42] },
+        { path: "/operacional/estoque", label: "Estoque", icon: "📦", modulo: "Administrativo", perfis: [1, 4] },
+        { path: "/operacional/pdv", label: "PDV", icon: "🛒", modulo: "Administrativo", perfis: [1] },
+        { path: "/operacional/cat", label: "CAT", icon: "📋", modulo: "Administrativo", perfis: [1, 5] },
+        { path: "/operacional/obito", label: "Óbito", icon: "⚰️", modulo: "Administrativo", perfis: [1, 5] },
+        
+        // === EXECUTORES / FLUXOS ===
+        { path: "/operacional/atendimento", label: "Atendimento", icon: "🎯", modulo: "Sistema", perfis: [1, 3] },
+        { path: "/operacional/executor/evolucao", label: "Evolução", icon: "📝", modulo: "Sistema", perfis: [1, 3, 5] },
+        { path: "/operacional/executor/estoque", label: "Exec. Estoque", icon: "🔄", modulo: "Sistema", perfis: [1, 4] },
+        { path: "/operacional/executor/faturamento", label: "Exec. Faturamento", icon: "📊", modulo: "Sistema", perfis: [1, 42] },
+        { path: "/operacional/fluxo/estoque", label: "Fluxo Estoque", icon: "↔️", modulo: "Sistema", perfis: [1, 4] },
+        { path: "/operacional/coordenador/global", label: "Coordenação", icon: "🎮", modulo: "Sistema", perfis: [1, 42] },
+        
+        // === ADMIN ===
+        { path: "/operacional/admin", label: "Administração", icon: "⚙️", modulo: "Admin", perfis: [1, 42] },
     ];
 
     // Filtra itens por perfil
     const filteredMenu = menuItems.filter(item => 
         !item.perfis || item.perfis.includes(Number(session?.id_perfil))
     );
+
+    // Agrupar itens por módulo
+    const modulos = ['Sistema', 'Assistencial', 'Serviços', 'Especialidades', 'Administrativo', 'Admin'];
+    const menuAgrupado = modulos.map(modulo => ({
+        nome: modulo,
+        items: filteredMenu.filter(item => item.modulo === modulo)
+    })).filter(modulo => modulo.items.length > 0);
 
     function handleLogout() {
         logout();
@@ -79,15 +118,20 @@ export default function Layout({ children }) {
                 </div>
 
                 <nav className="sidebar-nav">
-                    {filteredMenu.map(item => (
-                        <Link 
-                            key={item.path}
-                            to={item.path}
-                            className={`nav-item ${location.pathname === item.path ? "active" : ""}`}
-                        >
-                            <span className="nav-icon">{item.icon}</span>
-                            <span className="nav-label">{item.label}</span>
-                        </Link>
+                    {menuAgrupado.map(modulo => (
+                        <div key={modulo.nome} className="menu-grupo">
+                            <div className="menu-grupo-titulo">{modulo.nome}</div>
+                            {modulo.items.map(item => (
+                                <Link 
+                                    key={item.path}
+                                    to={item.path}
+                                    className={`nav-item ${location.pathname === item.path ? "active" : ""}`}
+                                >
+                                    <span className="nav-icon">{item.icon}</span>
+                                    <span className="nav-label">{item.label}</span>
+                                </Link>
+                            ))}
+                        </div>
                     ))}
                 </nav>
 
