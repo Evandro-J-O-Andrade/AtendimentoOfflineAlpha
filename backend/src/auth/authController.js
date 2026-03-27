@@ -77,9 +77,10 @@ class AuthController {
 
             // Criar Sessão diretamente no banco (sem dependência de SP)
             // Inserir registro na tabela sessao_usuario
+            // Usar unidade padrão (id_unidade = 1) para permitir login
             const [sessaoResult] = await conn.execute(
                 `INSERT INTO sessao_usuario (uuid_sessao, id_usuario, id_sistema, id_perfil, id_unidade, id_local, token_jwt, refresh_token, ip_origem, user_agent, iniciado_em, expira_em, ativo) 
-                 VALUES (UUID(), ?, 4, NULL, NULL, NULL, ?, ?, ?, ?, NOW(6), DATE_ADD(NOW(6), INTERVAL 8 HOUR), 1)`,
+                 VALUES (UUID(), ?, 4, NULL, 1, NULL, ?, ?, ?, ?, NOW(6), DATE_ADD(NOW(6), INTERVAL 8 HOUR), 1)`,
                 [user.id_usuario, jwtToken, refreshToken, ip, userAgent.substring(0, 255)]
             );
             

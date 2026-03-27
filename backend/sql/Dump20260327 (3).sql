@@ -35,8 +35,7 @@ CREATE TABLE `acompanhante` (
   PRIMARY KEY (`id_acompanhante`),
   UNIQUE KEY `uk_acompanhante_por_ffa` (`id_pessoa`,`id_ffa`),
   KEY `id_ffa` (`id_ffa`),
-  CONSTRAINT `acompanhante_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`),
-  CONSTRAINT `acompanhante_ibfk_2` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`)
+  CONSTRAINT `acompanhante_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -126,7 +125,7 @@ DROP TABLE IF EXISTS `agenda_disponibilidade`;
 CREATE TABLE `agenda_disponibilidade` (
   `id_disponibilidade` bigint NOT NULL AUTO_INCREMENT,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned DEFAULT NULL,
   `id_profissional` bigint NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `tipo` enum('ATENDIMENTO','BLOQUEIO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -149,7 +148,6 @@ CREATE TABLE `agenda_disponibilidade` (
   CONSTRAINT `fk_disp_prof` FOREIGN KEY (`id_profissional`) REFERENCES `usuario` (`id_usuario`),
   CONSTRAINT `fk_disp_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`),
   CONSTRAINT `fk_disp_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_disp_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_disp_user` FOREIGN KEY (`id_usuario_criador`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -172,14 +170,13 @@ DROP TABLE IF EXISTS `agendamento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `agendamento` (
   `id_agendamento` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned DEFAULT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `id_profissional` bigint DEFAULT NULL,
   `id_paciente` bigint DEFAULT NULL,
-  `id_ffa` bigint DEFAULT NULL,
-  `id_senha` bigint DEFAULT NULL,
+  `id_ffa` bigint unsigned DEFAULT NULL,
+  `id_senha` bigint unsigned DEFAULT NULL,
   `id_servico` bigint NOT NULL,
   `inicio_em` datetime(6) NOT NULL,
   `fim_em` datetime(6) NOT NULL,
@@ -194,6 +191,7 @@ CREATE TABLE `agendamento` (
   `uuid_sync` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `versao_sync` bigint DEFAULT '0',
   `hash_estado` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_agendamento`),
   KEY `idx_ag_prof` (`id_profissional`,`inicio_em`),
   KEY `idx_ag_local` (`id_local_operacional`,`inicio_em`),
@@ -204,12 +202,15 @@ CREATE TABLE `agendamento` (
   KEY `fk_ag_servico` (`id_servico`),
   KEY `fk_ag_sessao` (`id_sessao_criacao`),
   KEY `fk_ag_unidade` (`id_unidade`),
+  KEY `fk_agendamento_entidade` (`id_entidade`),
   CONSTRAINT `fk_ag_paciente` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id`),
   CONSTRAINT `fk_ag_prof` FOREIGN KEY (`id_profissional`) REFERENCES `usuario` (`id_usuario`),
-  CONSTRAINT `fk_ag_senha` FOREIGN KEY (`id_senha`) REFERENCES `senha` (`id_senha`),
   CONSTRAINT `fk_ag_servico` FOREIGN KEY (`id_servico`) REFERENCES `servico_agendamento` (`id_servico`),
   CONSTRAINT `fk_ag_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_ag_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  CONSTRAINT `fk_agendamento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_agendamento_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id_ffa`),
+  CONSTRAINT `fk_agendamento_senha` FOREIGN KEY (`id_senha`) REFERENCES `senha` (`id_senha`),
+  CONSTRAINT `fk_agendamento_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -273,7 +274,7 @@ CREATE TABLE `alerta` (
   `gpat` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
   `id_paciente` bigint DEFAULT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `severidade` enum('INFO','ATENCAO','ALTA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ATENCAO',
   `status` enum('ABERTO','LIDO','EM_ATENDIMENTO','RESOLVIDO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ABERTO',
@@ -291,7 +292,6 @@ CREATE TABLE `alerta` (
   KEY `idx_alerta_ffa` (`id_ffa`),
   KEY `fk_alerta_sessao` (`id_sessao_usuario_origem`),
   KEY `fk_alerta_usuario` (`id_usuario_origem`),
-  CONSTRAINT `fk_alerta_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_alerta_paciente` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id`),
   CONSTRAINT `fk_alerta_usuario` FOREIGN KEY (`id_usuario_origem`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -394,7 +394,7 @@ CREATE TABLE `alerta_regra` (
   `codigo` varchar(60) NOT NULL,
   `id_sistema_destino` bigint NOT NULL,
   `id_perfil_destino` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
@@ -404,8 +404,7 @@ CREATE TABLE `alerta_regra` (
   KEY `fk_alerta_regra_perfil` (`id_perfil_destino`),
   KEY `fk_alerta_regra_unidade` (`id_unidade`),
   CONSTRAINT `fk_alerta_regra_perfil` FOREIGN KEY (`id_perfil_destino`) REFERENCES `perfil` (`id_perfil`),
-  CONSTRAINT `fk_alerta_regra_sistema` FOREIGN KEY (`id_sistema_destino`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_alerta_regra_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  CONSTRAINT `fk_alerta_regra_sistema` FOREIGN KEY (`id_sistema_destino`) REFERENCES `sistema` (`id_sistema`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -433,7 +432,7 @@ CREATE TABLE `almoxarifado_central` (
   `quantidade_atual` int NOT NULL,
   `quantidade_minima` int DEFAULT '100',
   `nfe_chave_acesso` varchar(44) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `id_unidade` int DEFAULT NULL,
+  `id_unidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_validade` (`validade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -457,15 +456,15 @@ DROP TABLE IF EXISTS `anamnese`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `anamnese` (
   `id_anamnese` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned DEFAULT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_anamnese`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_usuario` (`id_usuario`),
-  CONSTRAINT `anamnese_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
-  CONSTRAINT `anamnese_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  CONSTRAINT `anamnese_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_anamnese_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -575,7 +574,7 @@ DROP TABLE IF EXISTS `assistencia_social_atendimento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `assistencia_social_atendimento` (
   `id_as` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_senha` bigint DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
   `status` enum('ABERTO','EM_ATENDIMENTO','FINALIZADO','CANCELADO') NOT NULL DEFAULT 'ABERTO',
@@ -587,7 +586,6 @@ CREATE TABLE `assistencia_social_atendimento` (
   PRIMARY KEY (`id_as`),
   KEY `fk_as_unidade` (`id_unidade`),
   KEY `fk_as_user` (`id_usuario_abertura`),
-  CONSTRAINT `fk_as_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_as_user` FOREIGN KEY (`id_usuario_abertura`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -648,8 +646,13 @@ CREATE TABLE `assistencial_checkpoint_global` (
   `estado_snapshot` varchar(60) NOT NULL,
   `quorum_valido` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_checkpoint`),
-  UNIQUE KEY `uk_checkpoint_ffa` (`id_ffa`)
+  UNIQUE KEY `uk_checkpoint_ffa` (`id_ffa`),
+  KEY `fk_assistencial_checkpoint_global_atendimento` (`id_atendimento`),
+  KEY `idx_acg_ent` (`id_entidade`),
+  CONSTRAINT `fk_assistencial_checkpoint_global_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -728,7 +731,7 @@ DROP TABLE IF EXISTS `assistencial_minipal_metric`;
 CREATE TABLE `assistencial_minipal_metric` (
   `id_metric` bigint NOT NULL AUTO_INCREMENT,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `score_global` decimal(10,4) DEFAULT '0.0000',
   `risco_fila` decimal(10,4) DEFAULT '0.0000',
   `risco_evasao` decimal(10,4) DEFAULT '0.0000',
@@ -789,7 +792,7 @@ DROP TABLE IF EXISTS `assistencial_raim_metric`;
 CREATE TABLE `assistencial_raim_metric` (
   `id_metric` bigint NOT NULL AUTO_INCREMENT,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `fila_pressao` decimal(10,4) DEFAULT '0.0000',
   `taxa_evasao` decimal(10,4) DEFAULT '0.0000',
   `saturacao_leito` decimal(10,4) DEFAULT '0.0000',
@@ -825,8 +828,13 @@ CREATE TABLE `assistencial_runtime_federado` (
   `payload_json` json DEFAULT NULL,
   `sincronizado` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_snapshot`),
-  KEY `idx_runtime_federado` (`id_sistema`,`sincronizado`)
+  KEY `idx_runtime_federado` (`id_sistema`,`sincronizado`),
+  KEY `fk_assistencial_runtime_federado_atendimento` (`id_atendimento`),
+  KEY `idx_arf_ent` (`id_entidade`),
+  CONSTRAINT `fk_assistencial_runtime_federado_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -857,8 +865,13 @@ CREATE TABLE `assistencial_runtime_panel` (
   `estado_runtime` varchar(60) DEFAULT 'NORMAL',
   `alerta_preventivo` varchar(120) DEFAULT NULL,
   `atualizado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_panel`),
-  UNIQUE KEY `uk_runtime_panel` (`id_panel`)
+  UNIQUE KEY `uk_runtime_panel` (`id_panel`),
+  KEY `fk_assistencial_runtime_panel_atendimento` (`id_atendimento`),
+  KEY `idx_arp_ent` (`id_entidade`),
+  CONSTRAINT `fk_assistencial_runtime_panel_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -886,8 +899,13 @@ CREATE TABLE `assistencial_simulacao_futura` (
   `risco_backlog` decimal(10,4) DEFAULT NULL,
   `recomendacao_runtime` varchar(200) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_simulacao`),
-  KEY `idx_simulacao_horizonte` (`horizonte_minutos`)
+  KEY `idx_simulacao_horizonte` (`horizonte_minutos`),
+  KEY `fk_assistencial_simulacao_futura_atendimento` (`id_atendimento`),
+  KEY `idx_asf_ent` (`id_entidade`),
+  CONSTRAINT `fk_assistencial_simulacao_futura_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -913,8 +931,13 @@ CREATE TABLE `assistencial_snapshot_runtime` (
   `estado_runtime` varchar(60) DEFAULT NULL,
   `hash_estado` char(64) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_snapshot`),
-  UNIQUE KEY `uk_snapshot_ffa` (`id_ffa`)
+  UNIQUE KEY `uk_snapshot_ffa` (`id_ffa`),
+  KEY `fk_assistencial_snapshot_runtime_atendimento` (`id_atendimento`),
+  KEY `idx_asr_ent` (`id_entidade`),
+  CONSTRAINT `fk_assistencial_snapshot_runtime_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -942,8 +965,13 @@ CREATE TABLE `assistencial_telemetria_runtime` (
   `unidade` varchar(30) DEFAULT NULL,
   `criticidade` enum('INFO','WARNING','CRITICAL') DEFAULT 'INFO',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_telemetria`),
-  KEY `idx_telemetria_lookup` (`componente`,`metrica`,`criado_em`)
+  KEY `idx_telemetria_lookup` (`componente`,`metrica`,`criado_em`),
+  KEY `fk_assistencial_telemetria_runtime_atendimento` (`id_atendimento`),
+  KEY `idx_atr_ent` (`id_entidade`),
+  CONSTRAINT `fk_assistencial_telemetria_runtime_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -970,8 +998,13 @@ CREATE TABLE `assistencial_watchdog_fila` (
   `taxa_retry` decimal(10,4) DEFAULT '0.0000',
   `estado_runtime` enum('NORMAL','ATENCAO','SATURADO') DEFAULT 'NORMAL',
   `atualizado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_watchdog`),
-  UNIQUE KEY `uk_watchdog_unidade` (`unidade`)
+  UNIQUE KEY `uk_watchdog_unidade` (`unidade`),
+  KEY `fk_assistencial_watchdog_fila_atendimento` (`id_atendimento`),
+  KEY `idx_awf_ent` (`id_entidade`),
+  CONSTRAINT `fk_assistencial_watchdog_fila_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -992,21 +1025,36 @@ DROP TABLE IF EXISTS `atendimento`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento` (
-  `id_atendimento` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
-  `id_ffa` bigint NOT NULL,
-  `id_paciente` bigint NOT NULL,
-  `status_atendimento` enum('ABERTO','EM_ATENDIMENTO','EM_OBSERVACAO','FINALIZADO','CANCELADO') DEFAULT 'ABERTO',
-  `data_abertura` datetime(6) NOT NULL,
-  `data_fechamento` datetime(6) DEFAULT NULL,
-  `criado_em` datetime(6) NOT NULL,
-  `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_saas_entidade` bigint unsigned NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
+  `id_ffa` bigint unsigned NOT NULL,
+  `id_profissional_responsavel` bigint unsigned DEFAULT NULL,
+  `tipo_atendimento` enum('AMBULATORIAL','URGENCIA','ELETIVO','UBS','FARMACIA','TELEMEDICINA','SAMU','REMOCAO') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `modo_entrada` enum('LOCAL','SAMU','REGULADO','TRANSFERENCIA','CONVENIO') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'LOCAL',
+  `status_execucao` enum('INICIADO','EM_CURSO','PAUSADO','CONCLUIDO','CANCELADO') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'INICIADO',
+  `id_faturamento_guia` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id_sessao_usuario_criacao` bigint unsigned DEFAULT NULL,
+  `id_sessao_usuario_alteracao` bigint unsigned DEFAULT NULL,
+  `uuid_sync` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `versao_sync` bigint unsigned DEFAULT '0',
+  `hash_estado` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `finalizado_em` datetime(6) DEFAULT NULL,
+  `removido_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_atendimento`),
-  KEY `idx_ffa` (`id_ffa`),
-  KEY `idx_paciente` (`id_paciente`),
-  KEY `idx_saas` (`id_saas_entidade`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_atendimento_ffa` (`id_ffa`),
+  KEY `idx_atendimento_saas_unidade` (`id_saas_entidade`,`id_unidade`),
+  KEY `idx_atendimento_status_execucao` (`status_execucao`),
+  KEY `fk_atendimento_unidade` (`id_unidade`),
+  KEY `idx_atendimento_entidade` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id_ffa`),
+  CONSTRAINT `fk_atendimento_saas` FOREIGN KEY (`id_saas_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1027,8 +1075,7 @@ DROP TABLE IF EXISTS `atendimento_anamnese`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_anamnese` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_ffa` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
@@ -1038,8 +1085,17 @@ CREATE TABLE `atendimento_anamnese` (
   `ip_origem` varchar(45) DEFAULT NULL,
   `device_info` varchar(255) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_ffa` (`id_ffa`)
+  KEY `idx_ffa` (`id_ffa`),
+  KEY `fk_atendimento_anamnese_entidade` (`id_entidade`),
+  KEY `fk_atendimento_anamnese_atendimento` (`id_atendimento`),
+  KEY `fk_aanam_unid` (`id_unidade`),
+  CONSTRAINT `fk_aanam_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_anamnese_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_anamnese_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_anamnese_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1061,13 +1117,20 @@ DROP TABLE IF EXISTS `atendimento_balanco_hidrico`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_balanco_hidrico` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `tipo_movimentacao` enum('ENTRADA','SAIDA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `via` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `volume_ml` int NOT NULL,
   `id_usuario_registro` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  `id_entidade` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_atendimento_balanco_hidrico_atendimento` (`id_atendimento`),
+  KEY `idx_abhi_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_balanco_hidrico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_balanco_hidrico_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_balanco_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_balanco_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1095,9 +1158,15 @@ CREATE TABLE `atendimento_checagem` (
   `id_enfermeiro` bigint DEFAULT NULL,
   `status` enum('PENDENTE','REALIZADO','RECUSADO','ATRASADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   `motivo_recusa` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_chec_presc` (`id_prescricao`),
   KEY `idx_checagem_horarios` (`horario_planejado`,`status`),
+  KEY `fk_atendimento_checagem_atendimento` (`id_atendimento`),
+  KEY `idx_achec_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_checagem_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_checagem_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_chec_presc` FOREIGN KEY (`id_prescricao`) REFERENCES `atendimento_prescricao` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1119,16 +1188,20 @@ DROP TABLE IF EXISTS `atendimento_desfecho`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_desfecho` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
-  `tipo_desfecho` enum('ALTA_MEDICA','ALTA_A_PEDIDO','TRANSFERENCIA','OBITO','EVASAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `id_usuario_alta` bigint NOT NULL,
-  `sumario_alta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `data_alta` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `fk_desfecho_atend` (`id_atendimento`),
-  CONSTRAINT `fk_desfecho_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_desfecho` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `tipo_desfecho` enum('ALTA','TRANSFERENCIA','OBITO','REMOCAO','CONVENIO') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `observacao` text COLLATE utf8mb4_unicode_ci,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id_desfecho`),
+  KEY `idx_desfecho_atendimento` (`id_atendimento`),
+  KEY `idx_adesf_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_desfecho_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_desfecho_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_desfecho_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1148,19 +1221,20 @@ DROP TABLE IF EXISTS `atendimento_diagnostico`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_diagnostico` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
-  `id_ffa` bigint NOT NULL,
-  `id_usuario` bigint DEFAULT NULL,
-  `id_sessao_usuario` bigint DEFAULT NULL,
-  `codigo_cid` varchar(10) NOT NULL,
-  `principal` tinyint DEFAULT '0',
-  `ip_origem` varchar(45) DEFAULT NULL,
-  `device_info` varchar(255) DEFAULT NULL,
+  `id_diagnostico` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `codigo_cid` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `principal` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id_entidade` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id_diagnostico`),
+  KEY `idx_diag_atendimento` (`id_atendimento`),
+  KEY `idx_adiag_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_diagnostico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_diagnostico_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_diagnostico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1173,35 +1247,6 @@ LOCK TABLES `atendimento_diagnostico` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `atendimento_diagnosticos`
---
-
-DROP TABLE IF EXISTS `atendimento_diagnosticos`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `atendimento_diagnosticos` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
-  `codigo_cid` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `tipo` enum('PRINCIPAL','SECUNDARIO','HIPOTESE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `data_registro` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `fk_diag_atend` (`id_atendimento`),
-  CONSTRAINT `fk_diag_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `atendimento_diagnosticos`
---
-
-LOCK TABLES `atendimento_diagnosticos` WRITE;
-/*!40000 ALTER TABLE `atendimento_diagnosticos` DISABLE KEYS */;
-/*!40000 ALTER TABLE `atendimento_diagnosticos` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `atendimento_escalas_risco`
 --
 
@@ -1210,15 +1255,18 @@ DROP TABLE IF EXISTS `atendimento_escalas_risco`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_escalas_risco` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_usuario` bigint NOT NULL,
   `escala_tipo` enum('MORSE_QUEDA','BRADEN_LESÃO_PELE','GLASGOW') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `pontuacao_total` int NOT NULL,
   `classificacao_resultado` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_avaliacao` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_escala_atend` (`id_atendimento`),
-  CONSTRAINT `fk_escala_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `idx_aescr_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_escalas_risco_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_escalas_risco_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1245,10 +1293,15 @@ CREATE TABLE `atendimento_estado_ativo` (
   `tipo_estado` enum('FILA_ESPERA','TRIAGEM','ATENDIMENTO_MEDICO','OBSERVACAO','INTERNACAO','EXAME','ALTA','EVASAO') NOT NULL,
   `id_sessao_ultimo_movimento` bigint NOT NULL,
   `atualizado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_ffa`),
   KEY `fk_estado_local` (`id_local_atual`),
   KEY `fk_estado_sessao` (`id_sessao_ultimo_movimento`),
-  CONSTRAINT `fk_estado_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
+  KEY `fk_atendimento_estado_ativo_atendimento` (`id_atendimento`),
+  KEY `idx_aest_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_estado_ativo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_estado_ativo_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_estado_local` FOREIGN KEY (`id_local_atual`) REFERENCES `local_operacional` (`id_local_operacional`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1271,10 +1324,9 @@ DROP TABLE IF EXISTS `atendimento_evento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_evento` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_ffa` bigint DEFAULT NULL,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_paciente` bigint DEFAULT NULL,
   `dominio` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tipo_evento` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -1286,6 +1338,7 @@ CREATE TABLE `atendimento_evento` (
   `id_usuario` bigint DEFAULT NULL,
   `hash_evento` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_evento_ffa` (`id_ffa`),
   KEY `idx_evento_atendimento` (`id_atendimento`),
@@ -1294,7 +1347,12 @@ CREATE TABLE `atendimento_evento` (
   KEY `idx_evento_tipo` (`tipo_evento`),
   KEY `idx_evento_tempo` (`criado_em`),
   KEY `idx_evento_sessao` (`id_sessao_usuario`),
-  KEY `idx_evento_hash` (`hash_evento`)
+  KEY `idx_evento_hash` (`hash_evento`),
+  KEY `fk_atendimento_evento_entidade` (`id_entidade`),
+  KEY `fk_aevt_unid` (`id_unidade`),
+  CONSTRAINT `fk_aevt_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_atendimento_evento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_evento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1332,7 +1390,7 @@ CREATE TABLE `atendimento_evento_ledger` (
   `estado_novo` json DEFAULT NULL,
   `payload_original` json DEFAULT NULL,
   `payload_processado` json DEFAULT NULL,
-  `id_atendimento` bigint GENERATED ALWAYS AS (json_unquote(json_extract(`payload_original`,_utf8mb4'$.id_atendimento'))) STORED,
+  `id_atendimento` bigint unsigned NOT NULL,
   `status_evento` enum('SUCESSO','ERRO','AVISO','CANCELADO','ROLLBACK') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SUCESSO',
   `codigo_erro` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `mensagem` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -1341,6 +1399,7 @@ CREATE TABLE `atendimento_evento_ledger` (
   `hostname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `processing_time_ms` int DEFAULT NULL,
   `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   UNIQUE KEY `uk_chain_evento` (`uuid_transacao`,`sequencia_evento`),
   KEY `idx_chain_pai` (`uuid_transacao_pai`),
@@ -1351,7 +1410,10 @@ CREATE TABLE `atendimento_evento_ledger` (
   KEY `idx_acao` (`acao`),
   KEY `idx_created` (`created_at`),
   KEY `idx_atendimento` (`id_atendimento`),
-  KEY `idx_status` (`status_evento`)
+  KEY `idx_status` (`status_evento`),
+  KEY `idx_aevtled_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_evento_ledger_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_evento_ledger_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Kernel Clinical Decision Ledger Append Only';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1373,11 +1435,10 @@ DROP TABLE IF EXISTS `atendimento_evolucao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_evolucao` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_ffa` bigint NOT NULL,
   `escala_dor` int DEFAULT NULL,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_usuario` bigint NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
   `tipo_profissional` enum('MEDICO','ENFERMEIRO','TECNICO','OUTROS') NOT NULL,
@@ -1386,10 +1447,17 @@ CREATE TABLE `atendimento_evolucao` (
   `ip_origem` varchar(45) DEFAULT NULL,
   `device_info` varchar(255) DEFAULT NULL,
   `criado_em` datetime(6) NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_ffa` (`id_ffa`),
   KEY `idx_usuario` (`id_usuario`),
-  KEY `idx_sessao` (`id_sessao_usuario`)
+  KEY `idx_sessao` (`id_sessao_usuario`),
+  KEY `fk_atendimento_evolucao_entidade` (`id_entidade`),
+  KEY `fk_atendimento_evolucao_atendimento` (`id_atendimento`),
+  KEY `fk_aevol_unid` (`id_unidade`),
+  CONSTRAINT `fk_aevol_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_atendimento_evolucao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_evolucao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1411,8 +1479,7 @@ DROP TABLE IF EXISTS `atendimento_exame_fisico`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_exame_fisico` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_ffa` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
@@ -1424,7 +1491,15 @@ CREATE TABLE `atendimento_exame_fisico` (
   `ip_origem` varchar(45) DEFAULT NULL,
   `device_info` varchar(255) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `id_entidade` bigint unsigned NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_atendimento_exame_fisico_atendimento` (`id_atendimento`),
+  KEY `fk_aexf_ent` (`id_entidade`),
+  KEY `fk_aexf_unid` (`id_unidade`),
+  CONSTRAINT `fk_aexf_ent` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_aexf_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_atendimento_exame_fisico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1452,9 +1527,15 @@ CREATE TABLE `atendimento_identidade_fluxo` (
   `origem_cadastro` enum('CENTRAL','EDGE_RUNTIME','PROVISORIO_OFFLINE') NOT NULL,
   `metadata_fluxo` json NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_fluxo`),
   UNIQUE KEY `uk_fluxo_evento` (`uuid_evento`),
-  KEY `idx_fluxo_pessoa` (`uuid_pessoa_assistida`)
+  KEY `idx_fluxo_pessoa` (`uuid_pessoa_assistida`),
+  KEY `fk_atendimento_identidade_fluxo_atendimento` (`id_atendimento`),
+  KEY `idx_aidflux_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_identidade_fluxo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_identidade_fluxo_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1476,17 +1557,20 @@ DROP TABLE IF EXISTS `atendimento_movimentacao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_movimentacao` (
   `id_mov` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `de_local` int DEFAULT NULL,
   `para_local` int DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
   `motivo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_mov`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_usuario` (`id_usuario`),
-  CONSTRAINT `atendimento_movimentacao_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
-  CONSTRAINT `atendimento_movimentacao_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  KEY `idx_amov_ent` (`id_entidade`),
+  CONSTRAINT `atendimento_movimentacao_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_atendimento_movimentacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_movimentacao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1508,17 +1592,20 @@ DROP TABLE IF EXISTS `atendimento_observacao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_observacao` (
   `id_obs` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `tipo` enum('OBSERVACAO','INTERNACAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_leito` int DEFAULT NULL,
   `data_inicio` datetime DEFAULT CURRENT_TIMESTAMP,
   `data_fim` datetime DEFAULT NULL,
   `status` enum('ATIVO','ALTA','TRANSFERIDO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ATIVO',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_obs`),
   UNIQUE KEY `uk_atendimento_obs` (`id_atendimento`),
   KEY `id_leito` (`id_leito`),
-  CONSTRAINT `atendimento_observacao_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
-  CONSTRAINT `atendimento_observacao_ibfk_2` FOREIGN KEY (`id_leito`) REFERENCES `leito` (`id_leito`)
+  KEY `idx_aobs_ent` (`id_entidade`),
+  CONSTRAINT `atendimento_observacao_ibfk_2` FOREIGN KEY (`id_leito`) REFERENCES `leito` (`id_leito`),
+  CONSTRAINT `fk_atendimento_observacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_observacao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1540,15 +1627,19 @@ DROP TABLE IF EXISTS `atendimento_pedidos_exame`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_pedidos_exame` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_medico_solicitante` bigint NOT NULL,
   `id_exame_tuss` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status_exame` enum('SOLICITADO','COLETADO','EM_ANALISE','LAUDADO','ENTREGUE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'SOLICITADO',
   `prioridade` enum('ELETIVO','URGENTE','EMERGENCIA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ELETIVO',
   `data_solicitacao` datetime DEFAULT CURRENT_TIMESTAMP,
   `url_laudo_pacs` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_pedido_tuss` (`id_exame_tuss`),
+  KEY `fk_atendimento_pedidos_exame_atendimento` (`id_atendimento`),
+  KEY `idx_apex_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_pedidos_exame_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_pedido_tuss` FOREIGN KEY (`id_exame_tuss`) REFERENCES `tabela_tuss` (`codigo_tuss`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1563,6 +1654,39 @@ LOCK TABLES `atendimento_pedidos_exame` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `atendimento_pre_hospitalar`
+--
+
+DROP TABLE IF EXISTS `atendimento_pre_hospitalar`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `atendimento_pre_hospitalar` (
+  `id_pre_hospitalar` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `tipo_intervencao` enum('SAMU','UBS','REMOCAO','FARMACIA') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` text COLLATE utf8mb4_unicode_ci,
+  `inicio_em` datetime(6) DEFAULT NULL,
+  `fim_em` datetime(6) DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id_pre_hospitalar`),
+  KEY `idx_pre_hosp_atendimento` (`id_atendimento`),
+  KEY `idx_aph_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_pre_hospitalar_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_pre_hosp_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `atendimento_pre_hospitalar`
+--
+
+LOCK TABLES `atendimento_pre_hospitalar` WRITE;
+/*!40000 ALTER TABLE `atendimento_pre_hospitalar` DISABLE KEYS */;
+/*!40000 ALTER TABLE `atendimento_pre_hospitalar` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `atendimento_prescricao`
 --
 
@@ -1571,8 +1695,7 @@ DROP TABLE IF EXISTS `atendimento_prescricao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_prescricao` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_ffa` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
@@ -1582,7 +1705,15 @@ CREATE TABLE `atendimento_prescricao` (
   `ip_origem` varchar(45) DEFAULT NULL,
   `device_info` varchar(255) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `id_entidade` bigint unsigned NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_atendimento_prescricao_atendimento` (`id_atendimento`),
+  KEY `fk_apresc_ent` (`id_entidade`),
+  KEY `fk_apresc_unid` (`id_unidade`),
+  CONSTRAINT `fk_apresc_ent` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_apresc_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_atendimento_prescricao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1604,12 +1735,16 @@ DROP TABLE IF EXISTS `atendimento_profissional`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_profissional` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_usuario` bigint NOT NULL,
   `papel` enum('MEDICO','ENFERMEIRO','TECNICO','OUTROS') DEFAULT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) NOT NULL,
-  PRIMARY KEY (`id`)
+  `id_entidade` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_atendimento_profissional_atendimento` (`id_atendimento`),
+  KEY `idx_aprof_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_profissional_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1630,7 +1765,7 @@ DROP TABLE IF EXISTS `atendimento_recepcao`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_recepcao` (
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `tipo_atendimento` enum('CLINICO','PEDIATRICO','EMERGENCIA','EXAME_EXTERNO','MEDICACAO_EXTERNA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `chegada` enum('MEIOS_PROPRIOS','AMBULANCIA','POLICIA','OUTROS') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `prioridade` enum('AUTISTA','CRIANCA_COLO','GESTANTE','IDOSO','NORMAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'NORMAL',
@@ -1638,10 +1773,12 @@ CREATE TABLE `atendimento_recepcao` (
   `destino_inicial` enum('TRIAGEM','MEDICO','EMERGENCIA','RX','MEDICACAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_recepcionista` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_atendimento`),
   KEY `id_recepcionista` (`id_recepcionista`),
-  CONSTRAINT `atendimento_recepcao_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
-  CONSTRAINT `atendimento_recepcao_ibfk_2` FOREIGN KEY (`id_recepcionista`) REFERENCES `usuario` (`id_usuario`)
+  KEY `idx_arec_ent` (`id_entidade`),
+  CONSTRAINT `atendimento_recepcao_ibfk_2` FOREIGN KEY (`id_recepcionista`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_atendimento_recepcao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1663,7 +1800,7 @@ DROP TABLE IF EXISTS `atendimento_sinais_vitais`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_sinais_vitais` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_usuario_registro` bigint NOT NULL,
   `pa_sistolica` int DEFAULT NULL,
   `pa_diastolica` int DEFAULT NULL,
@@ -1673,9 +1810,11 @@ CREATE TABLE `atendimento_sinais_vitais` (
   `saturacao_o2` int DEFAULT NULL,
   `hgt` int DEFAULT NULL,
   `data_registro` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sv_atendimento` (`id_atendimento`),
-  CONSTRAINT `fk_sv_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `idx_asv_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_sinais_vitais_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1685,7 +1824,7 @@ CREATE TABLE `atendimento_sinais_vitais` (
 
 LOCK TABLES `atendimento_sinais_vitais` WRITE;
 /*!40000 ALTER TABLE `atendimento_sinais_vitais` DISABLE KEYS */;
-INSERT INTO `atendimento_sinais_vitais` VALUES (2,3,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:20:16'),(3,4,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:20:42'),(4,5,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:21:25'),(5,6,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:21:57');
+INSERT INTO `atendimento_sinais_vitais` VALUES (2,3,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:20:16',0),(3,4,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:20:42',0),(4,5,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:21:25',0),(5,6,5,120,80,NULL,NULL,36.5,98,NULL,'2026-01-28 06:21:57',0);
 /*!40000 ALTER TABLE `atendimento_sinais_vitais` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1698,7 +1837,7 @@ DROP TABLE IF EXISTS `atendimento_sumario_alta`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_sumario_alta` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_medico_alta` bigint NOT NULL,
   `motivo_internacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `resumo_clinico` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
@@ -1707,9 +1846,11 @@ CREATE TABLE `atendimento_sumario_alta` (
   `medicamentos_receitados` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `data_alta` datetime DEFAULT CURRENT_TIMESTAMP,
   `assinatura_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_sumario_atend` (`id_atendimento`),
-  CONSTRAINT `fk_sumario_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `idx_asumal_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_sumario_alta_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1736,9 +1877,14 @@ CREATE TABLE `atendimento_transicao_ledger` (
   `estado_destino` varchar(60) DEFAULT NULL,
   `fingerprint_hash` char(64) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_transacao_uuid` (`uuid_transacao`),
-  KEY `idx_transicao_hash` (`fingerprint_hash`)
+  KEY `idx_transicao_hash` (`fingerprint_hash`),
+  KEY `fk_atendimento_transicao_ledger_atendimento` (`id_atendimento`),
+  KEY `idx_atrans_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_transicao_ledger_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1760,8 +1906,7 @@ DROP TABLE IF EXISTS `atendimento_triagem`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `atendimento_triagem` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_ffa` bigint NOT NULL,
   `escala_dor` int DEFAULT NULL,
   `id_usuario` bigint NOT NULL,
@@ -1775,8 +1920,16 @@ CREATE TABLE `atendimento_triagem` (
   `ip_origem` varchar(45) DEFAULT NULL,
   `device_info` varchar(255) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_ffa` (`id_ffa`)
+  KEY `idx_ffa` (`id_ffa`),
+  KEY `fk_atendimento_triagem_atendimento` (`id_atendimento`),
+  KEY `fk_atri_ent` (`id_entidade`),
+  KEY `fk_atri_unid` (`id_unidade`),
+  CONSTRAINT `fk_atendimento_triagem_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atri_ent` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_atri_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1799,11 +1952,15 @@ DROP TABLE IF EXISTS `atendimento_vinculo`;
 CREATE TABLE `atendimento_vinculo` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `id_ffa` bigint NOT NULL,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_ffa` (`id_ffa`)
+  UNIQUE KEY `uk_ffa` (`id_ffa`),
+  KEY `fk_atendimento_vinculo_atendimento` (`id_atendimento`),
+  KEY `idx_avinc_ent` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_vinculo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1883,6 +2040,50 @@ CREATE TABLE `auditoria_almoxarifado` (
 LOCK TABLES `auditoria_almoxarifado` WRITE;
 /*!40000 ALTER TABLE `auditoria_almoxarifado` DISABLE KEYS */;
 /*!40000 ALTER TABLE `auditoria_almoxarifado` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auditoria_contexto`
+--
+
+DROP TABLE IF EXISTS `auditoria_contexto`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auditoria_contexto` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_sessao_usuario` bigint NOT NULL,
+  `id_usuario` bigint NOT NULL,
+  `id_atendimento` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
+  `id_local` bigint NOT NULL,
+  `acao` varchar(60) NOT NULL,
+  `detalhes` json DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `idx_sessao` (`id_sessao_usuario`),
+  KEY `idx_usuario_criado` (`id_usuario`,`criado_em`),
+  KEY `idx_entidade_unidade` (`id_entidade`,`id_unidade`),
+  KEY `idx_atendimento` (`id_atendimento`),
+  KEY `idx_local` (`id_local`),
+  KEY `fk_aud_ctx_unidade` (`id_unidade`),
+  CONSTRAINT `fk_aud_ctx_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE SET NULL,
+  CONSTRAINT `fk_aud_ctx_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_aud_ctx_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_aud_ctx_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`) ON DELETE CASCADE,
+  CONSTRAINT `fk_aud_ctx_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_aud_ctx_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
+  CONSTRAINT `auditoria_contexto_chk_1` CHECK (((`detalhes` is null) or json_valid(`detalhes`)))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auditoria_contexto`
+--
+
+LOCK TABLES `auditoria_contexto` WRITE;
+/*!40000 ALTER TABLE `auditoria_contexto` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auditoria_contexto` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2052,8 +2253,7 @@ CREATE TABLE `auditoria_ffa` (
   `acao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `fk_auditoria_ffa_ffa` (`id_ffa`),
-  CONSTRAINT `fk_auditoria_ffa_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_auditoria_ffa_ffa` (`id_ffa`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2236,7 +2436,7 @@ CREATE TABLE `auth_grupo` (
   `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `tipo_grupo` enum('SETOR','EQUIPE','PROJETO','REGIONAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'SETOR',
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_por` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -2421,7 +2621,7 @@ DROP TABLE IF EXISTS `auth_sessao`;
 CREATE TABLE `auth_sessao` (
   `id_sessao` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `id_perfil` bigint DEFAULT NULL,
   `token_sessao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2560,7 +2760,7 @@ DROP TABLE IF EXISTS `caixa`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `caixa` (
   `id_caixa` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint NOT NULL,
   `status` enum('ABERTO','FECHADO') NOT NULL DEFAULT 'FECHADO',
   `aberto_em` datetime DEFAULT NULL,
@@ -2575,8 +2775,7 @@ CREATE TABLE `caixa` (
   KEY `fk_caixa_fechado_por` (`fechado_por`),
   CONSTRAINT `fk_caixa_aberto_por` FOREIGN KEY (`aberto_por`) REFERENCES `usuario` (`id_usuario`),
   CONSTRAINT `fk_caixa_fechado_por` FOREIGN KEY (`fechado_por`) REFERENCES `usuario` (`id_usuario`),
-  CONSTRAINT `fk_caixa_localop` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`),
-  CONSTRAINT `fk_caixa_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  CONSTRAINT `fk_caixa_localop` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2626,7 +2825,7 @@ DROP TABLE IF EXISTS `cat_acidente_trabalho`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cat_acidente_trabalho` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_pessoa_trabalhador` bigint NOT NULL,
   `data_acidente` datetime NOT NULL,
   `tipo_acidente` enum('TIPICO','TRAJETO','DOENCA_OCUPACIONAL','OUTRO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -2645,7 +2844,6 @@ CREATE TABLE `cat_acidente_trabalho` (
   KEY `idx_cat_trabalhador` (`id_pessoa_trabalhador`),
   KEY `idx_cat_status` (`status_cat`),
   KEY `fk_cat_sessao` (`id_sessao_usuario`),
-  CONSTRAINT `fk_cat_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `fk_cat_trabalhador` FOREIGN KEY (`id_pessoa_trabalhador`) REFERENCES `pessoa` (`id_pessoa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2797,7 +2995,7 @@ DROP TABLE IF EXISTS `chamado`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `chamado` (
   `id_chamado` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_sistema` bigint NOT NULL,
   `area_responsavel` enum('TI','MANUTENCAO','ENG_CLINICA','GASOTERAPIA','OUTRA') NOT NULL,
   `prioridade` enum('BAIXA','MEDIA','ALTA','CRITICA') NOT NULL DEFAULT 'MEDIA',
@@ -2817,7 +3015,6 @@ CREATE TABLE `chamado` (
   KEY `fk_ch_user_abertura` (`id_usuario_abertura`),
   KEY `fk_ch_user_atr` (`id_usuario_atribuido`),
   CONSTRAINT `fk_ch_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_ch_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_ch_user_abertura` FOREIGN KEY (`id_usuario_abertura`) REFERENCES `usuario` (`id_usuario`),
   CONSTRAINT `fk_ch_user_atr` FOREIGN KEY (`id_usuario_atribuido`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -2906,7 +3103,7 @@ CREATE TABLE `cidade` (
   `nome` varchar(150) NOT NULL,
   `estado` varchar(10) NOT NULL,
   `codigo_ibge` varchar(10) DEFAULT NULL,
-  `id_entidade` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
@@ -3061,7 +3258,7 @@ CREATE TABLE `codigo_prefixo_config` (
   `id_prefixo` bigint NOT NULL AUTO_INCREMENT,
   `dominio` enum('LAB','FARMACIA','ESTOQUE','FATURAMENTO','RH','PATRIMONIO','OUTRO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `prefixo_5` char(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `id_laboratorio` bigint DEFAULT NULL,
   `ativo` tinyint NOT NULL DEFAULT '1',
@@ -3093,7 +3290,7 @@ DROP TABLE IF EXISTS `codigo_prefixo_regra`;
 CREATE TABLE `codigo_prefixo_regra` (
   `id_regra` bigint NOT NULL AUTO_INCREMENT,
   `tipo` varchar(30) NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `prefixo5` char(5) NOT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
@@ -3103,7 +3300,9 @@ CREATE TABLE `codigo_prefixo_regra` (
   PRIMARY KEY (`id_regra`),
   UNIQUE KEY `uk_prefixo_tipo_ctx` (`tipo`,`id_unidade`,`id_local_operacional`),
   KEY `ix_prefixo_tipo` (`tipo`),
-  KEY `ix_prefixo_prefixo` (`prefixo5`)
+  KEY `ix_prefixo_prefixo` (`prefixo5`),
+  KEY `fk_codigo_prefixo_regra_unidade` (`id_unidade`),
+  CONSTRAINT `fk_codigo_prefixo_regra_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3113,7 +3312,7 @@ CREATE TABLE `codigo_prefixo_regra` (
 
 LOCK TABLES `codigo_prefixo_regra` WRITE;
 /*!40000 ALTER TABLE `codigo_prefixo_regra` DISABLE KEYS */;
-INSERT INTO `codigo_prefixo_regra` VALUES (1,'GPAT',NULL,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-16 07:20:27',NULL),(2,'LAB',NULL,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-16 07:20:27',NULL),(3,'FARM_PRODUTO',NULL,NULL,'40000',1,'Prefixo padrão produto','2026-02-16 07:50:28',NULL),(4,'PDV',NULL,NULL,'41000',1,'Prefixo padrão venda PDV','2026-02-16 07:50:28',NULL),(5,'INVENTARIO',NULL,NULL,'42000',1,'Prefixo padrão inventário','2026-02-16 07:50:28',NULL),(6,'FAT',NULL,NULL,'43000',1,'Prefixo padrão faturamento','2026-02-16 07:50:28',NULL),(7,'GPAT',NULL,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-17 10:32:12',NULL),(8,'LAB',NULL,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-17 10:32:12',NULL);
+INSERT INTO `codigo_prefixo_regra` VALUES (1,'GPAT',1,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-16 07:20:27',NULL),(2,'LAB',1,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-16 07:20:27',NULL),(3,'FARM_PRODUTO',1,NULL,'40000',1,'Prefixo padrão produto','2026-02-16 07:50:28',NULL),(4,'PDV',1,NULL,'41000',1,'Prefixo padrão venda PDV','2026-02-16 07:50:28',NULL),(5,'INVENTARIO',1,NULL,'42000',1,'Prefixo padrão inventário','2026-02-16 07:50:28',NULL),(6,'FAT',1,NULL,'43000',1,'Prefixo padrão faturamento','2026-02-16 07:50:28',NULL),(7,'GPAT',1,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-17 10:32:12',NULL),(8,'LAB',1,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-17 10:32:12',NULL);
 /*!40000 ALTER TABLE `codigo_prefixo_regra` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3156,7 +3355,6 @@ CREATE TABLE `codigo_universal` (
   KEY `fk_codigo_cliente` (`id_cliente`),
   KEY `fk_codigo_sessao` (`id_sessao_usuario`),
   CONSTRAINT `fk_codigo_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`),
-  CONSTRAINT `fk_codigo_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_codigo_paciente` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id`),
   CONSTRAINT `fk_codigo_produto` FOREIGN KEY (`id_produto`) REFERENCES `estoque_produto` (`id_produto`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_codigo_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
@@ -3181,12 +3379,14 @@ DROP TABLE IF EXISTS `config_leitos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `config_leitos` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `identificacao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipo` enum('OBSERVACAO','EMERGENCIA','INTERNACAO','ISOLAMENTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status_ocupacao` enum('LIVRE','OCUPADO','RESERVADO','HIGIENIZACAO','MANUTENCAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'LIVRE',
   `id_atendimento_atual` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_config_leitos_unidade` (`id_unidade`),
+  CONSTRAINT `fk_config_leitos_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3208,11 +3408,13 @@ DROP TABLE IF EXISTS `config_locais`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `config_locais` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipo` enum('RECEPCAO','TRIAGEM','CONSULTORIO','EXAME','MEDICACAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_config_locais_unidade` (`id_unidade`),
+  CONSTRAINT `fk_config_locais_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3234,11 +3436,12 @@ DROP TABLE IF EXISTS `config_sistema`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `config_sistema` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `parametro` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `valor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_config_unid` (`id_unidade`)
+  KEY `idx_config_unid` (`id_unidade`),
+  CONSTRAINT `fk_config_sistema_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3456,18 +3659,21 @@ DROP TABLE IF EXISTS `coordenador_estado_global`;
 CREATE TABLE `coordenador_estado_global` (
   `id_coordenacao` bigint NOT NULL AUTO_INCREMENT,
   `uuid_runtime` char(36) NOT NULL,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `estado_atual` varchar(80) NOT NULL,
   `hash_estado` char(64) NOT NULL,
   `payload_snapshot` json DEFAULT NULL,
   `bloqueado` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_coordenacao`),
   KEY `idx_coord_uuid` (`uuid_runtime`),
-  KEY `idx_coord_saas` (`id_saas_entidade`),
-  KEY `idx_coord_estado` (`estado_atual`)
+  KEY `idx_coord_estado` (`estado_atual`),
+  KEY `fk_coordenador_estado_global_unidade` (`id_unidade`),
+  KEY `fk_coord_estado_entidade` (`id_entidade`),
+  CONSTRAINT `fk_coord_estado_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_coordenador_estado_global_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3626,7 +3832,7 @@ CREATE TABLE `documento_emissao` (
   `status` enum('GERADO','IMPRESSO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'GERADO',
   `id_sessao_usuario` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -3639,7 +3845,9 @@ CREATE TABLE `documento_emissao` (
   KEY `idx_doc_status` (`status`),
   KEY `idx_doc_gpat` (`gpat`),
   KEY `idx_doc_data` (`criado_em`),
-  KEY `fk_doc_sessao` (`id_sessao_usuario`)
+  KEY `fk_doc_sessao` (`id_sessao_usuario`),
+  KEY `fk_documento_emissao_unidade` (`id_unidade`),
+  CONSTRAINT `fk_documento_emissao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3877,13 +4085,15 @@ DROP TABLE IF EXISTS `escala_medica`;
 CREATE TABLE `escala_medica` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario_medico` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `data_plantao` date NOT NULL,
   `turno` enum('MANHA','TARDE','NOITE','24H') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status_presenca` enum('PREVISTO','CONFIRMADO','FALTOU','SUBSTITUIDO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PREVISTO',
   `id_substituto` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_escala_dia` (`data_plantao`,`id_unidade`)
+  KEY `idx_escala_dia` (`data_plantao`,`id_unidade`),
+  KEY `fk_escala_medica_unidade` (`id_unidade`),
+  CONSTRAINT `fk_escala_medica_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3905,7 +4115,7 @@ DROP TABLE IF EXISTS `escala_plantao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `escala_plantao` (
   `id_escala` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_sistema` bigint NOT NULL,
   `data` date NOT NULL,
   `id_plantao_modelo` bigint NOT NULL,
@@ -3917,7 +4127,7 @@ CREATE TABLE `escala_plantao` (
   KEY `fk_esc_pm` (`id_plantao_modelo`),
   CONSTRAINT `fk_esc_pm` FOREIGN KEY (`id_plantao_modelo`) REFERENCES `plantao_modelo` (`id_plantao_modelo`),
   CONSTRAINT `fk_esc_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_esc_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  CONSTRAINT `fk_escala_plantao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3940,14 +4150,16 @@ DROP TABLE IF EXISTS `escala_plantao_atual`;
 CREATE TABLE `escala_plantao_atual` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_setor` int DEFAULT NULL,
   `registro_profissional` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_inicio` datetime DEFAULT NULL,
   `data_fim` datetime DEFAULT NULL,
   `status_plantao` enum('ATIVO','ENCERRADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ATIVO',
   PRIMARY KEY (`id`),
-  KEY `idx_plantao_ativo` (`id_usuario`,`status_plantao`)
+  KEY `idx_plantao_ativo` (`id_usuario`,`status_plantao`),
+  KEY `fk_escala_plantao_atual_unidade` (`id_unidade`),
+  CONSTRAINT `fk_escala_plantao_atual_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3970,7 +4182,7 @@ DROP TABLE IF EXISTS `escala_profissional`;
 CREATE TABLE `escala_profissional` (
   `id_escala_profissional` bigint NOT NULL AUTO_INCREMENT,
   `id_funcionario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local` bigint DEFAULT NULL,
   `data_inicio` datetime NOT NULL,
   `data_fim` datetime NOT NULL,
@@ -3983,7 +4195,7 @@ CREATE TABLE `escala_profissional` (
   KEY `idx_ep_local` (`id_local`),
   CONSTRAINT `fk_ep_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_ep_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_ep_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_escala_profissional_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4480,7 +4692,7 @@ CREATE TABLE `estoque_local` (
   `tipo` enum('FARMACIA_RUA','FARMACIA_PA','FARMACIA_UPA','FARMACIA_UBS','ALMOX','LAB','OUTRO') NOT NULL,
   `ala` enum('ADULTO','PEDI') DEFAULT NULL,
   `nome` varchar(200) NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_sistema` bigint NOT NULL,
   `id_local_operacional` bigint NOT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
@@ -4488,7 +4700,9 @@ CREATE TABLE `estoque_local` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_estoque_local`),
   UNIQUE KEY `uk_codigo_unidade` (`codigo`,`id_unidade`),
-  KEY `fk_local_sessao` (`id_sessao_usuario`)
+  KEY `fk_local_sessao` (`id_sessao_usuario`),
+  KEY `fk_estoque_local_unidade` (`id_unidade`),
+  CONSTRAINT `fk_estoque_local_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4605,14 +4819,13 @@ DROP TABLE IF EXISTS `estoque_movimentacao_itens`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estoque_movimentacao_itens` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_produto` int NOT NULL,
   `quantidade_saida` decimal(12,4) NOT NULL,
   `id_usuario_quem_deu_baixa` bigint NOT NULL,
   `data_movimento` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `fk_mov_atendimento` (`id_atendimento`),
-  CONSTRAINT `fk_mov_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `fk_mov_atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4635,7 +4848,7 @@ DROP TABLE IF EXISTS `estoque_movimento`;
 CREATE TABLE `estoque_movimento` (
   `id_movimento` bigint NOT NULL AUTO_INCREMENT,
   `id_item` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_origem` bigint DEFAULT NULL,
   `id_local_destino` bigint DEFAULT NULL,
   `id_lote` bigint NOT NULL,
@@ -4648,6 +4861,8 @@ CREATE TABLE `estoque_movimento` (
   UNIQUE KEY `hash_duplicidade` (`hash_duplicidade`),
   KEY `fk_estq_mov_item_ref` (`id_item`),
   KEY `fk_estq_mov_lote_ref` (`id_lote`),
+  KEY `fk_estoque_movimento_unidade` (`id_unidade`),
+  CONSTRAINT `fk_estoque_movimento_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_estq_mov_item_ref` FOREIGN KEY (`id_item`) REFERENCES `estoque_item` (`id_item`),
   CONSTRAINT `fk_estq_mov_lote_ref` FOREIGN KEY (`id_lote`) REFERENCES `estoque_lote` (`id_lote`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -4879,7 +5094,7 @@ DROP TABLE IF EXISTS `estoque_saldo`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estoque_saldo` (
   `id_saldo` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local` bigint NOT NULL,
   `contexto_tipo` enum('CENTRAL','FARMACIA','ASSISTENCIAL','LEITO','UTI','FATURAMENTO') NOT NULL,
   `id_item` bigint NOT NULL,
@@ -4891,7 +5106,8 @@ CREATE TABLE `estoque_saldo` (
   `ultima_atualizacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_saldo`),
   UNIQUE KEY `uk_estoque_global` (`id_unidade`,`id_local`,`id_item`,`id_lote`),
-  KEY `idx_lock` (`id_item`,`id_local`,`id_lote`)
+  KEY `idx_lock` (`id_item`,`id_local`,`id_lote`),
+  CONSTRAINT `fk_estoque_saldo_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4913,7 +5129,7 @@ DROP TABLE IF EXISTS `estoque_saldo_central`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estoque_saldo_central` (
   `id_saldo` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local` bigint NOT NULL,
   `id_item` bigint NOT NULL,
   `id_lote` bigint NOT NULL,
@@ -4927,7 +5143,8 @@ CREATE TABLE `estoque_saldo_central` (
   KEY `idx_central_lock` (`id_item`,`id_local`,`id_lote`),
   KEY `fk_central_lote` (`id_lote`),
   CONSTRAINT `fk_central_item` FOREIGN KEY (`id_item`) REFERENCES `estoque_item` (`id_item`),
-  CONSTRAINT `fk_central_lote` FOREIGN KEY (`id_lote`) REFERENCES `estoque_lote` (`id_lote`)
+  CONSTRAINT `fk_central_lote` FOREIGN KEY (`id_lote`) REFERENCES `estoque_lote` (`id_lote`),
+  CONSTRAINT `fk_estoque_saldo_central_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4949,7 +5166,7 @@ DROP TABLE IF EXISTS `estoque_saldo_master`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estoque_saldo_master` (
   `id_saldo` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local` bigint NOT NULL,
   `id_item` bigint NOT NULL,
   `id_lote` bigint NOT NULL,
@@ -4962,6 +5179,7 @@ CREATE TABLE `estoque_saldo_master` (
   UNIQUE KEY `uk_master_his` (`id_unidade`,`id_local`,`id_item`,`id_lote`),
   KEY `idx_master_lock` (`id_item`,`id_local`,`id_lote`),
   KEY `fk_master_lote` (`id_lote`),
+  CONSTRAINT `fk_estoque_saldo_master_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_master_item` FOREIGN KEY (`id_item`) REFERENCES `estoque_item` (`id_item`),
   CONSTRAINT `fk_master_lote` FOREIGN KEY (`id_lote`) REFERENCES `estoque_lote` (`id_lote`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -5020,7 +5238,7 @@ DROP TABLE IF EXISTS `evento_geral`;
 CREATE TABLE `evento_geral` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `dominio` varchar(50) NOT NULL,
   `tipo_evento` varchar(100) NOT NULL,
   `id_referencia` bigint DEFAULT NULL,
@@ -5031,7 +5249,8 @@ CREATE TABLE `evento_geral` (
   KEY `idx_usuario` (`id_usuario`),
   KEY `idx_unidade` (`id_unidade`),
   KEY `idx_dominio_tipo` (`dominio`,`tipo_evento`),
-  KEY `idx_referencia` (`id_referencia`)
+  KEY `idx_referencia` (`id_referencia`),
+  CONSTRAINT `fk_evento_geral_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ledger canônico: registra todos eventos gerais do HIS/PA';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5171,7 +5390,7 @@ DROP TABLE IF EXISTS `evolucao_multidisciplinar`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `evolucao_multidisciplinar` (
   `id_evolucao` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `area` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_usuario` bigint NOT NULL,
@@ -5179,7 +5398,6 @@ CREATE TABLE `evolucao_multidisciplinar` (
   PRIMARY KEY (`id_evolucao`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_usuario` (`id_usuario`),
-  CONSTRAINT `evolucao_multidisciplinar_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `evolucao_multidisciplinar_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5228,14 +5446,13 @@ DROP TABLE IF EXISTS `exame_fisico`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `exame_fisico` (
   `id_exame` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_exame`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_usuario` (`id_usuario`),
-  CONSTRAINT `exame_fisico_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `exame_fisico_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5290,7 +5507,7 @@ CREATE TABLE `exame_pedido` (
   `codigo_interno` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_senha` bigint NOT NULL,
   `id_ffa` bigint NOT NULL,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `status` enum('SOLICITADO','COLETADO','EM_LABORATORIO','FINALIZADO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'SOLICITADO',
   `id_usuario_solicitante` bigint NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -5298,9 +5515,7 @@ CREATE TABLE `exame_pedido` (
   UNIQUE KEY `codigo_interno` (`codigo_interno`),
   KEY `fk_exame_senha` (`id_senha`),
   KEY `fk_exame_ffa` (`id_ffa`),
-  KEY `fk_exame_atendimento` (`id_atendimento`),
-  CONSTRAINT `fk_exame_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
-  CONSTRAINT `fk_exame_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`)
+  KEY `fk_exame_atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Pedido de exame com herança completa';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5364,9 +5579,14 @@ CREATE TABLE `farm_atendimento_externo` (
   `status` enum('ABERTO','FINALIZADO','CANCELADO') NOT NULL DEFAULT 'ABERTO',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_atendimento_ext`),
   KEY `ix_fext_gpat` (`id_gpat`),
-  KEY `ix_fext_status` (`status`)
+  KEY `ix_fext_status` (`status`),
+  KEY `fk_farm_atendimento_externo_atendimento` (`id_atendimento`),
+  KEY `idx_farm_ext_ent` (`id_entidade`),
+  CONSTRAINT `fk_farm_atendimento_externo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5556,13 +5776,18 @@ CREATE TABLE `farmacia_atendimento_externo_dispensacao` (
   `dispensado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dispensado_por` bigint NOT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_dispensacao`),
   KEY `idx_faed` (`id_item`,`status`),
   KEY `fk_faed_lote` (`id_lote`),
   KEY `fk_faed_local` (`id_local_estoque`),
+  KEY `fk_farmacia_atendimento_externo_dispensacao_atendimento` (`id_atendimento`),
+  KEY `idx_far_disp_ent` (`id_entidade`),
   CONSTRAINT `fk_faed_item` FOREIGN KEY (`id_item`) REFERENCES `farmacia_atendimento_externo_item` (`id_item`),
   CONSTRAINT `fk_faed_local` FOREIGN KEY (`id_local_estoque`) REFERENCES `local_atendimento` (`id_local`),
-  CONSTRAINT `fk_faed_lote` FOREIGN KEY (`id_lote`) REFERENCES `farmaco_lote` (`id_lote`)
+  CONSTRAINT `fk_faed_lote` FOREIGN KEY (`id_lote`) REFERENCES `farmaco_lote` (`id_lote`),
+  CONSTRAINT `fk_farmacia_atendimento_externo_dispensacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5853,7 +6078,7 @@ CREATE TABLE `faturamento_conta` (
   `numero_conta` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `competencia` char(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_senha` bigint DEFAULT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `total_bruto` decimal(10,2) NOT NULL DEFAULT '0.00',
   `total_desconto` decimal(10,2) NOT NULL DEFAULT '0.00',
@@ -5874,7 +6099,7 @@ CREATE TABLE `faturamento_conta` (
   KEY `idx_fat_conta_sessao_criacao` (`id_sessao_usuario_criacao`),
   KEY `idx_fat_conta_criado_por` (`criado_por`),
   KEY `idx_fat_conta_cancelado_por` (`cancelado_por`),
-  CONSTRAINT `fk_fat_conta_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`)
+  CONSTRAINT `fk_faturamento_conta_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Conta financeira consolidada por atendimento';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5920,15 +6145,14 @@ DROP TABLE IF EXISTS `faturamento_conta_paciente`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `faturamento_conta_paciente` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_convenio` int NOT NULL,
   `status_conta` enum('ABERTA','FECHADA','FATURADA','PAGA','GLOSADA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ABERTA',
   `valor_total` decimal(12,2) DEFAULT '0.00',
   `numero_guia_principal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_fechamento` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_conta_atend` (`id_atendimento`),
-  CONSTRAINT `fk_conta_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `fk_conta_atend` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -6162,15 +6386,14 @@ DROP TABLE IF EXISTS `faturamento_producao_sus`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `faturamento_producao_sus` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_sigtap` int NOT NULL,
   `cbo_profissional` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `cns_paciente` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_producao` date DEFAULT NULL,
   `status_remessa` enum('PENDENTE','ENVIADO','REJEITADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   PRIMARY KEY (`id`),
-  KEY `fk_sus_atend` (`id_atendimento`),
-  CONSTRAINT `fk_sus_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `fk_sus_atend` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -6248,7 +6471,7 @@ DROP TABLE IF EXISTS `faturamento_sus_config`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `faturamento_sus_config` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `id_unidade` int NOT NULL,
+  `id_unidade` bigint unsigned DEFAULT NULL,
   `cnes_unidade` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `gestao_municipal_estadual` enum('M','E') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -6272,31 +6495,25 @@ DROP TABLE IF EXISTS `ffa`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ffa` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint DEFAULT NULL,
-  `id_paciente` bigint NOT NULL,
-  `gpat` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `status` enum('ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO','CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO','OBSERVACAO','MEDICACAO','AGUARDANDO_MEDICACAO','AGUARDANDO_RX','EM_RX','AGUARDANDO_COLETA','EM_COLETA','AGUARDANDO_ECG','EM_ECG','ALTA','TRANSFERENCIA','INTERNACAO','FINALIZADO','AGUARDANDO_RETORNO','EMERGENCIA') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `layout` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `id_usuario_criacao` bigint NOT NULL,
-  `id_usuario_alteracao` bigint DEFAULT NULL,
-  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime DEFAULT NULL,
-  `classificacao_manchester` enum('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `linha_assistencial` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `id_senha` bigint DEFAULT NULL,
-  `classificacao_cor` enum('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `tempo_limite` datetime DEFAULT NULL,
-  `data_criacao` datetime DEFAULT CURRENT_TIMESTAMP,
-  `id_gpat` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_ffa_classificacao` (`classificacao_cor`,`status`),
-  KEY `fk_ffa_atendimento` (`id_atendimento`),
-  KEY `idx_ffa_status_cor` (`status`,`classificacao_cor`),
-  KEY `idx_ffa_status` (`status`),
-  KEY `ix_ffa_id_gpat` (`id_gpat`),
-  CONSTRAINT `fk_ffa_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id_ffa` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_unidade` bigint unsigned NOT NULL,
+  `id_paciente` bigint unsigned NOT NULL,
+  `estado_clinico` enum('AGUARDANDO_TRIAGEM','EM_TRIAGEM','AGUARDANDO_ATENDIMENTO','EM_ATENDIMENTO','OBSERVACAO','MEDICACAO','EXAMES','ALTA','EVASAO','TRANSFERENCIA','INTERNACAO','FINALIZADO') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'AGUARDANDO_TRIAGEM',
+  `contexto_fluxo` json DEFAULT NULL,
+  `versao_ledger` bigint unsigned DEFAULT '1',
+  `id_sessao_usuario_abertura` bigint unsigned DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `fechado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id_ffa`),
+  KEY `idx_ffa_paciente` (`id_paciente`),
+  KEY `idx_ffa_estado` (`estado_clinico`),
+  KEY `fk_ffa_unidade` (`id_unidade`),
+  KEY `idx_ffa_entidade_unidade` (`id_entidade`,`id_unidade`),
+  CONSTRAINT `fk_ffa_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_ffa_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6305,7 +6522,6 @@ CREATE TABLE `ffa` (
 
 LOCK TABLES `ffa` WRITE;
 /*!40000 ALTER TABLE `ffa` DISABLE KEYS */;
-INSERT INTO `ffa` VALUES (1,NULL,1,NULL,'ABERTO','CLINICO',10,NULL,'2026-01-14 03:52:41','2026-01-14 03:52:41',NULL,NULL,2,NULL,NULL,'2026-01-28 06:35:38',NULL),(2,3,8,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:20:16',NULL,'VERDE',NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(3,4,8,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:20:42',NULL,'VERDE',NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(4,5,8,NULL,'EM_TRIAGEM',NULL,5,NULL,'2026-01-28 06:21:25',NULL,'VERDE',NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(5,6,1,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:21:57',NULL,'VERDE',NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(6,7,8,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:22:20',NULL,'VERDE',NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(7,8,1,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:22:54',NULL,'VERDE',NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(8,9,8,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:26:06',NULL,'VERDE',NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(9,10,31,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:29:42',NULL,NULL,NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(10,11,17,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:30:20',NULL,NULL,NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(11,12,17,NULL,'ABERTO',NULL,5,NULL,'2026-01-28 06:31:19',NULL,NULL,NULL,NULL,'VERDE',NULL,'2026-01-28 06:35:38',NULL),(12,13,8,'GPAT-20260215-0000000001','ABERTO',NULL,5,NULL,'2026-02-15 04:31:10','2026-02-15 04:31:10',NULL,NULL,1,NULL,NULL,'2026-02-15 04:31:10',NULL);
 /*!40000 ALTER TABLE `ffa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -6318,15 +6534,14 @@ DROP TABLE IF EXISTS `ffa_demandas_externas`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ffa_demandas_externas` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `tipo_demanda` enum('RX_EXTERNO','MEDICACAO_EXTERNA','EXAME_EXTERNO','OUTROS') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `profissional_externo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` enum('PENDENTE','REALIZADO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `fk_demanda_atendimento` (`id_atendimento`),
-  CONSTRAINT `fk_demanda_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `fk_demanda_atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -6363,7 +6578,6 @@ CREATE TABLE `ffa_diagnostico` (
   KEY `idx_diag_ffa` (`id_ffa`),
   KEY `idx_diag_sessao` (`id_sessao_usuario`),
   KEY `fk_diag_usuario` (`id_usuario`),
-  CONSTRAINT `fk_diag_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_diag_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6455,7 +6669,6 @@ CREATE TABLE `ffa_evolucao` (
   KEY `idx_evo_ffa` (`id_ffa`),
   KEY `idx_evo_sessao` (`id_sessao_usuario`),
   KEY `idx_evo_usuario` (`id_usuario`),
-  CONSTRAINT `fk_evo_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_evo_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6511,8 +6724,7 @@ CREATE TABLE `ffa_historico_status` (
   `data_mudanca` datetime DEFAULT CURRENT_TIMESTAMP,
   `id_usuario_acao` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_hist_ffa` (`id_ffa`),
-  CONSTRAINT `fk_hist_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`)
+  KEY `fk_hist_ffa` (`id_ffa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -6542,12 +6754,14 @@ CREATE TABLE `ffa_item` (
   `quantidade_autorizada` decimal(15,4) NOT NULL,
   `quantidade_dispensada` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `status` enum('PRESCRITO','AUTORIZADO','DISPENSADO_PARCIAL','DISPENSADO_TOTAL','CANCELADO') NOT NULL DEFAULT 'PRESCRITO',
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_ffa_item`),
   KEY `fk_ffa_produto` (`id_produto`),
   KEY `fk_ffa_sessao` (`id_sessao_usuario`),
+  KEY `fk_ffa_item_unidade` (`id_unidade`),
+  CONSTRAINT `fk_ffa_item_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_ffa_produto` FOREIGN KEY (`id_produto`) REFERENCES `estoque_produto` (`id_produto`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6651,7 +6865,6 @@ CREATE TABLE `ffa_sinais_vitais` (
   KEY `idx_ffa_sinais_sessao` (`id_sessao_usuario`),
   KEY `idx_ffa_sinais_usuario` (`id_usuario`,`data_coleta`),
   KEY `fk_ffa_sinais_local` (`id_local_operacional`),
-  CONSTRAINT `fk_ffa_sinais_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_ffa_sinais_local` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`),
   CONSTRAINT `fk_ffa_sinais_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6686,7 +6899,6 @@ CREATE TABLE `ffa_substatus` (
   PRIMARY KEY (`id`),
   KEY `id_usuario` (`id_usuario`),
   KEY `idx_ffa_categoria` (`id_ffa`,`categoria`,`ativo`),
-  CONSTRAINT `ffa_substatus_ibfk_1` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE CASCADE,
   CONSTRAINT `ffa_substatus_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Substatus assistenciais da FFA';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6764,7 +6976,6 @@ CREATE TABLE `fila_operacional` (
   KEY `idx_tipo_prioridade` (`tipo`,`prioridade`,`substatus`),
   KEY `idx_filaop_ordem` (`tipo`,`substatus`,`prioridade`,`data_entrada`,`id_local_operacional`),
   KEY `idx_reavaliar_em` (`tipo`,`substatus`,`reavaliar_em`),
-  CONSTRAINT `fila_operacional_ibfk_1` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fila_operacional_ibfk_2` FOREIGN KEY (`id_responsavel`) REFERENCES `usuario` (`id_usuario`),
   CONSTRAINT `fila_operacional_ibfk_3` FOREIGN KEY (`id_local`) REFERENCES `local_atendimento` (`id_local`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Fila operacional de todos os atendimentos, procedimentos, exames, medicação e observação';
@@ -6808,6 +7019,38 @@ CREATE TABLE `fila_operacional_evento` (
 LOCK TABLES `fila_operacional_evento` WRITE;
 /*!40000 ALTER TABLE `fila_operacional_evento` DISABLE KEYS */;
 /*!40000 ALTER TABLE `fila_operacional_evento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `fila_painel_runtime`
+--
+
+DROP TABLE IF EXISTS `fila_painel_runtime`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fila_painel_runtime` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `id_unidade` bigint NOT NULL,
+  `id_local` bigint DEFAULT NULL,
+  `id_senha` bigint DEFAULT NULL,
+  `codigo_visual` varchar(20) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `prioridade` int DEFAULT NULL,
+  `atualizado_em` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_unidade` (`id_unidade`),
+  KEY `idx_local` (`id_local`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fila_painel_runtime`
+--
+
+LOCK TABLES `fila_painel_runtime` WRITE;
+/*!40000 ALTER TABLE `fila_painel_runtime` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fila_painel_runtime` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -6917,8 +7160,13 @@ CREATE TABLE `fluxo_orquestrador_canonico` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_orquestrador`),
-  UNIQUE KEY `uk_ffa_orquestrador_fluxo` (`dominio_fluxo`,`estado_atual`,`estado_proximo`)
+  UNIQUE KEY `uk_ffa_orquestrador_fluxo` (`dominio_fluxo`,`estado_atual`,`estado_proximo`),
+  KEY `fk_fluxo_orquestrador_canonico_atendimento` (`id_atendimento`),
+  KEY `idx_foc_ent` (`id_entidade`),
+  CONSTRAINT `fk_fluxo_orquestrador_canonico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -7101,7 +7349,7 @@ DROP TABLE IF EXISTS `funcionario`;
 CREATE TABLE `funcionario` (
   `id_funcionario` bigint NOT NULL AUTO_INCREMENT,
   `id_pessoa` bigint NOT NULL,
-  `id_entidade` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `matricula` varchar(50) DEFAULT NULL,
   `tipo_funcionario` enum('MEDICO','ENFERMEIRO','TECNICO_ENFERMAGEM','RECEPCIONISTA','FARMACEUTICO','ADMINISTRATIVO','GESTOR','SUPORTE_TI','COORDENADOR','FISIOTERAPEUTA','MANUTENCAO','COORDENADOR_ENFERMAGEM','SUPERVISOR','NUTRICIONISTA','OUTRO') DEFAULT NULL,
   `cargo` varchar(150) DEFAULT NULL,
@@ -7126,7 +7374,7 @@ CREATE TABLE `funcionario` (
 
 LOCK TABLES `funcionario` WRITE;
 /*!40000 ALTER TABLE `funcionario` DISABLE KEYS */;
-INSERT INTO `funcionario` VALUES (1,1,NULL,'MAT_000001','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.812711',NULL),(2,2,NULL,'MAT_000002','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.814436',NULL),(3,3,NULL,'MAT_000003','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.814797',NULL),(4,4,NULL,'MAT_000004','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.814908',NULL),(5,5,NULL,'MAT_000005','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.815159',NULL),(6,6,NULL,'MAT_000006','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.815239',NULL),(7,7,NULL,'MAT_000007','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.815317',NULL),(8,8,NULL,'MAT_000008','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.815395',NULL),(9,9,NULL,'MAT_000009','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.815480',NULL),(10,10,NULL,'MAT_000010','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.815544',NULL),(11,11,NULL,'MAT_000011','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.815612',NULL),(12,12,NULL,'MAT_000012','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.815678',NULL),(13,13,NULL,'MAT_000013','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.815745',NULL),(14,14,NULL,'MAT_000014','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.815814',NULL),(15,15,NULL,'MAT_000015','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.815887',NULL),(16,16,NULL,'MAT_000016','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.815968',NULL),(17,17,NULL,'MAT_000017','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.816041',NULL),(18,18,NULL,'MAT_000018','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.816120',NULL),(19,19,NULL,'MAT_000019','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.816194',NULL),(20,20,NULL,'MAT_000020','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.816257',NULL),(21,21,NULL,'MAT_000021','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.816369',NULL),(22,22,NULL,'MAT_000022','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.816457',NULL),(23,23,NULL,'MAT_000023','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.816537',NULL),(24,24,NULL,'MAT_000024','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.816616',NULL),(25,25,NULL,'MAT_000025','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.816690',NULL),(26,26,NULL,'MAT_000026','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.816769',NULL),(27,27,NULL,'MAT_000027','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.816846',NULL),(28,28,NULL,'MAT_000028','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.816929',NULL),(29,29,NULL,'MAT_000029','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.817017',NULL),(30,30,NULL,'MAT_000030','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.817158',NULL),(31,31,NULL,'MAT_000031','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.817248',NULL),(32,32,NULL,'MAT_000032','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.817322',NULL),(33,33,NULL,'MAT_000033','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.817414',NULL),(34,34,NULL,'MAT_000034','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.817486',NULL),(35,35,NULL,'MAT_000035','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.817567',NULL),(36,36,NULL,'MAT_000036','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.817640',NULL),(37,37,NULL,'MAT_000037','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.817718',NULL),(38,38,NULL,'MAT_000038','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.817794',NULL),(39,39,NULL,'MAT_000039','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.817867',NULL),(40,40,NULL,'MAT_000040','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.817947',NULL),(41,41,NULL,'MAT_000041','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.818018',NULL),(42,42,NULL,'MAT_000042','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.818083',NULL),(43,43,NULL,'MAT_000043','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.818149',NULL),(44,44,NULL,'MAT_000044','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.818218',NULL),(45,45,NULL,'MAT_000045','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.818293',NULL),(46,46,NULL,'MAT_000046','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.818365',NULL),(47,47,NULL,'MAT_000047','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.818440',NULL),(48,48,NULL,'MAT_000048','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.818517',NULL),(49,49,NULL,'MAT_000049','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.818599',NULL),(50,50,NULL,'MAT_000050','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.818664',NULL),(51,51,NULL,'MAT_000051','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.818727',NULL),(52,52,NULL,'MAT_000052','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.818793',NULL),(53,53,NULL,'MAT_000053','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.818862',NULL),(54,54,NULL,'MAT_000054','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.818941',NULL),(55,55,NULL,'MAT_000055','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.819016',NULL),(56,56,NULL,'MAT_000056','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.819087',NULL),(57,57,NULL,'MAT_000057','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.819161',NULL),(58,58,NULL,'MAT_000058','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.819234',NULL),(59,59,NULL,'MAT_000059','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.819314',NULL),(60,60,NULL,'MAT_000060','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.819378',NULL),(61,61,NULL,'MAT_000061','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.819447',NULL),(62,62,NULL,'MAT_000062','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.819513',NULL),(63,63,NULL,'MAT_000063','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.819615',NULL),(64,64,NULL,'MAT_000064','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.819711',NULL),(65,65,NULL,'MAT_000065','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.819791',NULL),(66,66,NULL,'MAT_000066','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.819868',NULL),(67,67,NULL,'MAT_000067','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.819978',NULL),(68,68,NULL,'MAT_000068','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.820094',NULL),(69,69,NULL,'MAT_000069','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.820183',NULL),(70,70,NULL,'MAT_000070','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.820259',NULL),(71,71,NULL,'MAT_000071','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.820337',NULL),(72,72,NULL,'MAT_000072','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.820408',NULL),(73,73,NULL,'MAT_000073','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.820492',NULL),(74,74,NULL,'MAT_000074','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.820564',NULL),(75,75,NULL,'MAT_000075','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.820634',NULL),(76,76,NULL,'MAT_000076','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.820706',NULL),(77,77,NULL,'MAT_000077','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.820780',NULL),(78,78,NULL,'MAT_000078','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.820854',NULL),(79,79,NULL,'MAT_000079','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.821022',NULL),(80,80,NULL,'MAT_000080','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.821129',NULL),(81,81,NULL,'MAT_000081','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.821205',NULL),(82,82,NULL,'MAT_000082','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.821282',NULL),(83,83,NULL,'MAT_000083','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.821357',NULL),(84,84,NULL,'MAT_000084','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.821430',NULL),(85,85,NULL,'MAT_000085','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.821554',NULL),(86,86,NULL,'MAT_000086','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.821641',NULL),(87,87,NULL,'MAT_000087','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.821765',NULL),(88,88,NULL,'MAT_000088','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.821849',NULL),(89,89,NULL,'MAT_000089','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.821942',NULL),(90,90,NULL,'MAT_000090','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.822012',NULL),(91,91,NULL,'MAT_000091','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.822095',NULL),(92,92,NULL,'MAT_000092','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.822170',NULL),(93,93,NULL,'MAT_000093','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.822238',NULL),(94,94,NULL,'MAT_000094','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.822306',NULL),(95,95,NULL,'MAT_000095','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.822376',NULL),(96,96,NULL,'MAT_000096','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.822447',NULL),(97,97,NULL,'MAT_000097','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.822595',NULL),(98,98,NULL,'MAT_000098','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.822682',NULL),(99,99,NULL,'MAT_000099','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.822760',NULL),(100,100,NULL,'MAT_000100','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.822823',NULL),(101,101,NULL,'MAT_000101','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.822888',NULL),(102,102,NULL,'MAT_000102','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.822974',NULL),(103,103,NULL,'MAT_000103','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.823044',NULL),(104,104,NULL,'MAT_000104','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.823115',NULL),(105,105,NULL,'MAT_000105','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.823199',NULL),(106,106,NULL,'MAT_000106','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.823273',NULL),(107,107,NULL,'MAT_000107','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.823347',NULL),(108,108,NULL,'MAT_000108','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.823475',NULL),(109,109,NULL,'MAT_000109','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.823560',NULL),(110,110,NULL,'MAT_000110','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.823623',NULL),(111,111,NULL,'MAT_000111','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.823689',NULL),(112,112,NULL,'MAT_000112','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.823755',NULL),(113,113,NULL,'MAT_000113','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.823836',NULL),(114,114,NULL,'MAT_000114','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.823908',NULL),(115,115,NULL,'MAT_000115','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.824001',NULL),(116,116,NULL,'MAT_000116','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.824118',NULL),(117,117,NULL,'MAT_000117','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.824213',NULL),(118,118,NULL,'MAT_000118','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.824290',NULL),(119,119,NULL,'MAT_000119','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.824365',NULL),(120,120,NULL,'MAT_000120','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.824429',NULL),(121,121,NULL,'MAT_000121','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.824501',NULL),(122,122,NULL,'MAT_000122','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.824567',NULL),(123,123,NULL,'MAT_000123','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.824638',NULL),(124,124,NULL,'MAT_000124','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.824709',NULL),(125,125,NULL,'MAT_000125','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.824823',NULL),(126,126,NULL,'MAT_000126','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.824950',NULL),(127,127,NULL,'MAT_000127','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.825027',NULL),(128,128,NULL,'MAT_000128','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.825101',NULL),(129,129,NULL,'MAT_000129','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.825175',NULL),(130,130,NULL,'MAT_000130','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.825238',NULL),(131,131,NULL,'MAT_000131','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.825302',NULL),(132,132,NULL,'MAT_000132','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.825367',NULL),(133,133,NULL,'MAT_000133','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.825621',NULL),(134,134,NULL,'MAT_000134','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.825895',NULL),(135,135,NULL,'MAT_000135','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.826132',NULL),(136,136,NULL,'MAT_000136','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.826247',NULL),(137,137,NULL,'MAT_000137','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.826333',NULL),(138,138,NULL,'MAT_000138','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.826423',NULL),(139,139,NULL,'MAT_000139','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.826502',NULL),(140,140,NULL,'MAT_000140','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.826567',NULL),(141,141,NULL,'MAT_000141','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.826667',NULL),(142,142,NULL,'MAT_000142','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.826787',NULL),(143,143,NULL,'MAT_000143','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.826862',NULL),(144,144,NULL,'MAT_000144','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.826942',NULL),(145,145,NULL,'MAT_000145','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.827019',NULL),(146,146,NULL,'MAT_000146','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.827101',NULL),(147,147,NULL,'MAT_000147','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.827177',NULL),(148,148,NULL,'MAT_000148','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.827255',NULL),(149,149,NULL,'MAT_000149','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.827330',NULL),(150,150,NULL,'MAT_000150','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.827393',NULL),(151,151,NULL,'MAT_000151','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.827457',NULL),(152,152,NULL,'MAT_000152','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.827521',NULL),(153,153,NULL,'MAT_000153','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.827589',NULL),(154,154,NULL,'MAT_000154','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.827662',NULL),(155,155,NULL,'MAT_000155','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.827731',NULL),(156,156,NULL,'MAT_000156','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.827802',NULL),(157,157,NULL,'MAT_000157','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.827874',NULL),(158,158,NULL,'MAT_000158','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.827981',NULL),(159,159,NULL,'MAT_000159','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.828114',NULL),(160,160,NULL,'MAT_000160','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.828190',NULL),(161,161,NULL,'MAT_000161','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.828273',NULL),(162,162,NULL,'MAT_000162','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.828344',NULL),(163,163,NULL,'MAT_000163','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.828415',NULL),(164,164,NULL,'MAT_000164','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.828490',NULL),(165,165,NULL,'MAT_000165','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.829009',NULL),(166,166,NULL,'MAT_000166','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.829124',NULL),(167,167,NULL,'MAT_000167','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.829208',NULL),(168,168,NULL,'MAT_000168','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.829289',NULL),(169,169,NULL,'MAT_000169','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.829366',NULL),(170,170,NULL,'MAT_000170','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.831521',NULL),(171,171,NULL,'MAT_000171','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.831632',NULL),(172,172,NULL,'MAT_000172','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.831709',NULL),(173,173,NULL,'MAT_000173','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.831785',NULL),(174,174,NULL,'MAT_000174','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.831900',NULL),(175,175,NULL,'MAT_000175','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.831996',NULL),(176,176,NULL,'MAT_000176','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.832073',NULL),(177,177,NULL,'MAT_000177','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.832207',NULL),(178,178,NULL,'MAT_000178','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.832336',NULL),(179,179,NULL,'MAT_000179','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.832426',NULL),(180,180,NULL,'MAT_000180','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.832500',NULL),(181,181,NULL,'MAT_000181','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.832575',NULL),(182,182,NULL,'MAT_000182','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.832651',NULL),(183,183,NULL,'MAT_000183','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.832726',NULL),(184,184,NULL,'MAT_000184','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.832806',NULL),(185,185,NULL,'MAT_000185','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.832916',NULL),(186,186,NULL,'MAT_000186','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.833016',NULL),(187,187,NULL,'MAT_000187','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.833129',NULL),(188,188,NULL,'MAT_000188','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.833238',NULL),(189,189,NULL,'MAT_000189','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.833327',NULL),(190,190,NULL,'MAT_000190','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.833398',NULL),(191,191,NULL,'MAT_000191','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.833475',NULL),(192,192,NULL,'MAT_000192','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.833546',NULL),(193,193,NULL,'MAT_000193','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.833619',NULL),(194,194,NULL,'MAT_000194','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.833690',NULL),(195,195,NULL,'MAT_000195','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.833764',NULL),(196,196,NULL,'MAT_000196','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.833837',NULL),(197,197,NULL,'MAT_000197','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.833911',NULL),(198,198,NULL,'MAT_000198','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.833993',NULL),(199,199,NULL,'MAT_000199','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.834068',NULL),(200,200,NULL,'MAT_000200','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.834134',NULL),(201,201,NULL,'MAT_000201','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.834198',NULL),(202,202,NULL,'MAT_000202','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.834271',NULL),(203,203,NULL,'MAT_000203','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.834338',NULL),(204,204,NULL,'MAT_000204','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.834409',NULL),(205,205,NULL,'MAT_000205','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.834480',NULL),(206,206,NULL,'MAT_000206','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.835202',NULL),(207,207,NULL,'MAT_000207','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.835331',NULL),(208,208,NULL,'MAT_000208','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.835415',NULL),(209,209,NULL,'MAT_000209','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.835495',NULL),(210,210,NULL,'MAT_000210','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.835572',NULL),(211,211,NULL,'MAT_000211','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.835643',NULL),(212,212,NULL,'MAT_000212','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.835710',NULL),(213,213,NULL,'MAT_000213','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.835814',NULL),(214,214,NULL,'MAT_000214','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.835895',NULL),(215,215,NULL,'MAT_000215','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.836017',NULL),(216,216,NULL,'MAT_000216','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.836117',NULL),(217,217,NULL,'MAT_000217','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.836200',NULL),(218,218,NULL,'MAT_000218','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.836285',NULL),(219,219,NULL,'MAT_000219','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.836364',NULL),(220,220,NULL,'MAT_000220','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.836429',NULL),(221,221,NULL,'MAT_000221','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.836496',NULL),(222,222,NULL,'MAT_000222','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.836567',NULL),(223,223,NULL,'MAT_000223','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.836635',NULL),(224,224,NULL,'MAT_000224','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.836705',NULL),(225,225,NULL,'MAT_000225','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.836779',NULL),(226,226,NULL,'MAT_000226','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.836854',NULL),(227,227,NULL,'MAT_000227','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.836943',NULL),(228,228,NULL,'MAT_000228','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.837024',NULL),(229,229,NULL,'MAT_000229','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.837206',NULL),(230,230,NULL,'MAT_000230','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.837319',NULL),(231,231,NULL,'MAT_000231','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.837424',NULL),(232,232,NULL,'MAT_000232','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.837507',NULL),(233,233,NULL,'MAT_000233','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.837585',NULL),(234,234,NULL,'MAT_000234','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.837685',NULL),(235,235,NULL,'MAT_000235','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.837775',NULL),(236,236,NULL,'MAT_000236','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.837861',NULL),(237,237,NULL,'MAT_000237','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.837981',NULL),(238,238,NULL,'MAT_000238','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.838062',NULL),(239,239,NULL,'MAT_000239','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.838138',NULL),(240,240,NULL,'MAT_000240','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.838227',NULL),(241,241,NULL,'MAT_000241','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.838293',NULL),(242,242,NULL,'MAT_000242','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.838363',NULL),(243,243,NULL,'MAT_000243','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.838433',NULL),(244,244,NULL,'MAT_000244','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.838504',NULL),(245,245,NULL,'MAT_000245','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.838577',NULL),(246,246,NULL,'MAT_000246','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.838743',NULL),(247,247,NULL,'MAT_000247','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.838840',NULL),(248,248,NULL,'MAT_000248','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.839073',NULL),(249,249,NULL,'MAT_000249','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.839224',NULL),(250,250,NULL,'MAT_000250','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.839307',NULL),(251,251,NULL,'MAT_000251','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.839389',NULL),(252,252,NULL,'MAT_000252','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.839458',NULL),(253,253,NULL,'MAT_000253','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.839529',NULL),(254,254,NULL,'MAT_000254','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.840645',NULL),(255,255,NULL,'MAT_000255','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.840769',NULL),(256,256,NULL,'MAT_000256','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.840858',NULL),(257,257,NULL,'MAT_000257','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.840945',NULL),(258,258,NULL,'MAT_000258','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.841022',NULL),(259,259,NULL,'MAT_000259','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.841105',NULL),(260,260,NULL,'MAT_000260','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.841169',NULL),(261,261,NULL,'MAT_000261','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.841233',NULL),(262,262,NULL,'MAT_000262','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.841301',NULL),(263,263,NULL,'MAT_000263','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.841371',NULL),(264,264,NULL,'MAT_000264','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.841440',NULL),(265,265,NULL,'MAT_000265','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.841511',NULL),(266,266,NULL,'MAT_000266','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.841581',NULL),(267,267,NULL,'MAT_000267','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.841661',NULL),(268,268,NULL,'MAT_000268','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.841735',NULL),(269,269,NULL,'MAT_000269','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.841810',NULL),(270,270,NULL,'MAT_000270','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.841873',NULL),(271,271,NULL,'MAT_000271','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.841944',NULL),(272,272,NULL,'MAT_000272','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.842010',NULL),(273,273,NULL,'MAT_000273','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.842077',NULL),(274,274,NULL,'MAT_000274','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.842147',NULL),(275,275,NULL,'MAT_000275','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.842318',NULL),(276,276,NULL,'MAT_000276','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.842413',NULL),(277,277,NULL,'MAT_000277','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.842499',NULL),(278,278,NULL,'MAT_000278','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.842642',NULL),(279,279,NULL,'MAT_000279','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.842769',NULL),(280,280,NULL,'MAT_000280','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.842844',NULL),(281,281,NULL,'MAT_000281','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.842919',NULL),(282,282,NULL,'MAT_000282','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.842999',NULL),(283,283,NULL,'MAT_000283','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.843072',NULL),(284,284,NULL,'MAT_000284','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.843152',NULL),(285,285,NULL,'MAT_000285','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.843225',NULL),(286,286,NULL,'MAT_000286','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.843311',NULL),(287,287,NULL,'MAT_000287','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.843387',NULL),(288,288,NULL,'MAT_000288','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.843460',NULL),(289,289,NULL,'MAT_000289','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.843535',NULL),(290,290,NULL,'MAT_000290','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.843599',NULL),(291,291,NULL,'MAT_000291','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.843663',NULL),(292,292,NULL,'MAT_000292','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.843734',NULL),(293,293,NULL,'MAT_000293','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.843803',NULL),(294,294,NULL,'MAT_000294','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.843872',NULL),(295,295,NULL,'MAT_000295','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.843946',NULL),(296,296,NULL,'MAT_000296','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.844018',NULL),(297,297,NULL,'MAT_000297','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.844091',NULL),(298,298,NULL,'MAT_000298','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.844166',NULL),(299,299,NULL,'MAT_000299','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.844238',NULL),(300,300,NULL,'MAT_000300','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.844314',NULL),(301,301,NULL,'MAT_000301','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.844380',NULL),(302,302,NULL,'MAT_000302','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.844445',NULL),(303,303,NULL,'MAT_000303','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.844510',NULL),(304,304,NULL,'MAT_000304','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.844583',NULL),(305,305,NULL,'MAT_000305','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.844653',NULL),(306,306,NULL,'MAT_000306','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.844729',NULL),(307,307,NULL,'MAT_000307','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.844803',NULL),(308,308,NULL,'MAT_000308','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.844875',NULL),(309,309,NULL,'MAT_000309','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.844955',NULL),(310,310,NULL,'MAT_000310','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.845019',NULL),(311,311,NULL,'MAT_000311','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.845084',NULL),(312,312,NULL,'MAT_000312','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.845156',NULL),(313,313,NULL,'MAT_000313','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.845225',NULL),(314,314,NULL,'MAT_000314','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.845293',NULL),(315,315,NULL,'MAT_000315','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.845365',NULL),(316,316,NULL,'MAT_000316','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.845435',NULL),(317,317,NULL,'MAT_000317','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.845515',NULL),(318,318,NULL,'MAT_000318','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.845591',NULL),(319,319,NULL,'MAT_000319','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.845672',NULL),(320,320,NULL,'MAT_000320','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.845737',NULL),(321,321,NULL,'MAT_000321','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.845802',NULL),(322,322,NULL,'MAT_000322','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.845868',NULL),(323,323,NULL,'MAT_000323','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.845941',NULL),(324,324,NULL,'MAT_000324','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.846069',NULL),(325,325,NULL,'MAT_000325','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.846165',NULL),(326,326,NULL,'MAT_000326','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.846241',NULL),(327,327,NULL,'MAT_000327','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.846315',NULL),(328,328,NULL,'MAT_000328','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.846391',NULL),(329,329,NULL,'MAT_000329','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.846504',NULL),(330,330,NULL,'MAT_000330','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.846573',NULL),(331,331,NULL,'MAT_000331','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.846639',NULL),(332,332,NULL,'MAT_000332','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.846704',NULL),(333,333,NULL,'MAT_000333','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.846777',NULL),(334,334,NULL,'MAT_000334','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.846846',NULL),(335,335,NULL,'MAT_000335','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.846968',NULL),(336,336,NULL,'MAT_000336','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.847057',NULL),(337,337,NULL,'MAT_000337','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.847134',NULL),(338,338,NULL,'MAT_000338','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.847209',NULL),(339,339,NULL,'MAT_000339','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.847286',NULL),(340,340,NULL,'MAT_000340','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.847351',NULL),(341,341,NULL,'MAT_000341','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.847416',NULL),(342,342,NULL,'MAT_000342','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.847483',NULL),(343,343,NULL,'MAT_000343','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.847553',NULL),(344,344,NULL,'MAT_000344','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.847621',NULL),(345,345,NULL,'MAT_000345','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.847691',NULL),(346,346,NULL,'MAT_000346','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.847764',NULL),(347,347,NULL,'MAT_000347','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.847838',NULL),(348,348,NULL,'MAT_000348','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.847916',NULL),(349,349,NULL,'MAT_000349','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.848008',NULL),(350,350,NULL,'MAT_000350','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.848078',NULL),(351,351,NULL,'MAT_000351','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.848145',NULL),(352,352,NULL,'MAT_000352','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.848211',NULL),(353,353,NULL,'MAT_000353','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.848278',NULL),(354,354,NULL,'MAT_000354','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.848347',NULL),(355,355,NULL,'MAT_000355','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.848419',NULL),(356,356,NULL,'MAT_000356','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.848497',NULL),(357,357,NULL,'MAT_000357','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.848571',NULL),(358,358,NULL,'MAT_000358','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.848646',NULL),(359,359,NULL,'MAT_000359','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.848720',NULL),(360,360,NULL,'MAT_000360','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.848785',NULL),(361,361,NULL,'MAT_000361','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.848849',NULL),(362,362,NULL,'MAT_000362','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.848914',NULL),(363,363,NULL,'MAT_000363','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.848993',NULL),(364,364,NULL,'MAT_000364','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.849063',NULL),(365,365,NULL,'MAT_000365','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.849134',NULL),(366,366,NULL,'MAT_000366','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.849213',NULL),(367,367,NULL,'MAT_000367','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.849286',NULL),(368,368,NULL,'MAT_000368','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.849360',NULL),(369,369,NULL,'MAT_000369','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.849437',NULL),(370,370,NULL,'MAT_000370','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.849500',NULL),(371,371,NULL,'MAT_000371','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.849579',NULL),(372,372,NULL,'MAT_000372','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.849645',NULL),(373,373,NULL,'MAT_000373','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.849713',NULL),(374,374,NULL,'MAT_000374','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.849782',NULL),(375,375,NULL,'MAT_000375','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.849854',NULL),(376,376,NULL,'MAT_000376','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.849930',NULL),(377,377,NULL,'MAT_000377','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.850005',NULL),(378,378,NULL,'MAT_000378','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.850080',NULL),(379,379,NULL,'MAT_000379','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.850155',NULL),(380,380,NULL,'MAT_000380','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.850218',NULL),(381,381,NULL,'MAT_000381','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.850283',NULL),(382,382,NULL,'MAT_000382','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.850352',NULL),(383,383,NULL,'MAT_000383','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.850581',NULL),(384,384,NULL,'MAT_000384','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.850658',NULL),(385,385,NULL,'MAT_000385','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.850728',NULL),(386,386,NULL,'MAT_000386','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.850805',NULL),(387,387,NULL,'MAT_000387','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.850884',NULL),(388,388,NULL,'MAT_000388','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.851032',NULL),(389,389,NULL,'MAT_000389','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.851140',NULL),(390,390,NULL,'MAT_000390','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.851243',NULL),(391,391,NULL,'MAT_000391','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.851321',NULL),(392,392,NULL,'MAT_000392','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.851426',NULL),(393,393,NULL,'MAT_000393','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.851506',NULL),(394,394,NULL,'MAT_000394','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.851578',NULL),(395,395,NULL,'MAT_000395','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.851649',NULL),(396,396,NULL,'MAT_000396','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.851727',NULL),(397,397,NULL,'MAT_000397','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.851802',NULL),(398,398,NULL,'MAT_000398','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.851877',NULL),(399,399,NULL,'MAT_000399','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.851962',NULL),(400,400,NULL,'MAT_000400','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.852031',NULL),(401,401,NULL,'MAT_000401','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.852097',NULL),(402,402,NULL,'MAT_000402','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.852163',NULL),(403,403,NULL,'MAT_000403','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.852234',NULL),(404,404,NULL,'MAT_000404','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.852308',NULL),(405,405,NULL,'MAT_000405','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.852378',NULL),(406,406,NULL,'MAT_000406','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.852449',NULL),(407,407,NULL,'MAT_000407','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.852521',NULL),(408,408,NULL,'MAT_000408','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.852595',NULL),(409,409,NULL,'MAT_000409','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.852670',NULL),(410,410,NULL,'MAT_000410','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.852738',NULL),(411,411,NULL,'MAT_000411','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.852802',NULL),(412,412,NULL,'MAT_000412','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.852867',NULL),(413,413,NULL,'MAT_000413','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.852939',NULL),(414,414,NULL,'MAT_000414','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.853008',NULL),(415,415,NULL,'MAT_000415','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.853079',NULL),(416,416,NULL,'MAT_000416','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.853159',NULL),(417,417,NULL,'MAT_000417','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.853234',NULL),(418,418,NULL,'MAT_000418','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.853307',NULL),(419,419,NULL,'MAT_000419','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.853381',NULL),(420,420,NULL,'MAT_000420','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.853444',NULL),(421,421,NULL,'MAT_000421','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.853508',NULL),(422,422,NULL,'MAT_000422','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.854586',NULL),(423,423,NULL,'MAT_000423','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.854700',NULL),(424,424,NULL,'MAT_000424','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.854776',NULL),(425,425,NULL,'MAT_000425','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.854857',NULL),(426,426,NULL,'MAT_000426','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.854938',NULL),(427,427,NULL,'MAT_000427','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.855016',NULL),(428,428,NULL,'MAT_000428','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.855147',NULL),(429,429,NULL,'MAT_000429','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.855234',NULL),(430,430,NULL,'MAT_000430','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.855305',NULL),(431,431,NULL,'MAT_000431','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.855374',NULL),(432,432,NULL,'MAT_000432','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.855448',NULL),(433,433,NULL,'MAT_000433','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.855519',NULL),(434,434,NULL,'MAT_000434','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.855591',NULL),(435,435,NULL,'MAT_000435','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.855660',NULL),(436,436,NULL,'MAT_000436','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.855731',NULL),(437,437,NULL,'MAT_000437','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.855806',NULL),(438,438,NULL,'MAT_000438','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.855882',NULL),(439,439,NULL,'MAT_000439','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.855964',NULL),(440,440,NULL,'MAT_000440','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.856027',NULL),(441,441,NULL,'MAT_000441','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.856092',NULL),(442,442,NULL,'MAT_000442','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.856158',NULL),(443,443,NULL,'MAT_000443','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.856225',NULL),(444,444,NULL,'MAT_000444','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.856293',NULL),(445,445,NULL,'MAT_000445','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.856362',NULL),(446,446,NULL,'MAT_000446','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.856434',NULL),(447,447,NULL,'MAT_000447','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.856505',NULL),(448,448,NULL,'MAT_000448','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.856589',NULL),(449,449,NULL,'MAT_000449','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.856731',NULL),(450,450,NULL,'MAT_000450','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.856806',NULL),(451,451,NULL,'MAT_000451','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.856871',NULL),(452,452,NULL,'MAT_000452','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.856941',NULL),(453,453,NULL,'MAT_000453','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.857010',NULL),(454,454,NULL,'MAT_000454','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.857078',NULL),(455,455,NULL,'MAT_000455','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.857146',NULL),(456,456,NULL,'MAT_000456','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.857217',NULL),(457,457,NULL,'MAT_000457','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.857290',NULL),(458,458,NULL,'MAT_000458','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.857363',NULL),(459,459,NULL,'MAT_000459','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.857438',NULL),(460,460,NULL,'MAT_000460','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.857506',NULL),(461,461,NULL,'MAT_000461','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.857569',NULL),(462,462,NULL,'MAT_000462','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.857634',NULL),(463,463,NULL,'MAT_000463','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.857700',NULL),(464,464,NULL,'MAT_000464','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.857768',NULL),(465,465,NULL,'MAT_000465','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.857843',NULL),(466,466,NULL,'MAT_000466','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.857913',NULL),(467,467,NULL,'MAT_000467','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.857992',NULL),(468,468,NULL,'MAT_000468','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.858066',NULL),(469,469,NULL,'MAT_000469','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.858140',NULL),(470,470,NULL,'MAT_000470','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.858203',NULL),(471,471,NULL,'MAT_000471','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.858268',NULL),(472,472,NULL,'MAT_000472','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.858332',NULL),(473,473,NULL,'MAT_000473','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.858399',NULL),(474,474,NULL,'MAT_000474','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.858467',NULL),(475,475,NULL,'MAT_000475','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.858537',NULL),(476,476,NULL,'MAT_000476','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.858606',NULL),(477,477,NULL,'MAT_000477','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.858678',NULL),(478,478,NULL,'MAT_000478','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.858751',NULL),(479,479,NULL,'MAT_000479','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.858823',NULL),(480,480,NULL,'MAT_000480','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.859073',NULL),(481,481,NULL,'MAT_000481','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.859170',NULL),(482,482,NULL,'MAT_000482','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.859246',NULL),(483,483,NULL,'MAT_000483','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.859317',NULL),(484,484,NULL,'MAT_000484','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.859389',NULL),(485,485,NULL,'MAT_000485','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.859517',NULL),(486,486,NULL,'MAT_000486','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.859637',NULL),(487,487,NULL,'MAT_000487','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.859724',NULL),(488,488,NULL,'MAT_000488','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.859808',NULL),(489,489,NULL,'MAT_000489','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.859890',NULL),(490,490,NULL,'MAT_000490','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.859968',NULL),(491,491,NULL,'MAT_000491','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.860037',NULL),(492,492,NULL,'MAT_000492','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.860108',NULL),(493,493,NULL,'MAT_000493','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.860220',NULL),(494,494,NULL,'MAT_000494','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.860296',NULL),(495,495,NULL,'MAT_000495','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.860371',NULL),(496,496,NULL,'MAT_000496','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.860449',NULL),(497,497,NULL,'MAT_000497','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.860527',NULL),(498,498,NULL,'MAT_000498','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.860612',NULL),(499,499,NULL,'MAT_000499','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.860690',NULL),(500,500,NULL,'MAT_000500','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.860754',NULL);
+INSERT INTO `funcionario` VALUES (1,1,1,'MAT_000001','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.812711','2026-03-26 22:20:54.760370'),(2,2,1,'MAT_000002','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.814436','2026-03-26 22:20:54.760370'),(3,3,1,'MAT_000003','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.814797','2026-03-26 22:20:54.760370'),(4,4,1,'MAT_000004','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.814908','2026-03-26 22:20:54.760370'),(5,5,1,'MAT_000005','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.815159','2026-03-26 22:20:54.760370'),(6,6,1,'MAT_000006','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.815239','2026-03-26 22:20:54.760370'),(7,7,1,'MAT_000007','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.815317','2026-03-26 22:20:54.760370'),(8,8,1,'MAT_000008','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.815395','2026-03-26 22:20:54.760370'),(9,9,1,'MAT_000009','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.815480','2026-03-26 22:20:54.760370'),(10,10,1,'MAT_000010','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.815544','2026-03-26 22:20:54.760370'),(11,11,1,'MAT_000011','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.815612','2026-03-26 22:20:54.760370'),(12,12,1,'MAT_000012','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.815678','2026-03-26 22:20:54.760370'),(13,13,1,'MAT_000013','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.815745','2026-03-26 22:20:54.760370'),(14,14,1,'MAT_000014','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.815814','2026-03-26 22:20:54.760370'),(15,15,1,'MAT_000015','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.815887','2026-03-26 22:20:54.760370'),(16,16,1,'MAT_000016','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.815968','2026-03-26 22:20:54.760370'),(17,17,1,'MAT_000017','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.816041','2026-03-26 22:20:54.760370'),(18,18,1,'MAT_000018','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.816120','2026-03-26 22:20:54.760370'),(19,19,1,'MAT_000019','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.816194','2026-03-26 22:20:54.760370'),(20,20,1,'MAT_000020','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.816257','2026-03-26 22:20:54.760370'),(21,21,1,'MAT_000021','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.816369','2026-03-26 22:20:54.760370'),(22,22,1,'MAT_000022','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.816457','2026-03-26 22:20:54.760370'),(23,23,1,'MAT_000023','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.816537','2026-03-26 22:20:54.760370'),(24,24,1,'MAT_000024','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.816616','2026-03-26 22:20:54.760370'),(25,25,1,'MAT_000025','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.816690','2026-03-26 22:20:54.760370'),(26,26,1,'MAT_000026','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.816769','2026-03-26 22:20:54.760370'),(27,27,1,'MAT_000027','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.816846','2026-03-26 22:20:54.760370'),(28,28,1,'MAT_000028','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.816929','2026-03-26 22:20:54.760370'),(29,29,1,'MAT_000029','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.817017','2026-03-26 22:20:54.760370'),(30,30,1,'MAT_000030','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.817158','2026-03-26 22:20:54.760370'),(31,31,1,'MAT_000031','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.817248','2026-03-26 22:20:54.760370'),(32,32,1,'MAT_000032','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.817322','2026-03-26 22:20:54.760370'),(33,33,1,'MAT_000033','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.817414','2026-03-26 22:20:54.760370'),(34,34,1,'MAT_000034','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.817486','2026-03-26 22:20:54.760370'),(35,35,1,'MAT_000035','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.817567','2026-03-26 22:20:54.760370'),(36,36,1,'MAT_000036','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.817640','2026-03-26 22:20:54.760370'),(37,37,1,'MAT_000037','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.817718','2026-03-26 22:20:54.760370'),(38,38,1,'MAT_000038','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.817794','2026-03-26 22:20:54.760370'),(39,39,1,'MAT_000039','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.817867','2026-03-26 22:20:54.760370'),(40,40,1,'MAT_000040','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.817947','2026-03-26 22:20:54.760370'),(41,41,1,'MAT_000041','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.818018','2026-03-26 22:20:54.760370'),(42,42,1,'MAT_000042','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.818083','2026-03-26 22:20:54.760370'),(43,43,1,'MAT_000043','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.818149','2026-03-26 22:20:54.760370'),(44,44,1,'MAT_000044','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.818218','2026-03-26 22:20:54.760370'),(45,45,1,'MAT_000045','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.818293','2026-03-26 22:20:54.760370'),(46,46,1,'MAT_000046','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.818365','2026-03-26 22:20:54.760370'),(47,47,1,'MAT_000047','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.818440','2026-03-26 22:20:54.760370'),(48,48,1,'MAT_000048','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.818517','2026-03-26 22:20:54.760370'),(49,49,1,'MAT_000049','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.818599','2026-03-26 22:20:54.760370'),(50,50,1,'MAT_000050','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.818664','2026-03-26 22:20:54.760370'),(51,51,1,'MAT_000051','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.818727','2026-03-26 22:20:54.760370'),(52,52,1,'MAT_000052','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.818793','2026-03-26 22:20:54.760370'),(53,53,1,'MAT_000053','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.818862','2026-03-26 22:20:54.760370'),(54,54,1,'MAT_000054','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.818941','2026-03-26 22:20:54.760370'),(55,55,1,'MAT_000055','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.819016','2026-03-26 22:20:54.760370'),(56,56,1,'MAT_000056','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.819087','2026-03-26 22:20:54.760370'),(57,57,1,'MAT_000057','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.819161','2026-03-26 22:20:54.760370'),(58,58,1,'MAT_000058','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.819234','2026-03-26 22:20:54.760370'),(59,59,1,'MAT_000059','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.819314','2026-03-26 22:20:54.760370'),(60,60,1,'MAT_000060','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.819378','2026-03-26 22:20:54.760370'),(61,61,1,'MAT_000061','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.819447','2026-03-26 22:20:54.760370'),(62,62,1,'MAT_000062','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.819513','2026-03-26 22:20:54.760370'),(63,63,1,'MAT_000063','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.819615','2026-03-26 22:20:54.760370'),(64,64,1,'MAT_000064','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.819711','2026-03-26 22:20:54.760370'),(65,65,1,'MAT_000065','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.819791','2026-03-26 22:20:54.760370'),(66,66,1,'MAT_000066','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.819868','2026-03-26 22:20:54.760370'),(67,67,1,'MAT_000067','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.819978','2026-03-26 22:20:54.760370'),(68,68,1,'MAT_000068','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.820094','2026-03-26 22:20:54.760370'),(69,69,1,'MAT_000069','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.820183','2026-03-26 22:20:54.760370'),(70,70,1,'MAT_000070','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.820259','2026-03-26 22:20:54.760370'),(71,71,1,'MAT_000071','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.820337','2026-03-26 22:20:54.760370'),(72,72,1,'MAT_000072','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.820408','2026-03-26 22:20:54.760370'),(73,73,1,'MAT_000073','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.820492','2026-03-26 22:20:54.760370'),(74,74,1,'MAT_000074','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.820564','2026-03-26 22:20:54.760370'),(75,75,1,'MAT_000075','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.820634','2026-03-26 22:20:54.760370'),(76,76,1,'MAT_000076','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.820706','2026-03-26 22:20:54.760370'),(77,77,1,'MAT_000077','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.820780','2026-03-26 22:20:54.760370'),(78,78,1,'MAT_000078','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.820854','2026-03-26 22:20:54.760370'),(79,79,1,'MAT_000079','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.821022','2026-03-26 22:20:54.760370'),(80,80,1,'MAT_000080','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.821129','2026-03-26 22:20:54.760370'),(81,81,1,'MAT_000081','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.821205','2026-03-26 22:20:54.760370'),(82,82,1,'MAT_000082','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.821282','2026-03-26 22:20:54.760370'),(83,83,1,'MAT_000083','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.821357','2026-03-26 22:20:54.760370'),(84,84,1,'MAT_000084','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.821430','2026-03-26 22:20:54.760370'),(85,85,1,'MAT_000085','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.821554','2026-03-26 22:20:54.760370'),(86,86,1,'MAT_000086','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.821641','2026-03-26 22:20:54.760370'),(87,87,1,'MAT_000087','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.821765','2026-03-26 22:20:54.760370'),(88,88,1,'MAT_000088','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.821849','2026-03-26 22:20:54.760370'),(89,89,1,'MAT_000089','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.821942','2026-03-26 22:20:54.760370'),(90,90,1,'MAT_000090','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.822012','2026-03-26 22:20:54.760370'),(91,91,1,'MAT_000091','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.822095','2026-03-26 22:20:54.760370'),(92,92,1,'MAT_000092','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.822170','2026-03-26 22:20:54.760370'),(93,93,1,'MAT_000093','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.822238','2026-03-26 22:20:54.760370'),(94,94,1,'MAT_000094','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.822306','2026-03-26 22:20:54.760370'),(95,95,1,'MAT_000095','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.822376','2026-03-26 22:20:54.760370'),(96,96,1,'MAT_000096','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.822447','2026-03-26 22:20:54.760370'),(97,97,1,'MAT_000097','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.822595','2026-03-26 22:20:54.760370'),(98,98,1,'MAT_000098','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.822682','2026-03-26 22:20:54.760370'),(99,99,1,'MAT_000099','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.822760','2026-03-26 22:20:54.760370'),(100,100,1,'MAT_000100','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.822823','2026-03-26 22:20:54.760370'),(101,101,1,'MAT_000101','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.822888','2026-03-26 22:20:54.760370'),(102,102,1,'MAT_000102','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.822974','2026-03-26 22:20:54.760370'),(103,103,1,'MAT_000103','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.823044','2026-03-26 22:20:54.760370'),(104,104,1,'MAT_000104','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.823115','2026-03-26 22:20:54.760370'),(105,105,1,'MAT_000105','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.823199','2026-03-26 22:20:54.760370'),(106,106,1,'MAT_000106','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.823273','2026-03-26 22:20:54.760370'),(107,107,1,'MAT_000107','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.823347','2026-03-26 22:20:54.760370'),(108,108,1,'MAT_000108','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.823475','2026-03-26 22:20:54.760370'),(109,109,1,'MAT_000109','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.823560','2026-03-26 22:20:54.760370'),(110,110,1,'MAT_000110','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.823623','2026-03-26 22:20:54.760370'),(111,111,1,'MAT_000111','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.823689','2026-03-26 22:20:54.760370'),(112,112,1,'MAT_000112','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.823755','2026-03-26 22:20:54.760370'),(113,113,1,'MAT_000113','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.823836','2026-03-26 22:20:54.760370'),(114,114,1,'MAT_000114','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.823908','2026-03-26 22:20:54.760370'),(115,115,1,'MAT_000115','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.824001','2026-03-26 22:20:54.760370'),(116,116,1,'MAT_000116','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.824118','2026-03-26 22:20:54.760370'),(117,117,1,'MAT_000117','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.824213','2026-03-26 22:20:54.760370'),(118,118,1,'MAT_000118','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.824290','2026-03-26 22:20:54.760370'),(119,119,1,'MAT_000119','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.824365','2026-03-26 22:20:54.760370'),(120,120,1,'MAT_000120','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.824429','2026-03-26 22:20:54.760370'),(121,121,1,'MAT_000121','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.824501','2026-03-26 22:20:54.760370'),(122,122,1,'MAT_000122','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.824567','2026-03-26 22:20:54.760370'),(123,123,1,'MAT_000123','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.824638','2026-03-26 22:20:54.760370'),(124,124,1,'MAT_000124','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.824709','2026-03-26 22:20:54.760370'),(125,125,1,'MAT_000125','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.824823','2026-03-26 22:20:54.760370'),(126,126,1,'MAT_000126','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.824950','2026-03-26 22:20:54.760370'),(127,127,1,'MAT_000127','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.825027','2026-03-26 22:20:54.760370'),(128,128,1,'MAT_000128','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.825101','2026-03-26 22:20:54.760370'),(129,129,1,'MAT_000129','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.825175','2026-03-26 22:20:54.760370'),(130,130,1,'MAT_000130','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.825238','2026-03-26 22:20:54.760370'),(131,131,1,'MAT_000131','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.825302','2026-03-26 22:20:54.760370'),(132,132,1,'MAT_000132','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.825367','2026-03-26 22:20:54.760370'),(133,133,1,'MAT_000133','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.825621','2026-03-26 22:20:54.760370'),(134,134,1,'MAT_000134','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.825895','2026-03-26 22:20:54.760370'),(135,135,1,'MAT_000135','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.826132','2026-03-26 22:20:54.760370'),(136,136,1,'MAT_000136','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.826247','2026-03-26 22:20:54.760370'),(137,137,1,'MAT_000137','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.826333','2026-03-26 22:20:54.760370'),(138,138,1,'MAT_000138','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.826423','2026-03-26 22:20:54.760370'),(139,139,1,'MAT_000139','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.826502','2026-03-26 22:20:54.760370'),(140,140,1,'MAT_000140','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.826567','2026-03-26 22:20:54.760370'),(141,141,1,'MAT_000141','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.826667','2026-03-26 22:20:54.760370'),(142,142,1,'MAT_000142','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.826787','2026-03-26 22:20:54.760370'),(143,143,1,'MAT_000143','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.826862','2026-03-26 22:20:54.760370'),(144,144,1,'MAT_000144','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.826942','2026-03-26 22:20:54.760370'),(145,145,1,'MAT_000145','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.827019','2026-03-26 22:20:54.760370'),(146,146,1,'MAT_000146','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.827101','2026-03-26 22:20:54.760370'),(147,147,1,'MAT_000147','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.827177','2026-03-26 22:20:54.760370'),(148,148,1,'MAT_000148','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.827255','2026-03-26 22:20:54.760370'),(149,149,1,'MAT_000149','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.827330','2026-03-26 22:20:54.760370'),(150,150,1,'MAT_000150','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.827393','2026-03-26 22:20:54.760370'),(151,151,1,'MAT_000151','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.827457','2026-03-26 22:20:54.760370'),(152,152,1,'MAT_000152','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.827521','2026-03-26 22:20:54.760370'),(153,153,1,'MAT_000153','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.827589','2026-03-26 22:20:54.760370'),(154,154,1,'MAT_000154','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.827662','2026-03-26 22:20:54.760370'),(155,155,1,'MAT_000155','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.827731','2026-03-26 22:20:54.760370'),(156,156,1,'MAT_000156','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.827802','2026-03-26 22:20:54.760370'),(157,157,1,'MAT_000157','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.827874','2026-03-26 22:20:54.760370'),(158,158,1,'MAT_000158','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.827981','2026-03-26 22:20:54.760370'),(159,159,1,'MAT_000159','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.828114','2026-03-26 22:20:54.760370'),(160,160,1,'MAT_000160','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.828190','2026-03-26 22:20:54.760370'),(161,161,1,'MAT_000161','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.828273','2026-03-26 22:20:54.760370'),(162,162,1,'MAT_000162','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.828344','2026-03-26 22:20:54.760370'),(163,163,1,'MAT_000163','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.828415','2026-03-26 22:20:54.760370'),(164,164,1,'MAT_000164','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.828490','2026-03-26 22:20:54.760370'),(165,165,1,'MAT_000165','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.829009','2026-03-26 22:20:54.760370'),(166,166,1,'MAT_000166','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.829124','2026-03-26 22:20:54.760370'),(167,167,1,'MAT_000167','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.829208','2026-03-26 22:20:54.760370'),(168,168,1,'MAT_000168','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.829289','2026-03-26 22:20:54.760370'),(169,169,1,'MAT_000169','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.829366','2026-03-26 22:20:54.760370'),(170,170,1,'MAT_000170','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.831521','2026-03-26 22:20:54.760370'),(171,171,1,'MAT_000171','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.831632','2026-03-26 22:20:54.760370'),(172,172,1,'MAT_000172','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.831709','2026-03-26 22:20:54.760370'),(173,173,1,'MAT_000173','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.831785','2026-03-26 22:20:54.760370'),(174,174,1,'MAT_000174','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.831900','2026-03-26 22:20:54.760370'),(175,175,1,'MAT_000175','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.831996','2026-03-26 22:20:54.760370'),(176,176,1,'MAT_000176','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.832073','2026-03-26 22:20:54.760370'),(177,177,1,'MAT_000177','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.832207','2026-03-26 22:20:54.760370'),(178,178,1,'MAT_000178','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.832336','2026-03-26 22:20:54.760370'),(179,179,1,'MAT_000179','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.832426','2026-03-26 22:20:54.760370'),(180,180,1,'MAT_000180','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.832500','2026-03-26 22:20:54.760370'),(181,181,1,'MAT_000181','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.832575','2026-03-26 22:20:54.760370'),(182,182,1,'MAT_000182','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.832651','2026-03-26 22:20:54.760370'),(183,183,1,'MAT_000183','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.832726','2026-03-26 22:20:54.760370'),(184,184,1,'MAT_000184','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.832806','2026-03-26 22:20:54.760370'),(185,185,1,'MAT_000185','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.832916','2026-03-26 22:20:54.760370'),(186,186,1,'MAT_000186','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.833016','2026-03-26 22:20:54.760370'),(187,187,1,'MAT_000187','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.833129','2026-03-26 22:20:54.760370'),(188,188,1,'MAT_000188','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.833238','2026-03-26 22:20:54.760370'),(189,189,1,'MAT_000189','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.833327','2026-03-26 22:20:54.760370'),(190,190,1,'MAT_000190','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.833398','2026-03-26 22:20:54.760370'),(191,191,1,'MAT_000191','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.833475','2026-03-26 22:20:54.760370'),(192,192,1,'MAT_000192','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.833546','2026-03-26 22:20:54.760370'),(193,193,1,'MAT_000193','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.833619','2026-03-26 22:20:54.760370'),(194,194,1,'MAT_000194','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.833690','2026-03-26 22:20:54.760370'),(195,195,1,'MAT_000195','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.833764','2026-03-26 22:20:54.760370'),(196,196,1,'MAT_000196','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.833837','2026-03-26 22:20:54.760370'),(197,197,1,'MAT_000197','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.833911','2026-03-26 22:20:54.760370'),(198,198,1,'MAT_000198','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.833993','2026-03-26 22:20:54.760370'),(199,199,1,'MAT_000199','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.834068','2026-03-26 22:20:54.760370'),(200,200,1,'MAT_000200','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.834134','2026-03-26 22:20:54.760370'),(201,201,1,'MAT_000201','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.834198','2026-03-26 22:20:54.760370'),(202,202,1,'MAT_000202','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.834271','2026-03-26 22:20:54.760370'),(203,203,1,'MAT_000203','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.834338','2026-03-26 22:20:54.760370'),(204,204,1,'MAT_000204','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.834409','2026-03-26 22:20:54.760370'),(205,205,1,'MAT_000205','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.834480','2026-03-26 22:20:54.760370'),(206,206,1,'MAT_000206','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.835202','2026-03-26 22:20:54.760370'),(207,207,1,'MAT_000207','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.835331','2026-03-26 22:20:54.760370'),(208,208,1,'MAT_000208','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.835415','2026-03-26 22:20:54.760370'),(209,209,1,'MAT_000209','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.835495','2026-03-26 22:20:54.760370'),(210,210,1,'MAT_000210','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.835572','2026-03-26 22:20:54.760370'),(211,211,1,'MAT_000211','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.835643','2026-03-26 22:20:54.760370'),(212,212,1,'MAT_000212','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.835710','2026-03-26 22:20:54.760370'),(213,213,1,'MAT_000213','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.835814','2026-03-26 22:20:54.760370'),(214,214,1,'MAT_000214','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.835895','2026-03-26 22:20:54.760370'),(215,215,1,'MAT_000215','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.836017','2026-03-26 22:20:54.760370'),(216,216,1,'MAT_000216','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.836117','2026-03-26 22:20:54.760370'),(217,217,1,'MAT_000217','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.836200','2026-03-26 22:20:54.760370'),(218,218,1,'MAT_000218','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.836285','2026-03-26 22:20:54.760370'),(219,219,1,'MAT_000219','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.836364','2026-03-26 22:20:54.760370'),(220,220,1,'MAT_000220','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.836429','2026-03-26 22:20:54.760370'),(221,221,1,'MAT_000221','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.836496','2026-03-26 22:20:54.760370'),(222,222,1,'MAT_000222','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.836567','2026-03-26 22:20:54.760370'),(223,223,1,'MAT_000223','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.836635','2026-03-26 22:20:54.760370'),(224,224,1,'MAT_000224','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.836705','2026-03-26 22:20:54.760370'),(225,225,1,'MAT_000225','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.836779','2026-03-26 22:20:54.760370'),(226,226,1,'MAT_000226','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.836854','2026-03-26 22:20:54.760370'),(227,227,1,'MAT_000227','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.836943','2026-03-26 22:20:54.760370'),(228,228,1,'MAT_000228','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.837024','2026-03-26 22:20:54.760370'),(229,229,1,'MAT_000229','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.837206','2026-03-26 22:20:54.760370'),(230,230,1,'MAT_000230','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.837319','2026-03-26 22:20:54.760370'),(231,231,1,'MAT_000231','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.837424','2026-03-26 22:20:54.760370'),(232,232,1,'MAT_000232','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.837507','2026-03-26 22:20:54.760370'),(233,233,1,'MAT_000233','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.837585','2026-03-26 22:20:54.760370'),(234,234,1,'MAT_000234','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.837685','2026-03-26 22:20:54.760370'),(235,235,1,'MAT_000235','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.837775','2026-03-26 22:20:54.760370'),(236,236,1,'MAT_000236','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.837861','2026-03-26 22:20:54.760370'),(237,237,1,'MAT_000237','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.837981','2026-03-26 22:20:54.760370'),(238,238,1,'MAT_000238','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.838062','2026-03-26 22:20:54.760370'),(239,239,1,'MAT_000239','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.838138','2026-03-26 22:20:54.760370'),(240,240,1,'MAT_000240','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.838227','2026-03-26 22:20:54.760370'),(241,241,1,'MAT_000241','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.838293','2026-03-26 22:20:54.760370'),(242,242,1,'MAT_000242','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.838363','2026-03-26 22:20:54.760370'),(243,243,1,'MAT_000243','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.838433','2026-03-26 22:20:54.760370'),(244,244,1,'MAT_000244','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.838504','2026-03-26 22:20:54.760370'),(245,245,1,'MAT_000245','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.838577','2026-03-26 22:20:54.760370'),(246,246,1,'MAT_000246','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.838743','2026-03-26 22:20:54.760370'),(247,247,1,'MAT_000247','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.838840','2026-03-26 22:20:54.760370'),(248,248,1,'MAT_000248','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.839073','2026-03-26 22:20:54.760370'),(249,249,1,'MAT_000249','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.839224','2026-03-26 22:20:54.760370'),(250,250,1,'MAT_000250','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.839307','2026-03-26 22:20:54.760370'),(251,251,1,'MAT_000251','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.839389','2026-03-26 22:20:54.760370'),(252,252,1,'MAT_000252','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.839458','2026-03-26 22:20:54.760370'),(253,253,1,'MAT_000253','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.839529','2026-03-26 22:20:54.760370'),(254,254,1,'MAT_000254','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.840645','2026-03-26 22:20:54.760370'),(255,255,1,'MAT_000255','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.840769','2026-03-26 22:20:54.760370'),(256,256,1,'MAT_000256','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.840858','2026-03-26 22:20:54.760370'),(257,257,1,'MAT_000257','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.840945','2026-03-26 22:20:54.760370'),(258,258,1,'MAT_000258','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.841022','2026-03-26 22:20:54.760370'),(259,259,1,'MAT_000259','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.841105','2026-03-26 22:20:54.760370'),(260,260,1,'MAT_000260','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.841169','2026-03-26 22:20:54.760370'),(261,261,1,'MAT_000261','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.841233','2026-03-26 22:20:54.760370'),(262,262,1,'MAT_000262','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.841301','2026-03-26 22:20:54.760370'),(263,263,1,'MAT_000263','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.841371','2026-03-26 22:20:54.760370'),(264,264,1,'MAT_000264','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.841440','2026-03-26 22:20:54.760370'),(265,265,1,'MAT_000265','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.841511','2026-03-26 22:20:54.760370'),(266,266,1,'MAT_000266','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.841581','2026-03-26 22:20:54.760370'),(267,267,1,'MAT_000267','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.841661','2026-03-26 22:20:54.760370'),(268,268,1,'MAT_000268','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.841735','2026-03-26 22:20:54.760370'),(269,269,1,'MAT_000269','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.841810','2026-03-26 22:20:54.760370'),(270,270,1,'MAT_000270','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.841873','2026-03-26 22:20:54.760370'),(271,271,1,'MAT_000271','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.841944','2026-03-26 22:20:54.760370'),(272,272,1,'MAT_000272','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.842010','2026-03-26 22:20:54.760370'),(273,273,1,'MAT_000273','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.842077','2026-03-26 22:20:54.760370'),(274,274,1,'MAT_000274','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.842147','2026-03-26 22:20:54.760370'),(275,275,1,'MAT_000275','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.842318','2026-03-26 22:20:54.760370'),(276,276,1,'MAT_000276','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.842413','2026-03-26 22:20:54.760370'),(277,277,1,'MAT_000277','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.842499','2026-03-26 22:20:54.760370'),(278,278,1,'MAT_000278','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.842642','2026-03-26 22:20:54.760370'),(279,279,1,'MAT_000279','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.842769','2026-03-26 22:20:54.760370'),(280,280,1,'MAT_000280','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.842844','2026-03-26 22:20:54.760370'),(281,281,1,'MAT_000281','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.842919','2026-03-26 22:20:54.760370'),(282,282,1,'MAT_000282','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.842999','2026-03-26 22:20:54.760370'),(283,283,1,'MAT_000283','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.843072','2026-03-26 22:20:54.760370'),(284,284,1,'MAT_000284','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.843152','2026-03-26 22:20:54.760370'),(285,285,1,'MAT_000285','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.843225','2026-03-26 22:20:54.760370'),(286,286,1,'MAT_000286','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.843311','2026-03-26 22:20:54.760370'),(287,287,1,'MAT_000287','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.843387','2026-03-26 22:20:54.760370'),(288,288,1,'MAT_000288','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.843460','2026-03-26 22:20:54.760370'),(289,289,1,'MAT_000289','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.843535','2026-03-26 22:20:54.760370'),(290,290,1,'MAT_000290','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.843599','2026-03-26 22:20:54.760370'),(291,291,1,'MAT_000291','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.843663','2026-03-26 22:20:54.760370'),(292,292,1,'MAT_000292','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.843734','2026-03-26 22:20:54.760370'),(293,293,1,'MAT_000293','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.843803','2026-03-26 22:20:54.760370'),(294,294,1,'MAT_000294','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.843872','2026-03-26 22:20:54.760370'),(295,295,1,'MAT_000295','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.843946','2026-03-26 22:20:54.760370'),(296,296,1,'MAT_000296','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.844018','2026-03-26 22:20:54.760370'),(297,297,1,'MAT_000297','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.844091','2026-03-26 22:20:54.760370'),(298,298,1,'MAT_000298','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.844166','2026-03-26 22:20:54.760370'),(299,299,1,'MAT_000299','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.844238','2026-03-26 22:20:54.760370'),(300,300,1,'MAT_000300','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.844314','2026-03-26 22:20:54.760370'),(301,301,1,'MAT_000301','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.844380','2026-03-26 22:20:54.760370'),(302,302,1,'MAT_000302','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.844445','2026-03-26 22:20:54.760370'),(303,303,1,'MAT_000303','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.844510','2026-03-26 22:20:54.760370'),(304,304,1,'MAT_000304','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.844583','2026-03-26 22:20:54.760370'),(305,305,1,'MAT_000305','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.844653','2026-03-26 22:20:54.760370'),(306,306,1,'MAT_000306','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.844729','2026-03-26 22:20:54.760370'),(307,307,1,'MAT_000307','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.844803','2026-03-26 22:20:54.760370'),(308,308,1,'MAT_000308','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.844875','2026-03-26 22:20:54.760370'),(309,309,1,'MAT_000309','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.844955','2026-03-26 22:20:54.760370'),(310,310,1,'MAT_000310','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.845019','2026-03-26 22:20:54.760370'),(311,311,1,'MAT_000311','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.845084','2026-03-26 22:20:54.760370'),(312,312,1,'MAT_000312','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.845156','2026-03-26 22:20:54.760370'),(313,313,1,'MAT_000313','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.845225','2026-03-26 22:20:54.760370'),(314,314,1,'MAT_000314','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.845293','2026-03-26 22:20:54.760370'),(315,315,1,'MAT_000315','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.845365','2026-03-26 22:20:54.760370'),(316,316,1,'MAT_000316','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.845435','2026-03-26 22:20:54.760370'),(317,317,1,'MAT_000317','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.845515','2026-03-26 22:20:54.760370'),(318,318,1,'MAT_000318','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.845591','2026-03-26 22:20:54.760370'),(319,319,1,'MAT_000319','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.845672','2026-03-26 22:20:54.760370'),(320,320,1,'MAT_000320','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.845737','2026-03-26 22:20:54.760370'),(321,321,1,'MAT_000321','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.845802','2026-03-26 22:20:54.760370'),(322,322,1,'MAT_000322','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.845868','2026-03-26 22:20:54.760370'),(323,323,1,'MAT_000323','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.845941','2026-03-26 22:20:54.760370'),(324,324,1,'MAT_000324','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.846069','2026-03-26 22:20:54.760370'),(325,325,1,'MAT_000325','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.846165','2026-03-26 22:20:54.760370'),(326,326,1,'MAT_000326','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.846241','2026-03-26 22:20:54.760370'),(327,327,1,'MAT_000327','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.846315','2026-03-26 22:20:54.760370'),(328,328,1,'MAT_000328','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.846391','2026-03-26 22:20:54.760370'),(329,329,1,'MAT_000329','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.846504','2026-03-26 22:20:54.760370'),(330,330,1,'MAT_000330','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.846573','2026-03-26 22:20:54.760370'),(331,331,1,'MAT_000331','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.846639','2026-03-26 22:20:54.760370'),(332,332,1,'MAT_000332','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.846704','2026-03-26 22:20:54.760370'),(333,333,1,'MAT_000333','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.846777','2026-03-26 22:20:54.760370'),(334,334,1,'MAT_000334','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.846846','2026-03-26 22:20:54.760370'),(335,335,1,'MAT_000335','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.846968','2026-03-26 22:20:54.760370'),(336,336,1,'MAT_000336','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.847057','2026-03-26 22:20:54.760370'),(337,337,1,'MAT_000337','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.847134','2026-03-26 22:20:54.760370'),(338,338,1,'MAT_000338','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.847209','2026-03-26 22:20:54.760370'),(339,339,1,'MAT_000339','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.847286','2026-03-26 22:20:54.760370'),(340,340,1,'MAT_000340','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.847351','2026-03-26 22:20:54.760370'),(341,341,1,'MAT_000341','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.847416','2026-03-26 22:20:54.760370'),(342,342,1,'MAT_000342','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.847483','2026-03-26 22:20:54.760370'),(343,343,1,'MAT_000343','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.847553','2026-03-26 22:20:54.760370'),(344,344,1,'MAT_000344','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.847621','2026-03-26 22:20:54.760370'),(345,345,1,'MAT_000345','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.847691','2026-03-26 22:20:54.760370'),(346,346,1,'MAT_000346','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.847764','2026-03-26 22:20:54.760370'),(347,347,1,'MAT_000347','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.847838','2026-03-26 22:20:54.760370'),(348,348,1,'MAT_000348','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.847916','2026-03-26 22:20:54.760370'),(349,349,1,'MAT_000349','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.848008','2026-03-26 22:20:54.760370'),(350,350,1,'MAT_000350','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.848078','2026-03-26 22:20:54.760370'),(351,351,1,'MAT_000351','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.848145','2026-03-26 22:20:54.760370'),(352,352,1,'MAT_000352','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.848211','2026-03-26 22:20:54.760370'),(353,353,1,'MAT_000353','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.848278','2026-03-26 22:20:54.760370'),(354,354,1,'MAT_000354','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.848347','2026-03-26 22:20:54.760370'),(355,355,1,'MAT_000355','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.848419','2026-03-26 22:20:54.760370'),(356,356,1,'MAT_000356','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.848497','2026-03-26 22:20:54.760370'),(357,357,1,'MAT_000357','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.848571','2026-03-26 22:20:54.760370'),(358,358,1,'MAT_000358','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.848646','2026-03-26 22:20:54.760370'),(359,359,1,'MAT_000359','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.848720','2026-03-26 22:20:54.760370'),(360,360,1,'MAT_000360','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.848785','2026-03-26 22:20:54.760370'),(361,361,1,'MAT_000361','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.848849','2026-03-26 22:20:54.760370'),(362,362,1,'MAT_000362','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.848914','2026-03-26 22:20:54.760370'),(363,363,1,'MAT_000363','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.848993','2026-03-26 22:20:54.760370'),(364,364,1,'MAT_000364','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.849063','2026-03-26 22:20:54.760370'),(365,365,1,'MAT_000365','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.849134','2026-03-26 22:20:54.760370'),(366,366,1,'MAT_000366','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.849213','2026-03-26 22:20:54.760370'),(367,367,1,'MAT_000367','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.849286','2026-03-26 22:20:54.760370'),(368,368,1,'MAT_000368','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.849360','2026-03-26 22:20:54.760370'),(369,369,1,'MAT_000369','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.849437','2026-03-26 22:20:54.760370'),(370,370,1,'MAT_000370','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.849500','2026-03-26 22:20:54.760370'),(371,371,1,'MAT_000371','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.849579','2026-03-26 22:20:54.760370'),(372,372,1,'MAT_000372','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.849645','2026-03-26 22:20:54.760370'),(373,373,1,'MAT_000373','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.849713','2026-03-26 22:20:54.760370'),(374,374,1,'MAT_000374','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.849782','2026-03-26 22:20:54.760370'),(375,375,1,'MAT_000375','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.849854','2026-03-26 22:20:54.760370'),(376,376,1,'MAT_000376','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.849930','2026-03-26 22:20:54.760370'),(377,377,1,'MAT_000377','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.850005','2026-03-26 22:20:54.760370'),(378,378,1,'MAT_000378','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.850080','2026-03-26 22:20:54.760370'),(379,379,1,'MAT_000379','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.850155','2026-03-26 22:20:54.760370'),(380,380,1,'MAT_000380','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.850218','2026-03-26 22:20:54.760370'),(381,381,1,'MAT_000381','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.850283','2026-03-26 22:20:54.760370'),(382,382,1,'MAT_000382','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.850352','2026-03-26 22:20:54.760370'),(383,383,1,'MAT_000383','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.850581','2026-03-26 22:20:54.760370'),(384,384,1,'MAT_000384','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.850658','2026-03-26 22:20:54.760370'),(385,385,1,'MAT_000385','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.850728','2026-03-26 22:20:54.760370'),(386,386,1,'MAT_000386','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.850805','2026-03-26 22:20:54.760370'),(387,387,1,'MAT_000387','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.850884','2026-03-26 22:20:54.760370'),(388,388,1,'MAT_000388','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.851032','2026-03-26 22:20:54.760370'),(389,389,1,'MAT_000389','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.851140','2026-03-26 22:20:54.760370'),(390,390,1,'MAT_000390','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.851243','2026-03-26 22:20:54.760370'),(391,391,1,'MAT_000391','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.851321','2026-03-26 22:20:54.760370'),(392,392,1,'MAT_000392','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.851426','2026-03-26 22:20:54.760370'),(393,393,1,'MAT_000393','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.851506','2026-03-26 22:20:54.760370'),(394,394,1,'MAT_000394','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.851578','2026-03-26 22:20:54.760370'),(395,395,1,'MAT_000395','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.851649','2026-03-26 22:20:54.760370'),(396,396,1,'MAT_000396','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.851727','2026-03-26 22:20:54.760370'),(397,397,1,'MAT_000397','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.851802','2026-03-26 22:20:54.760370'),(398,398,1,'MAT_000398','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.851877','2026-03-26 22:20:54.760370'),(399,399,1,'MAT_000399','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.851962','2026-03-26 22:20:54.760370'),(400,400,1,'MAT_000400','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.852031','2026-03-26 22:20:54.760370'),(401,401,1,'MAT_000401','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.852097','2026-03-26 22:20:54.760370'),(402,402,1,'MAT_000402','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.852163','2026-03-26 22:20:54.760370'),(403,403,1,'MAT_000403','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.852234','2026-03-26 22:20:54.760370'),(404,404,1,'MAT_000404','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.852308','2026-03-26 22:20:54.760370'),(405,405,1,'MAT_000405','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.852378','2026-03-26 22:20:54.760370'),(406,406,1,'MAT_000406','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.852449','2026-03-26 22:20:54.760370'),(407,407,1,'MAT_000407','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.852521','2026-03-26 22:20:54.760370'),(408,408,1,'MAT_000408','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.852595','2026-03-26 22:20:54.760370'),(409,409,1,'MAT_000409','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.852670','2026-03-26 22:20:54.760370'),(410,410,1,'MAT_000410','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.852738','2026-03-26 22:20:54.760370'),(411,411,1,'MAT_000411','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.852802','2026-03-26 22:20:54.760370'),(412,412,1,'MAT_000412','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.852867','2026-03-26 22:20:54.760370'),(413,413,1,'MAT_000413','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.852939','2026-03-26 22:20:54.760370'),(414,414,1,'MAT_000414','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.853008','2026-03-26 22:20:54.760370'),(415,415,1,'MAT_000415','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.853079','2026-03-26 22:20:54.760370'),(416,416,1,'MAT_000416','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.853159','2026-03-26 22:20:54.760370'),(417,417,1,'MAT_000417','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.853234','2026-03-26 22:20:54.760370'),(418,418,1,'MAT_000418','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.853307','2026-03-26 22:20:54.760370'),(419,419,1,'MAT_000419','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.853381','2026-03-26 22:20:54.760370'),(420,420,1,'MAT_000420','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.853444','2026-03-26 22:20:54.760370'),(421,421,1,'MAT_000421','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.853508','2026-03-26 22:20:54.760370'),(422,422,1,'MAT_000422','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.854586','2026-03-26 22:20:54.760370'),(423,423,1,'MAT_000423','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.854700','2026-03-26 22:20:54.760370'),(424,424,1,'MAT_000424','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.854776','2026-03-26 22:20:54.760370'),(425,425,1,'MAT_000425','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.854857','2026-03-26 22:20:54.760370'),(426,426,1,'MAT_000426','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.854938','2026-03-26 22:20:54.760370'),(427,427,1,'MAT_000427','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.855016','2026-03-26 22:20:54.760370'),(428,428,1,'MAT_000428','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.855147','2026-03-26 22:20:54.760370'),(429,429,1,'MAT_000429','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.855234','2026-03-26 22:20:54.760370'),(430,430,1,'MAT_000430','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.855305','2026-03-26 22:20:54.760370'),(431,431,1,'MAT_000431','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.855374','2026-03-26 22:20:54.760370'),(432,432,1,'MAT_000432','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.855448','2026-03-26 22:20:54.760370'),(433,433,1,'MAT_000433','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.855519','2026-03-26 22:20:54.760370'),(434,434,1,'MAT_000434','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.855591','2026-03-26 22:20:54.760370'),(435,435,1,'MAT_000435','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.855660','2026-03-26 22:20:54.760370'),(436,436,1,'MAT_000436','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.855731','2026-03-26 22:20:54.760370'),(437,437,1,'MAT_000437','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.855806','2026-03-26 22:20:54.760370'),(438,438,1,'MAT_000438','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.855882','2026-03-26 22:20:54.760370'),(439,439,1,'MAT_000439','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.855964','2026-03-26 22:20:54.760370'),(440,440,1,'MAT_000440','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.856027','2026-03-26 22:20:54.760370'),(441,441,1,'MAT_000441','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.856092','2026-03-26 22:20:54.760370'),(442,442,1,'MAT_000442','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.856158','2026-03-26 22:20:54.760370'),(443,443,1,'MAT_000443','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.856225','2026-03-26 22:20:54.760370'),(444,444,1,'MAT_000444','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.856293','2026-03-26 22:20:54.760370'),(445,445,1,'MAT_000445','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.856362','2026-03-26 22:20:54.760370'),(446,446,1,'MAT_000446','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.856434','2026-03-26 22:20:54.760370'),(447,447,1,'MAT_000447','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.856505','2026-03-26 22:20:54.760370'),(448,448,1,'MAT_000448','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.856589','2026-03-26 22:20:54.760370'),(449,449,1,'MAT_000449','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.856731','2026-03-26 22:20:54.760370'),(450,450,1,'MAT_000450','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.856806','2026-03-26 22:20:54.760370'),(451,451,1,'MAT_000451','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.856871','2026-03-26 22:20:54.760370'),(452,452,1,'MAT_000452','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.856941','2026-03-26 22:20:54.760370'),(453,453,1,'MAT_000453','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.857010','2026-03-26 22:20:54.760370'),(454,454,1,'MAT_000454','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.857078','2026-03-26 22:20:54.760370'),(455,455,1,'MAT_000455','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.857146','2026-03-26 22:20:54.760370'),(456,456,1,'MAT_000456','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.857217','2026-03-26 22:20:54.760370'),(457,457,1,'MAT_000457','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.857290','2026-03-26 22:20:54.760370'),(458,458,1,'MAT_000458','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.857363','2026-03-26 22:20:54.760370'),(459,459,1,'MAT_000459','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.857438','2026-03-26 22:20:54.760370'),(460,460,1,'MAT_000460','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.857506','2026-03-26 22:20:54.760370'),(461,461,1,'MAT_000461','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.857569','2026-03-26 22:20:54.760370'),(462,462,1,'MAT_000462','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.857634','2026-03-26 22:20:54.760370'),(463,463,1,'MAT_000463','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.857700','2026-03-26 22:20:54.760370'),(464,464,1,'MAT_000464','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.857768','2026-03-26 22:20:54.760370'),(465,465,1,'MAT_000465','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.857843','2026-03-26 22:20:54.760370'),(466,466,1,'MAT_000466','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.857913','2026-03-26 22:20:54.760370'),(467,467,1,'MAT_000467','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.857992','2026-03-26 22:20:54.760370'),(468,468,1,'MAT_000468','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.858066','2026-03-26 22:20:54.760370'),(469,469,1,'MAT_000469','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.858140','2026-03-26 22:20:54.760370'),(470,470,1,'MAT_000470','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.858203','2026-03-26 22:20:54.760370'),(471,471,1,'MAT_000471','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.858268','2026-03-26 22:20:54.760370'),(472,472,1,'MAT_000472','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.858332','2026-03-26 22:20:54.760370'),(473,473,1,'MAT_000473','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.858399','2026-03-26 22:20:54.760370'),(474,474,1,'MAT_000474','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.858467','2026-03-26 22:20:54.760370'),(475,475,1,'MAT_000475','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.858537','2026-03-26 22:20:54.760370'),(476,476,1,'MAT_000476','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.858606','2026-03-26 22:20:54.760370'),(477,477,1,'MAT_000477','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.858678','2026-03-26 22:20:54.760370'),(478,478,1,'MAT_000478','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.858751','2026-03-26 22:20:54.760370'),(479,479,1,'MAT_000479','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.858823','2026-03-26 22:20:54.760370'),(480,480,1,'MAT_000480','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.859073','2026-03-26 22:20:54.760370'),(481,481,1,'MAT_000481','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.859170','2026-03-26 22:20:54.760370'),(482,482,1,'MAT_000482','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.859246','2026-03-26 22:20:54.760370'),(483,483,1,'MAT_000483','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.859317','2026-03-26 22:20:54.760370'),(484,484,1,'MAT_000484','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.859389','2026-03-26 22:20:54.760370'),(485,485,1,'MAT_000485','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.859517','2026-03-26 22:20:54.760370'),(486,486,1,'MAT_000486','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.859637','2026-03-26 22:20:54.760370'),(487,487,1,'MAT_000487','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.859724','2026-03-26 22:20:54.760370'),(488,488,1,'MAT_000488','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.859808','2026-03-26 22:20:54.760370'),(489,489,1,'MAT_000489','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.859890','2026-03-26 22:20:54.760370'),(490,490,1,'MAT_000490','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.859968','2026-03-26 22:20:54.760370'),(491,491,1,'MAT_000491','ENFERMEIRO','CARGO_ENFERMEIRO','DEP_ENFERMEIRO',NULL,NULL,1,'2026-03-05 05:29:23.860037','2026-03-26 22:20:54.760370'),(492,492,1,'MAT_000492','TECNICO_ENFERMAGEM','CARGO_TECNICO_ENFERMAGEM','DEP_TECNICO_ENFERMAGEM',NULL,NULL,1,'2026-03-05 05:29:23.860108','2026-03-26 22:20:54.760370'),(493,493,1,'MAT_000493','RECEPCIONISTA','CARGO_RECEPCIONISTA','DEP_RECEPCIONISTA',NULL,NULL,1,'2026-03-05 05:29:23.860220','2026-03-26 22:20:54.760370'),(494,494,1,'MAT_000494','FARMACEUTICO','CARGO_FARMACEUTICO','DEP_FARMACEUTICO',NULL,NULL,1,'2026-03-05 05:29:23.860296','2026-03-26 22:20:54.760370'),(495,495,1,'MAT_000495','ADMINISTRATIVO','CARGO_ADMINISTRATIVO','DEP_ADMINISTRATIVO',NULL,NULL,1,'2026-03-05 05:29:23.860371','2026-03-26 22:20:54.760370'),(496,496,1,'MAT_000496','GESTOR','CARGO_GESTOR','DEP_GESTOR',NULL,NULL,1,'2026-03-05 05:29:23.860449','2026-03-26 22:20:54.760370'),(497,497,1,'MAT_000497','SUPORTE_TI','CARGO_SUPORTE_TI','DEP_SUPORTE_TI',NULL,NULL,1,'2026-03-05 05:29:23.860527','2026-03-26 22:20:54.760370'),(498,498,1,'MAT_000498','COORDENADOR','CARGO_COORDENADOR','DEP_COORDENADOR',NULL,NULL,1,'2026-03-05 05:29:23.860612','2026-03-26 22:20:54.760370'),(499,499,1,'MAT_000499','OUTRO','CARGO_OUTRO','DEP_OUTRO',NULL,NULL,1,'2026-03-05 05:29:23.860690','2026-03-26 22:20:54.760370'),(500,500,1,'MAT_000500','MEDICO','CARGO_MEDICO','DEP_MEDICO',NULL,NULL,1,'2026-03-05 05:29:23.860754','2026-03-26 22:20:54.760370');
 /*!40000 ALTER TABLE `funcionario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7200,7 +7448,7 @@ DROP TABLE IF EXISTS `funcionario_unidade`;
 CREATE TABLE `funcionario_unidade` (
   `id_funcionario_unidade` bigint NOT NULL AUTO_INCREMENT,
   `id_funcionario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `funcao_unidade` varchar(150) DEFAULT NULL,
   `data_inicio` date DEFAULT NULL,
   `data_fim` date DEFAULT NULL,
@@ -7211,7 +7459,7 @@ CREATE TABLE `funcionario_unidade` (
   KEY `idx_fu_funcionario` (`id_funcionario`),
   KEY `idx_fu_unidade` (`id_unidade`),
   CONSTRAINT `fk_fu_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`),
-  CONSTRAINT `fk_fu_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  CONSTRAINT `fk_funcionario_unidade_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -7267,7 +7515,7 @@ DROP TABLE IF EXISTS `gaso_solicitacao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `gaso_solicitacao` (
   `id_gaso` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_senha` bigint DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
   `tipo` enum('CILINDRO','REDE','MANUTENCAO','OUTRO') NOT NULL DEFAULT 'OUTRO',
@@ -7281,7 +7529,7 @@ CREATE TABLE `gaso_solicitacao` (
   KEY `idx_gaso_status` (`status`),
   KEY `fk_gaso_unidade` (`id_unidade`),
   KEY `fk_gaso_user` (`id_usuario_abertura`),
-  CONSTRAINT `fk_gaso_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_gaso_solicitacao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_gaso_user` FOREIGN KEY (`id_usuario_abertura`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7304,7 +7552,7 @@ DROP TABLE IF EXISTS `gasoterapia_consumo`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `gasoterapia_consumo` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_leito` int NOT NULL,
   `tipo_gas` enum('OXIGENIO','AR_COMPRIMIDO','VACUO','MISTURA_N2O') NOT NULL,
   `litros_por_minuto` decimal(10,2) NOT NULL DEFAULT '0.00',
@@ -7315,7 +7563,6 @@ CREATE TABLE `gasoterapia_consumo` (
   PRIMARY KEY (`id`),
   KEY `fk_gaso_atendimento` (`id_atendimento`),
   KEY `fk_gaso_leito` (`id_leito`),
-  CONSTRAINT `fk_gaso_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `fk_gaso_leito` FOREIGN KEY (`id_leito`) REFERENCES `leito` (`id_leito`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7417,6 +7664,8 @@ CREATE TABLE `gpat_atendimento` (
   `id_sessao_fechamento` bigint DEFAULT NULL,
   `id_usuario_abertura` bigint DEFAULT NULL,
   `id_usuario_fechamento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_gpat`),
   UNIQUE KEY `uk_gpat_codigo` (`codigo`),
   KEY `idx_gpat_status` (`status`),
@@ -7425,6 +7674,9 @@ CREATE TABLE `gpat_atendimento` (
   KEY `fk_gpat_usuario_medico` (`id_usuario_medico`),
   KEY `fk_gpat_sessao_abertura` (`id_sessao_abertura`),
   KEY `fk_gpat_sessao_fechamento` (`id_sessao_fechamento`),
+  KEY `fk_gpat_atendimento_atendimento` (`id_atendimento`),
+  KEY `idx_gpat_ent` (`id_entidade`),
+  CONSTRAINT `fk_gpat_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_gpat_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`),
   CONSTRAINT `fk_gpat_prescritor_ext` FOREIGN KEY (`id_prescritor_externo`) REFERENCES `prescritor_externo` (`id_prescritor_externo`),
   CONSTRAINT `fk_gpat_usuario_medico` FOREIGN KEY (`id_usuario_medico`) REFERENCES `usuario` (`id_usuario`)
@@ -7593,17 +7845,20 @@ DROP TABLE IF EXISTS `guardiao_runtime_final`;
 CREATE TABLE `guardiao_runtime_final` (
   `id_guardiao` bigint NOT NULL AUTO_INCREMENT,
   `uuid_runtime` char(36) NOT NULL,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `hash_contexto` char(64) NOT NULL,
   `estado_permitido` tinyint(1) DEFAULT '1',
   `motivo_bloqueio` varchar(255) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_guardiao`),
   KEY `idx_guardiao_uuid` (`uuid_runtime`),
-  KEY `idx_guardiao_saas` (`id_saas_entidade`),
-  KEY `idx_guardiao_estado` (`estado_permitido`)
+  KEY `idx_guardiao_estado` (`estado_permitido`),
+  KEY `fk_guardiao_runtime_final_unidade` (`id_unidade`),
+  KEY `fk_guardiao_entidade` (`id_entidade`),
+  CONSTRAINT `fk_guardiao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_guardiao_runtime_final_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -7649,7 +7904,7 @@ DROP TABLE IF EXISTS `hipotese_diagnostica`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `hipotese_diagnostica` (
   `id_hipotese` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `cid10` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `principal` tinyint(1) DEFAULT '0',
   `id_medico` bigint DEFAULT NULL,
@@ -7657,7 +7912,6 @@ CREATE TABLE `hipotese_diagnostica` (
   PRIMARY KEY (`id_hipotese`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_medico` (`id_medico`),
-  CONSTRAINT `hipotese_diagnostica_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `hipotese_diagnostica_ibfk_2` FOREIGN KEY (`id_medico`) REFERENCES `medico` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7680,7 +7934,7 @@ DROP TABLE IF EXISTS `hospital_leitos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `hospital_leitos` (
   `id_leito` int NOT NULL AUTO_INCREMENT,
-  `id_unidade` int NOT NULL,
+  `id_unidade` bigint unsigned DEFAULT NULL,
   `nome_leito` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipo_leito` enum('OBSERVACAO','EMERGENCIA','INTERNACAO','ISOLAMENTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` enum('LIVRE','OCUPADO','RESERVADO','LIMPEZA','MANUTENCAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'LIVRE',
@@ -7794,7 +8048,7 @@ DROP TABLE IF EXISTS `intercorrencia`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `intercorrencia` (
   `id_intercorrencia` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_internacao` bigint DEFAULT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `gravidade` enum('LEVE','MODERADA','GRAVE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'LEVE',
@@ -7804,7 +8058,6 @@ CREATE TABLE `intercorrencia` (
   KEY `id_usuario` (`id_usuario`),
   KEY `idx_intercorrencia_atendimento` (`id_atendimento`),
   KEY `idx_intercorrencia_internacao` (`id_internacao`),
-  CONSTRAINT `intercorrencia_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `intercorrencia_ibfk_2` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `intercorrencia_ibfk_3` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -7849,6 +8102,8 @@ CREATE TABLE `internacao` (
   `id_local_operacional_saida` bigint DEFAULT NULL,
   `id_unidade_entrada` bigint DEFAULT NULL,
   `id_unidade_saida` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao`),
   KEY `idx_ffa` (`id_ffa`),
   KEY `idx_status` (`status`),
@@ -7857,7 +8112,9 @@ CREATE TABLE `internacao` (
   KEY `idx_internacao_leito_status` (`id_leito`,`status`),
   KEY `idx_internacao_datas` (`data_entrada`,`data_saida`),
   KEY `idx_internacao_status_data` (`status`,`data_entrada`,`data_saida`),
-  CONSTRAINT `fk_internacao_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
+  KEY `fk_internacao_atendimento` (`id_atendimento`),
+  KEY `idx_int_ent` (`id_entidade`),
+  CONSTRAINT `fk_internacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_internacao_leito` FOREIGN KEY (`id_leito`) REFERENCES `leito` (`id_leito`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Internação e observação clínica';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -8107,15 +8364,20 @@ CREATE TABLE `internacao_medicacao_administracao` (
   `id_usuario_responsavel` bigint NOT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao_medicacao_administracao`),
   KEY `idx_ima_internacao` (`id_internacao`),
   KEY `idx_ima_item` (`id_internacao_prescricao_item`),
   KEY `idx_ima_data_hora` (`data_hora`),
   KEY `idx_ima_usuario` (`id_usuario_responsavel`),
   KEY `idx_ima_sessao` (`id_sessao_usuario`),
+  KEY `fk_internacao_medicacao_administracao_atendimento` (`id_atendimento`),
+  KEY `idx_int_med_ent` (`id_entidade`),
   CONSTRAINT `fk_ima_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_ima_item` FOREIGN KEY (`id_internacao_prescricao_item`) REFERENCES `internacao_prescricao_item` (`id_internacao_prescricao_item`),
-  CONSTRAINT `fk_ima_usuario` FOREIGN KEY (`id_usuario_responsavel`) REFERENCES `usuario` (`id_usuario`)
+  CONSTRAINT `fk_ima_usuario` FOREIGN KEY (`id_usuario_responsavel`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_internacao_medicacao_administracao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8145,11 +8407,18 @@ CREATE TABLE `internacao_movimentacao` (
   `motivo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_mov_internacao` (`id_internacao`),
   KEY `idx_intern_mov_internacao_data` (`id_internacao`,`data_movimentacao`),
   KEY `idx_mov_sessao_data` (`id_sessao_usuario`,`data_movimentacao`),
+  KEY `fk_internacao_movimentacao_unidade` (`id_unidade`),
+  KEY `fk_internacao_movimentacao_atendimento` (`id_atendimento`),
+  KEY `idx_int_mov_ent` (`id_entidade`),
+  CONSTRAINT `fk_internacao_movimentacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_movimentacao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_mov_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -8180,12 +8449,17 @@ CREATE TABLE `internacao_prescricao` (
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao_prescricao`),
   KEY `idx_ip_internacao` (`id_internacao`),
   KEY `idx_ip_data` (`data_prescricao`),
   KEY `idx_ip_status` (`status`),
   KEY `idx_ip_usuario` (`id_usuario_prescritor`),
   KEY `idx_ip_sessao` (`id_sessao_usuario`),
+  KEY `fk_internacao_prescricao_atendimento` (`id_atendimento`),
+  KEY `idx_int_presc_ent` (`id_entidade`),
+  CONSTRAINT `fk_internacao_prescricao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_ip_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_ip_usuario` FOREIGN KEY (`id_usuario_prescritor`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -8220,10 +8494,15 @@ CREATE TABLE `internacao_prescricao_item` (
   `status` enum('ATIVO','SUSPENSO','ENCERRADO') NOT NULL DEFAULT 'ATIVO',
   `observacoes` text,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao_prescricao_item`),
   KEY `idx_ipi_prescricao` (`id_internacao_prescricao`),
   KEY `idx_ipi_tipo` (`tipo`),
   KEY `idx_ipi_status` (`status`),
+  KEY `fk_internacao_prescricao_item_atendimento` (`id_atendimento`),
+  KEY `idx_int_prescitem_ent` (`id_entidade`),
+  CONSTRAINT `fk_internacao_prescricao_item_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_ipi_prescricao` FOREIGN KEY (`id_internacao_prescricao`) REFERENCES `internacao_prescricao` (`id_internacao_prescricao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -8263,11 +8542,16 @@ CREATE TABLE `internacao_registro_enfermagem` (
   `id_usuario_responsavel` bigint NOT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao_registro_enfermagem`),
   KEY `idx_ire_internacao` (`id_internacao`),
   KEY `idx_ire_data_hora` (`data_hora`),
   KEY `idx_ire_usuario` (`id_usuario_responsavel`),
   KEY `idx_ire_sessao` (`id_sessao_usuario`),
+  KEY `fk_internacao_registro_enfermagem_atendimento` (`id_atendimento`),
+  KEY `idx_int_regenf_ent` (`id_entidade`),
+  CONSTRAINT `fk_internacao_registro_enfermagem_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_ire_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_ire_usuario` FOREIGN KEY (`id_usuario_responsavel`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -8299,12 +8583,17 @@ CREATE TABLE `internacao_turno_registro` (
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao_turno_registro`),
   KEY `idx_itr_internacao` (`id_internacao`),
   KEY `idx_itr_data_turno` (`data_referencia`,`turno`),
   KEY `idx_itr_criado_em` (`criado_em`),
   KEY `idx_itr_usuario` (`id_usuario_responsavel`),
   KEY `fk_itr_sessao` (`id_sessao_usuario`),
+  KEY `fk_internacao_turno_registro_atendimento` (`id_atendimento`),
+  KEY `idx_int_turno_ent` (`id_entidade`),
+  CONSTRAINT `fk_internacao_turno_registro_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_itr_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_itr_usuario` FOREIGN KEY (`id_usuario_responsavel`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -8457,7 +8746,6 @@ DROP TABLE IF EXISTS `kernel_runtime_evento`;
 CREATE TABLE `kernel_runtime_evento` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
   `uuid_runtime` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `id_saas_entidade` bigint NOT NULL,
   `id_usuario` bigint DEFAULT NULL,
   `tipo_evento` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `entidade_alvo` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -8465,9 +8753,9 @@ CREATE TABLE `kernel_runtime_evento` (
   `payload` json DEFAULT NULL,
   `hash_evento` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_runtime_evento_uuid` (`uuid_runtime`),
-  KEY `idx_runtime_evento_saas` (`id_saas_entidade`),
   KEY `idx_runtime_evento_tipo` (`tipo_evento`),
   KEY `idx_runtime_evento_referencia` (`entidade_alvo`,`id_referencia`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -8592,8 +8880,6 @@ CREATE TABLE `lab_amostra` (
   KEY `idx_lab_amostra_protocolo_ffa` (`id_protocolo`,`id_ffa`),
   KEY `idx_lab_amostra_ffa` (`id_ffa`),
   KEY `idx_lab_amostra_protocolo` (`id_protocolo`),
-  CONSTRAINT `fk_lab_amostra_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_lab_amostra_ffa_v1` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_lab_amostra_protocolo` FOREIGN KEY (`id_protocolo`) REFERENCES `lab_protocolo` (`id_protocolo`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_lab_proto` FOREIGN KEY (`id_protocolo`) REFERENCES `procedimento_protocolo` (`id_protocolo`),
   CONSTRAINT `fk_lab_user_col` FOREIGN KEY (`id_usuario_coleta`) REFERENCES `usuario` (`id_usuario`)
@@ -8658,8 +8944,7 @@ CREATE TABLE `lab_pedido` (
   PRIMARY KEY (`id_pedido`),
   UNIQUE KEY `protocolo_interno` (`protocolo_interno`),
   KEY `fk_lab_senha` (`id_senha`),
-  KEY `fk_lab_ffa` (`id_ffa`),
-  CONSTRAINT `fk_lab_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`)
+  KEY `fk_lab_ffa` (`id_ffa`)
 ) ENGINE=InnoDB AUTO_INCREMENT=300004458 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8688,8 +8973,7 @@ CREATE TABLE `lab_protocolo_interno` (
   `impresso` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `codigo_amostra` (`codigo_amostra`),
-  KEY `fk_lab_protocolo_ffa_v1` (`id_ffa`),
-  CONSTRAINT `fk_lab_protocolo_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  KEY `fk_lab_protocolo_ffa_v1` (`id_ffa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8813,7 +9097,7 @@ CREATE TABLE `ledger_evento_sincronizacao` (
   `id_evento` char(36) NOT NULL,
   `id_tenant` bigint NOT NULL,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `tipo_evento` varchar(50) NOT NULL,
   `subtipo_evento` varchar(50) DEFAULT NULL,
@@ -8832,7 +9116,8 @@ CREATE TABLE `ledger_evento_sincronizacao` (
   KEY `idx_ledger_unidade` (`id_unidade`),
   KEY `idx_ledger_estado` (`estado_sincronizacao`),
   KEY `idx_ledger_timestamp` (`timestamp_evento`),
-  KEY `idx_ledger_hash` (`hash_integridade`)
+  KEY `idx_ledger_hash` (`hash_integridade`),
+  CONSTRAINT `fk_ledger_evento_sincronizacao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8856,7 +9141,7 @@ CREATE TABLE `ledger_evento_sincronizacao_local` (
   `id_evento` char(36) NOT NULL,
   `id_tenant` bigint NOT NULL,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `tipo_evento` varchar(50) NOT NULL,
   `subtipo_evento` varchar(50) DEFAULT NULL,
@@ -8875,7 +9160,8 @@ CREATE TABLE `ledger_evento_sincronizacao_local` (
   KEY `idx_ledger_local` (`id_local_operacional`),
   KEY `idx_ledger_estado_sync` (`estado_sincronizacao`),
   KEY `idx_ledger_timestamp_evt` (`timestamp_evento`),
-  KEY `idx_ledger_tipo_evento` (`tipo_evento`)
+  KEY `idx_ledger_tipo_evento` (`tipo_evento`),
+  CONSTRAINT `fk_ledger_evento_sincronizacao_local_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8899,7 +9185,7 @@ CREATE TABLE `ledger_global_sincronismo` (
   `ulid_evento` binary(16) NOT NULL,
   `id_tenant` bigint NOT NULL,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `origem_runtime` varchar(40) NOT NULL,
   `contexto_origem` varchar(50) DEFAULT NULL,
@@ -8923,7 +9209,8 @@ CREATE TABLE `ledger_global_sincronismo` (
   KEY `idx_ledger_tipo_evt` (`tipo_evento`),
   KEY `idx_ledger_runtime` (`origem_runtime`),
   KEY `idx_ledger_schema` (`versao_schema`),
-  KEY `idx_ledger_timestamp` (`data_evento_local`)
+  KEY `idx_ledger_timestamp` (`data_evento_local`),
+  CONSTRAINT `fk_ledger_global_sincronismo_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8973,7 +9260,7 @@ DROP TABLE IF EXISTS `local`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `local` (
   `id_local` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_tipo_local` bigint NOT NULL,
   `codigo` varchar(40) DEFAULT NULL,
   `nome` varchar(120) NOT NULL,
@@ -9253,7 +9540,7 @@ CREATE TABLE `login_tentativa` (
   KEY `idx_login_tentativa_usuario` (`id_usuario`),
   KEY `idx_login_tentativa_dispositivo` (`dispositivo_origem`),
   CONSTRAINT `fk_login_tentativa_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=386 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=400 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9262,7 +9549,7 @@ CREATE TABLE `login_tentativa` (
 
 LOCK TABLES `login_tentativa` WRITE;
 /*!40000 ALTER TABLE `login_tentativa` DISABLE KEYS */;
-INSERT INTO `login_tentativa` VALUES (325,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"local\": 1, \"motivo\": \"senha_invalida\", \"perfil\": 1, \"unidade\": 1}','2026-03-17 02:33:51.791824'),(326,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-18 23:35:02.867801'),(327,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:17:53.899340'),(328,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:18:11.174637'),(329,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:21:43.064339'),(330,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:22:23.671894'),(331,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:24:40.138020'),(332,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:26:57.827559'),(333,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:33:03.647368'),(334,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:34:47.922935'),(335,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:45:49.530441'),(336,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:46:27.426464'),(337,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:03:23.176693'),(338,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:32:30.353930'),(339,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:35:21.193754'),(340,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:38:20.941715'),(341,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:43:28.918931'),(342,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:51:54.563315'),(343,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:59:21.944160'),(344,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:07:58.857052'),(345,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:29:07.799726'),(346,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:01.385918'),(347,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:44.134117'),(348,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:39:04.870962'),(349,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:56:36.074630'),(350,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 04:20:56.795283'),(351,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:29:05.750402'),(352,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-19 05:46:18.668307'),(353,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:47:15.194814'),(354,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 06:47:43.612246'),(355,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:04:37.222352'),(356,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:13:38.423107'),(357,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:42:10.867097'),(358,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:47:18.824939'),(359,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 07:01:42.146645'),(360,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:28:06.551802'),(361,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:45:43.421264'),(362,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 23:44:59.395948'),(363,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:32:57.400556'),(364,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:35:20.784309'),(365,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:05:13.411954'),(366,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:06:15.923965'),(367,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:12:02.917807'),(368,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:15:25.635568'),(369,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:22:44.567497'),(370,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:27:35.718147'),(371,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:33:07.181700'),(372,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:40:56.352604'),(373,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:50:04.448304'),(374,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:56:46.860397'),(375,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:57:16.479923'),(376,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:39:30.603997'),(377,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:41:33.291690'),(378,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:44:45.980447'),(379,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:10:37.669751'),(380,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:15:26.495818'),(381,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:16:44.802733'),(382,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:29:49.567458'),(383,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:31:15.284804'),(384,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:48:04.035035'),(385,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 04:01:00.897517');
+INSERT INTO `login_tentativa` VALUES (325,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"local\": 1, \"motivo\": \"senha_invalida\", \"perfil\": 1, \"unidade\": 1}','2026-03-17 02:33:51.791824'),(326,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-18 23:35:02.867801'),(327,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:17:53.899340'),(328,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:18:11.174637'),(329,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:21:43.064339'),(330,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:22:23.671894'),(331,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:24:40.138020'),(332,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:26:57.827559'),(333,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:33:03.647368'),(334,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:34:47.922935'),(335,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:45:49.530441'),(336,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:46:27.426464'),(337,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:03:23.176693'),(338,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:32:30.353930'),(339,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:35:21.193754'),(340,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:38:20.941715'),(341,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:43:28.918931'),(342,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:51:54.563315'),(343,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:59:21.944160'),(344,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:07:58.857052'),(345,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:29:07.799726'),(346,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:01.385918'),(347,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:44.134117'),(348,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:39:04.870962'),(349,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:56:36.074630'),(350,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 04:20:56.795283'),(351,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:29:05.750402'),(352,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-19 05:46:18.668307'),(353,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:47:15.194814'),(354,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 06:47:43.612246'),(355,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:04:37.222352'),(356,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:13:38.423107'),(357,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:42:10.867097'),(358,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:47:18.824939'),(359,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 07:01:42.146645'),(360,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:28:06.551802'),(361,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:45:43.421264'),(362,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 23:44:59.395948'),(363,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:32:57.400556'),(364,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:35:20.784309'),(365,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:05:13.411954'),(366,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:06:15.923965'),(367,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:12:02.917807'),(368,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:15:25.635568'),(369,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:22:44.567497'),(370,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:27:35.718147'),(371,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:33:07.181700'),(372,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:40:56.352604'),(373,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:50:04.448304'),(374,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:56:46.860397'),(375,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:57:16.479923'),(376,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:39:30.603997'),(377,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:41:33.291690'),(378,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:44:45.980447'),(379,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:10:37.669751'),(380,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:15:26.495818'),(381,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:16:44.802733'),(382,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:29:49.567458'),(383,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:31:15.284804'),(384,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:48:04.035035'),(385,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 04:01:00.897517'),(386,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:08:31.083628'),(387,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 06:12:16.514016'),(388,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:12:21.995073'),(389,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:24:30.160536'),(390,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:30:26.367121'),(391,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:31:09.559027'),(392,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:39:24.289807'),(393,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:45:36.449857'),(394,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:54:13.777840'),(395,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 07:10:29.789741'),(396,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 07:10:34.615048'),(397,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:11:12.463856'),(398,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:11:28.283489'),(399,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:13:34.285539');
 /*!40000 ALTER TABLE `login_tentativa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9592,7 +9879,6 @@ CREATE TABLE `medicacao_reavaliacao` (
   KEY `fk_reav_local` (`id_local_operacional`),
   KEY `fk_reav_usr_criador` (`id_usuario_criador`),
   KEY `fk_reav_usr_exec` (`id_usuario_executor`),
-  CONSTRAINT `fk_reav_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_reav_fila` FOREIGN KEY (`id_fila_medicacao`) REFERENCES `fila_operacional` (`id_fila`),
   CONSTRAINT `fk_reav_local` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`),
   CONSTRAINT `fk_reav_usr_criador` FOREIGN KEY (`id_usuario_criador`) REFERENCES `usuario` (`id_usuario`),
@@ -9742,7 +10028,7 @@ DROP TABLE IF EXISTS `notificacao_violencia`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notificacao_violencia` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `categoria` enum('VIOLENCIA','AGRESSAO','ABUSO','TRANSITO','OUTRA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipo` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_ocorrencia` datetime DEFAULT NULL,
@@ -9759,8 +10045,7 @@ CREATE TABLE `notificacao_violencia` (
   PRIMARY KEY (`id`),
   KEY `idx_nv_atendimento` (`id_atendimento`),
   KEY `idx_nv_status` (`status_notificacao`),
-  KEY `idx_nv_sessao` (`id_sessao_usuario`),
-  CONSTRAINT `fk_nv_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `idx_nv_sessao` (`id_sessao_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -9862,8 +10147,7 @@ CREATE TABLE `obito` (
   KEY `idx_obito_data` (`data_hora_obito`),
   KEY `idx_obito_status` (`status`),
   KEY `idx_obito_sessao` (`id_sessao_usuario`),
-  KEY `idx_obito_ffa_status` (`id_ffa`,`status`),
-  CONSTRAINT `fk_obito_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`)
+  KEY `idx_obito_ffa_status` (`id_ffa`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -9990,10 +10274,15 @@ CREATE TABLE `ordem_assistencial` (
   `criado_por` bigint NOT NULL,
   `atualizado_em` datetime DEFAULT NULL,
   `atualizado_por` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_ordem_ffa` (`id_ffa`),
   KEY `idx_ordem_status` (`status`),
-  KEY `idx_ordem_tipo` (`tipo_ordem`)
+  KEY `idx_ordem_tipo` (`tipo_ordem`),
+  KEY `fk_ordem_assistencial_atendimento` (`id_atendimento`),
+  KEY `idx_oass_ent` (`id_entidade`),
+  CONSTRAINT `fk_ordem_assistencial_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10026,15 +10315,20 @@ CREATE TABLE `ordem_assistencial_aprazamento` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `criado_por` bigint DEFAULT NULL,
   `id_sessao_usuario_criado` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_aprazamento`),
   UNIQUE KEY `uk_apraz_item_previsto` (`id_item`,`previsto_em`),
   KEY `idx_apraz_status_previsto` (`status`,`previsto_em`),
   KEY `fk_apraz_exec_user` (`id_usuario_execucao`),
   KEY `fk_apraz_exec_sessao` (`id_sessao_usuario_execucao`),
   KEY `fk_apraz_exec_local` (`id_local_operacional_execucao`),
+  KEY `fk_ordem_assistencial_aprazamento_atendimento` (`id_atendimento`),
+  KEY `idx_oassa_ent` (`id_entidade`),
   CONSTRAINT `fk_apraz_exec_local` FOREIGN KEY (`id_local_operacional_execucao`) REFERENCES `local_operacional` (`id_local_operacional`),
   CONSTRAINT `fk_apraz_exec_user` FOREIGN KEY (`id_usuario_execucao`) REFERENCES `usuario` (`id_usuario`),
-  CONSTRAINT `fk_apraz_item` FOREIGN KEY (`id_item`) REFERENCES `ordem_assistencial_item` (`id_item`)
+  CONSTRAINT `fk_apraz_item` FOREIGN KEY (`id_item`) REFERENCES `ordem_assistencial_item` (`id_item`),
+  CONSTRAINT `fk_ordem_assistencial_aprazamento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10066,11 +10360,16 @@ CREATE TABLE `ordem_assistencial_execucao` (
   `id_local_operacional` bigint DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `payload` json DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_execucao`),
   KEY `idx_exec_item_data` (`id_item`,`realizado_em`),
   KEY `idx_exec_apraz` (`id_aprazamento`),
+  KEY `fk_ordem_assistencial_execucao_atendimento` (`id_atendimento`),
+  KEY `idx_oasse_ent` (`id_entidade`),
   CONSTRAINT `fk_exec_apraz` FOREIGN KEY (`id_aprazamento`) REFERENCES `ordem_assistencial_aprazamento` (`id_aprazamento`),
-  CONSTRAINT `fk_exec_item` FOREIGN KEY (`id_item`) REFERENCES `ordem_assistencial_item` (`id_item`)
+  CONSTRAINT `fk_exec_item` FOREIGN KEY (`id_item`) REFERENCES `ordem_assistencial_item` (`id_item`),
+  CONSTRAINT `fk_ordem_assistencial_execucao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10116,13 +10415,18 @@ CREATE TABLE `ordem_assistencial_item` (
   `atualizado_por` bigint DEFAULT NULL,
   `id_sessao_usuario_atualizado` bigint DEFAULT NULL,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `idx_item_ordem` (`id_ordem`),
   KEY `idx_item_farmaco` (`id_farmaco`),
   KEY `idx_item_tipo_status` (`tipo_item`,`status`),
   KEY `idx_item_ordem_status` (`id_ordem`,`status`),
+  KEY `fk_ordem_assistencial_item_atendimento` (`id_atendimento`),
+  KEY `idx_oassi_ent` (`id_entidade`),
   CONSTRAINT `fk_item_farmaco` FOREIGN KEY (`id_farmaco`) REFERENCES `farmaco` (`id_farmaco`),
-  CONSTRAINT `fk_item_ordem` FOREIGN KEY (`id_ordem`) REFERENCES `ordem_assistencial` (`id`)
+  CONSTRAINT `fk_item_ordem` FOREIGN KEY (`id_ordem`) REFERENCES `ordem_assistencial` (`id`),
+  CONSTRAINT `fk_ordem_assistencial_item_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10183,7 +10487,7 @@ CREATE TABLE `paciente` (
   `nome` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `documento_principal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `metadata_identidade` json DEFAULT NULL,
-  `id_entidade` bigint NOT NULL DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_paciente_uuid` (`uuid_paciente`),
   UNIQUE KEY `uk_paciente_hash` (`hash_identidade`),
@@ -10346,7 +10650,7 @@ CREATE TABLE `painel` (
   `tipo` enum('PAINEL','TOTEM','TV') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'PAINEL',
   `nome` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `tts_habilitado` tinyint(1) NOT NULL DEFAULT '0',
   `piscada_seg` int NOT NULL DEFAULT '20',
@@ -10358,7 +10662,8 @@ CREATE TABLE `painel` (
   PRIMARY KEY (`id_painel`),
   UNIQUE KEY `uk_painel_codigo` (`codigo`),
   KEY `idx_painel_unidade` (`id_unidade`),
-  KEY `idx_painel_local` (`id_local_operacional`)
+  KEY `idx_painel_local` (`id_local_operacional`),
+  CONSTRAINT `fk_painel_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=254 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -11167,7 +11472,7 @@ CREATE TABLE `pessoa` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
-  `id_entidade` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa`),
   KEY `idx_pessoa_nome` (`nome`),
   KEY `idx_pessoa_nome_social` (`nome_social`),
@@ -11542,7 +11847,7 @@ DROP TABLE IF EXISTS `plantao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `plantao` (
   `id_plantao` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local` bigint DEFAULT NULL,
   `id_funcionario` bigint NOT NULL,
   `tipo_plantao` enum('CLINICO','PEDIATRIA','EMERGENCIA','ADMINISTRATIVO','OUTRO') NOT NULL,
@@ -11557,7 +11862,7 @@ CREATE TABLE `plantao` (
   KEY `idx_plantao_local` (`id_local`),
   CONSTRAINT `fk_plantao_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_plantao_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_plantao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_plantao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -11579,7 +11884,7 @@ DROP TABLE IF EXISTS `plantao_escala`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `plantao_escala` (
   `id_plantao_escala` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_funcionario` bigint NOT NULL,
   `data` date NOT NULL,
   `turno` varchar(30) NOT NULL,
@@ -11597,7 +11902,7 @@ CREATE TABLE `plantao_escala` (
   KEY `fk_plantao_escala_modelo` (`id_plantao_modelo`),
   CONSTRAINT `fk_plantao_escala_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_plantao_escala_modelo` FOREIGN KEY (`id_plantao_modelo`) REFERENCES `plantao_modelo` (`id_plantao_modelo`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_plantao_escala_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_plantao_escala_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -11649,7 +11954,7 @@ DROP TABLE IF EXISTS `prescricao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `prescricao` (
   `id_prescricao` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `tipo` enum('INTERNA','CONTROLADA','CASA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_medico` bigint DEFAULT NULL,
@@ -11658,7 +11963,6 @@ CREATE TABLE `prescricao` (
   PRIMARY KEY (`id_prescricao`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_medico` (`id_medico`),
-  CONSTRAINT `prescricao_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `prescricao_ibfk_2` FOREIGN KEY (`id_medico`) REFERENCES `medico` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -11741,7 +12045,7 @@ DROP TABLE IF EXISTS `prescricao_continua`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `prescricao_continua` (
   `id_prescricao` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `tipo` enum('MEDICAMENTOS','CUIDADOS_GERAIS') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_medico` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -11749,7 +12053,6 @@ CREATE TABLE `prescricao_continua` (
   PRIMARY KEY (`id_prescricao`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_medico` (`id_medico`),
-  CONSTRAINT `prescricao_continua_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `prescricao_continua_ibfk_2` FOREIGN KEY (`id_medico`) REFERENCES `medico` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -11967,7 +12270,6 @@ CREATE TABLE `prescricao_medicacao` (
   PRIMARY KEY (`id_prescricao`),
   KEY `id_medico` (`id_medico`),
   KEY `idx_ffa` (`id_ffa`),
-  CONSTRAINT `prescricao_medicacao_ibfk_1` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`) ON DELETE CASCADE,
   CONSTRAINT `prescricao_medicacao_ibfk_2` FOREIGN KEY (`id_medico`) REFERENCES `usuario` (`id_usuario`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Prescrições de medicação do PA';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12067,7 +12369,6 @@ CREATE TABLE `procedimento_protocolo` (
   KEY `idx_prot_status` (`tipo`,`status`,`criado_em`),
   KEY `fk_prot_sessao` (`id_sessao_criacao`),
   KEY `fk_prot_usuario` (`id_usuario_criacao`),
-  CONSTRAINT `fk_prot_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_prot_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`),
   CONSTRAINT `fk_prot_usuario` FOREIGN KEY (`id_usuario_criacao`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -12188,7 +12489,7 @@ DROP TABLE IF EXISTS `produtividade_evento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `produtividade_evento` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_usuario` bigint NOT NULL,
   `tipo` enum('INICIO_ATENDIMENTO','FIM_ATENDIMENTO','EVOLUCAO','PRESCRICAO','ENCAMINHAMENTO','OUTRO') NOT NULL,
   `id_ffa` bigint DEFAULT NULL,
@@ -12199,8 +12500,8 @@ CREATE TABLE `produtividade_evento` (
   KEY `idx_pe_user_time` (`id_usuario`,`ocorrido_em`),
   KEY `idx_pe_tipo_time` (`tipo`,`ocorrido_em`),
   KEY `fk_pe_unidade` (`id_unidade`),
-  CONSTRAINT `fk_pe_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
-  CONSTRAINT `fk_pe_user` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  CONSTRAINT `fk_pe_user` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_produtividade_evento_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12292,7 +12593,7 @@ DROP TABLE IF EXISTS `prontuario_evolucao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `prontuario_evolucao` (
   `id_evolucao` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_usuario` bigint NOT NULL,
   `texto_evolucao` longtext NOT NULL,
   `status` enum('ATIVO','REVISADO','CANCELADO') DEFAULT 'ATIVO',
@@ -12301,7 +12602,6 @@ CREATE TABLE `prontuario_evolucao` (
   PRIMARY KEY (`id_evolucao`),
   KEY `fk_evolucao_atendimento` (`id_atendimento`),
   KEY `fk_evolucao_usuario` (`id_usuario`),
-  CONSTRAINT `fk_evolucao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `fk_evolucao_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12331,9 +12631,14 @@ CREATE TABLE `protocolo_assistencial_global` (
   `estado_protocolo` enum('ATIVO','OBSOLETO','REVOGADO') DEFAULT 'ATIVO',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_protocolo`),
   UNIQUE KEY `uk_protocolo_hash` (`hash_protocolar`),
-  KEY `idx_protocolo_dominio` (`dominio_fluxo`,`versao_protocolo`)
+  KEY `idx_protocolo_dominio` (`dominio_fluxo`,`versao_protocolo`),
+  KEY `fk_protocolo_assistencial_global_atendimento` (`id_atendimento`),
+  KEY `idx_pag_ent` (`id_entidade`),
+  CONSTRAINT `fk_protocolo_assistencial_global_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12377,7 +12682,6 @@ CREATE TABLE `protocolo_emissao` (
   KEY `idx_prot_sessao` (`id_sessao_usuario`),
   KEY `fk_prot_em_usuario` (`id_usuario`),
   CONSTRAINT `fk_prot_em_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`),
-  CONSTRAINT `fk_prot_em_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`),
   CONSTRAINT `fk_prot_em_paciente` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id`),
   CONSTRAINT `fk_prot_em_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -12457,8 +12761,13 @@ CREATE TABLE `reabertura_atendimento` (
   `motivo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_reabertura`),
-  KEY `idx_ffa` (`id_ffa`)
+  KEY `idx_ffa` (`id_ffa`),
+  KEY `fk_reabertura_atendimento_atendimento` (`id_atendimento`),
+  KEY `idx_reab_ent` (`id_entidade`),
+  CONSTRAINT `fk_reabertura_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Reabertura de episódio/atendimento';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12663,7 +12972,7 @@ CREATE TABLE `reg_export_lote` (
   `competencia` char(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario_criador` bigint DEFAULT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `status` enum('ABERTO','GERADO','ENVIADO','ERRO','CONFIRMADO','CANCELADO') NOT NULL DEFAULT 'ABERTO',
   `protocolo_externo` varchar(80) DEFAULT NULL,
@@ -12678,9 +12987,9 @@ CREATE TABLE `reg_export_lote` (
   KEY `idx_reg_lote_usuario` (`id_usuario_criador`),
   KEY `idx_reg_lote_unidade_local` (`id_unidade`,`id_local_operacional`),
   KEY `fk_reg_lote_local` (`id_local_operacional`),
+  CONSTRAINT `fk_reg_export_lote_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_reg_lote_competencia` FOREIGN KEY (`competencia`) REFERENCES `md_competencia` (`competencia`),
   CONSTRAINT `fk_reg_lote_local` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_atendimento` (`id_local`),
-  CONSTRAINT `fk_reg_lote_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_reg_lote_usuario` FOREIGN KEY (`id_usuario_criador`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12758,6 +13067,38 @@ LOCK TABLES `regra_timeout` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `regulacao_evento`
+--
+
+DROP TABLE IF EXISTS `regulacao_evento`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `regulacao_evento` (
+  `id_regulacao` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_unidade` bigint unsigned NOT NULL,
+  `id_ffa` bigint unsigned NOT NULL,
+  `status` enum('SOLICITADO','EM_ANALISE','AUTORIZADO','NEGADO','TRANSFERIDO') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `destino_unidade` bigint unsigned DEFAULT NULL,
+  `tipo_regulacao` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observacao` text COLLATE utf8mb4_unicode_ci,
+  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id_regulacao`),
+  KEY `idx_reg_ffa` (`id_ffa`),
+  CONSTRAINT `fk_reg_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id_ffa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `regulacao_evento`
+--
+
+LOCK TABLES `regulacao_evento` WRITE;
+/*!40000 ALTER TABLE `regulacao_evento` DISABLE KEYS */;
+/*!40000 ALTER TABLE `regulacao_evento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `remocao`
 --
 
@@ -12766,7 +13107,7 @@ DROP TABLE IF EXISTS `remocao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `remocao` (
   `id_remocao` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_senha` bigint DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
   `origem` varchar(150) DEFAULT NULL,
@@ -12785,9 +13126,9 @@ CREATE TABLE `remocao` (
   KEY `fk_rem_unidade` (`id_unidade`),
   KEY `fk_rem_viatura` (`id_viatura`),
   KEY `fk_rem_user` (`id_usuario_solicitante`),
-  CONSTRAINT `fk_rem_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_rem_user` FOREIGN KEY (`id_usuario_solicitante`) REFERENCES `usuario` (`id_usuario`),
-  CONSTRAINT `fk_rem_viatura` FOREIGN KEY (`id_viatura`) REFERENCES `viatura` (`id_viatura`)
+  CONSTRAINT `fk_rem_viatura` FOREIGN KEY (`id_viatura`) REFERENCES `viatura` (`id_viatura`),
+  CONSTRAINT `fk_remocao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12841,7 +13182,7 @@ DROP TABLE IF EXISTS `remocao_logistica`;
 CREATE TABLE `remocao_logistica` (
   `id_remocao` bigint NOT NULL AUTO_INCREMENT,
   `id_ffa` bigint NOT NULL,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `motorista_nome` varchar(100) DEFAULT NULL,
   `tecnico_nome` varchar(100) DEFAULT NULL,
   `destino` varchar(255) NOT NULL,
@@ -12849,9 +13190,7 @@ CREATE TABLE `remocao_logistica` (
   `data_saida` datetime DEFAULT NULL,
   PRIMARY KEY (`id_remocao`),
   KEY `fk_rem_ffa_heranca` (`id_ffa`),
-  KEY `fk_rem_atend_heranca` (`id_atendimento`),
-  CONSTRAINT `fk_rem_atend_heranca` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
-  CONSTRAINT `fk_rem_ffa_heranca` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id`)
+  KEY `fk_rem_atend_heranca` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12873,15 +13212,18 @@ DROP TABLE IF EXISTS `retorno_atendimento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `retorno_atendimento` (
   `id_retorno` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento_origem` bigint DEFAULT NULL,
-  `id_atendimento_retorno` bigint DEFAULT NULL,
+  `id_atendimento_origem` bigint unsigned NOT NULL,
+  `id_atendimento_retorno` bigint unsigned NOT NULL,
   `motivo` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_atendimento` bigint unsigned NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_retorno`),
   KEY `id_atendimento_origem` (`id_atendimento_origem`),
   KEY `id_atendimento_retorno` (`id_atendimento_retorno`),
-  CONSTRAINT `retorno_atendimento_ibfk_1` FOREIGN KEY (`id_atendimento_origem`) REFERENCES `atendimento` (`id_atendimento`),
-  CONSTRAINT `retorno_atendimento_ibfk_2` FOREIGN KEY (`id_atendimento_retorno`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `fk_retorno_atendimento_atendimento` (`id_atendimento`),
+  KEY `idx_ret_ent` (`id_entidade`),
+  CONSTRAINT `fk_retorno_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13116,7 +13458,7 @@ DROP TABLE IF EXISTS `runtime_contexto`;
 CREATE TABLE `runtime_contexto` (
   `id_runtime_contexto` bigint NOT NULL AUTO_INCREMENT,
   `id_sessao_usuario` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `id_paciente` bigint DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
@@ -13127,6 +13469,8 @@ CREATE TABLE `runtime_contexto` (
   `ativo` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id_runtime_contexto`),
   KEY `idx_runtime_sessao` (`id_sessao_usuario`),
+  KEY `fk_runtime_contexto_unidade` (`id_unidade`),
+  CONSTRAINT `fk_runtime_contexto_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_runtime_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -13184,7 +13528,7 @@ CREATE TABLE `runtime_edge_evento` (
   `id_evento` bigint NOT NULL AUTO_INCREMENT,
   `uuid_evento` char(36) NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local` bigint DEFAULT NULL,
   `dominio_fluxo` varchar(50) NOT NULL,
   `estado_origem` varchar(50) NOT NULL,
@@ -13200,7 +13544,9 @@ CREATE TABLE `runtime_edge_evento` (
   UNIQUE KEY `uk_runtime_evento_uuid` (`uuid_evento`),
   KEY `idx_runtime_evento_sync` (`status_sync`),
   KEY `idx_runtime_evento_sessao` (`id_sessao_usuario`),
-  KEY `idx_evento_orquestrador` (`id_orquestrador`)
+  KEY `idx_evento_orquestrador` (`id_orquestrador`),
+  KEY `fk_runtime_edge_evento_unidade` (`id_unidade`),
+  CONSTRAINT `fk_runtime_edge_evento_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13327,17 +13673,18 @@ DROP TABLE IF EXISTS `runtime_invariant_log`;
 CREATE TABLE `runtime_invariant_log` (
   `id_invariant` bigint NOT NULL AUTO_INCREMENT,
   `uuid_runtime` char(36) NOT NULL,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `tipo_invariante` varchar(80) NOT NULL,
   `payload_original` json DEFAULT NULL,
   `hash_payload` char(64) NOT NULL,
   `estado_valido` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_invariant`),
   KEY `idx_invariant_uuid` (`uuid_runtime`),
-  KEY `idx_invariant_saas` (`id_saas_entidade`),
-  KEY `idx_invariant_estado` (`estado_valido`)
+  KEY `idx_invariant_estado` (`estado_valido`),
+  KEY `fk_runtime_invariant_log_unidade` (`id_unidade`),
+  CONSTRAINT `fk_runtime_invariant_log_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13479,19 +13826,19 @@ DROP TABLE IF EXISTS `runtime_sync_log`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `runtime_sync_log` (
   `id_sync` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `uuid_evento` char(36) NOT NULL,
   `tipo_evento` varchar(60) NOT NULL,
   `estado_payload` json DEFAULT NULL,
   `hash_payload` char(64) DEFAULT NULL,
   `sincronizado` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_sync`),
-  KEY `idx_sync_saas` (`id_saas_entidade`),
   KEY `idx_sync_unidade` (`id_unidade`),
   KEY `idx_sync_uuid` (`uuid_evento`),
-  KEY `idx_sync_status` (`sincronizado`)
+  KEY `idx_sync_status` (`sincronizado`),
+  CONSTRAINT `fk_runtime_sync_log_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13541,7 +13888,7 @@ DROP TABLE IF EXISTS `saas_contrato`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `saas_contrato` (
   `id_contrato` bigint NOT NULL AUTO_INCREMENT,
-  `id_entidade` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `data_inicio` date NOT NULL,
   `data_fim` date DEFAULT NULL,
   `status` enum('ATIVO','SUSPENSO','CANCELADO') NOT NULL DEFAULT 'ATIVO',
@@ -13570,7 +13917,7 @@ DROP TABLE IF EXISTS `saas_entidade`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `saas_entidade` (
-  `id_entidade` bigint NOT NULL AUTO_INCREMENT,
+  `id_entidade` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nome_fantasia` varchar(200) NOT NULL,
   `razao_social` varchar(200) DEFAULT NULL,
   `cnpj` varchar(20) DEFAULT NULL,
@@ -13593,41 +13940,6 @@ INSERT INTO `saas_entidade` VALUES (1,'Empresa Exemplo','PREFEITURA MUNICIPAL DE
 UNLOCK TABLES;
 
 --
--- Table structure for table `sala`
---
-
-DROP TABLE IF EXISTS `sala`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `sala` (
-  `id_sala` int NOT NULL AUTO_INCREMENT,
-  `nome_exibicao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `id_local` int NOT NULL,
-  `id_especialidade` int DEFAULT NULL,
-  `ativa` tinyint(1) DEFAULT '1',
-  `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
-  `codigo` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `id_tipo_sala` bigint unsigned DEFAULT NULL,
-  `permite_multiplas_especialidades` tinyint(1) DEFAULT '1',
-  `exibir_painel` tinyint(1) DEFAULT '1',
-  `gerar_tts` tinyint(1) DEFAULT '1',
-  PRIMARY KEY (`id_sala`),
-  KEY `fk_sala_tipo` (`id_tipo_sala`),
-  CONSTRAINT `fk_sala_tipo` FOREIGN KEY (`id_tipo_sala`) REFERENCES `tipo_sala` (`id_tipo_sala`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Sala física de atendimento (exibição em painel e uso assistencial)';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `sala`
---
-
-LOCK TABLES `sala` WRITE;
-/*!40000 ALTER TABLE `sala` DISABLE KEYS */;
-INSERT INTO `sala` VALUES (1,'Não Definida',1,NULL,1,'2026-03-23 03:45:12','NAO_DEFINIDA',1,1,0,0);
-/*!40000 ALTER TABLE `sala` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `sala_notificacao`
 --
 
@@ -13636,7 +13948,7 @@ DROP TABLE IF EXISTS `sala_notificacao`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sala_notificacao` (
   `id_notificacao` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_senha` bigint DEFAULT NULL,
   `id_ffa` bigint DEFAULT NULL,
   `tipo` enum('VIOLENCIA','AGRAVO','OUTRO') NOT NULL DEFAULT 'OUTRO',
@@ -13648,7 +13960,7 @@ CREATE TABLE `sala_notificacao` (
   PRIMARY KEY (`id_notificacao`),
   KEY `fk_sn_unidade` (`id_unidade`),
   KEY `fk_sn_user` (`id_usuario_abertura`),
-  CONSTRAINT `fk_sn_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_sala_notificacao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_sn_user` FOREIGN KEY (`id_usuario_abertura`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -13731,51 +14043,31 @@ DROP TABLE IF EXISTS `senha`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `senha` (
-  `id_senha` bigint NOT NULL AUTO_INCREMENT,
-  `id_saas_entidade` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
-  `id_local` bigint DEFAULT NULL,
-  `codigo_visual` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `prioridade` int NOT NULL DEFAULT '0',
-  `id_fluxo_status` bigint NOT NULL,
-  `contexto_fluxo` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `id_atendimento` bigint DEFAULT NULL,
-  `id_ffa` bigint DEFAULT NULL,
-  `id_paciente` bigint DEFAULT NULL,
-  `origem` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `dispositivo` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `id_sessao_usuario` bigint DEFAULT NULL,
-  `ordem_fila` bigint NOT NULL DEFAULT '0',
-  `chamada_sequencial` int DEFAULT '0',
-  `chamada_em` datetime(6) DEFAULT NULL,
-  `executado_em` datetime(6) DEFAULT NULL,
-  `cancelado` tinyint(1) DEFAULT '0',
-  `cancelado_em` datetime(6) DEFAULT NULL,
-  `cancelado_por` bigint DEFAULT NULL,
-  `nao_compareceu` tinyint(1) DEFAULT '0',
-  `nao_compareceu_em` datetime(6) DEFAULT NULL,
-  `retorno_permitido_ate` datetime(6) DEFAULT NULL,
-  `retorno_utilizado` tinyint(1) DEFAULT '0',
-  `retorno_em` datetime(6) DEFAULT NULL,
-  `uuid_sync` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `versao_sync` bigint DEFAULT '0',
-  `hash_estado` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `estado_snapshot` json DEFAULT NULL,
-  `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_senha` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_unidade` bigint unsigned NOT NULL,
+  `codigo_visual` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_paciente` bigint unsigned DEFAULT NULL,
+  `origem_entrada` enum('RECEPCAO','AGENDAMENTO','UBS','SAMU','TRANSFERENCIA','REGULACAO','FARMACIA','OUTRO') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'RECEPCAO',
+  `id_prioridade` bigint unsigned NOT NULL DEFAULT '1',
+  `id_fluxo_status` bigint unsigned NOT NULL DEFAULT '1',
+  `id_sessao_usuario` bigint unsigned DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
-  `risco_dinamico` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `risco_dinamico_em` datetime(6) DEFAULT NULL,
-  `risco_dinamico_origem` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uuid_sync` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `versao_sync` bigint unsigned DEFAULT '0',
+  `hash_estado` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id_ffa` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_senha`),
-  UNIQUE KEY `uk_senha_codigo_dia` (`id_saas_entidade`,`id_unidade`,(cast(`criado_em` as date)),`codigo_visual`),
-  KEY `idx_senha_saas` (`id_saas_entidade`),
-  KEY `idx_senha_unidade_fila` (`id_unidade`,`id_local`,`id_fluxo_status`,`prioridade`,`cancelado`,`executado_em`),
   KEY `idx_senha_paciente` (`id_paciente`),
-  KEY `idx_senha_atendimento` (`id_atendimento`),
-  KEY `idx_senha_uuid_sync` (`uuid_sync`),
-  KEY `idx_senha_runtime` (`executado_em`,`cancelado`,`nao_compareceu`,`criado_em`),
-  KEY `idx_senha_data_dia` ((cast(`criado_em` as date)))
-) ENGINE=InnoDB AUTO_INCREMENT=1086 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_senha_origem` (`origem_entrada`),
+  KEY `fk_senha_unidade` (`id_unidade`),
+  KEY `fk_senha_ffa` (`id_ffa`),
+  KEY `idx_senha_entidade_unidade` (`id_entidade`,`id_unidade`),
+  CONSTRAINT `fk_senha_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_senha_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id_ffa`),
+  CONSTRAINT `fk_senha_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13784,7 +14076,6 @@ CREATE TABLE `senha` (
 
 LOCK TABLES `senha` WRITE;
 /*!40000 ALTER TABLE `senha` DISABLE KEYS */;
-INSERT INTO `senha` VALUES (1001,1,1,NULL,'CLI-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1002,1,1,NULL,'CLI-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1003,1,1,NULL,'PED-001',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1004,1,1,NULL,'CLI-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1005,1,1,NULL,'PED-002',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1006,1,1,NULL,'CLI-004',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1007,1,1,NULL,'CLI-005',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1008,1,1,NULL,'PED-003',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1009,1,1,NULL,'CLI-006',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1010,1,1,NULL,'CLI-007',0,1,'AGUARDANDO_RECEPCAO',NULL,NULL,NULL,'TOTEM',NULL,NULL,0,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'',0,NULL,NULL,'2026-03-09 02:52:10.000000',NULL,NULL,NULL,NULL),(1047,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9d73a6ca-4c8d-4598-83d8-1557939fd990',0,NULL,NULL,'2026-03-11 01:37:37.869538',NULL,NULL,NULL,NULL),(1048,1,1,1,'P002',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'16385ac6-21ca-46db-9d1c-1fce3bdf146e',0,NULL,NULL,'2026-03-11 01:37:39.917484',NULL,NULL,NULL,NULL),(1049,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b1b95573-fd88-4c73-8bda-eeb14eb5812d',0,NULL,NULL,'2026-03-11 01:37:41.176215',NULL,NULL,NULL,NULL),(1050,1,1,1,'P003',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'efdbbe73-8ec1-4a40-bd0d-a1d1f92d8985',0,NULL,NULL,'2026-03-11 01:39:11.645634',NULL,NULL,NULL,NULL),(1051,1,1,1,'P004',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'80c3de42-afbb-4279-b776-0a55b798ad4b',0,NULL,NULL,'2026-03-11 01:39:27.123352',NULL,NULL,NULL,NULL),(1052,1,1,1,'C002',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'f5ea0a7f-89c4-416a-a3b6-39b7d1def62d',0,NULL,NULL,'2026-03-11 01:39:28.381425',NULL,NULL,NULL,NULL),(1053,1,1,1,'P005',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'c632bb2e-7e6a-4f4c-929c-31fdf4821248',0,NULL,NULL,'2026-03-11 01:42:37.406235',NULL,NULL,NULL,NULL),(1054,1,1,1,'P006',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,6,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'e12c005b-7302-4baf-8e6d-a1a8788452db',0,NULL,NULL,'2026-03-11 01:42:38.363552',NULL,NULL,NULL,NULL),(1055,1,1,1,'C003',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9df08589-9ae0-4698-a2a4-ecbf1e2247c2',0,NULL,NULL,'2026-03-11 01:42:39.021091',NULL,NULL,NULL,NULL),(1056,1,1,1,'C004',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'8434ed27-6bc8-4701-b0a4-5a6af7becf52',0,NULL,NULL,'2026-03-11 01:42:39.715106',NULL,NULL,NULL,NULL),(1057,1,1,1,'P007',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,7,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'545a2d06-cbda-408a-9023-e1b5250a943d',0,NULL,NULL,'2026-03-11 01:42:40.564160',NULL,NULL,NULL,NULL),(1058,1,1,1,'C005',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'532c069c-9401-4594-9566-8f1a5162a04e',0,NULL,NULL,'2026-03-11 01:42:41.156766',NULL,NULL,NULL,NULL),(1059,1,1,1,'P008',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,8,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'f57d7f26-a473-4c40-8838-33406cc92d8a',0,NULL,NULL,'2026-03-11 01:49:01.291675',NULL,NULL,NULL,NULL),(1060,1,1,1,'P009',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,9,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'572227dc-aaf6-4917-b48c-839f50e4506c',0,NULL,NULL,'2026-03-11 01:49:02.354536',NULL,NULL,NULL,NULL),(1061,1,1,1,'C006',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,6,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'2c0c194d-f60f-44dd-8b7a-c19ad9285042',0,NULL,NULL,'2026-03-11 01:49:03.100371',NULL,NULL,NULL,NULL),(1062,1,1,1,'P010',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,10,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9ac92bba-f471-4372-b865-314171a2491e',0,NULL,NULL,'2026-03-11 01:51:20.176711',NULL,NULL,NULL,NULL),(1063,1,1,1,'P011',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,11,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'97559ee6-6ecc-47f8-bae3-b4ad0571cebb',0,NULL,NULL,'2026-03-11 01:51:21.706821',NULL,NULL,NULL,NULL),(1064,1,1,1,'C007',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,7,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0375598e-61c6-4960-a1d0-cf126c03cb34',0,NULL,NULL,'2026-03-11 01:51:22.449154',NULL,NULL,NULL,NULL),(1065,1,1,1,'P012',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,12,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'9c9d2149-42ea-4e1f-8cbb-de87b9213611',0,NULL,NULL,'2026-03-11 01:53:59.786072',NULL,NULL,NULL,NULL),(1066,1,1,1,'C008',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,8,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0c016b44-4f43-4c4e-bc10-58a413375ace',0,NULL,NULL,'2026-03-11 01:55:09.940169',NULL,NULL,NULL,NULL),(1067,1,1,1,'P013',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,13,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'a6dca1c7-405a-4933-8d00-73138c12a4ee',0,NULL,NULL,'2026-03-11 02:05:15.657145',NULL,NULL,NULL,NULL),(1068,1,1,1,'P014',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,14,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'c368eb3e-f5a6-4909-b9ab-4d4086175540',0,NULL,NULL,'2026-03-11 02:05:29.942983',NULL,NULL,NULL,NULL),(1069,1,1,1,'P015',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,15,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'39e996d6-817c-4fda-91b8-c6a0d317ab28',0,NULL,NULL,'2026-03-11 02:06:32.153055',NULL,NULL,NULL,NULL),(1070,1,1,1,'P016',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,16,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'e2e287f6-c657-44c9-a417-9017c682f307',0,NULL,NULL,'2026-03-11 02:07:30.514829',NULL,NULL,NULL,NULL),(1071,1,1,1,'P017',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,17,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'483dad9e-3857-45d1-9859-345c111b4897',0,NULL,NULL,'2026-03-11 02:12:15.263708',NULL,NULL,NULL,NULL),(1072,1,1,1,'P018',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,18,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'1574f6c9-3352-458d-823a-3b05354a46f0',0,NULL,NULL,'2026-03-11 02:35:09.982899',NULL,NULL,NULL,NULL),(1073,1,1,1,'P019',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,19,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'0d2b06c6-985f-4d0f-87c5-7fe92e685dfb',0,NULL,NULL,'2026-03-11 02:41:39.129162',NULL,NULL,NULL,NULL),(1074,1,1,1,'P020',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,20,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'686cc778-4334-4c76-b0a6-48d343ca612d',0,NULL,NULL,'2026-03-11 03:00:34.709224',NULL,NULL,NULL,NULL),(1075,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'1931d8fc-ca52-41bc-b3c0-c7618dc1a12d',0,NULL,NULL,'2026-03-15 05:10:27.471176',NULL,NULL,NULL,NULL),(1076,1,1,1,'P002',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'106f27cf-ab11-4bf3-bfa8-cd2d34f9cdc3',0,NULL,NULL,'2026-03-15 05:24:10.306927',NULL,NULL,NULL,NULL),(1077,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b529e17e-3635-4884-85e5-3a11deb0e651',0,NULL,NULL,'2026-03-16 22:54:42.291139',NULL,NULL,NULL,NULL),(1078,1,1,1,'C002',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b260abdd-4730-4f70-bffc-356da76e4bcc',0,NULL,NULL,'2026-03-16 22:54:42.364450',NULL,NULL,NULL,NULL),(1079,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'79d3a9d6-7062-4288-93c8-4a59b14099d2',0,NULL,NULL,'2026-03-16 23:35:46.828794',NULL,NULL,NULL,NULL),(1080,1,1,1,'P001',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'fabe2f7d-ef11-44ef-93d2-0f9b47b5ddb8',0,NULL,NULL,'2026-03-19 01:33:12.980839',NULL,NULL,NULL,NULL),(1081,1,1,1,'P002',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,2,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'3c057fc8-38af-405e-ba3c-a2233cc93e33',0,NULL,NULL,'2026-03-19 02:05:48.150816',NULL,NULL,NULL,NULL),(1082,1,1,1,'P003',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,3,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'fbb81763-72b6-48b9-bb8c-c5f7c3e29ae7',0,NULL,NULL,'2026-03-19 02:05:56.010680',NULL,NULL,NULL,NULL),(1083,1,1,1,'P004',1,1,'PRIORITARIO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,4,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'b6f848bd-50a5-4afd-b521-f3b5a4f71f2e',0,NULL,NULL,'2026-03-19 02:06:04.864958',NULL,NULL,NULL,NULL),(1084,1,1,1,'C001',5,1,'CLINICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,1,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'2e29c827-e249-44d0-97f3-0196b2b08b89',0,NULL,NULL,'2026-03-19 02:06:15.834491',NULL,NULL,NULL,NULL),(1085,1,1,1,'P005',2,1,'PEDIATRICO',NULL,NULL,NULL,'PAINEL_TOTEM','::ffff:127.0.0.1',NULL,5,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,'a389a01c-fb6e-4a03-9f1a-accf199f4a72',0,NULL,NULL,'2026-03-19 02:06:21.088199',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `senha` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13830,11 +14121,13 @@ DROP TABLE IF EXISTS `senha_sequencia`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `senha_sequencia` (
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `data_ref` date NOT NULL,
   `prefixo` varchar(5) NOT NULL,
   `ultimo_numero` int NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id_sistema`,`id_unidade`,`data_ref`,`prefixo`)
+  PRIMARY KEY (`id_sistema`,`id_unidade`,`data_ref`,`prefixo`),
+  KEY `fk_senha_sequencia_unidade` (`id_unidade`),
+  CONSTRAINT `fk_senha_sequencia_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13917,7 +14210,7 @@ DROP TABLE IF EXISTS `servico_agendamento`;
 CREATE TABLE `servico_agendamento` (
   `id_servico` bigint NOT NULL AUTO_INCREMENT,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `codigo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `nome` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `duracao_minutos` int NOT NULL DEFAULT '15',
@@ -13931,8 +14224,8 @@ CREATE TABLE `servico_agendamento` (
   UNIQUE KEY `uk_servico_ctx_codigo` (`id_sistema`,`id_unidade`,`codigo`),
   KEY `ix_servico_ctx` (`id_sistema`,`id_unidade`),
   KEY `fk_servico_unidade` (`id_unidade`),
-  CONSTRAINT `fk_servico_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
-  CONSTRAINT `fk_servico_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
+  CONSTRAINT `fk_servico_agendamento_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
+  CONSTRAINT `fk_servico_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13969,6 +14262,51 @@ CREATE TABLE `sessao_ativa` (
 LOCK TABLES `sessao_ativa` WRITE;
 /*!40000 ALTER TABLE `sessao_ativa` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sessao_ativa` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sessao_contexto_historico`
+--
+
+DROP TABLE IF EXISTS `sessao_contexto_historico`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sessao_contexto_historico` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_sessao_usuario` bigint NOT NULL,
+  `id_usuario` bigint NOT NULL,
+  `id_atendimento` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
+  `id_local` bigint NOT NULL,
+  `contexto_anterior` json DEFAULT NULL,
+  `contexto_novo` json DEFAULT NULL,
+  `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `idx_hist_sessao` (`id_sessao_usuario`,`criado_em`),
+  KEY `idx_hist_usuario` (`id_usuario`,`criado_em`),
+  KEY `idx_hist_ent_unid` (`id_entidade`,`id_unidade`,`criado_em`),
+  KEY `idx_hist_atendimento` (`id_atendimento`),
+  KEY `idx_hist_local` (`id_local`),
+  KEY `fk_hist_ctx_unidade` (`id_unidade`),
+  CONSTRAINT `fk_hist_ctx_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE SET NULL,
+  CONSTRAINT `fk_hist_ctx_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_hist_ctx_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_hist_ctx_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`) ON DELETE CASCADE,
+  CONSTRAINT `fk_hist_ctx_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_hist_ctx_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
+  CONSTRAINT `sessao_contexto_historico_chk_1` CHECK (((`contexto_anterior` is null) or json_valid(`contexto_anterior`))),
+  CONSTRAINT `sessao_contexto_historico_chk_2` CHECK (((`contexto_novo` is null) or json_valid(`contexto_novo`)))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sessao_contexto_historico`
+--
+
+LOCK TABLES `sessao_contexto_historico` WRITE;
+/*!40000 ALTER TABLE `sessao_contexto_historico` DISABLE KEYS */;
+/*!40000 ALTER TABLE `sessao_contexto_historico` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -14020,8 +14358,9 @@ CREATE TABLE `sessao_usuario` (
   `id_usuario` bigint NOT NULL,
   `id_perfil` bigint DEFAULT NULL,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local` bigint DEFAULT NULL,
+  `id_sala` bigint DEFAULT NULL,
   `id_dispositivo` bigint DEFAULT NULL,
   `token_jwt` varchar(512) NOT NULL,
   `refresh_token` varchar(512) DEFAULT NULL,
@@ -14052,12 +14391,13 @@ CREATE TABLE `sessao_usuario` (
   KEY `idx_sessao_expira` (`expira_em`),
   KEY `idx_sessao_ativo` (`ativo`),
   KEY `idx_sessao_local` (`id_local`),
+  KEY `idx_sessao_sala` (`id_sala`),
   CONSTRAINT `fk_sessao_usuario_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`),
   CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
   CONSTRAINT `fk_sessao_usuario_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
   CONSTRAINT `fk_sessao_usuario_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_sessao_usuario_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=178 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=190 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14066,7 +14406,7 @@ CREATE TABLE `sessao_usuario` (
 
 LOCK TABLES `sessao_usuario` WRITE;
 /*!40000 ALTER TABLE `sessao_usuario` DISABLE KEYS */;
-INSERT INTO `sessao_usuario` VALUES (7,'63c37b7d-452b-4a86-aea0-d86a37df5023',1,42,1,1,NULL,NULL,'1372fc2f1b036f2b2eaaeb43b4c848d2bc1f6d000fe7547ee335ffaa5c7962a2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:05.817284','2026-03-15 12:01:05.816000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:05.817284',NULL,NULL,NULL,NULL,NULL,NULL),(8,'b39ce1df-7561-459d-acc9-94d0ebe3eb21',1,42,1,1,NULL,NULL,'eb37f4e0fc8692e22c3fb36c6534970edad66762027721b31fd4066240f0e23d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:41.237955','2026-03-15 12:01:41.237000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:41.237955',NULL,NULL,NULL,NULL,NULL,NULL),(9,'4cb66dd7-0573-420e-8ee3-35a16c0b8354',1,42,1,1,NULL,NULL,'cee05051dc58779e8644c9ca5504d973527acd3089c95ada44df2750bdebe2a4',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:03:46.388138','2026-03-15 12:03:46.387000',NULL,NULL,NULL,1,0,'2026-03-15 04:03:46.388138',NULL,NULL,NULL,NULL,NULL,NULL),(10,'2d3f8c43-6965-4796-bb51-5cfa62cda2da',1,42,1,1,NULL,NULL,'f51713aca9e0affe852e6a510cb8d87fb8447b521523209a210768507ffc6302',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:27.379626','2026-03-15 12:08:27.368000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:27.379626',NULL,NULL,NULL,NULL,NULL,NULL),(11,'2f6d3f77-1f54-4564-8fb7-014d6f78866f',1,42,1,1,NULL,NULL,'e7317224ce17d218708316ed36838c06f4027a4ca72dd982971a395a771dd4a1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:50.176704','2026-03-15 12:08:50.175000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:50.176704',NULL,NULL,NULL,NULL,NULL,NULL),(12,'e144b098-9911-4205-8ae1-06828e2f987f',1,42,1,1,NULL,NULL,'3adb704fa919ccda9b98001ad2c36762917b309fbfd58d9813ab44e074c8f7b6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:12:14.179418','2026-03-15 12:12:14.178000',NULL,NULL,NULL,1,0,'2026-03-15 04:12:14.179418',NULL,NULL,NULL,NULL,NULL,NULL),(13,'397ae7a5-01eb-41c9-bde3-b71553c18da1',1,42,1,1,NULL,NULL,'a3e36c54a2f521f2403d7dbf972699b009b3778d4262f26b03fe0d216d3131b7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:11.011380','2026-03-15 12:14:11.004000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:11.011380',NULL,NULL,NULL,NULL,NULL,NULL),(14,'dd97f6f7-55f8-45bd-8866-be0c7b7f7afd',1,42,1,1,NULL,NULL,'871d0b640f96992252ffbf2d9f83382a3a08398e010ef1a2b7ffdb52fff3ca75',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:29.945664','2026-03-15 12:14:29.944000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:29.945664',NULL,NULL,NULL,NULL,NULL,NULL),(15,'13249301-44c2-49fc-8f06-a941c8dbd883',1,42,1,1,NULL,NULL,'b902ac1b34000f57048d9a7b455389d4853b5de92dea9731e64c366ec1de6db2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:05.577331','2026-03-15 12:29:05.527000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:05.577331',NULL,NULL,NULL,NULL,NULL,NULL),(16,'1ab7c4ec-55ec-44a8-9fed-e5993231f768',1,42,1,1,NULL,NULL,'12d51baea86c236f511a88c8a4771b5ea749b48b59b3566892cfea9228594aab',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:28.697984','2026-03-15 12:29:28.696000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:28.697984',NULL,NULL,NULL,NULL,NULL,NULL),(17,'1f103d68-a824-4fe1-a51d-16ada7bfaa2f',1,42,1,1,NULL,NULL,'882dd04c16cb0024d88c6d2792071e763f5e5906fccca406b99fa523be1806ad',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:38:21.583153','2026-03-15 12:38:21.579000',NULL,NULL,NULL,1,0,'2026-03-15 04:38:21.583153',NULL,NULL,NULL,NULL,NULL,NULL),(18,'58075872-3163-4505-9c92-660c35893b77',1,42,1,1,NULL,NULL,'ee653d551b1cb460d4f3707c99772ac5b81f530dca5cb43d29134d878ebf3eb6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:29.831578','2026-03-15 12:43:29.830000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:29.831578',NULL,NULL,NULL,NULL,NULL,NULL),(19,'c9cd4225-14ec-4a92-b6b3-47c521ce771b',1,42,1,1,NULL,NULL,'d0785168510e09119c38365c10ef25a5c8673d9f7da617f22c286348fb18ef85',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:42.608531','2026-03-15 12:43:42.607000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:42.608531',NULL,NULL,NULL,NULL,NULL,NULL),(20,'3c5da068-7630-4c91-a709-47fa8cef55d6',1,42,1,1,NULL,NULL,'7f34ec46414d5dfa85aa6823ed0b9772616a831ff2c0d8718fa5fc7a7a1eeaf5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:44:05.883072','2026-03-15 12:44:05.882000',NULL,NULL,NULL,1,0,'2026-03-15 04:44:05.883072',NULL,NULL,NULL,NULL,NULL,NULL),(21,'8fe9121c-c63c-43a0-88f5-81f6f1e70ff3',1,42,1,1,NULL,NULL,'26f46ab3f1e78157bf5dd91e81437d6a6251c78ae7cc5fb9dc9db79c8feecd1e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:46:52.323077','2026-03-15 12:46:52.321000',NULL,NULL,NULL,1,0,'2026-03-15 04:46:52.323077',NULL,NULL,NULL,NULL,NULL,NULL),(22,'55a81184-9657-4b28-8540-5bf0e217eeae',1,42,1,1,NULL,NULL,'a18136a06af71bcb136c75c5bbfbc166b3ca9c853956997d9efc0e6ad9e3996d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:52:07.194269','2026-03-15 12:52:07.192000',NULL,NULL,NULL,1,0,'2026-03-15 04:52:07.194269',NULL,NULL,NULL,NULL,NULL,NULL),(23,'c3e7b60e-d6b7-4042-9b8e-045d61d9518c',1,42,1,1,NULL,NULL,'fb00d6352697002685225620f45f854828ba6d29e6a87719928dea3e1aae6a8c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.549440','2026-03-15 12:53:57.548000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.549440',NULL,NULL,NULL,NULL,NULL,NULL),(24,'d99e2221-1442-41a9-88ea-8b93eb13912a',1,42,1,1,NULL,NULL,'560906d8554298e4dca2f11fcfd9c327c39322471fcb34f11243b240a6259ec9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.812067','2026-03-15 12:53:57.805000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.812067',NULL,NULL,NULL,NULL,NULL,NULL),(25,'0d218d46-92b4-45f5-90f0-3fe1b281eb72',1,42,1,1,NULL,NULL,'d53958ce98a94e0adf1628b3a524fecf24acefe9f521ae8b2fbf6b2a092675af',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:54:44.965119','2026-03-15 12:54:44.964000',NULL,NULL,NULL,1,0,'2026-03-15 04:54:44.965119',NULL,NULL,NULL,NULL,NULL,NULL),(26,'a4a074ec-0b7a-4186-ac94-c67f0fc9fb26',1,42,1,1,NULL,NULL,'777637c164c144831659549628ecd2238b224efd07c38d44afe82d100a3ab66d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:59:02.337344','2026-03-15 12:59:02.335000',NULL,NULL,NULL,1,0,'2026-03-15 04:59:02.337344',NULL,NULL,NULL,NULL,NULL,NULL),(27,'afe722c9-ef79-4fcb-bf7c-360d9670d6ec',1,42,1,1,NULL,NULL,'3c8ddda048fa01707486bc2623b27b795be575fdfcac170816e033bc50b65fd5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:01:49.926764','2026-03-15 13:01:49.925000',NULL,NULL,NULL,1,0,'2026-03-15 05:01:49.926764',NULL,NULL,NULL,NULL,NULL,NULL),(28,'9b9c4550-4e6d-444c-a3dc-b4e94f3bc3e4',1,42,1,1,NULL,NULL,'1722fb2391563a12a08db86c7a6185846b41cf32e351038b802d8debdc935d7d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:04:31.209876','2026-03-15 13:04:31.208000',NULL,NULL,NULL,1,0,'2026-03-15 05:04:31.209876',NULL,NULL,NULL,NULL,NULL,NULL),(29,'8ac9f6d8-fb40-4885-9986-65b5fc5c84b2',1,42,1,1,NULL,NULL,'6c61a69433e695be84fbf9b9f59b788e5593ca03e34d1889992bee938f4a27c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:05:24.089442','2026-03-15 13:05:24.087000',NULL,NULL,NULL,1,0,'2026-03-15 05:05:24.089442',NULL,NULL,NULL,NULL,NULL,NULL),(30,'b18c5b34-8442-4215-a99d-50b355959639',1,42,1,1,NULL,NULL,'524f43c0cae88f5940ed43a9a9bfa507041d6e263c25ac292b43c9399dc579a8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:07:02.949027','2026-03-15 13:07:02.946000',NULL,NULL,NULL,1,0,'2026-03-15 05:07:02.949027',NULL,NULL,NULL,NULL,NULL,NULL),(31,'2de510c9-3d05-4f64-ba88-724ccaa67cd9',1,42,1,1,NULL,NULL,'86fada34141e91b2111e1a4adb1d608192278d8d003bdf76ce238c0d3b34896b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:10:18.915385','2026-03-15 13:10:18.913000',NULL,NULL,NULL,1,0,'2026-03-15 05:10:18.915385',NULL,NULL,NULL,NULL,NULL,NULL),(32,'e412dc45-9a52-4c20-8872-e279fb7c5ee3',1,42,1,1,NULL,NULL,'ec2214b4e05e9a2ac5ceb8e8d7928747260cc0f312548dc13ca82275987d9280',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:11:06.087464','2026-03-15 13:11:06.086000',NULL,NULL,NULL,1,0,'2026-03-15 05:11:06.087464',NULL,NULL,NULL,NULL,NULL,NULL),(33,'07d17b58-4172-4d4b-ac37-fd4a4478c275',1,42,1,1,NULL,NULL,'c4d78d54a26ea192a604b14e20b74a9658d9a1c338fe30d67fdd5a797bbeae96',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:13:08.825375','2026-03-15 13:13:08.824000',NULL,NULL,NULL,1,0,'2026-03-15 05:13:08.825375',NULL,NULL,NULL,NULL,NULL,NULL),(34,'d31b6c73-2d2c-4452-8c1e-376ec08adace',1,42,1,1,NULL,NULL,'e7f8c8b98aa3e810fa7613e91f71cf9384282a3a15b9491d9a0455a184ad38d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:19:33.582081','2026-03-15 13:19:33.580000',NULL,NULL,NULL,1,0,'2026-03-15 05:19:33.582081',NULL,NULL,NULL,NULL,NULL,NULL),(35,'f3f52003-da54-4489-8c3b-84582fb4b097',1,42,1,1,NULL,NULL,'9f1793aeb07425915397c5a27f8be18767b13d8ac692cfe3722483ca0ca26f16',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:20:16.048413','2026-03-15 13:20:16.047000',NULL,NULL,NULL,1,0,'2026-03-15 05:20:16.048413',NULL,NULL,NULL,NULL,NULL,NULL),(36,'f669359c-77b2-4e95-a951-e94f19a4c3f0',1,42,1,1,NULL,NULL,'4f5fb83da594beb48268959b625532c8eca7d8aea1f07fac379c7b5a420cbb9c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:23:45.486190','2026-03-15 13:23:45.485000',NULL,NULL,NULL,1,0,'2026-03-15 05:23:45.486190',NULL,NULL,NULL,NULL,NULL,NULL),(37,'a47179c5-7506-4981-8874-4d375b6db2a5',1,42,1,1,NULL,NULL,'3f1fe25ae0e4f047a55d2e2fa4306b8c05157969c8ff46dc60daa9765e6b4670',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:24:05.181714','2026-03-15 13:24:05.180000',NULL,NULL,NULL,1,0,'2026-03-15 05:24:05.181714',NULL,NULL,NULL,NULL,NULL,NULL),(38,'f8e70a89-7e2a-499b-9ad8-a3041ca84674',1,42,1,1,NULL,NULL,'1fc1055ff66c52efff0f050e9b9f6563b50215f5a2c441ac9700e1c25c88ad22',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:25:01.357715','2026-03-15 13:25:01.356000',NULL,NULL,NULL,1,0,'2026-03-15 05:25:01.357715',NULL,NULL,NULL,NULL,NULL,NULL),(39,'2585de0f-319a-486a-ba66-c0fb9290b0fb',1,42,1,1,NULL,NULL,'d677c12877e0cecd198e649b8efee8312f25554bb5fe7dd772948bc8d20bbae6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:28:23.799640','2026-03-15 13:28:23.797000',NULL,NULL,NULL,1,0,'2026-03-15 05:28:23.799640',NULL,NULL,NULL,NULL,NULL,NULL),(40,'faf72121-36ce-463b-a77a-318d5ddc9e0f',1,42,1,1,NULL,NULL,'a6a1c717a2807104c181ab4f659558b611239fb88dc3a459852900d571a1de4e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:24.565813','2026-03-15 13:29:24.564000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:24.565813',NULL,NULL,NULL,NULL,NULL,NULL),(41,'6e513914-1319-4d5d-be03-fde1eb0222b9',1,42,1,1,NULL,NULL,'a1d23df2b021e98171cf65e5803a7276152e6b2d724c8a5c4033fc47a3c02330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:42.507935','2026-03-15 13:29:42.506000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:42.507935',NULL,NULL,NULL,NULL,NULL,NULL),(42,'4816f1ab-c5e8-4515-a20d-8cc56613fabb',1,42,1,1,NULL,NULL,'4d7a1e2d9ac6f80e53a72219992fd6cea2a671934edb62d9459504afb09552f1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:34:19.502653','2026-03-15 13:34:19.501000',NULL,NULL,NULL,1,0,'2026-03-15 05:34:19.502653',NULL,NULL,NULL,NULL,NULL,NULL),(43,'3ed53aee-4311-4bbc-8f36-6ae72bdaf19e',1,42,1,1,NULL,NULL,'5303f79f6960a59ca5aaf5e734eed88f83205405fb72d3e72d2e772c17918794',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:47:06.103453','2026-03-15 13:47:06.101000',NULL,NULL,NULL,1,0,'2026-03-15 05:47:06.103453',NULL,NULL,NULL,NULL,NULL,NULL),(44,'b18293a4-59cb-4ff2-8656-4062d0c0b85f',1,42,1,1,NULL,NULL,'acb1d550e8f4e2b8dba1035a6ac81477289c6d38a0527fcc2c8c5658ce993f9a',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:04.716838','2026-03-15 13:49:04.715000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:04.716838',NULL,NULL,NULL,NULL,NULL,NULL),(45,'1af2b45c-ac3a-4434-b220-acb2c566fb67',1,42,1,1,NULL,NULL,'c144c2a5f987ee11854fba3963bcec76fb5193156ceef574096654849e401da8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:51.795570','2026-03-15 13:49:51.794000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:51.795570',NULL,NULL,NULL,NULL,NULL,NULL),(46,'0176059d-2ca7-47fa-b75c-fec17e8e5d84',1,42,1,1,NULL,NULL,'92b3eb710653308e3bf4bd243e79b62153a54a4d427a7fd472a345ed6ba1a4c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:51:18.543658','2026-03-15 13:51:18.543000',NULL,NULL,NULL,1,0,'2026-03-15 05:51:18.543658',NULL,NULL,NULL,NULL,NULL,NULL),(47,'68640f65-cd41-437e-b5ca-1f3bfbd0ba73',1,42,1,1,NULL,NULL,'f6730df241ca451cb6cc9aa1e2fa1b5f8ab8f5060d94123cb17d6ad6411463d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:52:40.592110','2026-03-15 13:52:40.590000',NULL,NULL,NULL,1,0,'2026-03-15 05:52:40.592110',NULL,NULL,NULL,NULL,NULL,NULL),(48,'a3106b09-f571-4853-abcb-24616ea7bf2d',1,42,1,1,NULL,NULL,'a69c2b85547f87d8ce9ef80a1f1bae89f2baa86a4a09c75dbd553315ca025fa9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:53:20.003322','2026-03-15 13:53:20.001000',NULL,NULL,NULL,1,0,'2026-03-15 05:53:20.003322',NULL,NULL,NULL,NULL,NULL,NULL),(49,'4a05a12b-efd9-4afd-a675-87ae6c71505a',1,42,1,1,NULL,NULL,'41a2228d80125b77416308aa72c7ada8e1b92ed81eeaa8e107b989896a5fcae7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:15:43.228380','2026-03-15 14:15:43.227000',NULL,NULL,NULL,1,0,'2026-03-15 06:15:43.228380',NULL,NULL,NULL,NULL,NULL,NULL),(50,'5d15c751-c5aa-41f3-a6a1-2ba53b051ad2',1,42,1,1,NULL,NULL,'4803775615d816cdc13c43b6482d76854cf32928fb4f4f0f129dc096ce84a18b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:29:47.314898','2026-03-15 14:29:47.313000',NULL,NULL,NULL,1,0,'2026-03-15 06:29:47.314898',NULL,NULL,NULL,NULL,NULL,NULL),(51,'0d3dfb20-53c1-46c9-9998-a1cfd26396cc',1,42,1,1,NULL,NULL,'0e0390b5245ca5e54eec47bbe454a7ac8843d94c4cba035e9f1cd9488134f330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:41:11.699902','2026-03-15 14:41:11.698000',NULL,NULL,NULL,1,0,'2026-03-15 06:41:11.699902',NULL,NULL,NULL,NULL,NULL,NULL),(52,'bca53638-a182-44fe-9451-a80b8ee440bc',1,42,1,1,NULL,NULL,'a2bdbbaf06a9708d00051add445c25e8ba9422832889fd41d1ab977735d9fe80',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:43:58.577254','2026-03-15 14:43:58.575000',NULL,NULL,NULL,1,0,'2026-03-15 06:43:58.577254',NULL,NULL,NULL,NULL,NULL,NULL),(53,'522e2766-d026-410d-85dd-f21b37e23d1d',1,42,1,1,NULL,NULL,'409cf7bad8ffebf248f3dcb5106bbba228db8bce130521af8fcabd101a23d7cc',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:47:51.929614','2026-03-15 14:47:51.927000',NULL,NULL,NULL,1,0,'2026-03-15 06:47:51.929614',NULL,NULL,NULL,NULL,NULL,NULL),(54,'e32c3349-14c1-4b9c-bbcf-ae81432eea55',1,42,1,1,NULL,NULL,'9bd4705293555f6ac1ca2feadc9fc296d8b74310af622eefb9cc48e5833ab717',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:52:08.454722','2026-03-15 14:52:08.453000',NULL,NULL,NULL,1,0,'2026-03-15 06:52:08.454722',NULL,NULL,NULL,NULL,NULL,NULL),(55,'670299a1-f54e-4e5f-a4a6-e73ef010e578',1,42,1,1,NULL,NULL,'87418159553fb03bd6e62cb7b80aeb7af3e52128feaeb5dcea81643c83d81629',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:55:27.345484','2026-03-15 14:55:27.342000',NULL,NULL,NULL,1,0,'2026-03-15 06:55:27.345484',NULL,NULL,NULL,NULL,NULL,NULL),(56,'ce264be2-c41e-427d-93cf-4faf1870740d',1,42,1,1,NULL,NULL,'b81b4c61a9330dfa0290e9a5b3cc77109d0ca292c95a7d6e105326aa5f7710fb',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:24:04.569310','2026-03-17 06:24:04.554000',NULL,NULL,NULL,1,0,'2026-03-16 22:24:04.569310',NULL,NULL,NULL,NULL,NULL,NULL),(57,'0db5dde4-0fa2-41ae-a8d6-8d042cd2e082',1,42,1,1,NULL,NULL,'eb335f0c74a9e213608127a17dc82ca476719214773266aec02b6b1fafec0fff',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.812490','2026-03-17 06:25:25.811000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.812490',NULL,NULL,NULL,NULL,NULL,NULL),(58,'0f8bd2f2-9667-4acc-a56d-e035d5303759',1,42,1,1,NULL,NULL,'8861b5cf060a3fdcfa568589c04cef2b157a3027ffa043732f941727ec790976',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.940807','2026-03-17 06:25:25.938000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.940807',NULL,NULL,NULL,NULL,NULL,NULL),(59,'4dde9d25-9151-49c6-b88f-8225669b5c1a',1,42,1,1,NULL,NULL,'f341d4930e8ed0054aedd5055572e8e531494c5a9a508ddc462275a3f8e7c35e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:35:23.378417','2026-03-17 06:35:23.376000',NULL,NULL,NULL,1,0,'2026-03-16 22:35:23.378417',NULL,NULL,NULL,NULL,NULL,NULL),(60,'7d293064-9697-4f28-af2a-2d147b68f3bf',1,42,1,1,NULL,NULL,'2465ee9007e950467e2731a05f6940c42b2add6269f88497dd9e0bbda0e46aab',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:38:51.083680','2026-03-17 06:38:51.082000',NULL,NULL,NULL,1,0,'2026-03-16 22:38:51.083680',NULL,NULL,NULL,NULL,NULL,NULL),(61,'0b362983-ea96-435d-b349-1182b4864a98',1,42,1,1,NULL,NULL,'cab38f6d7dac91e02f1abd9885e1dfd51e6d01cb3099558b27685d947f1df373',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:40:01.718458','2026-03-17 06:40:01.717000',NULL,NULL,NULL,1,0,'2026-03-16 22:40:01.718458',NULL,NULL,NULL,NULL,NULL,NULL),(62,'205e5718-bdd1-4576-bb7d-b186f62c6fc1',1,42,1,1,NULL,NULL,'ed5a4e43c718119c84dbaa4563d2b6c079d4e6737224ebe766591789ed97878f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:03.769537','2026-03-17 06:43:03.768000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:03.769537',NULL,NULL,NULL,NULL,NULL,NULL),(63,'e6bfb0c4-5d28-4102-a911-b7f0f7b7f1de',1,42,1,1,NULL,NULL,'12cafcefbeba26e5c96db7ba273371d0b50ca5ce31e7589994b421830ab74582',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:21.698424','2026-03-17 06:43:21.697000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:21.698424',NULL,NULL,NULL,NULL,NULL,NULL),(64,'8296bcf0-c33f-4d0a-b674-caf510a6286d',1,42,1,1,NULL,NULL,'594167c174364ed6863af304f145356e220e9fd37cb4db5f7ce0d50708fdd731',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:52:13.880474','2026-03-17 06:52:13.879000',NULL,NULL,NULL,1,0,'2026-03-16 22:52:13.880474',NULL,NULL,NULL,NULL,NULL,NULL),(65,'6e7c7a1b-2590-44cf-b4ab-d5b746edebc8',1,42,1,1,NULL,NULL,'d57a14c6abefa3a8a62a22fb3f5c93ad87110d77df7978353ceec76625a4bea4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:54:35.486146','2026-03-17 06:54:35.485000',NULL,NULL,NULL,1,0,'2026-03-16 22:54:35.486146',NULL,NULL,NULL,NULL,NULL,NULL),(66,'58cf0196-1fba-4b9b-87e8-9f461b079fb5',1,42,1,1,NULL,NULL,'de6e277deb3a1c05a51bb86ccdab7b02d210ef8662882f51318a5a13b5135419',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:21.990369','2026-03-17 06:57:21.988000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:21.990369',NULL,NULL,NULL,NULL,NULL,NULL),(67,'d1805ea1-d6cf-4d7a-ad86-b5b34c098b28',1,42,1,1,NULL,NULL,'45100470d323ffc68ea37a87c251e9de9a8e4fdecd3745998c69d1a28b1b5cba',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:44.317456','2026-03-17 06:57:44.316000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:44.317456',NULL,NULL,NULL,NULL,NULL,NULL),(68,'2f12c7c9-3d29-4013-acf0-723b2a179f9d',1,42,1,1,NULL,NULL,'1e4d84197e1128f080a571e2a8c3dcdbaa5d5670a58c784f2e943e95d102481e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:12.306487','2026-03-17 06:58:12.305000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:12.306487',NULL,NULL,NULL,NULL,NULL,NULL),(69,'f22372a2-a564-421d-8e0a-a5553071e740',1,42,1,1,NULL,NULL,'68f7de146c3ce12e5ebe82a60bf7277e9d622240508dce923e6219be86628581',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:30.889045','2026-03-17 06:58:30.887000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:30.889045',NULL,NULL,NULL,NULL,NULL,NULL),(70,'fbedc517-f035-4224-a8bb-8f13839285b4',1,42,1,1,NULL,NULL,'804e18ee16c4e652e3cf0bdd0f36445b52359a6e45e9bfa1931d51f14c606c00',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:59:43.851763','2026-03-17 06:59:43.850000',NULL,NULL,NULL,1,0,'2026-03-16 22:59:43.851763',NULL,NULL,NULL,NULL,NULL,NULL),(71,'44e4f97b-5ace-4279-aedd-eeffe8c37bd1',1,42,1,1,NULL,NULL,'366a33456c208d33b00f848b5182d9dc77fb699f729c8684711e46ca99335ff8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:12:02.595586','2026-03-17 07:12:02.595000',NULL,NULL,NULL,1,0,'2026-03-16 23:12:02.595586',NULL,NULL,NULL,NULL,NULL,NULL),(72,'b93fa42b-428b-42d3-b256-43fd2750e343',1,42,1,1,NULL,NULL,'92edc1447539a63f2882d1e34b7fc909b82ebff0f900587e57391ac24b54c572',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:35:42.036490','2026-03-17 07:35:42.035000',NULL,NULL,NULL,1,0,'2026-03-16 23:35:42.036490',NULL,NULL,NULL,NULL,NULL,NULL),(73,'66c87673-862c-441f-9a5a-317ff725f5ac',1,42,1,1,NULL,NULL,'befa220ec4bdeac6412aa243c8b736af6c71e1eaf2665aadf18d9cce594dec50',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:37:33.276373','2026-03-17 07:37:33.274000',NULL,NULL,NULL,1,0,'2026-03-16 23:37:33.276373',NULL,NULL,NULL,NULL,NULL,NULL),(74,'8d938f96-45d2-40ef-a25f-06b545ca0188',1,42,1,1,NULL,NULL,'51df221db516bad738304aa5ed695fd5bdec441ab2280f4dcbb8a80054988fd4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:50:53.630289','2026-03-17 07:50:53.629000',NULL,NULL,NULL,1,0,'2026-03-16 23:50:53.630289',NULL,NULL,NULL,NULL,NULL,NULL),(78,'3b817e39-233c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4ODc3MDIsImV4cCI6MTc3MzkxNjUwMn0.0SJm2FT5mgk0cEtaF752tWHd2UMHPFOHcOjlCFqXmdI',NULL,'::1','curl/8.13.0','2026-03-18 23:35:02.854844','2026-03-19 23:35:02.854844',NULL,NULL,NULL,1,0,'2026-03-18 23:35:02.854844',NULL,NULL,NULL,NULL,NULL,NULL),(79,'61576bee-09d5-42df-88ef-d509585ed06c',1,42,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3MjAsImV4cCI6MTc3MzkyMjUyMH0.wy0lwa6mw4LgT2050PzSyFKlB4sk9TCBTtA0IDuTpP4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:15:20.257667','2026-03-20 01:15:20.252000',NULL,NULL,NULL,1,0,'2026-03-19 01:15:20.257667',NULL,NULL,NULL,NULL,NULL,NULL),(80,'daa7e12b-fc80-4bc7-ab55-683fec51173c',1,42,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3NjAsImV4cCI6MTc3MzkyMjU2MH0.h0jR45ip_ANARg6gQgl587t9wEDtIqBEjtvFgqAS8I8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:16:00.352448','2026-03-20 01:16:00.351000',NULL,NULL,NULL,1,0,'2026-03-19 01:16:00.352448',NULL,NULL,NULL,NULL,NULL,NULL),(81,'99baf4e6-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4NzMsImV4cCI6MTc3MzkyMjY3M30.mdBPnnBO5Auwj-h1-ro0ndF47WgmakRY_WrOWwQFiFI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:17:53.891454','2026-03-20 01:17:53.891454',NULL,NULL,NULL,1,0,'2026-03-19 01:17:53.891454',NULL,NULL,NULL,NULL,NULL,NULL),(82,'a407badb-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4OTEsImV4cCI6MTc3MzkyMjY5MX0.hAw7Wh2zCpSxRDBE_FX5Vk6Sk8ABR7-tJD59kCwTBfU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:18:11.171812','2026-03-20 01:18:11.171812',NULL,NULL,NULL,1,0,'2026-03-19 01:18:11.171812',NULL,NULL,NULL,NULL,NULL,NULL),(83,'2253416f-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxMDMsImV4cCI6MTc3MzkyMjkwM30.MuE2l9617U93NCrowzGR_-Eu6AEh7PIMuqguX6dH4s4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:21:43.059699','2026-03-20 01:21:43.059699',NULL,NULL,NULL,1,0,'2026-03-19 01:21:43.059699',NULL,NULL,NULL,NULL,NULL,NULL),(84,'3a87ba86-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxNDMsImV4cCI6MTc3MzkyMjk0M30.m9CR0MQDPQB_Xj0u1NWgzlRFKc6I-yLwJVs82EgBgcM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:22:23.668904','2026-03-20 01:22:23.668904',NULL,NULL,NULL,1,0,'2026-03-19 01:22:23.668904',NULL,NULL,NULL,NULL,NULL,NULL),(85,'8bd193cd-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQyODAsImV4cCI6MTc3MzkyMzA4MH0.uzCjkX4jCPYFtlRJATxdx4qKlG64HL1bR2VueJLaw6Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:24:40.048329','2026-03-20 01:24:40.048329',NULL,NULL,NULL,1,0,'2026-03-19 01:24:40.048329',NULL,NULL,NULL,NULL,NULL,NULL),(86,'ddf05a6e-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ0MTcsImV4cCI6MTc3MzkyMzIxN30.YyqewlducVMkzvA3K31Wu2YWD5219J1h8vrDw7gXksg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:26:57.823193','2026-03-20 01:26:57.823193',NULL,NULL,NULL,1,0,'2026-03-19 01:26:57.823193',NULL,NULL,NULL,NULL,NULL,NULL),(87,'b7e93564-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ3ODMsImV4cCI6MTc3Mzg5ODM4M30.MvVHy2_1mE7CYYvoRlQJF0-47KoWZd4QgD7qSM1CoMU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:33:03.519678','2026-03-20 01:33:03.519678',NULL,NULL,NULL,1,0,'2026-03-19 01:33:03.519678',NULL,NULL,NULL,NULL,NULL,NULL),(88,'f623921c-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ4ODcsImV4cCI6MTc3Mzg5ODQ4N30.ny-59Ux4z6Qumy1tcWgNHMiTi1oTisnZANrc-w4_wQU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:34:47.920900','2026-03-20 01:34:47.920900',NULL,NULL,NULL,1,0,'2026-03-19 01:34:47.920900',NULL,NULL,NULL,NULL,NULL,NULL),(89,'807c65ef-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1NDksImV4cCI6MTc3Mzg5OTE0OX0.j9KbSZ9aKspBoblfo6m8IL54hdxPG2AZzXFNneUH6NM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:45:49.525350','2026-03-20 01:45:49.525350',NULL,NULL,NULL,1,0,'2026-03-19 01:45:49.525350',NULL,NULL,NULL,NULL,NULL,NULL),(90,'9713279e-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1ODcsImV4cCI6MTc3Mzg5OTE4N30.3uRLQ3w__cnPLEx2DZ4wU0JKCn-flXbSIc1RjMNdabA',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:46:27.423224','2026-03-20 01:46:27.423224',NULL,NULL,NULL,1,0,'2026-03-19 01:46:27.423224',NULL,NULL,NULL,NULL,NULL,NULL),(91,'f4823728-2350-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTY2MDMsImV4cCI6MTc3MzkwMDIwM30.ROXuwACgFYKfhhnKbIrWPxbTDZ-8qykclCAEr5s-s-I',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:03:23.172639','2026-03-20 02:03:23.172639',NULL,NULL,NULL,1,0,'2026-03-19 02:03:23.172639',NULL,NULL,NULL,NULL,NULL,NULL),(92,'05e86b18-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTgzNTAsImV4cCI6MTc3MzkwMTk1MH0.5e_Jo-MJrXheKXJ76zPbmBKwyUtXZoymHZBdGoMKib0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:32:30.350621','2026-03-20 02:32:30.350621',NULL,NULL,NULL,1,0,'2026-03-19 02:32:30.350621',NULL,NULL,NULL,NULL,NULL,NULL),(93,'6bbc96e5-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg1MjEsImV4cCI6MTc3MzkwMjEyMX0.AXOatB6alSgWn9s7ouThQiSD6RSWsi7sKg7CRU_qqLM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:35:21.190987','2026-03-20 02:35:21.190987',NULL,NULL,NULL,1,0,'2026-03-19 02:35:21.190987',NULL,NULL,NULL,NULL,NULL,NULL),(94,'d6dfd7e6-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg3MDAsImV4cCI6MTc3MzkwMjMwMH0.M_eq_NnB1GD2Yz6guy_d92JXJBuLQ9mxybPFQ9HEnaE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:38:20.938238','2026-03-20 02:38:20.938238',NULL,NULL,NULL,1,0,'2026-03-19 02:38:20.938238',NULL,NULL,NULL,NULL,NULL,NULL),(95,'8e718d15-2356-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTkwMDgsImV4cCI6MTc3MzkwMjYwOH0.x5w-LQQT0tf7t2Kf8rMNc6Dat-XDaMQTW-oZzsXft2Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:43:28.916202','2026-03-20 02:43:28.916202',NULL,NULL,NULL,1,0,'2026-03-19 02:43:28.916202',NULL,NULL,NULL,NULL,NULL,NULL),(96,'bbd4c3c5-2357-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk1MTQsImV4cCI6MTc3MzkwMzExNH0.V_8jJqkHOxZ4b2ERbwbSsIGQtybGC3ro09ZFlpEMw28',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:51:54.560610','2026-03-20 02:51:54.560610',NULL,NULL,NULL,1,0,'2026-03-19 02:51:54.560610',NULL,NULL,NULL,NULL,NULL,NULL),(97,'c67d7bbf-2358-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk5NjEsImV4cCI6MTc3MzkwMzU2MX0.ZoY3A7wDnBVhHwrJV3yEbo4mcNLGNo3kOdd2bEgkbqE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:59:21.940270','2026-03-20 02:59:21.940270',NULL,NULL,NULL,1,0,'2026-03-19 02:59:21.940270',NULL,NULL,NULL,NULL,NULL,NULL),(98,'fa983a96-2359-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDA0NzgsImV4cCI6MTc3MzkwNDA3OH0.ClzU14UooBL1tuYmPX2ja7E0mdCp-xFf3fHMycauJx0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:07:58.853802','2026-03-20 03:07:58.853802',NULL,NULL,NULL,1,0,'2026-03-19 03:07:58.853802',NULL,NULL,NULL,NULL,NULL,NULL),(99,'eef123e8-235c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDE3NDcsImV4cCI6MTc3MzkwNTM0N30.83IYHRGpQcuZstgyVBXzPv3cjglWBa74sfaHZmI_XCg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:29:07.794022','2026-03-20 03:29:07.794022',NULL,NULL,NULL,1,0,'2026-03-19 03:29:07.794022',NULL,NULL,NULL,NULL,NULL,NULL),(100,'092c6d95-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyMjEsImV4cCI6MTc3MzkwNTgyMX0.HnfUJAYvDHJ4B35si8QCph0UIjEFFex6pKyaenTHtk4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:01.300062','2026-03-20 03:37:01.300062',NULL,NULL,NULL,1,0,'2026-03-19 03:37:01.300062',NULL,NULL,NULL,NULL,NULL,NULL),(101,'22b406fb-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyNjQsImV4cCI6MTc3MzkwNTg2NH0.Fm7uXm1ddAZlVLoZGC82zECvOyGvHCGcHwggPzFEopQ',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:44.131764','2026-03-20 03:37:44.131764',NULL,NULL,NULL,1,0,'2026-03-19 03:37:44.131764',NULL,NULL,NULL,NULL,NULL,NULL),(102,'52c7c313-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIzNDQsImV4cCI6MTc3MzkwNTk0NH0.7hZPPoxhOuV3X_8pfOFsCUTAxlgi4ZUyTS0Kru4WwnI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:39:04.791734','2026-03-20 03:39:04.791734',NULL,NULL,NULL,1,0,'2026-03-19 03:39:04.791734',NULL,NULL,NULL,NULL,NULL,NULL),(103,'c557739f-2360-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDMzOTUsImV4cCI6MTc3MzkwNjk5NX0.Pi-i7G43HaRH3m-1lxERRKpu6aw541AxtatGoG3ZA5s',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:56:35.987141','2026-03-20 03:56:35.987141',NULL,NULL,NULL,1,0,'2026-03-19 03:56:35.987141',NULL,NULL,NULL,NULL,NULL,NULL),(104,'2be94184-2364-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDQ4NTYsImV4cCI6MTc3MzkwODQ1Nn0.mOE3hSflaxGaiGw6I_vf2sBz6cMtXneSvulADYcnEQE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 04:20:56.560475','2026-03-20 04:20:56.560475',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.560475',NULL,NULL,NULL,NULL,NULL,NULL),(105,'3546ebdb-b7a4-4b7b-8cf4-0f0926be1893',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 04:20:56.967102','2026-03-20 04:20:56.963000',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.967102',NULL,NULL,NULL,NULL,NULL,NULL),(106,'b141994e-236d-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDg5NDUsImV4cCI6MTc3MzkxMjU0NX0.21n99e5T9nLpiU2J4FbQdmAesm6NM2iCmTyu8Rmmosk',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:29:05.746978','2026-03-20 05:29:05.746978',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.746978',NULL,NULL,NULL,NULL,NULL,NULL),(107,'d3d57e7a-81f4-4022-a178-d6a327f2042d',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:29:05.753761','2026-03-20 05:29:05.753000',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.753761',NULL,NULL,NULL,NULL,NULL,NULL),(108,'3a9d926a-2370-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTAwMzUsImV4cCI6MTc3MzkxMzYzNX0.ee1i2TSJqxBwdjTdo_FM4ILdH7MrNOXhG8iyoMA6hZ8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:47:15.191052','2026-03-20 05:47:15.191052',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.191052',NULL,NULL,NULL,NULL,NULL,NULL),(109,'5ca0b438-93dd-49ed-81f4-53e07203fad2',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:47:15.261044','2026-03-20 05:47:15.258000',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.261044',NULL,NULL,NULL,NULL,NULL,NULL),(110,'ad463124-2378-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTM2NjMsImV4cCI6MTc3MzkxNzI2M30.3-pM_a8yKIW76voMl3BkpDeizUQMTEOHRzmf7-p7dow',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 06:47:43.530219','2026-03-20 06:47:43.530219',NULL,NULL,NULL,1,0,'2026-03-19 06:47:43.530219',NULL,NULL,NULL,NULL,NULL,NULL),(111,'620be80c-7487-4cec-871a-b0ea17a477b1',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 06:47:44.034757','2026-03-20 06:47:44.033000',NULL,NULL,NULL,1,0,'2026-03-19 06:47:44.034757',NULL,NULL,NULL,NULL,NULL,NULL),(112,'13514605-ebe8-4ed3-93c4-a5942984ab24',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 20:17:17.490857','2026-03-22 20:17:17.485000',NULL,NULL,NULL,1,0,'2026-03-21 20:17:17.490857',NULL,NULL,NULL,NULL,NULL,NULL),(113,'06c11a3b-00ab-4628-a059-30b80acc4b6a',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:01:18.523492','2026-03-22 22:01:18.522000',NULL,NULL,NULL,1,0,'2026-03-21 22:01:18.523492',NULL,NULL,NULL,NULL,NULL,NULL),(114,'afcdcf54-12a6-454f-831e-c14d7e8c49f4',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:05:47.816819','2026-03-22 22:05:47.816000',NULL,NULL,NULL,1,0,'2026-03-21 22:05:47.816819',NULL,NULL,NULL,NULL,NULL,NULL),(115,'bd411ee8-da90-4c78-a039-94d228ee38db',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:13:12.723586','2026-03-22 22:13:12.723000',NULL,NULL,NULL,1,0,'2026-03-21 22:13:12.723586',NULL,NULL,NULL,NULL,NULL,NULL),(116,'8ea3f884-6c59-4347-a118-2cc4b464bc1e',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:54:48.899185','2026-03-22 22:54:48.898000',NULL,NULL,NULL,1,0,'2026-03-21 22:54:48.899185',NULL,NULL,NULL,NULL,NULL,NULL),(117,'e1fcd390-f520-4af0-b824-fe3cd59b568f',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:04:04.214475','2026-03-22 23:04:04.213000',NULL,NULL,NULL,1,0,'2026-03-21 23:04:04.214475',NULL,NULL,NULL,NULL,NULL,NULL),(118,'ddec17c8-f5c5-4f7e-94a2-e24b9cc5d1da',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:14:30.340244','2026-03-22 23:14:30.339000',NULL,NULL,NULL,1,0,'2026-03-21 23:14:30.340244',NULL,NULL,NULL,NULL,NULL,NULL),(119,'4fe9d288-a188-4ec5-b886-f16e5c99b790',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:23:43.049903','2026-03-22 23:23:43.049000',NULL,NULL,NULL,1,0,'2026-03-21 23:23:43.049903',NULL,NULL,NULL,NULL,NULL,NULL),(120,'adae467e-2596-11f1-a946-c8d3ff00effc',1,NULL,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzQxNDY0NTEsImV4cCI6MTc3NDE1MDA1MX0.jVi8IwgN8AUaycoN2TVByxcjihHGFPIoI46jwNFRJ84',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-21 23:27:31.439796','2026-03-22 23:27:31.439796',NULL,NULL,NULL,1,0,'2026-03-21 23:27:31.439796',NULL,NULL,NULL,NULL,NULL,NULL),(121,'6e7353db-138d-414b-98c7-9346f55e0e3c',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:43:54.485114','2026-03-23 02:43:54.482000',NULL,NULL,NULL,1,0,'2026-03-22 02:43:54.485114',NULL,NULL,NULL,NULL,NULL,NULL),(122,'ebc0c4fa-4fc9-4e57-af2a-68bd5de385da',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:49:03.520101','2026-03-23 02:49:03.519000',NULL,NULL,NULL,1,0,'2026-03-22 02:49:03.520101',NULL,NULL,NULL,NULL,NULL,NULL),(123,'70e80883-546e-464b-97ce-2160554c3c1d',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 03:52:41.778381','2026-03-23 03:52:41.777000',NULL,NULL,NULL,1,0,'2026-03-22 03:52:41.778381',NULL,NULL,NULL,NULL,NULL,NULL),(124,'6a218f0e-e202-43f6-95e0-4bdf4bb6ea02',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:11:57.906932','2026-03-23 04:11:57.905000',NULL,NULL,NULL,1,0,'2026-03-22 04:11:57.906932',NULL,NULL,NULL,NULL,NULL,NULL),(125,'ea928a15-a02a-47f9-adda-b529bf48e3df',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:16:33.133245','2026-03-23 04:16:33.132000',NULL,NULL,NULL,1,0,'2026-03-22 04:16:33.133245',NULL,NULL,NULL,NULL,NULL,NULL),(126,'eba31484-53d7-4a4e-8eaa-86607cf6cfcf',1,42,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:30:41.073134','2026-03-23 04:30:41.071000',NULL,NULL,NULL,1,0,'2026-03-22 04:30:41.073134',NULL,NULL,NULL,NULL,NULL,NULL),(127,'df4cde48-0460-4ccc-97af-ba51bb287af3',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:40:31.295705','2026-03-23 04:40:31.289000',NULL,NULL,NULL,1,0,'2026-03-22 04:40:31.295705',NULL,NULL,NULL,NULL,NULL,NULL),(128,'177ef741-afb6-47d7-b80d-afac77f3c6da',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:44.622548','2026-03-23 06:04:44.621000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:44.622548',NULL,NULL,NULL,NULL,NULL,NULL),(129,'e96d7631-c52a-4232-8bfe-658cdfd0b47c',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:49.730618','2026-03-23 06:04:49.729000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:49.730618',NULL,NULL,NULL,NULL,NULL,NULL),(130,'98d999be-4860-4d92-a08d-91a9f4610205',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:05:00.794544','2026-03-23 06:05:00.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:05:00.794544',NULL,NULL,NULL,NULL,NULL,NULL),(131,'60e1d88a-9976-4403-9dbf-4e2e3facbc83',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:09:04.274769','2026-03-23 06:09:04.274000',NULL,NULL,NULL,1,0,'2026-03-22 06:09:04.274769',NULL,NULL,NULL,NULL,NULL,NULL),(132,'0b71a86c-920e-42a7-a039-e153dab2b7ef',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:13:51.431374','2026-03-23 06:13:51.429000',NULL,NULL,NULL,1,0,'2026-03-22 06:13:51.431374',NULL,NULL,NULL,NULL,NULL,NULL),(133,'3c4c04d6-cbf9-41e9-9a55-6ea4f0d8090c',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:17:24.499182','2026-03-23 06:17:24.498000',NULL,NULL,NULL,1,0,'2026-03-22 06:17:24.499182',NULL,NULL,NULL,NULL,NULL,NULL),(134,'b549a0d5-2167-43cd-abbc-9704480db180',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:23:02.413532','2026-03-23 06:23:02.412000',NULL,NULL,NULL,1,0,'2026-03-22 06:23:02.413532',NULL,NULL,NULL,NULL,NULL,NULL),(135,'587f75e2-7122-4071-b1e7-086ecc768c27',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:26:28.794172','2026-03-23 06:26:28.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:26:28.794172',NULL,NULL,NULL,NULL,NULL,NULL),(136,'5624e91f-94b0-4035-8c4b-0beccb9b0754',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:35:30.127910','2026-03-23 06:35:30.126000',NULL,NULL,NULL,1,0,'2026-03-22 06:35:30.127910',NULL,NULL,NULL,NULL,NULL,NULL),(137,'0895d3e2-b153-42b2-938e-ba644c36c2b1',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:39:34.545146','2026-03-23 06:39:34.544000',NULL,NULL,NULL,1,0,'2026-03-22 06:39:34.545146',NULL,NULL,NULL,NULL,NULL,NULL),(138,'5b0da3d3-3876-44a1-bd88-77de1381ff63',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:13.728007','2026-03-23 06:40:13.727000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:13.728007',NULL,NULL,NULL,NULL,NULL,NULL),(139,'f7846d0d-71d7-48e9-bd8a-3dafce434b05',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:43.223912','2026-03-23 06:40:43.222000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:43.223912',NULL,NULL,NULL,NULL,NULL,NULL),(140,'81f092a7-eab5-4212-8477-772efa2e69fb',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:42:23.117742','2026-03-23 06:42:23.117000',NULL,NULL,NULL,1,0,'2026-03-22 06:42:23.117742',NULL,NULL,NULL,NULL,NULL,NULL),(141,'341a7157-16d4-4831-b0ef-02999e6a59f7',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:45:06.717408','2026-03-23 06:45:06.716000',NULL,NULL,NULL,1,0,'2026-03-22 06:45:06.717408',NULL,NULL,NULL,NULL,NULL,NULL),(142,'f708b04a-5895-4666-95bc-3c837568b656',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:46:34.114181','2026-03-23 06:46:34.113000',NULL,NULL,NULL,1,0,'2026-03-22 06:46:34.114181',NULL,NULL,NULL,NULL,NULL,NULL),(143,'97bb320d-b926-405f-9511-de9fca557dcb',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:47:26.474349','2026-03-23 06:47:26.473000',NULL,NULL,NULL,1,0,'2026-03-22 06:47:26.474349',NULL,NULL,NULL,NULL,NULL,NULL),(144,'805fc296-b0cc-4721-9607-1363f44d6004',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:59:15.847959','2026-03-23 06:59:15.847000',NULL,NULL,NULL,1,0,'2026-03-22 06:59:15.847959',NULL,NULL,NULL,NULL,NULL,NULL),(145,'c60554d8-ba64-4501-8712-80a3576ba3db',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 07:01:54.979601','2026-03-23 07:01:54.978000',NULL,NULL,NULL,1,0,'2026-03-22 07:01:54.979601',NULL,NULL,NULL,NULL,NULL,NULL),(146,'9a82f5fe-a060-4eae-90a3-57bd11797d01',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:25:47.577442','2026-03-23 21:25:47.573000',NULL,NULL,NULL,1,0,'2026-03-22 21:25:47.577442',NULL,NULL,NULL,NULL,NULL,NULL),(147,'8ab13198-84f8-4972-a056-8ed814e63f02',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:13.182556','2026-03-23 21:28:13.181000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:13.182556',NULL,NULL,NULL,NULL,NULL,NULL),(148,'1d71bee1-2a64-43f1-91e6-9c5ca15937a3',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:39.428636','2026-03-23 21:28:39.427000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:39.428636',NULL,NULL,NULL,NULL,NULL,NULL),(149,'7df3b3bf-c66b-4919-96b8-e9eef49925e9',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:32:00.570805','2026-03-23 21:32:00.569000',NULL,NULL,NULL,1,0,'2026-03-22 21:32:00.570805',NULL,NULL,NULL,NULL,NULL,NULL),(150,'3e73b0fc-af6e-4728-8527-2f3bd64ab1ed',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:39:15.813284','2026-03-23 21:39:15.812000',NULL,NULL,NULL,1,0,'2026-03-22 21:39:15.813284',NULL,NULL,NULL,NULL,NULL,NULL),(151,'79c3e4c4-b508-4c6f-83ce-a473b87e8428',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:45:48.782773','2026-03-23 21:45:48.781000',NULL,NULL,NULL,1,0,'2026-03-22 21:45:48.782773',NULL,NULL,NULL,NULL,NULL,NULL),(152,'a6ea1d4b-641e-47df-9ad6-cf9bbdb2f6c7',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:17.715143','2026-03-23 21:49:17.714000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:17.715143',NULL,NULL,NULL,NULL,NULL,NULL),(153,'d915a7d1-5cc4-4ff8-b070-27a5a0560e36',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:55.392969','2026-03-23 21:49:55.392000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:55.392969',NULL,NULL,NULL,NULL,NULL,NULL),(154,'e80db09a-bcc6-4033-b2ce-7ae55fdc3dcb',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 22:20:33.586502','2026-03-23 22:20:33.585000',NULL,NULL,NULL,1,0,'2026-03-22 22:20:33.586502',NULL,NULL,NULL,NULL,NULL,NULL),(155,'675d5849-40a7-4e6c-8b89-f14e0ae768c1',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:38:42.688728','2026-03-23 23:38:42.687000',NULL,NULL,NULL,1,0,'2026-03-22 23:38:42.688728',NULL,NULL,NULL,NULL,NULL,NULL),(156,'f3138709-167c-45f6-835d-932b72bbddfe',1,NULL,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:45:06.336952','2026-03-23 23:45:06.336000',NULL,NULL,NULL,1,0,'2026-03-22 23:45:06.336952',NULL,NULL,NULL,NULL,NULL,NULL),(157,'7e18ae9a-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODcxMywiZXhwIjoxNzc0MjY3NTEzfQ.zQFtQuD31qWpVdsj3KguN-hRcSIpiMOO3FKgZ68ZWn8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4NzEzLCJleHAiOjE3NzQ4NDM1MTN9.PEgnCIuGOemPccGXIGErsHvAKHTuiPHjDFDBZ95-cRI','::1','curl/8.13.0','2026-03-23 01:05:13.390164','2026-03-23 09:05:13.390164',NULL,NULL,NULL,1,0,'2026-03-23 01:05:13.390164','2026-03-23 01:05:13.419102',NULL,NULL,NULL,NULL,NULL),(158,'a35bfe4e-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODc3NSwiZXhwIjoxNzc0MjY3NTc1fQ.ye1vxGPaYoSB-o-uOSOMxLlYrwZNc5X0FFWIO8pVc7A','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4Nzc1LCJleHAiOjE3NzQ4NDM1NzV9.rHlN4YGO1BxOMJiTOmcy1qBqX_c7LLDcgTD2hO3Sr8E','::1','curl/8.13.0','2026-03-23 01:06:15.920040','2026-03-23 09:06:15.920040',NULL,NULL,NULL,1,0,'2026-03-23 01:06:15.920040','2026-03-23 01:06:15.929500',NULL,NULL,NULL,NULL,NULL),(159,'722f3588-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTEyMiwiZXhwIjoxNzc0MjY3OTIyfQ.pbWMN-E9-AHD6Oc__mPO0gqmC8kywgE-LP5ToHE_aR8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MTIyLCJleHAiOjE3NzQ4NDM5MjJ9.Lg2LVmr1443qYme60M5qAznnUfsSENGTqjtNkHyZ0Rk','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:12:02.914950','2026-03-23 09:12:02.914950',NULL,NULL,NULL,1,0,'2026-03-23 01:12:02.914950','2026-03-23 01:12:02.922625',NULL,NULL,NULL,NULL,NULL),(160,'eb03520a-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTMyNSwiZXhwIjoxNzc0MjY4MTI1fQ.fIH7btEBY6Ti5FDOBBVs7FSpeuEuGWe8OnYu4_pABxY','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MzI1LCJleHAiOjE3NzQ4NDQxMjV9.pai6e1MZT77UMCIdXGVKY08J2ZBHT0DXfryJtpFeKFQ','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:15:25.631562','2026-03-23 09:15:25.631562',NULL,NULL,NULL,1,0,'2026-03-23 01:15:25.631562','2026-03-23 01:15:25.640500',NULL,NULL,NULL,NULL,NULL),(161,'f09fdef1-266f-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTc2NCwiZXhwIjoxNzc0MjY4NTY0fQ.SfNI0O7awW6Ye2cMRPjKvnVKQtUbiFVzcTYt3P9hh68','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5NzY0LCJleHAiOjE3NzQ4NDQ1NjR9.jSJvtNFaHetjaQNvFyoP35A4L3fT9zJQr6VE9gzsSYQ','::1','curl/8.13.0','2026-03-23 01:22:44.542861','2026-03-23 09:22:44.542861',NULL,NULL,NULL,1,0,'2026-03-23 01:22:44.542861','2026-03-23 01:22:44.573863',NULL,NULL,NULL,NULL,NULL),(162,'9e2cb782-2670-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDA1NSwiZXhwIjoxNzc0MjY4ODU1fQ.EQkp_RbQTz5JNetCzXGuPtePgMi6YBzLFLvBcMLd1CA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMDU1LCJleHAiOjE3NzQ4NDQ4NTV9.nA0LEUxpGJfOoCXDVRUf5HRikOg_efjwZUSU9LnpBKk','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:27:35.711845','2026-03-23 09:27:35.711845',NULL,NULL,NULL,1,0,'2026-03-23 01:27:35.711845','2026-03-23 01:27:35.724002',NULL,NULL,NULL,NULL,NULL),(163,'63be6edf-2671-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDM4NywiZXhwIjoxNzc0MjY5MTg3fQ.rzrJlgwh2mNY1St8Zmn3wrHe6KV0nQ5IG9Y9CjQzdK8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMzg3LCJleHAiOjE3NzQ4NDUxODd9.oq6HtvdAxhxFZJ8u0TVRCltB9Eb5Q88qiC_jjNj4mv8','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:33:07.177919','2026-03-23 09:33:07.177919',NULL,NULL,NULL,1,0,'2026-03-23 01:33:07.177919','2026-03-23 01:33:07.185820',NULL,NULL,NULL,NULL,NULL),(164,'7b63f6a7-2672-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDg1NiwiZXhwIjoxNzc0MjY5NjU2fQ.ViSakqbkCeUU1-26dIUuxjOSTvzDedl7surfbQT_cRU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwODU2LCJleHAiOjE3NzQ4NDU2NTZ9.cEfQOrn_rCurOFHf2YdrJ1hmnlgB8IizDZ7uIpYUL34','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:40:56.347102','2026-03-23 09:40:56.347102',NULL,NULL,NULL,1,0,'2026-03-23 01:40:56.347102','2026-03-23 01:40:56.357995',NULL,NULL,NULL,NULL,NULL),(165,'c2146fcf-2673-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTQwNCwiZXhwIjoxNzc0MjcwMjA0fQ.FN0GBkcd-zkJ8ClO3A5dZauNfpLabTyhyCcQvCxokBI','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxNDA0LCJleHAiOjE3NzQ4NDYyMDR9.da-7BjN_FgYFbmXhBg9X9BMAUyBTBL9ft9hr_eTKHBE','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:50:04.440784','2026-03-23 09:50:04.440784',NULL,NULL,NULL,1,0,'2026-03-23 01:50:04.440784','2026-03-23 01:50:04.453221',NULL,NULL,NULL,NULL,NULL),(166,'b1f01862-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgwNiwiZXhwIjoxNzc0MjcwNjA2fQ.hU38lfZ8evt5SEOEr3ziFcLe6-pFohZcIKLg-6OANEg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODA2LCJleHAiOjE3NzQ4NDY2MDZ9.H4GfHLsGDDZXFoZmpxN17tM8_1dheoWlvi3F_9sKor0','::1','curl/8.13.0','2026-03-23 01:56:46.855745','2026-03-23 09:56:46.855745',NULL,NULL,NULL,1,0,'2026-03-23 01:56:46.855745','2026-03-23 01:56:46.865001',NULL,NULL,NULL,NULL,NULL),(167,'c397b513-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgzNiwiZXhwIjoxNzc0MjcwNjM2fQ.GQpSHeDryN0R-sVB0BNIBOD8oSrO7l8gmc6Dq7J_KLA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODM2LCJleHAiOjE3NzQ4NDY2MzZ9.QqyeA-9EDGMTVPTy7UIxGBSLVzo2zmJVhz5cRjaEkjU','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:57:16.475605','2026-03-23 09:57:16.475605',NULL,NULL,NULL,1,0,'2026-03-23 01:57:16.475605','2026-03-23 01:57:16.485395',NULL,NULL,NULL,NULL,NULL),(168,'aa0c06a9-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDM3MCwiZXhwIjoxNzc0MjczMTcwfQ.hsy2tOyUjXBb0_wCwy14rQxbuaRe1p-AlBm7q_tb7X0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0MzcwLCJleHAiOjE3NzQ4NDkxNzB9.7SEhzQlreNPgNqLLEelgfWN-Cz3OV5TutGspPdoAKX8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:39:30.597075','2026-03-23 10:39:30.597075',NULL,NULL,NULL,1,0,'2026-03-23 02:39:30.597075','2026-03-23 02:39:30.609544',NULL,NULL,NULL,NULL,NULL),(169,'f32d241f-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDQ5MywiZXhwIjoxNzc0MjczMjkzfQ.VSd7dB0Yhk_dkH3kbI7GTSGS39A1qm71NIxIHyFkkOQ','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0NDkzLCJleHAiOjE3NzQ4NDkyOTN9.kNrd88JYngvvSzCre_t-Cx5YFNDHotzYW5Dbx4IA8tM','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:41:33.288162','2026-03-23 10:41:33.288162',NULL,NULL,NULL,1,0,'2026-03-23 02:41:33.288162','2026-03-23 02:41:33.306515',NULL,NULL,NULL,NULL,NULL),(170,'66070192-267b-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDY4NSwiZXhwIjoxNzc0MjczNDg1fQ.IvxtCGSQFQZRGzEqsYqyPu7ZL83KghvVQnx9OcJaZF0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0Njg1LCJleHAiOjE3NzQ4NDk0ODV9.3IJLj7mcBkynNyQac6VrJpOuphAJjOPSzK3mhFoRFL0','::1','curl/8.13.0','2026-03-23 02:44:45.976122','2026-03-23 10:44:45.976122',NULL,NULL,NULL,1,0,'2026-03-23 02:44:45.976122','2026-03-23 02:44:45.987516',NULL,NULL,NULL,NULL,NULL),(171,'02e7d533-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjIzNywiZXhwIjoxNzc0Mjc1MDM3fQ.S0Uuk2f4zVuP3B2BAHnNpdoIK0jvwa4BbE7I2q9nnc8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2MjM3LCJleHAiOjE3NzQ4NTEwMzd9.DbfRdeOQQU39sc-HPpq1VHVHv-2Zrg0bJF5-6hODm8c','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:10:37.664407','2026-03-23 11:10:37.664407',NULL,NULL,NULL,1,0,'2026-03-23 03:10:37.664407','2026-03-23 03:10:37.675943',NULL,NULL,NULL,NULL,NULL),(172,'af0ec837-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjUyNiwiZXhwIjoxNzc0Mjc1MzI2fQ.6hBlKH7km9yh2Es3KbmtCGLzrfYaQsDnCN-CZTK1mQg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NTI2LCJleHAiOjE3NzQ4NTEzMjZ9.yVNH57p6eSdeOeWG9y_RN5KKMrxCrh1TOjEtmVypJrw','::1','curl/8.13.0','2026-03-23 03:15:26.487803','2026-03-23 11:15:26.487803',NULL,NULL,NULL,1,0,'2026-03-23 03:15:26.487803','2026-03-23 03:15:26.504232',NULL,NULL,NULL,NULL,NULL),(173,'ddbbb9f0-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjYwNCwiZXhwIjoxNzc0Mjc1NDA0fQ.qsmcGzLB2lDp2tOJCP7OtMSyLt1p7q0NEb7szGCj4ok','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NjA0LCJleHAiOjE3NzQ4NTE0MDR9.WSocl8pTCUhLe13UGMHr70wtEkvuZSvT8rX-C7VxQ7U','::1','curl/8.13.0','2026-03-23 03:16:44.796282','2026-03-23 11:16:44.796282',NULL,NULL,NULL,1,0,'2026-03-23 03:16:44.796282','2026-03-23 03:16:44.808376',NULL,NULL,NULL,NULL,NULL),(174,'b1710f4f-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzM4OSwiZXhwIjoxNzc0Mjc2MTg5fQ.NeEcIvLAxRBfz2fcsqDSwgmOcGBS4Xz1LQuy8WLHqyU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3Mzg5LCJleHAiOjE3NzQ4NTIxODl9.r8ar95BS2-LugMF5D2e5w4des3okyg5SiUQSuOEEyFI','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:29:49.480812','2026-03-23 11:29:49.480812',NULL,NULL,NULL,1,0,'2026-03-23 03:29:49.480812','2026-03-23 03:29:49.776098',NULL,NULL,NULL,NULL,NULL),(175,'e494ca28-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzQ3NSwiZXhwIjoxNzc0Mjc2Mjc1fQ.9-a1KvN1m03NDBfBuhnN8WF9HvnN6fWBNcfmfUS4D1s','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3NDc1LCJleHAiOjE3NzQ4NTIyNzV9.m_yTjYwCJ1aATo5yQLrxQWOClIjQ8psBXoKlRHDlHSo','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:31:15.278808','2026-03-23 11:31:15.278808',NULL,NULL,NULL,1,0,'2026-03-23 03:31:15.278808','2026-03-23 03:31:15.289483',NULL,NULL,NULL,NULL,NULL),(176,'3dbe90c4-2684-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0ODQ4NCwiZXhwIjoxNzc0Mjc3Mjg0fQ.npQSnFL5sktJ8gg35WhW6E6WDRtNdWacpoiyHrf0gik','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ4NDg0LCJleHAiOjE3NzQ4NTMyODR9.9oUdrcuI-kkcglrMd8xIsfm4oYawHg_jG3WDZ5u3PKo','::1','curl/8.13.0','2026-03-23 03:48:03.863168','2026-03-23 11:48:03.863168',NULL,NULL,NULL,1,0,'2026-03-23 03:48:03.863168','2026-03-23 03:48:04.040846',NULL,NULL,NULL,NULL,NULL),(177,'0ce3cae6-2686-11f1-b11b-c8d3ff00effc',1,NULL,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0OTI2MCwiZXhwIjoxNzc0Mjc4MDYwfQ.5vIQyGQbNNX9PE2iEJkYNN7-Q-tr-DEVGLcPV7rs0Ag','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ5MjYwLCJleHAiOjE3NzQ4NTQwNjB9.Z98aDEVJWNl64eaXa_ne7fmOMDj4129galMEblEy01s','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 04:01:00.892296','2026-03-23 12:01:00.892296',NULL,NULL,NULL,1,0,'2026-03-23 04:01:00.892296','2026-03-23 04:01:00.903695',NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `sessao_usuario` VALUES (7,'63c37b7d-452b-4a86-aea0-d86a37df5023',1,42,1,1,NULL,NULL,NULL,'1372fc2f1b036f2b2eaaeb43b4c848d2bc1f6d000fe7547ee335ffaa5c7962a2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:05.817284','2026-03-15 12:01:05.816000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:05.817284',NULL,NULL,NULL,NULL,NULL,NULL),(8,'b39ce1df-7561-459d-acc9-94d0ebe3eb21',1,42,1,1,NULL,NULL,NULL,'eb37f4e0fc8692e22c3fb36c6534970edad66762027721b31fd4066240f0e23d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:41.237955','2026-03-15 12:01:41.237000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:41.237955',NULL,NULL,NULL,NULL,NULL,NULL),(9,'4cb66dd7-0573-420e-8ee3-35a16c0b8354',1,42,1,1,NULL,NULL,NULL,'cee05051dc58779e8644c9ca5504d973527acd3089c95ada44df2750bdebe2a4',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:03:46.388138','2026-03-15 12:03:46.387000',NULL,NULL,NULL,1,0,'2026-03-15 04:03:46.388138',NULL,NULL,NULL,NULL,NULL,NULL),(10,'2d3f8c43-6965-4796-bb51-5cfa62cda2da',1,42,1,1,NULL,NULL,NULL,'f51713aca9e0affe852e6a510cb8d87fb8447b521523209a210768507ffc6302',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:27.379626','2026-03-15 12:08:27.368000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:27.379626',NULL,NULL,NULL,NULL,NULL,NULL),(11,'2f6d3f77-1f54-4564-8fb7-014d6f78866f',1,42,1,1,NULL,NULL,NULL,'e7317224ce17d218708316ed36838c06f4027a4ca72dd982971a395a771dd4a1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:50.176704','2026-03-15 12:08:50.175000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:50.176704',NULL,NULL,NULL,NULL,NULL,NULL),(12,'e144b098-9911-4205-8ae1-06828e2f987f',1,42,1,1,NULL,NULL,NULL,'3adb704fa919ccda9b98001ad2c36762917b309fbfd58d9813ab44e074c8f7b6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:12:14.179418','2026-03-15 12:12:14.178000',NULL,NULL,NULL,1,0,'2026-03-15 04:12:14.179418',NULL,NULL,NULL,NULL,NULL,NULL),(13,'397ae7a5-01eb-41c9-bde3-b71553c18da1',1,42,1,1,NULL,NULL,NULL,'a3e36c54a2f521f2403d7dbf972699b009b3778d4262f26b03fe0d216d3131b7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:11.011380','2026-03-15 12:14:11.004000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:11.011380',NULL,NULL,NULL,NULL,NULL,NULL),(14,'dd97f6f7-55f8-45bd-8866-be0c7b7f7afd',1,42,1,1,NULL,NULL,NULL,'871d0b640f96992252ffbf2d9f83382a3a08398e010ef1a2b7ffdb52fff3ca75',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:29.945664','2026-03-15 12:14:29.944000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:29.945664',NULL,NULL,NULL,NULL,NULL,NULL),(15,'13249301-44c2-49fc-8f06-a941c8dbd883',1,42,1,1,NULL,NULL,NULL,'b902ac1b34000f57048d9a7b455389d4853b5de92dea9731e64c366ec1de6db2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:05.577331','2026-03-15 12:29:05.527000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:05.577331',NULL,NULL,NULL,NULL,NULL,NULL),(16,'1ab7c4ec-55ec-44a8-9fed-e5993231f768',1,42,1,1,NULL,NULL,NULL,'12d51baea86c236f511a88c8a4771b5ea749b48b59b3566892cfea9228594aab',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:28.697984','2026-03-15 12:29:28.696000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:28.697984',NULL,NULL,NULL,NULL,NULL,NULL),(17,'1f103d68-a824-4fe1-a51d-16ada7bfaa2f',1,42,1,1,NULL,NULL,NULL,'882dd04c16cb0024d88c6d2792071e763f5e5906fccca406b99fa523be1806ad',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:38:21.583153','2026-03-15 12:38:21.579000',NULL,NULL,NULL,1,0,'2026-03-15 04:38:21.583153',NULL,NULL,NULL,NULL,NULL,NULL),(18,'58075872-3163-4505-9c92-660c35893b77',1,42,1,1,NULL,NULL,NULL,'ee653d551b1cb460d4f3707c99772ac5b81f530dca5cb43d29134d878ebf3eb6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:29.831578','2026-03-15 12:43:29.830000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:29.831578',NULL,NULL,NULL,NULL,NULL,NULL),(19,'c9cd4225-14ec-4a92-b6b3-47c521ce771b',1,42,1,1,NULL,NULL,NULL,'d0785168510e09119c38365c10ef25a5c8673d9f7da617f22c286348fb18ef85',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:42.608531','2026-03-15 12:43:42.607000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:42.608531',NULL,NULL,NULL,NULL,NULL,NULL),(20,'3c5da068-7630-4c91-a709-47fa8cef55d6',1,42,1,1,NULL,NULL,NULL,'7f34ec46414d5dfa85aa6823ed0b9772616a831ff2c0d8718fa5fc7a7a1eeaf5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:44:05.883072','2026-03-15 12:44:05.882000',NULL,NULL,NULL,1,0,'2026-03-15 04:44:05.883072',NULL,NULL,NULL,NULL,NULL,NULL),(21,'8fe9121c-c63c-43a0-88f5-81f6f1e70ff3',1,42,1,1,NULL,NULL,NULL,'26f46ab3f1e78157bf5dd91e81437d6a6251c78ae7cc5fb9dc9db79c8feecd1e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:46:52.323077','2026-03-15 12:46:52.321000',NULL,NULL,NULL,1,0,'2026-03-15 04:46:52.323077',NULL,NULL,NULL,NULL,NULL,NULL),(22,'55a81184-9657-4b28-8540-5bf0e217eeae',1,42,1,1,NULL,NULL,NULL,'a18136a06af71bcb136c75c5bbfbc166b3ca9c853956997d9efc0e6ad9e3996d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:52:07.194269','2026-03-15 12:52:07.192000',NULL,NULL,NULL,1,0,'2026-03-15 04:52:07.194269',NULL,NULL,NULL,NULL,NULL,NULL),(23,'c3e7b60e-d6b7-4042-9b8e-045d61d9518c',1,42,1,1,NULL,NULL,NULL,'fb00d6352697002685225620f45f854828ba6d29e6a87719928dea3e1aae6a8c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.549440','2026-03-15 12:53:57.548000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.549440',NULL,NULL,NULL,NULL,NULL,NULL),(24,'d99e2221-1442-41a9-88ea-8b93eb13912a',1,42,1,1,NULL,NULL,NULL,'560906d8554298e4dca2f11fcfd9c327c39322471fcb34f11243b240a6259ec9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.812067','2026-03-15 12:53:57.805000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.812067',NULL,NULL,NULL,NULL,NULL,NULL),(25,'0d218d46-92b4-45f5-90f0-3fe1b281eb72',1,42,1,1,NULL,NULL,NULL,'d53958ce98a94e0adf1628b3a524fecf24acefe9f521ae8b2fbf6b2a092675af',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:54:44.965119','2026-03-15 12:54:44.964000',NULL,NULL,NULL,1,0,'2026-03-15 04:54:44.965119',NULL,NULL,NULL,NULL,NULL,NULL),(26,'a4a074ec-0b7a-4186-ac94-c67f0fc9fb26',1,42,1,1,NULL,NULL,NULL,'777637c164c144831659549628ecd2238b224efd07c38d44afe82d100a3ab66d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:59:02.337344','2026-03-15 12:59:02.335000',NULL,NULL,NULL,1,0,'2026-03-15 04:59:02.337344',NULL,NULL,NULL,NULL,NULL,NULL),(27,'afe722c9-ef79-4fcb-bf7c-360d9670d6ec',1,42,1,1,NULL,NULL,NULL,'3c8ddda048fa01707486bc2623b27b795be575fdfcac170816e033bc50b65fd5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:01:49.926764','2026-03-15 13:01:49.925000',NULL,NULL,NULL,1,0,'2026-03-15 05:01:49.926764',NULL,NULL,NULL,NULL,NULL,NULL),(28,'9b9c4550-4e6d-444c-a3dc-b4e94f3bc3e4',1,42,1,1,NULL,NULL,NULL,'1722fb2391563a12a08db86c7a6185846b41cf32e351038b802d8debdc935d7d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:04:31.209876','2026-03-15 13:04:31.208000',NULL,NULL,NULL,1,0,'2026-03-15 05:04:31.209876',NULL,NULL,NULL,NULL,NULL,NULL),(29,'8ac9f6d8-fb40-4885-9986-65b5fc5c84b2',1,42,1,1,NULL,NULL,NULL,'6c61a69433e695be84fbf9b9f59b788e5593ca03e34d1889992bee938f4a27c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:05:24.089442','2026-03-15 13:05:24.087000',NULL,NULL,NULL,1,0,'2026-03-15 05:05:24.089442',NULL,NULL,NULL,NULL,NULL,NULL),(30,'b18c5b34-8442-4215-a99d-50b355959639',1,42,1,1,NULL,NULL,NULL,'524f43c0cae88f5940ed43a9a9bfa507041d6e263c25ac292b43c9399dc579a8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:07:02.949027','2026-03-15 13:07:02.946000',NULL,NULL,NULL,1,0,'2026-03-15 05:07:02.949027',NULL,NULL,NULL,NULL,NULL,NULL),(31,'2de510c9-3d05-4f64-ba88-724ccaa67cd9',1,42,1,1,NULL,NULL,NULL,'86fada34141e91b2111e1a4adb1d608192278d8d003bdf76ce238c0d3b34896b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:10:18.915385','2026-03-15 13:10:18.913000',NULL,NULL,NULL,1,0,'2026-03-15 05:10:18.915385',NULL,NULL,NULL,NULL,NULL,NULL),(32,'e412dc45-9a52-4c20-8872-e279fb7c5ee3',1,42,1,1,NULL,NULL,NULL,'ec2214b4e05e9a2ac5ceb8e8d7928747260cc0f312548dc13ca82275987d9280',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:11:06.087464','2026-03-15 13:11:06.086000',NULL,NULL,NULL,1,0,'2026-03-15 05:11:06.087464',NULL,NULL,NULL,NULL,NULL,NULL),(33,'07d17b58-4172-4d4b-ac37-fd4a4478c275',1,42,1,1,NULL,NULL,NULL,'c4d78d54a26ea192a604b14e20b74a9658d9a1c338fe30d67fdd5a797bbeae96',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:13:08.825375','2026-03-15 13:13:08.824000',NULL,NULL,NULL,1,0,'2026-03-15 05:13:08.825375',NULL,NULL,NULL,NULL,NULL,NULL),(34,'d31b6c73-2d2c-4452-8c1e-376ec08adace',1,42,1,1,NULL,NULL,NULL,'e7f8c8b98aa3e810fa7613e91f71cf9384282a3a15b9491d9a0455a184ad38d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:19:33.582081','2026-03-15 13:19:33.580000',NULL,NULL,NULL,1,0,'2026-03-15 05:19:33.582081',NULL,NULL,NULL,NULL,NULL,NULL),(35,'f3f52003-da54-4489-8c3b-84582fb4b097',1,42,1,1,NULL,NULL,NULL,'9f1793aeb07425915397c5a27f8be18767b13d8ac692cfe3722483ca0ca26f16',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:20:16.048413','2026-03-15 13:20:16.047000',NULL,NULL,NULL,1,0,'2026-03-15 05:20:16.048413',NULL,NULL,NULL,NULL,NULL,NULL),(36,'f669359c-77b2-4e95-a951-e94f19a4c3f0',1,42,1,1,NULL,NULL,NULL,'4f5fb83da594beb48268959b625532c8eca7d8aea1f07fac379c7b5a420cbb9c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:23:45.486190','2026-03-15 13:23:45.485000',NULL,NULL,NULL,1,0,'2026-03-15 05:23:45.486190',NULL,NULL,NULL,NULL,NULL,NULL),(37,'a47179c5-7506-4981-8874-4d375b6db2a5',1,42,1,1,NULL,NULL,NULL,'3f1fe25ae0e4f047a55d2e2fa4306b8c05157969c8ff46dc60daa9765e6b4670',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:24:05.181714','2026-03-15 13:24:05.180000',NULL,NULL,NULL,1,0,'2026-03-15 05:24:05.181714',NULL,NULL,NULL,NULL,NULL,NULL),(38,'f8e70a89-7e2a-499b-9ad8-a3041ca84674',1,42,1,1,NULL,NULL,NULL,'1fc1055ff66c52efff0f050e9b9f6563b50215f5a2c441ac9700e1c25c88ad22',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:25:01.357715','2026-03-15 13:25:01.356000',NULL,NULL,NULL,1,0,'2026-03-15 05:25:01.357715',NULL,NULL,NULL,NULL,NULL,NULL),(39,'2585de0f-319a-486a-ba66-c0fb9290b0fb',1,42,1,1,NULL,NULL,NULL,'d677c12877e0cecd198e649b8efee8312f25554bb5fe7dd772948bc8d20bbae6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:28:23.799640','2026-03-15 13:28:23.797000',NULL,NULL,NULL,1,0,'2026-03-15 05:28:23.799640',NULL,NULL,NULL,NULL,NULL,NULL),(40,'faf72121-36ce-463b-a77a-318d5ddc9e0f',1,42,1,1,NULL,NULL,NULL,'a6a1c717a2807104c181ab4f659558b611239fb88dc3a459852900d571a1de4e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:24.565813','2026-03-15 13:29:24.564000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:24.565813',NULL,NULL,NULL,NULL,NULL,NULL),(41,'6e513914-1319-4d5d-be03-fde1eb0222b9',1,42,1,1,NULL,NULL,NULL,'a1d23df2b021e98171cf65e5803a7276152e6b2d724c8a5c4033fc47a3c02330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:42.507935','2026-03-15 13:29:42.506000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:42.507935',NULL,NULL,NULL,NULL,NULL,NULL),(42,'4816f1ab-c5e8-4515-a20d-8cc56613fabb',1,42,1,1,NULL,NULL,NULL,'4d7a1e2d9ac6f80e53a72219992fd6cea2a671934edb62d9459504afb09552f1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:34:19.502653','2026-03-15 13:34:19.501000',NULL,NULL,NULL,1,0,'2026-03-15 05:34:19.502653',NULL,NULL,NULL,NULL,NULL,NULL),(43,'3ed53aee-4311-4bbc-8f36-6ae72bdaf19e',1,42,1,1,NULL,NULL,NULL,'5303f79f6960a59ca5aaf5e734eed88f83205405fb72d3e72d2e772c17918794',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:47:06.103453','2026-03-15 13:47:06.101000',NULL,NULL,NULL,1,0,'2026-03-15 05:47:06.103453',NULL,NULL,NULL,NULL,NULL,NULL),(44,'b18293a4-59cb-4ff2-8656-4062d0c0b85f',1,42,1,1,NULL,NULL,NULL,'acb1d550e8f4e2b8dba1035a6ac81477289c6d38a0527fcc2c8c5658ce993f9a',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:04.716838','2026-03-15 13:49:04.715000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:04.716838',NULL,NULL,NULL,NULL,NULL,NULL),(45,'1af2b45c-ac3a-4434-b220-acb2c566fb67',1,42,1,1,NULL,NULL,NULL,'c144c2a5f987ee11854fba3963bcec76fb5193156ceef574096654849e401da8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:51.795570','2026-03-15 13:49:51.794000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:51.795570',NULL,NULL,NULL,NULL,NULL,NULL),(46,'0176059d-2ca7-47fa-b75c-fec17e8e5d84',1,42,1,1,NULL,NULL,NULL,'92b3eb710653308e3bf4bd243e79b62153a54a4d427a7fd472a345ed6ba1a4c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:51:18.543658','2026-03-15 13:51:18.543000',NULL,NULL,NULL,1,0,'2026-03-15 05:51:18.543658',NULL,NULL,NULL,NULL,NULL,NULL),(47,'68640f65-cd41-437e-b5ca-1f3bfbd0ba73',1,42,1,1,NULL,NULL,NULL,'f6730df241ca451cb6cc9aa1e2fa1b5f8ab8f5060d94123cb17d6ad6411463d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:52:40.592110','2026-03-15 13:52:40.590000',NULL,NULL,NULL,1,0,'2026-03-15 05:52:40.592110',NULL,NULL,NULL,NULL,NULL,NULL),(48,'a3106b09-f571-4853-abcb-24616ea7bf2d',1,42,1,1,NULL,NULL,NULL,'a69c2b85547f87d8ce9ef80a1f1bae89f2baa86a4a09c75dbd553315ca025fa9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:53:20.003322','2026-03-15 13:53:20.001000',NULL,NULL,NULL,1,0,'2026-03-15 05:53:20.003322',NULL,NULL,NULL,NULL,NULL,NULL),(49,'4a05a12b-efd9-4afd-a675-87ae6c71505a',1,42,1,1,NULL,NULL,NULL,'41a2228d80125b77416308aa72c7ada8e1b92ed81eeaa8e107b989896a5fcae7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:15:43.228380','2026-03-15 14:15:43.227000',NULL,NULL,NULL,1,0,'2026-03-15 06:15:43.228380',NULL,NULL,NULL,NULL,NULL,NULL),(50,'5d15c751-c5aa-41f3-a6a1-2ba53b051ad2',1,42,1,1,NULL,NULL,NULL,'4803775615d816cdc13c43b6482d76854cf32928fb4f4f0f129dc096ce84a18b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:29:47.314898','2026-03-15 14:29:47.313000',NULL,NULL,NULL,1,0,'2026-03-15 06:29:47.314898',NULL,NULL,NULL,NULL,NULL,NULL),(51,'0d3dfb20-53c1-46c9-9998-a1cfd26396cc',1,42,1,1,NULL,NULL,NULL,'0e0390b5245ca5e54eec47bbe454a7ac8843d94c4cba035e9f1cd9488134f330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:41:11.699902','2026-03-15 14:41:11.698000',NULL,NULL,NULL,1,0,'2026-03-15 06:41:11.699902',NULL,NULL,NULL,NULL,NULL,NULL),(52,'bca53638-a182-44fe-9451-a80b8ee440bc',1,42,1,1,NULL,NULL,NULL,'a2bdbbaf06a9708d00051add445c25e8ba9422832889fd41d1ab977735d9fe80',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:43:58.577254','2026-03-15 14:43:58.575000',NULL,NULL,NULL,1,0,'2026-03-15 06:43:58.577254',NULL,NULL,NULL,NULL,NULL,NULL),(53,'522e2766-d026-410d-85dd-f21b37e23d1d',1,42,1,1,NULL,NULL,NULL,'409cf7bad8ffebf248f3dcb5106bbba228db8bce130521af8fcabd101a23d7cc',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:47:51.929614','2026-03-15 14:47:51.927000',NULL,NULL,NULL,1,0,'2026-03-15 06:47:51.929614',NULL,NULL,NULL,NULL,NULL,NULL),(54,'e32c3349-14c1-4b9c-bbcf-ae81432eea55',1,42,1,1,NULL,NULL,NULL,'9bd4705293555f6ac1ca2feadc9fc296d8b74310af622eefb9cc48e5833ab717',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:52:08.454722','2026-03-15 14:52:08.453000',NULL,NULL,NULL,1,0,'2026-03-15 06:52:08.454722',NULL,NULL,NULL,NULL,NULL,NULL),(55,'670299a1-f54e-4e5f-a4a6-e73ef010e578',1,42,1,1,NULL,NULL,NULL,'87418159553fb03bd6e62cb7b80aeb7af3e52128feaeb5dcea81643c83d81629',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:55:27.345484','2026-03-15 14:55:27.342000',NULL,NULL,NULL,1,0,'2026-03-15 06:55:27.345484',NULL,NULL,NULL,NULL,NULL,NULL),(56,'ce264be2-c41e-427d-93cf-4faf1870740d',1,42,1,1,NULL,NULL,NULL,'b81b4c61a9330dfa0290e9a5b3cc77109d0ca292c95a7d6e105326aa5f7710fb',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:24:04.569310','2026-03-17 06:24:04.554000',NULL,NULL,NULL,1,0,'2026-03-16 22:24:04.569310',NULL,NULL,NULL,NULL,NULL,NULL),(57,'0db5dde4-0fa2-41ae-a8d6-8d042cd2e082',1,42,1,1,NULL,NULL,NULL,'eb335f0c74a9e213608127a17dc82ca476719214773266aec02b6b1fafec0fff',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.812490','2026-03-17 06:25:25.811000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.812490',NULL,NULL,NULL,NULL,NULL,NULL),(58,'0f8bd2f2-9667-4acc-a56d-e035d5303759',1,42,1,1,NULL,NULL,NULL,'8861b5cf060a3fdcfa568589c04cef2b157a3027ffa043732f941727ec790976',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.940807','2026-03-17 06:25:25.938000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.940807',NULL,NULL,NULL,NULL,NULL,NULL),(59,'4dde9d25-9151-49c6-b88f-8225669b5c1a',1,42,1,1,NULL,NULL,NULL,'f341d4930e8ed0054aedd5055572e8e531494c5a9a508ddc462275a3f8e7c35e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:35:23.378417','2026-03-17 06:35:23.376000',NULL,NULL,NULL,1,0,'2026-03-16 22:35:23.378417',NULL,NULL,NULL,NULL,NULL,NULL),(60,'7d293064-9697-4f28-af2a-2d147b68f3bf',1,42,1,1,NULL,NULL,NULL,'2465ee9007e950467e2731a05f6940c42b2add6269f88497dd9e0bbda0e46aab',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:38:51.083680','2026-03-17 06:38:51.082000',NULL,NULL,NULL,1,0,'2026-03-16 22:38:51.083680',NULL,NULL,NULL,NULL,NULL,NULL),(61,'0b362983-ea96-435d-b349-1182b4864a98',1,42,1,1,NULL,NULL,NULL,'cab38f6d7dac91e02f1abd9885e1dfd51e6d01cb3099558b27685d947f1df373',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:40:01.718458','2026-03-17 06:40:01.717000',NULL,NULL,NULL,1,0,'2026-03-16 22:40:01.718458',NULL,NULL,NULL,NULL,NULL,NULL),(62,'205e5718-bdd1-4576-bb7d-b186f62c6fc1',1,42,1,1,NULL,NULL,NULL,'ed5a4e43c718119c84dbaa4563d2b6c079d4e6737224ebe766591789ed97878f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:03.769537','2026-03-17 06:43:03.768000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:03.769537',NULL,NULL,NULL,NULL,NULL,NULL),(63,'e6bfb0c4-5d28-4102-a911-b7f0f7b7f1de',1,42,1,1,NULL,NULL,NULL,'12cafcefbeba26e5c96db7ba273371d0b50ca5ce31e7589994b421830ab74582',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:21.698424','2026-03-17 06:43:21.697000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:21.698424',NULL,NULL,NULL,NULL,NULL,NULL),(64,'8296bcf0-c33f-4d0a-b674-caf510a6286d',1,42,1,1,NULL,NULL,NULL,'594167c174364ed6863af304f145356e220e9fd37cb4db5f7ce0d50708fdd731',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:52:13.880474','2026-03-17 06:52:13.879000',NULL,NULL,NULL,1,0,'2026-03-16 22:52:13.880474',NULL,NULL,NULL,NULL,NULL,NULL),(65,'6e7c7a1b-2590-44cf-b4ab-d5b746edebc8',1,42,1,1,NULL,NULL,NULL,'d57a14c6abefa3a8a62a22fb3f5c93ad87110d77df7978353ceec76625a4bea4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:54:35.486146','2026-03-17 06:54:35.485000',NULL,NULL,NULL,1,0,'2026-03-16 22:54:35.486146',NULL,NULL,NULL,NULL,NULL,NULL),(66,'58cf0196-1fba-4b9b-87e8-9f461b079fb5',1,42,1,1,NULL,NULL,NULL,'de6e277deb3a1c05a51bb86ccdab7b02d210ef8662882f51318a5a13b5135419',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:21.990369','2026-03-17 06:57:21.988000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:21.990369',NULL,NULL,NULL,NULL,NULL,NULL),(67,'d1805ea1-d6cf-4d7a-ad86-b5b34c098b28',1,42,1,1,NULL,NULL,NULL,'45100470d323ffc68ea37a87c251e9de9a8e4fdecd3745998c69d1a28b1b5cba',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:44.317456','2026-03-17 06:57:44.316000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:44.317456',NULL,NULL,NULL,NULL,NULL,NULL),(68,'2f12c7c9-3d29-4013-acf0-723b2a179f9d',1,42,1,1,NULL,NULL,NULL,'1e4d84197e1128f080a571e2a8c3dcdbaa5d5670a58c784f2e943e95d102481e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:12.306487','2026-03-17 06:58:12.305000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:12.306487',NULL,NULL,NULL,NULL,NULL,NULL),(69,'f22372a2-a564-421d-8e0a-a5553071e740',1,42,1,1,NULL,NULL,NULL,'68f7de146c3ce12e5ebe82a60bf7277e9d622240508dce923e6219be86628581',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:30.889045','2026-03-17 06:58:30.887000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:30.889045',NULL,NULL,NULL,NULL,NULL,NULL),(70,'fbedc517-f035-4224-a8bb-8f13839285b4',1,42,1,1,NULL,NULL,NULL,'804e18ee16c4e652e3cf0bdd0f36445b52359a6e45e9bfa1931d51f14c606c00',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:59:43.851763','2026-03-17 06:59:43.850000',NULL,NULL,NULL,1,0,'2026-03-16 22:59:43.851763',NULL,NULL,NULL,NULL,NULL,NULL),(71,'44e4f97b-5ace-4279-aedd-eeffe8c37bd1',1,42,1,1,NULL,NULL,NULL,'366a33456c208d33b00f848b5182d9dc77fb699f729c8684711e46ca99335ff8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:12:02.595586','2026-03-17 07:12:02.595000',NULL,NULL,NULL,1,0,'2026-03-16 23:12:02.595586',NULL,NULL,NULL,NULL,NULL,NULL),(72,'b93fa42b-428b-42d3-b256-43fd2750e343',1,42,1,1,NULL,NULL,NULL,'92edc1447539a63f2882d1e34b7fc909b82ebff0f900587e57391ac24b54c572',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:35:42.036490','2026-03-17 07:35:42.035000',NULL,NULL,NULL,1,0,'2026-03-16 23:35:42.036490',NULL,NULL,NULL,NULL,NULL,NULL),(73,'66c87673-862c-441f-9a5a-317ff725f5ac',1,42,1,1,NULL,NULL,NULL,'befa220ec4bdeac6412aa243c8b736af6c71e1eaf2665aadf18d9cce594dec50',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:37:33.276373','2026-03-17 07:37:33.274000',NULL,NULL,NULL,1,0,'2026-03-16 23:37:33.276373',NULL,NULL,NULL,NULL,NULL,NULL),(74,'8d938f96-45d2-40ef-a25f-06b545ca0188',1,42,1,1,NULL,NULL,NULL,'51df221db516bad738304aa5ed695fd5bdec441ab2280f4dcbb8a80054988fd4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:50:53.630289','2026-03-17 07:50:53.629000',NULL,NULL,NULL,1,0,'2026-03-16 23:50:53.630289',NULL,NULL,NULL,NULL,NULL,NULL),(78,'3b817e39-233c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4ODc3MDIsImV4cCI6MTc3MzkxNjUwMn0.0SJm2FT5mgk0cEtaF752tWHd2UMHPFOHcOjlCFqXmdI',NULL,'::1','curl/8.13.0','2026-03-18 23:35:02.854844','2026-03-19 23:35:02.854844',NULL,NULL,NULL,1,0,'2026-03-18 23:35:02.854844',NULL,NULL,NULL,NULL,NULL,NULL),(79,'61576bee-09d5-42df-88ef-d509585ed06c',1,42,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3MjAsImV4cCI6MTc3MzkyMjUyMH0.wy0lwa6mw4LgT2050PzSyFKlB4sk9TCBTtA0IDuTpP4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:15:20.257667','2026-03-20 01:15:20.252000',NULL,NULL,NULL,1,0,'2026-03-19 01:15:20.257667','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(80,'daa7e12b-fc80-4bc7-ab55-683fec51173c',1,42,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3NjAsImV4cCI6MTc3MzkyMjU2MH0.h0jR45ip_ANARg6gQgl587t9wEDtIqBEjtvFgqAS8I8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:16:00.352448','2026-03-20 01:16:00.351000',NULL,NULL,NULL,1,0,'2026-03-19 01:16:00.352448','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(81,'99baf4e6-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4NzMsImV4cCI6MTc3MzkyMjY3M30.mdBPnnBO5Auwj-h1-ro0ndF47WgmakRY_WrOWwQFiFI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:17:53.891454','2026-03-20 01:17:53.891454',NULL,NULL,NULL,1,0,'2026-03-19 01:17:53.891454',NULL,NULL,NULL,NULL,NULL,NULL),(82,'a407badb-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4OTEsImV4cCI6MTc3MzkyMjY5MX0.hAw7Wh2zCpSxRDBE_FX5Vk6Sk8ABR7-tJD59kCwTBfU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:18:11.171812','2026-03-20 01:18:11.171812',NULL,NULL,NULL,1,0,'2026-03-19 01:18:11.171812',NULL,NULL,NULL,NULL,NULL,NULL),(83,'2253416f-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxMDMsImV4cCI6MTc3MzkyMjkwM30.MuE2l9617U93NCrowzGR_-Eu6AEh7PIMuqguX6dH4s4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:21:43.059699','2026-03-20 01:21:43.059699',NULL,NULL,NULL,1,0,'2026-03-19 01:21:43.059699',NULL,NULL,NULL,NULL,NULL,NULL),(84,'3a87ba86-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxNDMsImV4cCI6MTc3MzkyMjk0M30.m9CR0MQDPQB_Xj0u1NWgzlRFKc6I-yLwJVs82EgBgcM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:22:23.668904','2026-03-20 01:22:23.668904',NULL,NULL,NULL,1,0,'2026-03-19 01:22:23.668904',NULL,NULL,NULL,NULL,NULL,NULL),(85,'8bd193cd-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQyODAsImV4cCI6MTc3MzkyMzA4MH0.uzCjkX4jCPYFtlRJATxdx4qKlG64HL1bR2VueJLaw6Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:24:40.048329','2026-03-20 01:24:40.048329',NULL,NULL,NULL,1,0,'2026-03-19 01:24:40.048329',NULL,NULL,NULL,NULL,NULL,NULL),(86,'ddf05a6e-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ0MTcsImV4cCI6MTc3MzkyMzIxN30.YyqewlducVMkzvA3K31Wu2YWD5219J1h8vrDw7gXksg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:26:57.823193','2026-03-20 01:26:57.823193',NULL,NULL,NULL,1,0,'2026-03-19 01:26:57.823193',NULL,NULL,NULL,NULL,NULL,NULL),(87,'b7e93564-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ3ODMsImV4cCI6MTc3Mzg5ODM4M30.MvVHy2_1mE7CYYvoRlQJF0-47KoWZd4QgD7qSM1CoMU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:33:03.519678','2026-03-20 01:33:03.519678',NULL,NULL,NULL,1,0,'2026-03-19 01:33:03.519678',NULL,NULL,NULL,NULL,NULL,NULL),(88,'f623921c-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ4ODcsImV4cCI6MTc3Mzg5ODQ4N30.ny-59Ux4z6Qumy1tcWgNHMiTi1oTisnZANrc-w4_wQU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:34:47.920900','2026-03-20 01:34:47.920900',NULL,NULL,NULL,1,0,'2026-03-19 01:34:47.920900',NULL,NULL,NULL,NULL,NULL,NULL),(89,'807c65ef-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1NDksImV4cCI6MTc3Mzg5OTE0OX0.j9KbSZ9aKspBoblfo6m8IL54hdxPG2AZzXFNneUH6NM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:45:49.525350','2026-03-20 01:45:49.525350',NULL,NULL,NULL,1,0,'2026-03-19 01:45:49.525350',NULL,NULL,NULL,NULL,NULL,NULL),(90,'9713279e-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1ODcsImV4cCI6MTc3Mzg5OTE4N30.3uRLQ3w__cnPLEx2DZ4wU0JKCn-flXbSIc1RjMNdabA',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:46:27.423224','2026-03-20 01:46:27.423224',NULL,NULL,NULL,1,0,'2026-03-19 01:46:27.423224',NULL,NULL,NULL,NULL,NULL,NULL),(91,'f4823728-2350-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTY2MDMsImV4cCI6MTc3MzkwMDIwM30.ROXuwACgFYKfhhnKbIrWPxbTDZ-8qykclCAEr5s-s-I',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:03:23.172639','2026-03-20 02:03:23.172639',NULL,NULL,NULL,1,0,'2026-03-19 02:03:23.172639',NULL,NULL,NULL,NULL,NULL,NULL),(92,'05e86b18-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTgzNTAsImV4cCI6MTc3MzkwMTk1MH0.5e_Jo-MJrXheKXJ76zPbmBKwyUtXZoymHZBdGoMKib0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:32:30.350621','2026-03-20 02:32:30.350621',NULL,NULL,NULL,1,0,'2026-03-19 02:32:30.350621',NULL,NULL,NULL,NULL,NULL,NULL),(93,'6bbc96e5-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg1MjEsImV4cCI6MTc3MzkwMjEyMX0.AXOatB6alSgWn9s7ouThQiSD6RSWsi7sKg7CRU_qqLM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:35:21.190987','2026-03-20 02:35:21.190987',NULL,NULL,NULL,1,0,'2026-03-19 02:35:21.190987',NULL,NULL,NULL,NULL,NULL,NULL),(94,'d6dfd7e6-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg3MDAsImV4cCI6MTc3MzkwMjMwMH0.M_eq_NnB1GD2Yz6guy_d92JXJBuLQ9mxybPFQ9HEnaE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:38:20.938238','2026-03-20 02:38:20.938238',NULL,NULL,NULL,1,0,'2026-03-19 02:38:20.938238',NULL,NULL,NULL,NULL,NULL,NULL),(95,'8e718d15-2356-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTkwMDgsImV4cCI6MTc3MzkwMjYwOH0.x5w-LQQT0tf7t2Kf8rMNc6Dat-XDaMQTW-oZzsXft2Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:43:28.916202','2026-03-20 02:43:28.916202',NULL,NULL,NULL,1,0,'2026-03-19 02:43:28.916202',NULL,NULL,NULL,NULL,NULL,NULL),(96,'bbd4c3c5-2357-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk1MTQsImV4cCI6MTc3MzkwMzExNH0.V_8jJqkHOxZ4b2ERbwbSsIGQtybGC3ro09ZFlpEMw28',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:51:54.560610','2026-03-20 02:51:54.560610',NULL,NULL,NULL,1,0,'2026-03-19 02:51:54.560610',NULL,NULL,NULL,NULL,NULL,NULL),(97,'c67d7bbf-2358-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk5NjEsImV4cCI6MTc3MzkwMzU2MX0.ZoY3A7wDnBVhHwrJV3yEbo4mcNLGNo3kOdd2bEgkbqE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:59:21.940270','2026-03-20 02:59:21.940270',NULL,NULL,NULL,1,0,'2026-03-19 02:59:21.940270',NULL,NULL,NULL,NULL,NULL,NULL),(98,'fa983a96-2359-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDA0NzgsImV4cCI6MTc3MzkwNDA3OH0.ClzU14UooBL1tuYmPX2ja7E0mdCp-xFf3fHMycauJx0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:07:58.853802','2026-03-20 03:07:58.853802',NULL,NULL,NULL,1,0,'2026-03-19 03:07:58.853802',NULL,NULL,NULL,NULL,NULL,NULL),(99,'eef123e8-235c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDE3NDcsImV4cCI6MTc3MzkwNTM0N30.83IYHRGpQcuZstgyVBXzPv3cjglWBa74sfaHZmI_XCg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:29:07.794022','2026-03-20 03:29:07.794022',NULL,NULL,NULL,1,0,'2026-03-19 03:29:07.794022',NULL,NULL,NULL,NULL,NULL,NULL),(100,'092c6d95-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyMjEsImV4cCI6MTc3MzkwNTgyMX0.HnfUJAYvDHJ4B35si8QCph0UIjEFFex6pKyaenTHtk4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:01.300062','2026-03-20 03:37:01.300062',NULL,NULL,NULL,1,0,'2026-03-19 03:37:01.300062',NULL,NULL,NULL,NULL,NULL,NULL),(101,'22b406fb-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyNjQsImV4cCI6MTc3MzkwNTg2NH0.Fm7uXm1ddAZlVLoZGC82zECvOyGvHCGcHwggPzFEopQ',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:44.131764','2026-03-20 03:37:44.131764',NULL,NULL,NULL,1,0,'2026-03-19 03:37:44.131764',NULL,NULL,NULL,NULL,NULL,NULL),(102,'52c7c313-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIzNDQsImV4cCI6MTc3MzkwNTk0NH0.7hZPPoxhOuV3X_8pfOFsCUTAxlgi4ZUyTS0Kru4WwnI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:39:04.791734','2026-03-20 03:39:04.791734',NULL,NULL,NULL,1,0,'2026-03-19 03:39:04.791734',NULL,NULL,NULL,NULL,NULL,NULL),(103,'c557739f-2360-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDMzOTUsImV4cCI6MTc3MzkwNjk5NX0.Pi-i7G43HaRH3m-1lxERRKpu6aw541AxtatGoG3ZA5s',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:56:35.987141','2026-03-20 03:56:35.987141',NULL,NULL,NULL,1,0,'2026-03-19 03:56:35.987141',NULL,NULL,NULL,NULL,NULL,NULL),(104,'2be94184-2364-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDQ4NTYsImV4cCI6MTc3MzkwODQ1Nn0.mOE3hSflaxGaiGw6I_vf2sBz6cMtXneSvulADYcnEQE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 04:20:56.560475','2026-03-20 04:20:56.560475',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.560475',NULL,NULL,NULL,NULL,NULL,NULL),(105,'3546ebdb-b7a4-4b7b-8cf4-0f0926be1893',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 04:20:56.967102','2026-03-20 04:20:56.963000',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.967102','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(106,'b141994e-236d-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDg5NDUsImV4cCI6MTc3MzkxMjU0NX0.21n99e5T9nLpiU2J4FbQdmAesm6NM2iCmTyu8Rmmosk',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:29:05.746978','2026-03-20 05:29:05.746978',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.746978',NULL,NULL,NULL,NULL,NULL,NULL),(107,'d3d57e7a-81f4-4022-a178-d6a327f2042d',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:29:05.753761','2026-03-20 05:29:05.753000',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.753761','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(108,'3a9d926a-2370-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTAwMzUsImV4cCI6MTc3MzkxMzYzNX0.ee1i2TSJqxBwdjTdo_FM4ILdH7MrNOXhG8iyoMA6hZ8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:47:15.191052','2026-03-20 05:47:15.191052',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.191052',NULL,NULL,NULL,NULL,NULL,NULL),(109,'5ca0b438-93dd-49ed-81f4-53e07203fad2',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:47:15.261044','2026-03-20 05:47:15.258000',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.261044','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(110,'ad463124-2378-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTM2NjMsImV4cCI6MTc3MzkxNzI2M30.3-pM_a8yKIW76voMl3BkpDeizUQMTEOHRzmf7-p7dow',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 06:47:43.530219','2026-03-20 06:47:43.530219',NULL,NULL,NULL,1,0,'2026-03-19 06:47:43.530219',NULL,NULL,NULL,NULL,NULL,NULL),(111,'620be80c-7487-4cec-871a-b0ea17a477b1',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 06:47:44.034757','2026-03-20 06:47:44.033000',NULL,NULL,NULL,1,0,'2026-03-19 06:47:44.034757','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(112,'13514605-ebe8-4ed3-93c4-a5942984ab24',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 20:17:17.490857','2026-03-22 20:17:17.485000',NULL,NULL,NULL,1,0,'2026-03-21 20:17:17.490857','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(113,'06c11a3b-00ab-4628-a059-30b80acc4b6a',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:01:18.523492','2026-03-22 22:01:18.522000',NULL,NULL,NULL,1,0,'2026-03-21 22:01:18.523492','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(114,'afcdcf54-12a6-454f-831e-c14d7e8c49f4',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:05:47.816819','2026-03-22 22:05:47.816000',NULL,NULL,NULL,1,0,'2026-03-21 22:05:47.816819','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(115,'bd411ee8-da90-4c78-a039-94d228ee38db',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:13:12.723586','2026-03-22 22:13:12.723000',NULL,NULL,NULL,1,0,'2026-03-21 22:13:12.723586','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(116,'8ea3f884-6c59-4347-a118-2cc4b464bc1e',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:54:48.899185','2026-03-22 22:54:48.898000',NULL,NULL,NULL,1,0,'2026-03-21 22:54:48.899185','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(117,'e1fcd390-f520-4af0-b824-fe3cd59b568f',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:04:04.214475','2026-03-22 23:04:04.213000',NULL,NULL,NULL,1,0,'2026-03-21 23:04:04.214475','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(118,'ddec17c8-f5c5-4f7e-94a2-e24b9cc5d1da',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:14:30.340244','2026-03-22 23:14:30.339000',NULL,NULL,NULL,1,0,'2026-03-21 23:14:30.340244','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(119,'4fe9d288-a188-4ec5-b886-f16e5c99b790',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:23:43.049903','2026-03-22 23:23:43.049000',NULL,NULL,NULL,1,0,'2026-03-21 23:23:43.049903','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(120,'adae467e-2596-11f1-a946-c8d3ff00effc',1,NULL,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzQxNDY0NTEsImV4cCI6MTc3NDE1MDA1MX0.jVi8IwgN8AUaycoN2TVByxcjihHGFPIoI46jwNFRJ84',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-21 23:27:31.439796','2026-03-22 23:27:31.439796',NULL,NULL,NULL,1,0,'2026-03-21 23:27:31.439796','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(121,'6e7353db-138d-414b-98c7-9346f55e0e3c',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:43:54.485114','2026-03-23 02:43:54.482000',NULL,NULL,NULL,1,0,'2026-03-22 02:43:54.485114','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(122,'ebc0c4fa-4fc9-4e57-af2a-68bd5de385da',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:49:03.520101','2026-03-23 02:49:03.519000',NULL,NULL,NULL,1,0,'2026-03-22 02:49:03.520101','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(123,'70e80883-546e-464b-97ce-2160554c3c1d',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 03:52:41.778381','2026-03-23 03:52:41.777000',NULL,NULL,NULL,1,0,'2026-03-22 03:52:41.778381','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(124,'6a218f0e-e202-43f6-95e0-4bdf4bb6ea02',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:11:57.906932','2026-03-23 04:11:57.905000',NULL,NULL,NULL,1,0,'2026-03-22 04:11:57.906932','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(125,'ea928a15-a02a-47f9-adda-b529bf48e3df',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:16:33.133245','2026-03-23 04:16:33.132000',NULL,NULL,NULL,1,0,'2026-03-22 04:16:33.133245','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(126,'eba31484-53d7-4a4e-8eaa-86607cf6cfcf',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:30:41.073134','2026-03-23 04:30:41.071000',NULL,NULL,NULL,1,0,'2026-03-22 04:30:41.073134','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(127,'df4cde48-0460-4ccc-97af-ba51bb287af3',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:40:31.295705','2026-03-23 04:40:31.289000',NULL,NULL,NULL,1,0,'2026-03-22 04:40:31.295705','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(128,'177ef741-afb6-47d7-b80d-afac77f3c6da',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:44.622548','2026-03-23 06:04:44.621000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:44.622548','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(129,'e96d7631-c52a-4232-8bfe-658cdfd0b47c',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:49.730618','2026-03-23 06:04:49.729000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:49.730618','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(130,'98d999be-4860-4d92-a08d-91a9f4610205',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:05:00.794544','2026-03-23 06:05:00.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:05:00.794544','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(131,'60e1d88a-9976-4403-9dbf-4e2e3facbc83',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:09:04.274769','2026-03-23 06:09:04.274000',NULL,NULL,NULL,1,0,'2026-03-22 06:09:04.274769','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(132,'0b71a86c-920e-42a7-a039-e153dab2b7ef',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:13:51.431374','2026-03-23 06:13:51.429000',NULL,NULL,NULL,1,0,'2026-03-22 06:13:51.431374','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(133,'3c4c04d6-cbf9-41e9-9a55-6ea4f0d8090c',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:17:24.499182','2026-03-23 06:17:24.498000',NULL,NULL,NULL,1,0,'2026-03-22 06:17:24.499182','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(134,'b549a0d5-2167-43cd-abbc-9704480db180',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:23:02.413532','2026-03-23 06:23:02.412000',NULL,NULL,NULL,1,0,'2026-03-22 06:23:02.413532','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(135,'587f75e2-7122-4071-b1e7-086ecc768c27',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:26:28.794172','2026-03-23 06:26:28.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:26:28.794172','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(136,'5624e91f-94b0-4035-8c4b-0beccb9b0754',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:35:30.127910','2026-03-23 06:35:30.126000',NULL,NULL,NULL,1,0,'2026-03-22 06:35:30.127910','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(137,'0895d3e2-b153-42b2-938e-ba644c36c2b1',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:39:34.545146','2026-03-23 06:39:34.544000',NULL,NULL,NULL,1,0,'2026-03-22 06:39:34.545146','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(138,'5b0da3d3-3876-44a1-bd88-77de1381ff63',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:13.728007','2026-03-23 06:40:13.727000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:13.728007','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(139,'f7846d0d-71d7-48e9-bd8a-3dafce434b05',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:43.223912','2026-03-23 06:40:43.222000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:43.223912','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(140,'81f092a7-eab5-4212-8477-772efa2e69fb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:42:23.117742','2026-03-23 06:42:23.117000',NULL,NULL,NULL,1,0,'2026-03-22 06:42:23.117742','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(141,'341a7157-16d4-4831-b0ef-02999e6a59f7',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:45:06.717408','2026-03-23 06:45:06.716000',NULL,NULL,NULL,1,0,'2026-03-22 06:45:06.717408','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(142,'f708b04a-5895-4666-95bc-3c837568b656',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:46:34.114181','2026-03-23 06:46:34.113000',NULL,NULL,NULL,1,0,'2026-03-22 06:46:34.114181','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(143,'97bb320d-b926-405f-9511-de9fca557dcb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:47:26.474349','2026-03-23 06:47:26.473000',NULL,NULL,NULL,1,0,'2026-03-22 06:47:26.474349','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(144,'805fc296-b0cc-4721-9607-1363f44d6004',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:59:15.847959','2026-03-23 06:59:15.847000',NULL,NULL,NULL,1,0,'2026-03-22 06:59:15.847959','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(145,'c60554d8-ba64-4501-8712-80a3576ba3db',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 07:01:54.979601','2026-03-23 07:01:54.978000',NULL,NULL,NULL,1,0,'2026-03-22 07:01:54.979601','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(146,'9a82f5fe-a060-4eae-90a3-57bd11797d01',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:25:47.577442','2026-03-23 21:25:47.573000',NULL,NULL,NULL,1,0,'2026-03-22 21:25:47.577442','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(147,'8ab13198-84f8-4972-a056-8ed814e63f02',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:13.182556','2026-03-23 21:28:13.181000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:13.182556','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(148,'1d71bee1-2a64-43f1-91e6-9c5ca15937a3',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:39.428636','2026-03-23 21:28:39.427000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:39.428636','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(149,'7df3b3bf-c66b-4919-96b8-e9eef49925e9',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:32:00.570805','2026-03-23 21:32:00.569000',NULL,NULL,NULL,1,0,'2026-03-22 21:32:00.570805','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(150,'3e73b0fc-af6e-4728-8527-2f3bd64ab1ed',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:39:15.813284','2026-03-23 21:39:15.812000',NULL,NULL,NULL,1,0,'2026-03-22 21:39:15.813284','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(151,'79c3e4c4-b508-4c6f-83ce-a473b87e8428',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:45:48.782773','2026-03-23 21:45:48.781000',NULL,NULL,NULL,1,0,'2026-03-22 21:45:48.782773','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(152,'a6ea1d4b-641e-47df-9ad6-cf9bbdb2f6c7',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:17.715143','2026-03-23 21:49:17.714000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:17.715143','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(153,'d915a7d1-5cc4-4ff8-b070-27a5a0560e36',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:55.392969','2026-03-23 21:49:55.392000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:55.392969','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(154,'e80db09a-bcc6-4033-b2ce-7ae55fdc3dcb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 22:20:33.586502','2026-03-23 22:20:33.585000',NULL,NULL,NULL,1,0,'2026-03-22 22:20:33.586502','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(155,'675d5849-40a7-4e6c-8b89-f14e0ae768c1',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:38:42.688728','2026-03-23 23:38:42.687000',NULL,NULL,NULL,1,0,'2026-03-22 23:38:42.688728','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(156,'f3138709-167c-45f6-835d-932b72bbddfe',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:45:06.336952','2026-03-23 23:45:06.336000',NULL,NULL,NULL,1,0,'2026-03-22 23:45:06.336952','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(157,'7e18ae9a-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODcxMywiZXhwIjoxNzc0MjY3NTEzfQ.zQFtQuD31qWpVdsj3KguN-hRcSIpiMOO3FKgZ68ZWn8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4NzEzLCJleHAiOjE3NzQ4NDM1MTN9.PEgnCIuGOemPccGXIGErsHvAKHTuiPHjDFDBZ95-cRI','::1','curl/8.13.0','2026-03-23 01:05:13.390164','2026-03-23 09:05:13.390164',NULL,NULL,NULL,1,0,'2026-03-23 01:05:13.390164','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(158,'a35bfe4e-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODc3NSwiZXhwIjoxNzc0MjY3NTc1fQ.ye1vxGPaYoSB-o-uOSOMxLlYrwZNc5X0FFWIO8pVc7A','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4Nzc1LCJleHAiOjE3NzQ4NDM1NzV9.rHlN4YGO1BxOMJiTOmcy1qBqX_c7LLDcgTD2hO3Sr8E','::1','curl/8.13.0','2026-03-23 01:06:15.920040','2026-03-23 09:06:15.920040',NULL,NULL,NULL,1,0,'2026-03-23 01:06:15.920040','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(159,'722f3588-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTEyMiwiZXhwIjoxNzc0MjY3OTIyfQ.pbWMN-E9-AHD6Oc__mPO0gqmC8kywgE-LP5ToHE_aR8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MTIyLCJleHAiOjE3NzQ4NDM5MjJ9.Lg2LVmr1443qYme60M5qAznnUfsSENGTqjtNkHyZ0Rk','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:12:02.914950','2026-03-23 09:12:02.914950',NULL,NULL,NULL,1,0,'2026-03-23 01:12:02.914950','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(160,'eb03520a-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTMyNSwiZXhwIjoxNzc0MjY4MTI1fQ.fIH7btEBY6Ti5FDOBBVs7FSpeuEuGWe8OnYu4_pABxY','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MzI1LCJleHAiOjE3NzQ4NDQxMjV9.pai6e1MZT77UMCIdXGVKY08J2ZBHT0DXfryJtpFeKFQ','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:15:25.631562','2026-03-23 09:15:25.631562',NULL,NULL,NULL,1,0,'2026-03-23 01:15:25.631562','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(161,'f09fdef1-266f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTc2NCwiZXhwIjoxNzc0MjY4NTY0fQ.SfNI0O7awW6Ye2cMRPjKvnVKQtUbiFVzcTYt3P9hh68','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5NzY0LCJleHAiOjE3NzQ4NDQ1NjR9.jSJvtNFaHetjaQNvFyoP35A4L3fT9zJQr6VE9gzsSYQ','::1','curl/8.13.0','2026-03-23 01:22:44.542861','2026-03-23 09:22:44.542861',NULL,NULL,NULL,1,0,'2026-03-23 01:22:44.542861','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(162,'9e2cb782-2670-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDA1NSwiZXhwIjoxNzc0MjY4ODU1fQ.EQkp_RbQTz5JNetCzXGuPtePgMi6YBzLFLvBcMLd1CA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMDU1LCJleHAiOjE3NzQ4NDQ4NTV9.nA0LEUxpGJfOoCXDVRUf5HRikOg_efjwZUSU9LnpBKk','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:27:35.711845','2026-03-23 09:27:35.711845',NULL,NULL,NULL,1,0,'2026-03-23 01:27:35.711845','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(163,'63be6edf-2671-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDM4NywiZXhwIjoxNzc0MjY5MTg3fQ.rzrJlgwh2mNY1St8Zmn3wrHe6KV0nQ5IG9Y9CjQzdK8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMzg3LCJleHAiOjE3NzQ4NDUxODd9.oq6HtvdAxhxFZJ8u0TVRCltB9Eb5Q88qiC_jjNj4mv8','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:33:07.177919','2026-03-23 09:33:07.177919',NULL,NULL,NULL,1,0,'2026-03-23 01:33:07.177919','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(164,'7b63f6a7-2672-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDg1NiwiZXhwIjoxNzc0MjY5NjU2fQ.ViSakqbkCeUU1-26dIUuxjOSTvzDedl7surfbQT_cRU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwODU2LCJleHAiOjE3NzQ4NDU2NTZ9.cEfQOrn_rCurOFHf2YdrJ1hmnlgB8IizDZ7uIpYUL34','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:40:56.347102','2026-03-23 09:40:56.347102',NULL,NULL,NULL,1,0,'2026-03-23 01:40:56.347102','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(165,'c2146fcf-2673-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTQwNCwiZXhwIjoxNzc0MjcwMjA0fQ.FN0GBkcd-zkJ8ClO3A5dZauNfpLabTyhyCcQvCxokBI','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxNDA0LCJleHAiOjE3NzQ4NDYyMDR9.da-7BjN_FgYFbmXhBg9X9BMAUyBTBL9ft9hr_eTKHBE','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:50:04.440784','2026-03-23 09:50:04.440784',NULL,NULL,NULL,1,0,'2026-03-23 01:50:04.440784','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(166,'b1f01862-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgwNiwiZXhwIjoxNzc0MjcwNjA2fQ.hU38lfZ8evt5SEOEr3ziFcLe6-pFohZcIKLg-6OANEg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODA2LCJleHAiOjE3NzQ4NDY2MDZ9.H4GfHLsGDDZXFoZmpxN17tM8_1dheoWlvi3F_9sKor0','::1','curl/8.13.0','2026-03-23 01:56:46.855745','2026-03-23 09:56:46.855745',NULL,NULL,NULL,1,0,'2026-03-23 01:56:46.855745','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(167,'c397b513-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgzNiwiZXhwIjoxNzc0MjcwNjM2fQ.GQpSHeDryN0R-sVB0BNIBOD8oSrO7l8gmc6Dq7J_KLA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODM2LCJleHAiOjE3NzQ4NDY2MzZ9.QqyeA-9EDGMTVPTy7UIxGBSLVzo2zmJVhz5cRjaEkjU','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:57:16.475605','2026-03-23 09:57:16.475605',NULL,NULL,NULL,1,0,'2026-03-23 01:57:16.475605','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(168,'aa0c06a9-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDM3MCwiZXhwIjoxNzc0MjczMTcwfQ.hsy2tOyUjXBb0_wCwy14rQxbuaRe1p-AlBm7q_tb7X0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0MzcwLCJleHAiOjE3NzQ4NDkxNzB9.7SEhzQlreNPgNqLLEelgfWN-Cz3OV5TutGspPdoAKX8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:39:30.597075','2026-03-23 10:39:30.597075',NULL,NULL,NULL,1,0,'2026-03-23 02:39:30.597075','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(169,'f32d241f-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDQ5MywiZXhwIjoxNzc0MjczMjkzfQ.VSd7dB0Yhk_dkH3kbI7GTSGS39A1qm71NIxIHyFkkOQ','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0NDkzLCJleHAiOjE3NzQ4NDkyOTN9.kNrd88JYngvvSzCre_t-Cx5YFNDHotzYW5Dbx4IA8tM','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:41:33.288162','2026-03-23 10:41:33.288162',NULL,NULL,NULL,1,0,'2026-03-23 02:41:33.288162','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(170,'66070192-267b-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDY4NSwiZXhwIjoxNzc0MjczNDg1fQ.IvxtCGSQFQZRGzEqsYqyPu7ZL83KghvVQnx9OcJaZF0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0Njg1LCJleHAiOjE3NzQ4NDk0ODV9.3IJLj7mcBkynNyQac6VrJpOuphAJjOPSzK3mhFoRFL0','::1','curl/8.13.0','2026-03-23 02:44:45.976122','2026-03-23 10:44:45.976122',NULL,NULL,NULL,1,0,'2026-03-23 02:44:45.976122','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(171,'02e7d533-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjIzNywiZXhwIjoxNzc0Mjc1MDM3fQ.S0Uuk2f4zVuP3B2BAHnNpdoIK0jvwa4BbE7I2q9nnc8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2MjM3LCJleHAiOjE3NzQ4NTEwMzd9.DbfRdeOQQU39sc-HPpq1VHVHv-2Zrg0bJF5-6hODm8c','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:10:37.664407','2026-03-23 11:10:37.664407',NULL,NULL,NULL,1,0,'2026-03-23 03:10:37.664407','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(172,'af0ec837-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjUyNiwiZXhwIjoxNzc0Mjc1MzI2fQ.6hBlKH7km9yh2Es3KbmtCGLzrfYaQsDnCN-CZTK1mQg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NTI2LCJleHAiOjE3NzQ4NTEzMjZ9.yVNH57p6eSdeOeWG9y_RN5KKMrxCrh1TOjEtmVypJrw','::1','curl/8.13.0','2026-03-23 03:15:26.487803','2026-03-23 11:15:26.487803',NULL,NULL,NULL,1,0,'2026-03-23 03:15:26.487803','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(173,'ddbbb9f0-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjYwNCwiZXhwIjoxNzc0Mjc1NDA0fQ.qsmcGzLB2lDp2tOJCP7OtMSyLt1p7q0NEb7szGCj4ok','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NjA0LCJleHAiOjE3NzQ4NTE0MDR9.WSocl8pTCUhLe13UGMHr70wtEkvuZSvT8rX-C7VxQ7U','::1','curl/8.13.0','2026-03-23 03:16:44.796282','2026-03-23 11:16:44.796282',NULL,NULL,NULL,1,0,'2026-03-23 03:16:44.796282','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(174,'b1710f4f-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzM4OSwiZXhwIjoxNzc0Mjc2MTg5fQ.NeEcIvLAxRBfz2fcsqDSwgmOcGBS4Xz1LQuy8WLHqyU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3Mzg5LCJleHAiOjE3NzQ4NTIxODl9.r8ar95BS2-LugMF5D2e5w4des3okyg5SiUQSuOEEyFI','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:29:49.480812','2026-03-23 11:29:49.480812',NULL,NULL,NULL,1,0,'2026-03-23 03:29:49.480812','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(175,'e494ca28-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzQ3NSwiZXhwIjoxNzc0Mjc2Mjc1fQ.9-a1KvN1m03NDBfBuhnN8WF9HvnN6fWBNcfmfUS4D1s','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3NDc1LCJleHAiOjE3NzQ4NTIyNzV9.m_yTjYwCJ1aATo5yQLrxQWOClIjQ8psBXoKlRHDlHSo','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:31:15.278808','2026-03-23 11:31:15.278808',NULL,NULL,NULL,1,0,'2026-03-23 03:31:15.278808','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(176,'3dbe90c4-2684-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0ODQ4NCwiZXhwIjoxNzc0Mjc3Mjg0fQ.npQSnFL5sktJ8gg35WhW6E6WDRtNdWacpoiyHrf0gik','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ4NDg0LCJleHAiOjE3NzQ4NTMyODR9.9oUdrcuI-kkcglrMd8xIsfm4oYawHg_jG3WDZ5u3PKo','::1','curl/8.13.0','2026-03-23 03:48:03.863168','2026-03-23 11:48:03.863168',NULL,NULL,NULL,1,0,'2026-03-23 03:48:03.863168','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(177,'0ce3cae6-2686-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0OTI2MCwiZXhwIjoxNzc0Mjc4MDYwfQ.5vIQyGQbNNX9PE2iEJkYNN7-Q-tr-DEVGLcPV7rs0Ag','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ5MjYwLCJleHAiOjE3NzQ4NTQwNjB9.Z98aDEVJWNl64eaXa_ne7fmOMDj4129galMEblEy01s','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 04:01:00.892296','2026-03-23 12:01:00.892296',NULL,NULL,NULL,1,0,'2026-03-23 04:01:00.892296','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(178,'dcc0f3b2-2697-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1NjkxMSwiZXhwIjoxNzc0Mjg1NzExfQ.GpqmMl-mQxT_CNAR3qw3JdE2sBfpAHpNK1WFD6rVkGo','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU2OTExLCJleHAiOjE3NzQ4NjE3MTF9.4xY1Olj6XpKv6uUaRM3-p5lPYcaQ_ko76Q9_w00uxSo','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:08:31.074212','2026-03-23 14:08:31.074212',NULL,NULL,NULL,1,0,'2026-03-23 06:08:31.074212','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(179,'66641617-2698-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1NzE0MSwiZXhwIjoxNzc0Mjg1OTQxfQ.0w5QIP-lw3-HxDBj7A49SfHFfG1AIFUt-PDmgNdZg7Q','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU3MTQxLCJleHAiOjE3NzQ4NjE5NDF9.5CpxOhTiD0QM6UctOa-vN2zzriOe8rl93q0V1dpbOVY','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:12:21.991364','2026-03-23 14:12:21.991364',NULL,NULL,NULL,1,0,'2026-03-23 06:12:21.991364','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(180,'18695c13-269a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1Nzg3MCwiZXhwIjoxNzc0Mjg2NjcwfQ.8h-wmmYtN-q_lOTpAEtWcbdKnZ8vsGoUBQRrJ2bnxWo','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU3ODcwLCJleHAiOjE3NzQ4NjI2NzB9.B3pINOYoTJYPT4RZh6nWH6xC3prK-E7o9Vj76RnVueQ','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:24:30.157213','2026-03-23 14:24:30.157213',NULL,NULL,NULL,1,0,'2026-03-23 06:24:30.157213','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(181,'ec9c0445-269a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODIyNiwiZXhwIjoxNzc0Mjg3MDI2fQ.R2CeGVxty9I1TYG0v6kiI94nv0Vd--NmCLvek_NYrKA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4MjI2LCJleHAiOjE3NzQ4NjMwMjZ9.2Z0WQ2IdpBm_uvntDrrrEzPpWqmJPBwqdPjJ0eLrwbk','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:30:26.165769','2026-03-23 14:30:26.165769',NULL,NULL,NULL,1,0,'2026-03-23 06:30:26.165769','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(182,'0678ab59-269b-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODI2OSwiZXhwIjoxNzc0Mjg3MDY5fQ.Ks8hZ6aWTJF7fUNfi5W-oGqmgfOLcsh6QnkEiShHFWw','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4MjY5LCJleHAiOjE3NzQ4NjMwNjl9.P4HaHgYbHVrQ3lrCYbHaMFNGaXIo9u2GxdZN4_394Ng','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:31:09.555281','2026-03-23 14:31:09.555281',NULL,NULL,NULL,1,0,'2026-03-23 06:31:09.555281','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(183,'2d5a3526-269c-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODc2NCwiZXhwIjoxNzc0Mjg3NTY0fQ.XFqhDx9sInxxWFUAX38dxcsL2bNT_wgohR10LIbdkL4','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4NzY0LCJleHAiOjE3NzQ4NjM1NjR9.FPDb3w6gNXDkPvuYWXKrTEi6p3RbPkYUReMD4eYR9l0','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:39:24.283425','2026-03-23 14:39:24.283425',NULL,NULL,NULL,1,0,'2026-03-23 06:39:24.283425','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(184,'0b2d7821-269d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1OTEzNiwiZXhwIjoxNzc0Mjg3OTM2fQ.oZWEXAdfRd69gJ1noOxS2R5uhujSc_OyIAGjExiOsFY','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU5MTM2LCJleHAiOjE3NzQ4NjM5MzZ9.GAmYEV4unE0Fu0eXPS1od5ddTpMwWnBx2IDoxg8a7d8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:45:36.444444','2026-03-23 14:45:36.444444',NULL,NULL,NULL,1,0,'2026-03-23 06:45:36.444444','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(185,'3f879c2d-269e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1OTY1MywiZXhwIjoxNzc0Mjg4NDUzfQ.20O8eVzhuJVFjE6CGWgfQafWzs4imowuozIrfkBkph8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU5NjUzLCJleHAiOjE3NzQ4NjQ0NTN9.dOElfz0zt76ggDHRV8IqIBvpCsyhP81QxXE6yBwPwxw','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:54:13.773460','2026-03-23 14:54:13.773460',NULL,NULL,NULL,1,0,'2026-03-23 06:54:13.773460','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(186,'88277981-26a0-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI2MDYzNCwiZXhwIjoxNzc0Mjg5NDM0fQ.-PWUFhFztgBpRwxpp8ZCuS1-53c3JgJ5dVtFi9jXVY8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjYwNjM0LCJleHAiOjE3NzQ4NjU0MzR9.ePrT-7CilP2o1XrQDtGrqVwkbKkNfolwLMcKeyQ2ecc','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 07:10:34.610551','2026-03-23 15:10:34.610551',NULL,NULL,NULL,1,0,'2026-03-23 07:10:34.610551','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(187,'e6325ea2-29bc-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjY3MiwiZXhwIjoxNzc0NjMxNDcyfQ.u4VNlLj8Tb9bBIXPROZ-1AQR96f-Pj5ecR86GG8jips','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyNjcyLCJleHAiOjE3NzUyMDc0NzJ9.pSY_DpNwWAj7TOykkGCXfQcITgEwJav2mOt6sfVaxAM','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:11:11.784551','2026-03-27 14:11:11.784551',NULL,NULL,NULL,1,0,'2026-03-27 06:11:11.784551','2026-03-27 06:11:12.664721',NULL,NULL,NULL,NULL,NULL),(188,'effb4edd-29bc-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjY4OCwiZXhwIjoxNzc0NjMxNDg4fQ.RMejGTgaIP5SfQRVmtmejN0mL1gF_FFRDjqQ3pp_i1o','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyNjg4LCJleHAiOjE3NzUyMDc0ODh9._6gMdvHrGxwSYZV3HFqgtQa9tUUKE-smqOS0al5Usds','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:11:28.200977','2026-03-27 14:11:28.200977',NULL,NULL,NULL,1,0,'2026-03-27 06:11:28.200977','2026-03-27 06:11:28.403067',NULL,NULL,NULL,NULL,NULL),(189,'3b21d869-29bd-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjgxNCwiZXhwIjoxNzc0NjMxNjE0fQ.B538eolAJC-daw8sY63FhQKcA9KShhiE54m-ceMjttw','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyODE0LCJleHAiOjE3NzUyMDc2MTR9.OhAz2URzoXhIVKaxZ-KckmIz0pzTABKp5huUaS4tC4A','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:13:34.282593','2026-03-27 14:13:34.282593',NULL,NULL,NULL,1,0,'2026-03-27 06:13:34.282593','2026-03-27 06:13:34.289312',NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `sessao_usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14079,7 +14419,7 @@ DROP TABLE IF EXISTS `setor`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `setor` (
   `id_setor` int NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipo` enum('PRONTO_SOCORRO','OBSERVACAO','INTERNACAO','UTI_ADULTO','UTI_PEDIATRICA','CENTRO_CIRURGICO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `ramal` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -14143,7 +14483,7 @@ DROP TABLE IF EXISTS `sinais_vitais`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sinais_vitais` (
   `id_sinal` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_usuario` bigint NOT NULL,
   `frequencia_cardiaca` int DEFAULT NULL,
   `pressao_sistolica` int DEFAULT NULL,
@@ -14153,8 +14493,7 @@ CREATE TABLE `sinais_vitais` (
   `dor` int DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_sinal`),
-  KEY `fk_sinais_atendimento` (`id_atendimento`),
-  CONSTRAINT `fk_sinais_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
+  KEY `fk_sinais_atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -14296,7 +14635,7 @@ DROP TABLE IF EXISTS `solicitacao_exame`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `solicitacao_exame` (
   `id_solicitacao` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint DEFAULT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_exame` int DEFAULT NULL,
   `id_sigpat` bigint DEFAULT NULL,
   `status` enum('SOLICITADO','COLETADO','EM_ANALISE','RESULTADO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -14306,7 +14645,6 @@ CREATE TABLE `solicitacao_exame` (
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_exame` (`id_exame`),
   KEY `id_medico` (`id_medico`),
-  CONSTRAINT `solicitacao_exame_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
   CONSTRAINT `solicitacao_exame_ibfk_2` FOREIGN KEY (`id_exame`) REFERENCES `exame` (`id_exame`),
   CONSTRAINT `solicitacao_exame_ibfk_3` FOREIGN KEY (`id_medico`) REFERENCES `medico` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -14639,7 +14977,7 @@ DROP TABLE IF EXISTS `totem`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `totem` (
   `id_totem` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `codigo` varchar(50) NOT NULL,
   `descricao` varchar(150) DEFAULT NULL,
   `ip` varchar(45) DEFAULT NULL,
@@ -14824,18 +15162,20 @@ DROP TABLE IF EXISTS `triagem`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `triagem` (
   `id_triagem` bigint NOT NULL AUTO_INCREMENT,
-  `id_atendimento` bigint NOT NULL,
+  `id_atendimento` bigint unsigned NOT NULL,
   `id_risco` int NOT NULL,
   `queixa` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `sinais_vitais` json DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_enfermeiro` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_triagem`),
   UNIQUE KEY `uk_triagem_atendimento` (`id_atendimento`),
   KEY `id_risco` (`id_risco`),
   KEY `id_enfermeiro` (`id_enfermeiro`),
-  CONSTRAINT `triagem_ibfk_1` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`),
+  KEY `idx_tri_ent` (`id_entidade`),
+  CONSTRAINT `fk_triagem_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `triagem_ibfk_2` FOREIGN KEY (`id_risco`) REFERENCES `classificacao_risco` (`id_risco`),
   CONSTRAINT `triagem_ibfk_3` FOREIGN KEY (`id_enfermeiro`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -14860,7 +15200,7 @@ DROP TABLE IF EXISTS `tv_rotativo`;
 CREATE TABLE `tv_rotativo` (
   `id_tv_rotativo` bigint NOT NULL AUTO_INCREMENT,
   `nome` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `intervalo_seg` int NOT NULL DEFAULT '120',
   `ativo` tinyint NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14868,7 +15208,9 @@ CREATE TABLE `tv_rotativo` (
   `atualizado_em` datetime DEFAULT NULL,
   `atualizado_por` bigint DEFAULT NULL,
   PRIMARY KEY (`id_tv_rotativo`),
-  UNIQUE KEY `uk_tv_rotativo_nome` (`nome`)
+  UNIQUE KEY `uk_tv_rotativo_nome` (`nome`),
+  KEY `fk_tv_rotativo_unidade` (`id_unidade`),
+  CONSTRAINT `fk_tv_rotativo_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -14922,8 +15264,8 @@ DROP TABLE IF EXISTS `unidade`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `unidade` (
-  `id_unidade` bigint NOT NULL AUTO_INCREMENT,
-  `id_entidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_entidade` bigint unsigned NOT NULL,
   `id_cidade` bigint DEFAULT NULL,
   `nome` varchar(200) DEFAULT NULL,
   `tipo` varchar(100) DEFAULT NULL,
@@ -14957,7 +15299,7 @@ DROP TABLE IF EXISTS `usuario`;
 CREATE TABLE `usuario` (
   `id_usuario` bigint NOT NULL AUTO_INCREMENT,
   `id_pessoa` bigint DEFAULT NULL,
-  `id_entidade` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `login` varchar(80) NOT NULL,
   `senha_hash` varchar(255) NOT NULL,
   `ativo` tinyint DEFAULT '1',
@@ -14969,7 +15311,9 @@ CREATE TABLE `usuario` (
   `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `login` (`login`),
-  KEY `idx_usuario_login` (`login`)
+  KEY `idx_usuario_login` (`login`),
+  KEY `fk_usuario_entidade` (`id_entidade`),
+  CONSTRAINT `fk_usuario_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -14979,7 +15323,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,NULL,NULL,'evandro.andrade','$2a$10$Qf8vD2tC.4BmsoseuYU4DOETo./bUvHtFbBKQ4Ooq6D4q8AZ0PH2K',1,0,NULL,NULL,NULL,'2026-03-11 04:46:48.000000',NULL),(2,2,NULL,'maria.silva','$2a$10$uXuCam0bl/36gRyC2tjJ5eUsUR8eUzwI0fndGuT/WsNKJLcaykJl6',1,0,NULL,NULL,NULL,'2026-03-17 06:46:37.000000',NULL),(3,3,NULL,'joao.santos','$2a$10$iQxOtGfY9BAiLWhgY/R0D.misWxW94LSmQwnwmIM.n4ZZRvwAXI36',1,0,NULL,NULL,NULL,'2026-03-17 06:46:37.000000',NULL),(4,4,NULL,'ana.paula','$2a$10$JyVHzlj.pI8Uw3gghownku.3MUwJIYvHFN8L8M4.TSvGjmyFnmgCW',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(5,5,NULL,'carlos.pereira','$2a$10$fD.ZAyBjlFz6O5sjifRMaOAINkQPJq9LOx4Sx8JuQ7rnmrIJX.saG',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(6,6,NULL,'juliana.costa','$2a$10$Z/WTZYs.Yc9CFHNFlSPOFeKRVTzJR3y8rU5r620/fn9qJM5QHc8yu',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(7,7,NULL,'roberto.ferreira','$2a$10$xBoXIH0X2suhlh5OYkQZeOUorHEcY.ZjMAYo2IyW5LgbrJS.nk7vG',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(8,8,NULL,'patricia.almeida','$2a$10$T4iNpyCwCHGDBOM86l2t2uShiUmGAbpL0anATYwxbYNX6SR/pBi3.',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(9,9,NULL,'marcos.rodrigues','$2a$10$GPlVB5uYWaZ/lzWnbhpQi.gcJf8L7/gnWVCqPBk1V.vhp171J7HBu',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(10,10,NULL,'luciana.martins','$2a$10$BAKDkyk5tj/86l3UhISWkuVNIyvwvBiXirpscvPNoLf4yQbGuT.0C',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(11,11,NULL,'fernanda.souza','$2a$10$gIJlG0QLphA3zyZphkdKr.KUwLRPksVZ8eg2wi8hrC8Y33yfnXJde',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(12,12,NULL,'ricardo.lima','$2a$10$/TqJd1PNTMZXzNrIqLBP5.A8ubTy/zvI7vzpsLHSeJvSo2goBYp9.',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(13,13,NULL,'carla.dias','$2a$10$YIpPU15c79RKWWnrsUtIB.ENT1W7ZqV.GsVoO9og734WgZormSOZ6',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(14,14,NULL,'bruno.castro','$2a$10$zRPiQybIzxbSVqbP3GlqlO1gCDHW1kC.zvu2F05rsrfl17ld4a1Fq',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(15,15,NULL,'tatiana.reis','$2a$10$wNZNAt1mCEnQs5B.dNIso.AjaHvI4uPWO10Y/WeaIeecZ1yAT6nDi',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL);
+INSERT INTO `usuario` VALUES (1,NULL,1,'evandro.andrade','$2a$10$Qf8vD2tC.4BmsoseuYU4DOETo./bUvHtFbBKQ4Ooq6D4q8AZ0PH2K',1,0,NULL,NULL,NULL,'2026-03-11 04:46:48.000000',NULL),(2,2,1,'maria.silva','$2a$10$uXuCam0bl/36gRyC2tjJ5eUsUR8eUzwI0fndGuT/WsNKJLcaykJl6',1,0,NULL,NULL,NULL,'2026-03-17 06:46:37.000000',NULL),(3,3,1,'joao.santos','$2a$10$iQxOtGfY9BAiLWhgY/R0D.misWxW94LSmQwnwmIM.n4ZZRvwAXI36',1,0,NULL,NULL,NULL,'2026-03-17 06:46:37.000000',NULL),(4,4,1,'ana.paula','$2a$10$JyVHzlj.pI8Uw3gghownku.3MUwJIYvHFN8L8M4.TSvGjmyFnmgCW',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(5,5,1,'carlos.pereira','$2a$10$fD.ZAyBjlFz6O5sjifRMaOAINkQPJq9LOx4Sx8JuQ7rnmrIJX.saG',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(6,6,1,'juliana.costa','$2a$10$Z/WTZYs.Yc9CFHNFlSPOFeKRVTzJR3y8rU5r620/fn9qJM5QHc8yu',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(7,7,1,'roberto.ferreira','$2a$10$xBoXIH0X2suhlh5OYkQZeOUorHEcY.ZjMAYo2IyW5LgbrJS.nk7vG',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(8,8,1,'patricia.almeida','$2a$10$T4iNpyCwCHGDBOM86l2t2uShiUmGAbpL0anATYwxbYNX6SR/pBi3.',1,0,NULL,NULL,NULL,'2026-03-17 06:46:38.000000',NULL),(9,9,1,'marcos.rodrigues','$2a$10$GPlVB5uYWaZ/lzWnbhpQi.gcJf8L7/gnWVCqPBk1V.vhp171J7HBu',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(10,10,1,'luciana.martins','$2a$10$BAKDkyk5tj/86l3UhISWkuVNIyvwvBiXirpscvPNoLf4yQbGuT.0C',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(11,11,1,'fernanda.souza','$2a$10$gIJlG0QLphA3zyZphkdKr.KUwLRPksVZ8eg2wi8hrC8Y33yfnXJde',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(12,12,1,'ricardo.lima','$2a$10$/TqJd1PNTMZXzNrIqLBP5.A8ubTy/zvI7vzpsLHSeJvSo2goBYp9.',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(13,13,1,'carla.dias','$2a$10$YIpPU15c79RKWWnrsUtIB.ENT1W7ZqV.GsVoO9og734WgZormSOZ6',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(14,14,1,'bruno.castro','$2a$10$zRPiQybIzxbSVqbP3GlqlO1gCDHW1kC.zvu2F05rsrfl17ld4a1Fq',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL),(15,15,1,'tatiana.reis','$2a$10$wNZNAt1mCEnQs5B.dNIso.AjaHvI4uPWO10Y/WeaIeecZ1yAT6nDi',1,0,NULL,NULL,NULL,'2026-03-17 06:46:39.000000',NULL);
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15025,7 +15369,7 @@ CREATE TABLE `usuario_contexto` (
   `id_usuario_contexto` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
   `id_sistema` bigint NOT NULL,
-  `id_unidade` bigint DEFAULT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `id_perfil` bigint NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
@@ -15033,8 +15377,10 @@ CREATE TABLE `usuario_contexto` (
   PRIMARY KEY (`id_usuario_contexto`),
   KEY `idx_usuario_contexto_usuario` (`id_usuario`),
   KEY `fk_uc_perfil` (`id_perfil`),
+  KEY `fk_usuario_contexto_unidade` (`id_unidade`),
   CONSTRAINT `fk_uc_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
-  CONSTRAINT `fk_uc_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  CONSTRAINT `fk_uc_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_usuario_contexto_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -15117,7 +15463,7 @@ DROP TABLE IF EXISTS `usuario_log_acesso`;
 CREATE TABLE `usuario_log_acesso` (
   `id_log` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `id_entidade` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `ip` varchar(45) NOT NULL,
   `user_agent` varchar(255) DEFAULT NULL,
   `sucesso` tinyint(1) NOT NULL,
@@ -15302,7 +15648,7 @@ DROP TABLE IF EXISTS `usuario_sala`;
 CREATE TABLE `usuario_sala` (
   `id_usuario_sala` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `id_sala` int NOT NULL,
+  `id_sala` bigint unsigned NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario_sala`),
@@ -15501,14 +15847,14 @@ DROP TABLE IF EXISTS `usuario_unidade`;
 CREATE TABLE `usuario_unidade` (
   `id_usuario_unidade` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint NOT NULL,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario_unidade`),
   UNIQUE KEY `uk_usuario_unidade` (`id_usuario`,`id_unidade`),
   KEY `fk_uu_usuario` (`id_usuario`),
   KEY `fk_uu_unidade` (`id_unidade`),
-  CONSTRAINT `fk_uu_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE CASCADE,
+  CONSTRAINT `fk_usuario_unidade_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_uu_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -15666,7 +16012,7 @@ DROP TABLE IF EXISTS `viatura`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `viatura` (
   `id_viatura` bigint NOT NULL AUTO_INCREMENT,
-  `id_unidade` bigint NOT NULL,
+  `id_unidade` bigint unsigned NOT NULL,
   `prefixo` varchar(30) NOT NULL,
   `tipo` enum('AMBULANCIA_BASICA','AMBULANCIA_AVANCADA','OUTRO') NOT NULL DEFAULT 'OUTRO',
   `ativo` tinyint(1) DEFAULT '1',
@@ -15684,354 +16030,6 @@ LOCK TABLES `viatura` WRITE;
 /*!40000 ALTER TABLE `viatura` DISABLE KEYS */;
 /*!40000 ALTER TABLE `viatura` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Temporary view structure for view `vw_conciliacao_faturamento`
---
-
-DROP TABLE IF EXISTS `vw_conciliacao_faturamento`;
-/*!50001 DROP VIEW IF EXISTS `vw_conciliacao_faturamento`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_conciliacao_faturamento` AS SELECT 
- 1 AS `id_atendimento`,
- 1 AS `nome_comercial`,
- 1 AS `evento_tipo`,
- 1 AS `qtd_movimentada`,
- 1 AS `data_movimento`,
- 1 AS `status_pipeline`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_estoque_assistencial`
---
-
-DROP TABLE IF EXISTS `vw_estoque_assistencial`;
-/*!50001 DROP VIEW IF EXISTS `vw_estoque_assistencial`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_estoque_assistencial` AS SELECT 
- 1 AS `id_unidade`,
- 1 AS `id_local`,
- 1 AS `nome_comercial`,
- 1 AS `qtd_em_uso`,
- 1 AS `ultima_atualizacao`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_estoque_central`
---
-
-DROP TABLE IF EXISTS `vw_estoque_central`;
-/*!50001 DROP VIEW IF EXISTS `vw_estoque_central`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_estoque_central` AS SELECT 
- 1 AS `id_unidade`,
- 1 AS `id_local`,
- 1 AS `nome_comercial`,
- 1 AS `numero_lote`,
- 1 AS `data_validade`,
- 1 AS `qtd_fisica`,
- 1 AS `qtd_projetada`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_estoque_farmacia`
---
-
-DROP TABLE IF EXISTS `vw_estoque_farmacia`;
-/*!50001 DROP VIEW IF EXISTS `vw_estoque_farmacia`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_estoque_farmacia` AS SELECT 
- 1 AS `id_unidade`,
- 1 AS `id_local`,
- 1 AS `nome_comercial`,
- 1 AS `numero_lote`,
- 1 AS `data_validade`,
- 1 AS `qtd_fisica`,
- 1 AS `qtd_reservada`,
- 1 AS `qtd_projetada`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_fila_painel`
---
-
-DROP TABLE IF EXISTS `vw_fila_painel`;
-/*!50001 DROP VIEW IF EXISTS `vw_fila_painel`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_fila_painel` AS SELECT 
- 1 AS `id_senha`,
- 1 AS `codigo_visual`,
- 1 AS `contexto_fluxo`,
- 1 AS `prioridade`,
- 1 AS `risco_dinamico`,
- 1 AS `tempo_espera`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_gestao_fluxo_tempo_real`
---
-
-DROP TABLE IF EXISTS `vw_gestao_fluxo_tempo_real`;
-/*!50001 DROP VIEW IF EXISTS `vw_gestao_fluxo_tempo_real`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_gestao_fluxo_tempo_real` AS SELECT 
- 1 AS `id_senha`,
- 1 AS `codigo_visual`,
- 1 AS `contexto_fluxo`,
- 1 AS `id_fluxo_status`,
- 1 AS `hora_chegada`,
- 1 AS `hora_chamada`,
- 1 AS `minutos_espera`,
- 1 AS `alerta_gestao`,
- 1 AS `prioridade`,
- 1 AS `id_atendimento`,
- 1 AS `nao_compareceu`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_laboratorio_protocolos_pendentes`
---
-
-DROP TABLE IF EXISTS `vw_laboratorio_protocolos_pendentes`;
-/*!50001 DROP VIEW IF EXISTS `vw_laboratorio_protocolos_pendentes`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_laboratorio_protocolos_pendentes` AS SELECT 
- 1 AS `id_laboratorio_protocolo`,
- 1 AS `id_ffa`,
- 1 AS `id_gpat`,
- 1 AS `id_pedido_item`,
- 1 AS `codigo`,
- 1 AS `status`,
- 1 AS `criado_em`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_laboratorio_protocolos_por_gpat`
---
-
-DROP TABLE IF EXISTS `vw_laboratorio_protocolos_por_gpat`;
-/*!50001 DROP VIEW IF EXISTS `vw_laboratorio_protocolos_por_gpat`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_laboratorio_protocolos_por_gpat` AS SELECT 
- 1 AS `id_laboratorio_protocolo`,
- 1 AS `id_ffa`,
- 1 AS `id_gpat`,
- 1 AS `id_pedido_item`,
- 1 AS `codigo`,
- 1 AS `barcode`,
- 1 AS `status`,
- 1 AS `sistema_externo`,
- 1 AS `codigo_externo`,
- 1 AS `criado_em`,
- 1 AS `atualizado_em`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_painel_config_efetiva`
---
-
-DROP TABLE IF EXISTS `vw_painel_config_efetiva`;
-/*!50001 DROP VIEW IF EXISTS `vw_painel_config_efetiva`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_painel_config_efetiva` AS SELECT 
- 1 AS `id_painel`,
- 1 AS `painel_codigo`,
- 1 AS `painel_tipo`,
- 1 AS `chave`,
- 1 AS `tipo_valor`,
- 1 AS `valor_efetivo`,
- 1 AS `atualizado_em`,
- 1 AS `id_usuario`,
- 1 AS `id_sessao_usuario`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_painel_config_json`
---
-
-DROP TABLE IF EXISTS `vw_painel_config_json`;
-/*!50001 DROP VIEW IF EXISTS `vw_painel_config_json`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_painel_config_json` AS SELECT 
- 1 AS `id_painel`,
- 1 AS `painel_codigo`,
- 1 AS `painel_tipo`,
- 1 AS `config_json`,
- 1 AS `atualizado_em`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_painel_senhas_chamando_por_painel`
---
-
-DROP TABLE IF EXISTS `vw_painel_senhas_chamando_por_painel`;
-/*!50001 DROP VIEW IF EXISTS `vw_painel_senhas_chamando_por_painel`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_painel_senhas_chamando_por_painel` AS SELECT 
- 1 AS `id_senha`,
- 1 AS `codigo`,
- 1 AS `prioridade`,
- 1 AS `id_unidade`,
- 1 AS `id_local`,
- 1 AS `id_paciente`,
- 1 AS `id_ffa`,
- 1 AS `id_fluxo_status`,
- 1 AS `contexto_fluxo`,
- 1 AS `chamada_sequencial`,
- 1 AS `chamada_em`,
- 1 AS `executado_em`,
- 1 AS `cancelado`,
- 1 AS `nao_compareceu`,
- 1 AS `criado_em`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_rastreio_cat_por_ffa`
---
-
-DROP TABLE IF EXISTS `vw_rastreio_cat_por_ffa`;
-/*!50001 DROP VIEW IF EXISTS `vw_rastreio_cat_por_ffa`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_rastreio_cat_por_ffa` AS SELECT 
- 1 AS `id_cat`,
- 1 AS `id_ffa`,
- 1 AS `id_gpat`,
- 1 AS `status`,
- 1 AS `criado_em`,
- 1 AS `atualizado_em`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_rastreio_ffa_gpat`
---
-
-DROP TABLE IF EXISTS `vw_rastreio_ffa_gpat`;
-/*!50001 DROP VIEW IF EXISTS `vw_rastreio_ffa_gpat`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_rastreio_ffa_gpat` AS SELECT 
- 1 AS `id_ffa`,
- 1 AS `id_gpat`,
- 1 AS `codigo_gpat`,
- 1 AS `barcode_gpat`,
- 1 AS `gpat_criado_em`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_senhas_ativas`
---
-
-DROP TABLE IF EXISTS `vw_senhas_ativas`;
-/*!50001 DROP VIEW IF EXISTS `vw_senhas_ativas`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_senhas_ativas` AS SELECT 
- 1 AS `id`,
- 1 AS `codigo`,
- 1 AS `prioridade`,
- 1 AS `id_unidade`,
- 1 AS `id_local`,
- 1 AS `id_paciente`,
- 1 AS `id_ffa`,
- 1 AS `id_fluxo_status`,
- 1 AS `contexto_fluxo`,
- 1 AS `chamada_sequencial`,
- 1 AS `chamada_em`,
- 1 AS `executado_em`,
- 1 AS `cancelado`,
- 1 AS `nao_compareceu`,
- 1 AS `criado_em`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_usuario_contextos`
---
-
-DROP TABLE IF EXISTS `vw_usuario_contextos`;
-/*!50001 DROP VIEW IF EXISTS `vw_usuario_contextos`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_usuario_contextos` AS SELECT 
- 1 AS `id_usuario`,
- 1 AS `id_sistema`,
- 1 AS `id_unidade`,
- 1 AS `id_local_operacional`,
- 1 AS `id_perfil`,
- 1 AS `perfil_nome`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_usuario_permissoes`
---
-
-DROP TABLE IF EXISTS `vw_usuario_permissoes`;
-/*!50001 DROP VIEW IF EXISTS `vw_usuario_permissoes`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_usuario_permissoes` AS SELECT 
- 1 AS `id_sessao_usuario`,
- 1 AS `id_usuario`,
- 1 AS `id_sistema`,
- 1 AS `id_unidade`,
- 1 AS `id_local`,
- 1 AS `id_perfil`,
- 1 AS `perfil_nome`,
- 1 AS `codigo_permissao`,
- 1 AS `nome_permissao`,
- 1 AS `nome_procedure`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_workflow_ffa_completo`
---
-
-DROP TABLE IF EXISTS `vw_workflow_ffa_completo`;
-/*!50001 DROP VIEW IF EXISTS `vw_workflow_ffa_completo`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_workflow_ffa_completo` AS SELECT 
- 1 AS `id_ffa`,
- 1 AS `origem`,
- 1 AS `entidade`,
- 1 AS `id_entidade`,
- 1 AS `tipo_evento`,
- 1 AS `detalhe`,
- 1 AS `id_sessao_usuario`,
- 1 AS `criado_em`,
- 1 AS `payload_json`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vw_workflow_ffa_eventos_materializado`
---
-
-DROP TABLE IF EXISTS `vw_workflow_ffa_eventos_materializado`;
-/*!50001 DROP VIEW IF EXISTS `vw_workflow_ffa_eventos_materializado`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_workflow_ffa_eventos_materializado` AS SELECT 
- 1 AS `id_workflow_evento`,
- 1 AS `id_ffa`,
- 1 AS `origem`,
- 1 AS `entidade`,
- 1 AS `id_entidade`,
- 1 AS `tipo_evento`,
- 1 AS `detalhe`,
- 1 AS `id_sessao_usuario`,
- 1 AS `criado_em`*/;
-SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `workflow_ffa_evento`
@@ -16909,6 +16907,7 @@ proc: BEGIN
     END IF;
 
     SET p_resultado = JSON_OBJECT(
+
         'unidades', (
             SELECT JSON_ARRAYAGG(JSON_OBJECT(
                 'id_unidade', u.id_unidade,
@@ -16937,7 +16936,24 @@ proc: BEGIN
             FROM usuario_perfil up
             JOIN perfil p ON p.id_perfil = up.id_perfil
             WHERE up.id_usuario = v_id_usuario AND up.ativo = 1
+        ),
+
+        'salas', (
+            SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                'id_sala', s.id_sala,
+                'nome', s.nome_exibicao,
+                'id_local', s.id_local,
+                'id_tipo_sala', s.id_tipo_sala,
+                'exibir_painel', s.exibir_painel,
+                'gerar_tts', s.gerar_tts
+            ))
+            FROM usuario_sala us
+            JOIN sala s ON s.id_sala = us.id_sala
+            WHERE us.id_usuario = v_id_usuario
+              AND us.ativo = 1
+              AND s.ativa = 1
         )
+
     );
 
     SET p_sucesso = TRUE;
@@ -16964,6 +16980,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_contexto_set`(
     IN p_id_unidade BIGINT,
     IN p_id_local BIGINT,
     IN p_id_perfil BIGINT,
+    IN p_id_sala BIGINT,
+
     OUT p_resultado JSON,
     OUT p_sucesso BOOLEAN,
     OUT p_mensagem TEXT
@@ -16971,9 +16989,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_contexto_set`(
 proc: BEGIN
 
     DECLARE v_id_usuario BIGINT;
+    DECLARE v_count INT;
 
     SET p_sucesso = FALSE;
 
+    -- ==========================================
+    -- VALIDAR SESSÃO
+    -- ==========================================
     SELECT id_usuario
     INTO v_id_usuario
     FROM sessao_usuario
@@ -16986,32 +17008,97 @@ proc: BEGIN
         LEAVE proc;
     END IF;
 
-    -- LOCAL opcional (NULL permitido)
+    -- ==========================================
+    -- VALIDAR UNIDADE
+    -- ==========================================
+    SELECT COUNT(*) INTO v_count
+    FROM usuario_unidade
+    WHERE id_usuario = v_id_usuario
+      AND id_unidade = p_id_unidade
+      AND ativo = 1;
+
+    IF v_count = 0 THEN
+        SET p_mensagem = 'UNIDADE_INVALIDA';
+        LEAVE proc;
+    END IF;
+
+    -- ==========================================
+    -- VALIDAR LOCAL
+    -- ==========================================
     IF p_id_local IS NOT NULL THEN
-        IF NOT EXISTS (
-            SELECT 1 FROM usuario_local
-            WHERE id_usuario = v_id_usuario
-              AND id_local = p_id_local
-              AND ativo = 1
-        ) THEN
+        SELECT COUNT(*) INTO v_count
+        FROM usuario_local
+        WHERE id_usuario = v_id_usuario
+          AND id_local = p_id_local
+          AND ativo = 1;
+
+        IF v_count = 0 THEN
             SET p_mensagem = 'LOCAL_INVALIDO';
             LEAVE proc;
         END IF;
     END IF;
 
+    -- ==========================================
+    -- VALIDAR PERFIL
+    -- ==========================================
+    SELECT COUNT(*) INTO v_count
+    FROM usuario_perfil
+    WHERE id_usuario = v_id_usuario
+      AND id_perfil = p_id_perfil
+      AND ativo = 1;
+
+    IF v_count = 0 THEN
+        SET p_mensagem = 'PERFIL_INVALIDO';
+        LEAVE proc;
+    END IF;
+
+    -- ==========================================
+    -- VALIDAR SALA
+    -- ==========================================
+    SELECT COUNT(*) INTO v_count
+    FROM usuario_sala
+    WHERE id_usuario = v_id_usuario
+      AND id_sala = p_id_sala
+      AND ativo = 1;
+
+    IF v_count = 0 THEN
+        SET p_mensagem = 'SALA_INVALIDA';
+        LEAVE proc;
+    END IF;
+
+    -- ==========================================
+    -- VALIDAR COERÊNCIA SALA x LOCAL
+    -- ==========================================
+    SELECT COUNT(*) INTO v_count
+    FROM sala
+    WHERE id_sala = p_id_sala
+      AND id_local = p_id_local;
+
+    IF v_count = 0 THEN
+        SET p_mensagem = 'SALA_NAO_PERTENCE_AO_LOCAL';
+        LEAVE proc;
+    END IF;
+
+    -- ==========================================
+    -- UPDATE SESSÃO
+    -- ==========================================
     UPDATE sessao_usuario
     SET id_unidade = p_id_unidade,
         id_local = p_id_local,
         id_perfil = p_id_perfil,
+        id_sala = p_id_sala,
         contexto_definido_em = NOW(6)
     WHERE id_sessao_usuario = p_id_sessao;
 
+    -- ==========================================
+    -- RESULTADO
+    -- ==========================================
     SET p_resultado = JSON_OBJECT(
         'contexto_definido', TRUE,
         'id_unidade', p_id_unidade,
         'id_local', p_id_local,
         'id_perfil', p_id_perfil,
-        'local_null', p_id_local IS NULL
+        'id_sala', p_id_sala
     );
 
     SET p_sucesso = TRUE;
@@ -17042,19 +17129,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_menu_get`(
 )
 proc: BEGIN
 
-    -- ==========================================
-    -- DECLARAÇÕES
-    -- ==========================================
     DECLARE v_id_usuario BIGINT;
     DECLARE v_id_perfil BIGINT;
     DECLARE v_id_unidade BIGINT;
+    DECLARE v_id_local BIGINT;
+    DECLARE v_id_sala BIGINT;
     DECLARE v_ativo TINYINT;
 
     DECLARE v_erro_msg TEXT;
 
-    -- ==========================================
-    -- HANDLER
-    -- ==========================================
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         GET DIAGNOSTICS CONDITION 1 v_erro_msg = MESSAGE_TEXT;
@@ -17068,18 +17151,24 @@ proc: BEGIN
         SET p_mensagem = 'ERRO_MENU';
     END;
 
-    -- ==========================================
-    -- INIT
-    -- ==========================================
     SET p_sucesso = FALSE;
     SET p_mensagem = '';
     SET p_resultado = JSON_OBJECT();
 
-    -- ==========================================
-    -- VALIDAR SESSÃO
-    -- ==========================================
-    SELECT id_usuario, id_perfil, id_unidade, ativo
-    INTO v_id_usuario, v_id_perfil, v_id_unidade, v_ativo
+    SELECT 
+        id_usuario,
+        id_perfil,
+        id_unidade,
+        id_local,
+        id_sala,
+        ativo
+    INTO 
+        v_id_usuario,
+        v_id_perfil,
+        v_id_unidade,
+        v_id_local,
+        v_id_sala,
+        v_ativo
     FROM sessao_usuario
     WHERE id_sessao_usuario = p_id_sessao
     LIMIT 1;
@@ -17094,14 +17183,11 @@ proc: BEGIN
         LEAVE proc;
     END IF;
 
-    IF v_id_unidade IS NULL THEN
+    IF v_id_unidade IS NULL OR v_id_perfil IS NULL THEN
         SET p_mensagem = 'CONTEXTO_NAO_DEFINIDO';
         LEAVE proc;
     END IF;
 
-    -- ==========================================
-    -- MENU DINÂMICO
-    -- ==========================================
     SET p_resultado = JSON_OBJECT(
         'modulos',
         (
@@ -17122,8 +17208,12 @@ proc: BEGIN
                             )
                         )
                         FROM permissao p
-                        JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao
+                        JOIN perfil_permissao pp 
+                            ON pp.id_permissao = p.id_permissao
+                        LEFT JOIN permissao_local pl 
+                            ON pl.id_permissao = p.id_permissao
                         WHERE pp.id_perfil = v_id_perfil
+                          AND (pl.id_local IS NULL OR pl.id_local = v_id_local)
                           AND p.modulo = m.modulo
                           AND p.ativo = 1
                     )
@@ -17136,8 +17226,12 @@ proc: BEGIN
                     COALESCE(p.icone, 'default') AS icone,
                     COALESCE(p.ordem, 999) AS ordem
                 FROM permissao p
-                JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao
+                JOIN perfil_permissao pp 
+                    ON pp.id_permissao = p.id_permissao
+                LEFT JOIN permissao_local pl 
+                    ON pl.id_permissao = p.id_permissao
                 WHERE pp.id_perfil = v_id_perfil
+                  AND (pl.id_local IS NULL OR pl.id_local = v_id_local)
                   AND p.ativo = 1
             ) m
         )
@@ -21226,6 +21320,147 @@ BEGIN
     -- Evento semântico
     INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)
     VALUES (p_id_senha, p_id_sessao_usuario, 'SENHA_FINALIZADA', NOW());
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_fix_fk_unidade` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_fix_fk_unidade`()
+BEGIN
+
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_table VARCHAR(255);
+
+    -- cursor com suas tabelas
+    DECLARE cur CURSOR FOR
+        SELECT table_name
+        FROM (
+            SELECT 'codigo_prefixo_regra' AS table_name UNION
+            SELECT 'config_leitos' UNION
+            SELECT 'config_locais' UNION
+            SELECT 'config_sistema' UNION
+            SELECT 'coordenador_estado_global' UNION
+            SELECT 'documento_emissao' UNION
+            SELECT 'escala_medica' UNION
+            SELECT 'escala_plantao' UNION
+            SELECT 'escala_plantao_atual' UNION
+            SELECT 'escala_profissional' UNION
+            SELECT 'estoque_local' UNION
+            SELECT 'estoque_movimento' UNION
+            SELECT 'estoque_saldo' UNION
+            SELECT 'estoque_saldo_central' UNION
+            SELECT 'estoque_saldo_master' UNION
+            SELECT 'evento_geral' UNION
+            SELECT 'faturamento_conta' UNION
+            SELECT 'ffa_item' UNION
+            SELECT 'funcionario_unidade' UNION
+            SELECT 'gaso_solicitacao' UNION
+            SELECT 'guardiao_runtime_final' UNION
+            SELECT 'internacao_movimentacao' UNION
+            SELECT 'ledger_evento_sincronizacao' UNION
+            SELECT 'ledger_evento_sincronizacao_local' UNION
+            SELECT 'ledger_global_sincronismo' UNION
+            SELECT 'painel' UNION
+            SELECT 'plantao' UNION
+            SELECT 'plantao_escala' UNION
+            SELECT 'produtividade_evento' UNION
+            SELECT 'reg_export_lote' UNION
+            SELECT 'remocao' UNION
+            SELECT 'runtime_contexto' UNION
+            SELECT 'runtime_edge_evento' UNION
+            SELECT 'runtime_invariant_log' UNION
+            SELECT 'runtime_sync_log' UNION
+            SELECT 'sala_notificacao' UNION
+            SELECT 'senha_sequencia' UNION
+            SELECT 'servico_agendamento' UNION
+            SELECT 'sessao_usuario' UNION
+            SELECT 'setor' UNION
+            SELECT 'totem' UNION
+            SELECT 'tv_rotativo' UNION
+            SELECT 'usuario_contexto' UNION
+            SELECT 'usuario_unidade' UNION
+            SELECT 'viatura'
+        ) t;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    loop_tables: LOOP
+
+        FETCH cur INTO v_table;
+        IF done THEN
+            LEAVE loop_tables;
+        END IF;
+
+        -- 1. NORMALIZA DADOS
+        SET @sql1 = CONCAT('
+            UPDATE ', v_table, '
+            SET id_unidade = 1
+            WHERE id_unidade IS NULL
+               OR id_unidade <= 0
+               OR id_unidade REGEXP "[^0-9]"
+        ');
+
+        PREPARE stmt FROM @sql1;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+        -- 2. AJUSTA TIPO
+        SET @sql2 = CONCAT('
+            ALTER TABLE ', v_table, '
+            MODIFY COLUMN id_unidade BIGINT UNSIGNED NOT NULL
+        ');
+
+        PREPARE stmt FROM @sql2;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+        -- 3. CRIA FK SE NÃO EXISTIR
+        SET @fk = CONCAT('fk_', v_table, '_unidade');
+
+        SET @check_fk = CONCAT('
+            SELECT COUNT(*) INTO @fk_exists
+            FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+            WHERE CONSTRAINT_SCHEMA = DATABASE()
+              AND TABLE_NAME = "', v_table, '"
+              AND CONSTRAINT_NAME = "', @fk, '"
+        ');
+
+        PREPARE stmt FROM @check_fk;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+        IF @fk_exists = 0 THEN
+
+            SET @sql3 = CONCAT('
+                ALTER TABLE ', v_table, '
+                ADD CONSTRAINT ', @fk, '
+                FOREIGN KEY (id_unidade)
+                REFERENCES unidade(id_unidade)
+            ');
+
+            PREPARE stmt FROM @sql3;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+        END IF;
+
+    END LOOP;
+
+    CLOSE cur;
 
 END ;;
 DELIMITER ;
@@ -25933,14 +26168,20 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_routes`(
 proc: BEGIN
 
     -- ==========================================
-    -- DECLARAÇÕES
+    -- VARIÁVEIS
     -- ==========================================
+    DECLARE v_usuario BIGINT;
+    DECLARE v_unidade BIGINT;
+    DECLARE v_local BIGINT;
+    DECLARE v_perfil BIGINT;
+    DECLARE v_sala BIGINT;
+
+    DECLARE v_now DATETIME(6);
     DECLARE v_erro_msg TEXT;
     DECLARE v_erro_code INT;
-    DECLARE v_now DATETIME(6);
 
     -- ==========================================
-    -- HANDLER GLOBAL
+    -- HANDLER
     -- ==========================================
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -25957,13 +26198,12 @@ proc: BEGIN
             detalhe,
             criado_em
         ) VALUES (
-            NULL,
+            v_usuario,
             'sp_master_routes',
             'ERRO',
             JSON_OBJECT(
                 'erro_code', v_erro_code,
                 'erro_msg', v_erro_msg,
-                'metodo', p_metodo,
                 'rota', p_rota
             ),
             NOW(6)
@@ -25983,13 +26223,12 @@ proc: BEGIN
     -- INIT
     -- ==========================================
     SET v_now = NOW(6);
+    SET p_metodo = UPPER(p_metodo);
+
     SET p_resultado = JSON_OBJECT();
     SET p_sucesso = FALSE;
     SET p_mensagem = 'INIT';
 
-    -- ==========================================
-    -- VALIDAÇÃO INICIAL
-    -- ==========================================
     IF p_metodo IS NULL OR p_rota IS NULL THEN
         SET p_mensagem = 'METODO_ROTA_OBRIGATORIOS';
         LEAVE proc;
@@ -25998,7 +26237,7 @@ proc: BEGIN
     START TRANSACTION;
 
     -- ==========================================
-    -- AUTH.LOGIN
+    -- LOGIN (SEM CONTEXTO)
     -- ==========================================
     IF p_metodo = 'POST' AND p_rota = 'AUTH.LOGIN' THEN
 
@@ -26011,15 +26250,9 @@ proc: BEGIN
         );
 
     -- ==========================================
-    -- AUTH.CONTEXTO_GET
+    -- CARREGAR CONTEXTO (LISTA)
     -- ==========================================
     ELSEIF p_metodo = 'GET' AND p_rota = 'AUTH.CONTEXTO_GET' THEN
-
-        IF p_id_sessao IS NULL THEN
-            SET p_mensagem = 'SESSAO_OBRIGATORIA';
-            ROLLBACK;
-            LEAVE proc;
-        END IF;
 
         CALL sp_auth_contexto_get(
             p_id_sessao,
@@ -26029,36 +26262,25 @@ proc: BEGIN
         );
 
     -- ==========================================
-    -- AUTH.CONTEXTO_SET
+    -- DEFINIR CONTEXTO (AGORA COM SALA)
     -- ==========================================
     ELSEIF p_metodo = 'SET' AND p_rota = 'AUTH.CONTEXTO_SET' THEN
 
-        IF p_id_sessao IS NULL THEN
-            SET p_mensagem = 'SESSAO_OBRIGATORIA';
-            ROLLBACK;
-            LEAVE proc;
-        END IF;
-
         CALL sp_auth_contexto_set(
             p_id_sessao,
-            JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade')),
-            JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_local')),
-            JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_perfil')),
+            JSON_EXTRACT(p_payload, '$.id_unidade'),
+            JSON_EXTRACT(p_payload, '$.id_local'),
+            JSON_EXTRACT(p_payload, '$.id_perfil'),
+            JSON_EXTRACT(p_payload, '$.id_sala'),
             p_resultado,
             p_sucesso,
             p_mensagem
         );
 
     -- ==========================================
-    -- AUTH.ASSERT
+    -- ASSERT CONTEXTO
     -- ==========================================
     ELSEIF p_metodo = 'REQUEST' AND p_rota = 'AUTH.ASSERT' THEN
-
-        IF p_id_sessao IS NULL THEN
-            SET p_mensagem = 'SESSAO_OBRIGATORIA';
-            ROLLBACK;
-            LEAVE proc;
-        END IF;
 
         CALL sp_auth_assert(
             p_id_sessao,
@@ -26068,36 +26290,48 @@ proc: BEGIN
         );
 
     -- ==========================================
-    -- AUTH.MENU
+    -- MENU DINÂMICO REAL
     -- ==========================================
     ELSEIF p_metodo = 'GET' AND p_rota = 'AUTH.MENU' THEN
 
-        IF p_id_sessao IS NULL THEN
-            SET p_mensagem = 'SESSAO_OBRIGATORIA';
+        SELECT 
+            su.id_usuario,
+            su.id_unidade,
+            su.id_local,
+            su.id_perfil,
+            su.id_sala
+        INTO
+            v_usuario,
+            v_unidade,
+            v_local,
+            v_perfil,
+            v_sala
+        FROM sessao_usuario su
+        WHERE su.id_sessao = p_id_sessao;
+
+        IF v_usuario IS NULL THEN
+            SET p_mensagem = 'SESSAO_INVALIDA';
             ROLLBACK;
             LEAVE proc;
         END IF;
 
-        -- MENU MOCK (base inicial)
-        SET p_resultado = JSON_OBJECT(
-            'modulos', JSON_ARRAY(
-                JSON_OBJECT('codigo','usuarios','nome','Usuarios'),
-                JSON_OBJECT('codigo','unidades','nome','Unidades'),
-                JSON_OBJECT('codigo','recepcao','nome','Recepcao'),
-                JSON_OBJECT('codigo','triagem','nome','Triagem'),
-                JSON_OBJECT('codigo','medico','nome','Atendimento Medico'),
-                JSON_OBJECT('codigo','enfermagem','nome','Enfermagem'),
-                JSON_OBJECT('codigo','farmacia','nome','Farmacia'),
-                JSON_OBJECT('codigo','estoque','nome','Estoque'),
-                JSON_OBJECT('codigo','relatorios','nome','Relatorios')
+        SELECT JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'codigo', p.codigo,
+                'nome', p.nome
             )
-        );
+        )
+        INTO p_resultado
+        FROM permissao p
+        INNER JOIN perfil_permissao pp ON pp.id_permissao = p.id_permissao
+        WHERE pp.id_perfil = v_perfil
+        AND p.ativo = 1;
 
         SET p_sucesso = TRUE;
         SET p_mensagem = 'MENU_OK';
 
     -- ==========================================
-    -- AUTH.LOGOUT
+    -- LOGOUT
     -- ==========================================
     ELSEIF p_metodo = 'POST' AND p_rota = 'AUTH.LOGOUT' THEN
 
@@ -26109,9 +26343,6 @@ proc: BEGIN
             p_mensagem
         );
 
-    -- ==========================================
-    -- ROTA NÃO IMPLEMENTADA
-    -- ==========================================
     ELSE
         SET p_mensagem = 'ROTA_NAO_IMPLEMENTADA';
         ROLLBACK;
@@ -26119,7 +26350,28 @@ proc: BEGIN
     END IF;
 
     -- ==========================================
-    -- FINALIZAÇÃO
+    -- LOG EXECUÇÃO
+    -- ==========================================
+    INSERT INTO auditoria_evento (
+        id_usuario,
+        entidade,
+        acao,
+        detalhe,
+        criado_em
+    ) VALUES (
+        v_usuario,
+        'sp_master_routes',
+        'EXEC',
+        JSON_OBJECT(
+            'rota', p_rota,
+            'metodo', p_metodo,
+            'sucesso', p_sucesso
+        ),
+        v_now
+    );
+
+    -- ==========================================
+    -- FINAL
     -- ==========================================
     IF p_sucesso = TRUE THEN
         COMMIT;
@@ -32824,330 +33076,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-
---
--- Final view structure for view `vw_conciliacao_faturamento`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_conciliacao_faturamento`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_conciliacao_faturamento` AS select `a`.`id_referencia_externa` AS `id_atendimento`,`i`.`nome_comercial` AS `nome_comercial`,`a`.`evento_tipo` AS `evento_tipo`,json_extract(`a`.`payload`,'$.qtd') AS `qtd_movimentada`,`a`.`criado_em` AS `data_movimento`,`p`.`estado` AS `status_pipeline` from ((`estoque_audit_stream` `a` join `estoque_execucao_pipeline` `p` on((`a`.`hash_pipeline` = `p`.`pipeline_hash`))) join `estoque_item` `i` on((json_extract(`a`.`payload`,'$.item') = `i`.`id_item`))) where ((`a`.`entidade_tipo` = 'ESTOQUE') and (`a`.`evento_tipo` = 'DISPENSAR') and (`p`.`estado` = 'CONCLUIDO')) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_estoque_assistencial`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_estoque_assistencial`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_estoque_assistencial` AS select `s`.`id_unidade` AS `id_unidade`,`s`.`id_local` AS `id_local`,`i`.`nome_comercial` AS `nome_comercial`,`s`.`qtd_reservada` AS `qtd_em_uso`,`s`.`ultima_atualizacao` AS `ultima_atualizacao` from (`estoque_saldo` `s` join `estoque_item` `i` on((`s`.`id_item` = `i`.`id_item`))) where (`s`.`contexto_tipo` in ('LEITO','UTI','ASSISTENCIAL')) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_estoque_central`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_estoque_central`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_estoque_central` AS select `s`.`id_unidade` AS `id_unidade`,`s`.`id_local` AS `id_local`,`i`.`nome_comercial` AS `nome_comercial`,`l`.`numero_lote` AS `numero_lote`,`l`.`data_validade` AS `data_validade`,`s`.`qtd_fisica` AS `qtd_fisica`,`s`.`qtd_projetada` AS `qtd_projetada` from ((`estoque_saldo` `s` join `estoque_item` `i` on((`s`.`id_item` = `i`.`id_item`))) join `estoque_lote` `l` on((`s`.`id_lote` = `l`.`id_lote`))) where (`s`.`contexto_tipo` = 'CENTRAL') */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_estoque_farmacia`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_estoque_farmacia`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_estoque_farmacia` AS select `s`.`id_unidade` AS `id_unidade`,`s`.`id_local` AS `id_local`,`i`.`nome_comercial` AS `nome_comercial`,`l`.`numero_lote` AS `numero_lote`,`l`.`data_validade` AS `data_validade`,`s`.`qtd_fisica` AS `qtd_fisica`,`s`.`qtd_reservada` AS `qtd_reservada`,`s`.`qtd_projetada` AS `qtd_projetada` from ((`estoque_saldo` `s` join `estoque_item` `i` on((`s`.`id_item` = `i`.`id_item`))) join `estoque_lote` `l` on((`s`.`id_lote` = `l`.`id_lote`))) where (`s`.`contexto_tipo` = 'FARMACIA') */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_fila_painel`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_fila_painel`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_fila_painel` AS select `s`.`id_senha` AS `id_senha`,`s`.`codigo_visual` AS `codigo_visual`,`s`.`contexto_fluxo` AS `contexto_fluxo`,`s`.`prioridade` AS `prioridade`,`s`.`risco_dinamico` AS `risco_dinamico`,timestampdiff(MINUTE,`s`.`criado_em`,now()) AS `tempo_espera` from `senha` `s` where ((`s`.`executado_em` is null) and (`s`.`cancelado` = 0) and (`s`.`nao_compareceu` = 0)) order by `s`.`prioridade` desc,`s`.`criado_em` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_gestao_fluxo_tempo_real`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_gestao_fluxo_tempo_real`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_gestao_fluxo_tempo_real` AS select `s`.`id_senha` AS `id_senha`,`s`.`codigo_visual` AS `codigo_visual`,`s`.`contexto_fluxo` AS `contexto_fluxo`,`s`.`id_fluxo_status` AS `id_fluxo_status`,`s`.`criado_em` AS `hora_chegada`,`s`.`chamada_em` AS `hora_chamada`,(case when (`s`.`chamada_em` is not null) then timestampdiff(MINUTE,`s`.`criado_em`,`s`.`chamada_em`) else timestampdiff(MINUTE,`s`.`criado_em`,now()) end) AS `minutos_espera`,(case when (timestampdiff(MINUTE,`s`.`criado_em`,ifnull(`s`.`chamada_em`,now())) > 60) then 'CRÍTICO' when (timestampdiff(MINUTE,`s`.`criado_em`,ifnull(`s`.`chamada_em`,now())) > 30) then 'ATENÇÃO' else 'NORMAL' end) AS `alerta_gestao`,`s`.`prioridade` AS `prioridade`,`s`.`id_atendimento` AS `id_atendimento`,`s`.`nao_compareceu` AS `nao_compareceu` from `senha` `s` where ((`s`.`criado_em` >= curdate()) and (`s`.`cancelado` = 0) and (`s`.`nao_compareceu` = 0)) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_laboratorio_protocolos_pendentes`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_laboratorio_protocolos_pendentes`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_laboratorio_protocolos_pendentes` AS select `lp`.`id_laboratorio_protocolo` AS `id_laboratorio_protocolo`,`lp`.`id_ffa` AS `id_ffa`,`lp`.`id_gpat` AS `id_gpat`,`lp`.`id_pedido_item` AS `id_pedido_item`,`lp`.`codigo` AS `codigo`,`lp`.`status` AS `status`,`lp`.`criado_em` AS `criado_em` from `laboratorio_protocolo` `lp` where (`lp`.`status` in ('GERADO','COLETADO','ENVIADO')) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_laboratorio_protocolos_por_gpat`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_laboratorio_protocolos_por_gpat`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_laboratorio_protocolos_por_gpat` AS select `lp`.`id_laboratorio_protocolo` AS `id_laboratorio_protocolo`,`lp`.`id_ffa` AS `id_ffa`,`lp`.`id_gpat` AS `id_gpat`,`lp`.`id_pedido_item` AS `id_pedido_item`,`lp`.`codigo` AS `codigo`,`lp`.`barcode` AS `barcode`,`lp`.`status` AS `status`,`lp`.`sistema_externo` AS `sistema_externo`,`lp`.`codigo_externo` AS `codigo_externo`,`lp`.`criado_em` AS `criado_em`,`lp`.`atualizado_em` AS `atualizado_em` from `laboratorio_protocolo` `lp` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_painel_config_efetiva`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_painel_config_efetiva`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_painel_config_efetiva` AS select `p`.`id_painel` AS `id_painel`,`p`.`codigo` AS `painel_codigo`,`p`.`tipo` AS `painel_tipo`,`d`.`chave` AS `chave`,`d`.`tipo_valor` AS `tipo_valor`,coalesce(`pc`.`valor_bool`,`pc`.`valor_int`,`pc`.`valor_decimal`,`pc`.`valor_text`,`pc`.`valor_json`,`pc`.`valor_enum`,`d`.`default_bool`,`d`.`default_int`,`d`.`default_decimal`,`d`.`default_text`,`d`.`default_json`,`d`.`default_enum`) AS `valor_efetivo`,`pc`.`atualizado_em` AS `atualizado_em`,`pc`.`id_usuario` AS `id_usuario`,`pc`.`id_sessao_usuario` AS `id_sessao_usuario` from ((`painel` `p` join `painel_config_def` `d` on(((`d`.`ativo` = 1) and (((convert(`d`.`aplica_em` using utf8mb4) collate utf8mb4_0900_ai_ci) = ('TODOS' collate utf8mb4_0900_ai_ci)) or ((convert(`d`.`aplica_em` using utf8mb4) collate utf8mb4_0900_ai_ci) = (convert(`p`.`tipo` using utf8mb4) collate utf8mb4_0900_ai_ci)))))) left join `painel_config` `pc` on(((`pc`.`id_painel` = `p`.`id_painel`) and ((convert(`pc`.`chave` using utf8mb4) collate utf8mb4_0900_ai_ci) = (convert(`d`.`chave` using utf8mb4) collate utf8mb4_0900_ai_ci))))) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_painel_config_json`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_painel_config_json`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_painel_config_json` AS select `vw_painel_config_efetiva`.`id_painel` AS `id_painel`,`vw_painel_config_efetiva`.`painel_codigo` AS `painel_codigo`,`vw_painel_config_efetiva`.`painel_tipo` AS `painel_tipo`,json_objectagg(`vw_painel_config_efetiva`.`chave`,`vw_painel_config_efetiva`.`valor_efetivo`) AS `config_json`,max(`vw_painel_config_efetiva`.`atualizado_em`) AS `atualizado_em` from `vw_painel_config_efetiva` group by `vw_painel_config_efetiva`.`id_painel`,`vw_painel_config_efetiva`.`painel_codigo`,`vw_painel_config_efetiva`.`painel_tipo` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_painel_senhas_chamando_por_painel`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_painel_senhas_chamando_por_painel`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_painel_senhas_chamando_por_painel` AS select `s`.`id_senha` AS `id_senha`,`s`.`codigo_visual` AS `codigo`,`s`.`prioridade` AS `prioridade`,`s`.`id_unidade` AS `id_unidade`,`s`.`id_local` AS `id_local`,`s`.`id_paciente` AS `id_paciente`,`s`.`id_ffa` AS `id_ffa`,`s`.`id_fluxo_status` AS `id_fluxo_status`,`s`.`contexto_fluxo` AS `contexto_fluxo`,`s`.`chamada_sequencial` AS `chamada_sequencial`,`s`.`chamada_em` AS `chamada_em`,`s`.`executado_em` AS `executado_em`,`s`.`cancelado` AS `cancelado`,`s`.`nao_compareceu` AS `nao_compareceu`,`s`.`criado_em` AS `criado_em` from `senha` `s` where ((`s`.`cancelado` = false) and (`s`.`executado_em` is null)) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_rastreio_cat_por_ffa`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_rastreio_cat_por_ffa`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_rastreio_cat_por_ffa` AS select `c`.`id_cat` AS `id_cat`,`c`.`id_ffa` AS `id_ffa`,`c`.`id_gpat` AS `id_gpat`,`c`.`status` AS `status`,`c`.`criado_em` AS `criado_em`,`c`.`atualizado_em` AS `atualizado_em` from `cat_notificacao` `c` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_rastreio_ffa_gpat`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_rastreio_ffa_gpat`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_rastreio_ffa_gpat` AS select `f`.`id` AS `id_ffa`,`f`.`id_gpat` AS `id_gpat`,`g`.`codigo_gpat` AS `codigo_gpat`,`g`.`barcode_gpat` AS `barcode_gpat`,`g`.`criado_em` AS `gpat_criado_em` from (`ffa` `f` left join `gpat` `g` on((`g`.`id_gpat` = `f`.`id_gpat`))) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_senhas_ativas`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_senhas_ativas`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_senhas_ativas` AS select `s`.`id_senha` AS `id`,`s`.`codigo_visual` AS `codigo`,`s`.`prioridade` AS `prioridade`,`s`.`id_unidade` AS `id_unidade`,`s`.`id_local` AS `id_local`,`s`.`id_paciente` AS `id_paciente`,`s`.`id_ffa` AS `id_ffa`,`s`.`id_fluxo_status` AS `id_fluxo_status`,`s`.`contexto_fluxo` AS `contexto_fluxo`,`s`.`chamada_sequencial` AS `chamada_sequencial`,`s`.`chamada_em` AS `chamada_em`,`s`.`executado_em` AS `executado_em`,`s`.`cancelado` AS `cancelado`,`s`.`nao_compareceu` AS `nao_compareceu`,`s`.`criado_em` AS `criado_em` from `senha` `s` where ((`s`.`cancelado` = false) and (`s`.`executado_em` is null)) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_usuario_contextos`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_usuario_contextos`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_usuario_contextos` AS select `uc`.`id_usuario` AS `id_usuario`,`uc`.`id_sistema` AS `id_sistema`,`uc`.`id_unidade` AS `id_unidade`,`uc`.`id_local_operacional` AS `id_local_operacional`,`uc`.`id_perfil` AS `id_perfil`,`p`.`nome` AS `perfil_nome` from (`usuario_contexto` `uc` join `perfil` `p` on((`p`.`id_perfil` = `uc`.`id_perfil`))) where (`uc`.`ativo` = 1) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_usuario_permissoes`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_usuario_permissoes`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_usuario_permissoes` AS select `su`.`id_sessao_usuario` AS `id_sessao_usuario`,`su`.`id_usuario` AS `id_usuario`,`su`.`id_sistema` AS `id_sistema`,`su`.`id_unidade` AS `id_unidade`,`su`.`id_local` AS `id_local`,`uc`.`id_perfil` AS `id_perfil`,`p`.`nome` AS `perfil_nome`,`pm`.`codigo` AS `codigo_permissao`,`pm`.`nome` AS `nome_permissao`,`pm`.`nome_procedure` AS `nome_procedure` from ((((`sessao_usuario` `su` join `usuario_contexto` `uc` on(((`uc`.`id_usuario` = `su`.`id_usuario`) and (`uc`.`id_sistema` = `su`.`id_sistema`) and (`uc`.`id_unidade` = `su`.`id_unidade`) and (`uc`.`ativo` = 1)))) join `perfil` `p` on(((`p`.`id_perfil` = `uc`.`id_perfil`) and (`p`.`ativo` = 1)))) join `perfil_permissao` `pp` on((`pp`.`id_perfil` = `uc`.`id_perfil`))) join `permissao` `pm` on(((`pm`.`id_permissao` = `pp`.`id_permissao`) and (`pm`.`ativo` = 1)))) where (`su`.`ativo` = 1) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_workflow_ffa_completo`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_workflow_ffa_completo`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
-/*!50001 VIEW `vw_workflow_ffa_completo` AS select `f`.`id` AS `id_ffa`,'SENHA' AS `origem`,'senha' AS `entidade`,`se`.`id_senha` AS `id_entidade`,`se`.`tipo_evento` AS `tipo_evento`,`se`.`detalhe` AS `detalhe`,`se`.`id_sessao_usuario` AS `id_sessao_usuario`,`se`.`criado_em` AS `criado_em`,NULL AS `payload_json` from (`senha_eventos` `se` join `ffa` `f` on((`f`.`id_senha` = `se`.`id_senha`))) union all select `fo`.`id_ffa` AS `id_ffa`,'FILA' AS `origem`,'fila_operacional' AS `entidade`,`fe`.`id_fila` AS `id_entidade`,`fe`.`tipo_evento` AS `tipo_evento`,`fe`.`detalhe` AS `detalhe`,`fe`.`id_sessao_usuario` AS `id_sessao_usuario`,`fe`.`criado_em` AS `criado_em`,NULL AS `payload_json` from (`fila_operacional_evento` `fe` join `fila_operacional` `fo` on((`fo`.`id_fila` = `fe`.`id_fila`))) union all select (case when (`ae`.`dominio` = 'ffa') then `ae`.`id_referencia` when (`ae`.`dominio` = 'pedido_medico') then `pm`.`id_ffa` when (`ae`.`dominio` = 'pedido_medico_item') then `pm2`.`id_ffa` when (`ae`.`dominio` = 'gpat') then `g`.`id_ffa` when (`ae`.`dominio` = 'pep_registro') then `pr`.`id_ffa` when (`ae`.`dominio` = 'cat_notificacao') then `cn`.`id_ffa` when (`ae`.`dominio` = 'sinan_notificacao') then `sn`.`id_ffa` else NULL end) AS `id_ffa`,'AUD' AS `origem`,`ae`.`dominio` AS `entidade`,`ae`.`id_referencia` AS `id_entidade`,`ae`.`tipo_evento` AS `tipo_evento`,ifnull(cast(json_unquote(json_extract(`ae`.`payload`,'$.observacao')) as char charset utf8mb4),'Log de Auditoria') AS `detalhe`,`ae`.`id_sessao_usuario` AS `id_sessao_usuario`,`ae`.`criado_em` AS `criado_em`,`ae`.`payload` AS `payload_json` from (((((((`auditoria_evento` `ae` left join `pedido_medico` `pm` on(((`ae`.`dominio` = 'pedido_medico') and (`pm`.`id_pedido_medico` = `ae`.`id_referencia`)))) left join `pedido_medico_item` `pmi` on(((`ae`.`dominio` = 'pedido_medico_item') and (`pmi`.`id_pedido_item` = `ae`.`id_referencia`)))) left join `pedido_medico` `pm2` on((`pmi`.`id_pedido_medico` = `pm2`.`id_pedido_medico`))) left join `gpat` `g` on(((`ae`.`dominio` = 'gpat') and (`g`.`id_gpat` = `ae`.`id_referencia`)))) left join `pep_registro` `pr` on(((`ae`.`dominio` = 'pep_registro') and (`pr`.`id_pep_registro` = `ae`.`id_referencia`)))) left join `cat_notificacao` `cn` on(((`ae`.`dominio` = 'cat_notificacao') and (`cn`.`id_cat` = `ae`.`id_referencia`)))) left join `sinan_notificacao` `sn` on(((`ae`.`dominio` = 'sinan_notificacao') and (`sn`.`id_sinan` = `ae`.`id_referencia`)))) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_workflow_ffa_eventos_materializado`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_workflow_ffa_eventos_materializado`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_workflow_ffa_eventos_materializado` AS select `workflow_ffa_evento`.`id_workflow_evento` AS `id_workflow_evento`,`workflow_ffa_evento`.`id_ffa` AS `id_ffa`,`workflow_ffa_evento`.`origem` AS `origem`,`workflow_ffa_evento`.`entidade` AS `entidade`,`workflow_ffa_evento`.`id_entidade` AS `id_entidade`,`workflow_ffa_evento`.`tipo_evento` AS `tipo_evento`,`workflow_ffa_evento`.`detalhe` AS `detalhe`,`workflow_ffa_evento`.`id_sessao_usuario` AS `id_sessao_usuario`,`workflow_ffa_evento`.`criado_em` AS `criado_em` from `workflow_ffa_evento` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -33158,4 +33086,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-23  5:25:33
+-- Dump completed on 2026-03-27  6:35:04

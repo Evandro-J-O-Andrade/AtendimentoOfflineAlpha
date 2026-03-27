@@ -12,7 +12,6 @@ const ledgerRoutes = require("./ledger/ledgerRoutes");
 const permissaoRoutes = require("./routes/permissaoRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const spRoutes = require("./routes/spRoutes");
-const contextosRoutes = require("./routes/contextosRoutes");
 
 const app = express();
 
@@ -31,6 +30,5 @@ app.use("/api/permissoes", permissaoRoutes);
 app.use("/api", ledgerRoutes);
 app.use("/api", sessionRoutes);
 app.use("/api", spRoutes);
-app.use("/api/contextos", contextosRoutes);
 
 module.exports = app;

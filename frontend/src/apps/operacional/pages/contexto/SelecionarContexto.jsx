@@ -1,344 +1,132 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthProvider";
 import "./SelecionarContexto.css";
 
 export default function SelecionarContexto() {
-    const navigate = useNavigate();
-    const { getContexto, setContexto } = useAuth();
+  const navigate = useNavigate();
+  const { getContexto, setContexto } = useAuth();
 
-    const [loading, setLoading] = useState(true);
-    const [erro, setErro] = useState("");
-    
-    // Listas reais vindas do Dispatcher -> Orquestradora
-    const [unidades, setUnidades] = useState([]);
-    const [perfis, setPerfis] = useState([]);
-    const [locais, setLocais] = useState([]);
-    const [salas, setSalas] = useState([]);
-    
-    // Seleções do usuário - ESTADO INICIAL VAZIO (sem auto-seleção)
-    const [idUnidade, setIdUnidade] = useState(null);
-    const [idPerfil, setIdPerfil] = useState(null);
-    const [idLocal, setIdLocal] = useState(null);
-    const [idSala, setIdSala] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
 
-    // Passo atual do fluxo obrigatório
-    const [passoAtual, setPassoAtual] = useState(1);
+  const [unidades, setUnidades] = useState([]);
+  const [perfis, setPerfis] = useState([]);
+  const [locais, setLocais] = useState([]);
 
-    useEffect(() => {
-        async function loadDados() {
-            setLoading(true);
-            setErro("");
-            try {
-                // Fluxo Canônico: Node -> Dispatcher -> AUTH.CONTEXTO.GET
-                const data = await getContexto();
-                
-                if (data) {
-                    setUnidades(data.unidades || []);
-                    setPerfis(data.perfis || []);
-                    
-                    // Adiciona "NÃO DEFINIDA" como opção default para locais
-                    const listaLocais = data.locais || [];
-                    const possuiNaoDefinida = listaLocais.some(l => l.id_local === 0 || l.id_local === null);
-                    
-                    if (!possuiNaoDefinida) {
-                        listaLocais.unshift({ id_local: 0, nome: "NÃO DEFINIDA" });
-                    }
-                    setLocais(listaLocais);
-                    
-                    // Adiciona opção NÃO DEFINIDA para salas
-                    const listaSalas = data.salas || [];
-                    
-                    // Normaliza o id_sala - o backend usa -1 para NÃO DEFINIDA
-                    listaSalas.forEach(sala => {
-                        if (sala.id_sala === -1) {
-                            sala.id_sala = 0;
-                        }
-                    });
-                    
-                    // Verifica se já existe NÃO DEFINIDA (id_sala = 0)
-                    const salaPossuiNaoDefinida = listaSalas.some(s => s.id_sala === 0);
-                    
-                    if (!salaPossuiNaoDefinida) {
-                        listaSalas.unshift({ 
-                            id_sala: 0, 
-                            nome: "NÃO DEFINIDA", 
-                            tipo_nome: null,
-                            tipo_codigo: null
-                        });
-                    }
-                    
-                    setSalas(listaSalas);
-                } else {
-                    setErro("Nenhum contexto retornado pelo dispatcher.");
-                }
-            } catch (err) {
-                console.error("Erro carregar contextos via dispatcher:", err);
-                setErro("Falha ao carregar contextos operacionais.");
-            } finally {
-                setLoading(false);
-            }
+  const [idUnidade, setIdUnidade] = useState("");
+  const [idPerfil, setIdPerfil] = useState("");
+  const [idLocal, setIdLocal] = useState("");
+
+  useEffect(() => {
+    async function loadDados() {
+      setLoading(true);
+      setErro("");
+      try {
+        const data = await getContexto();
+        if (!data) {
+          setErro("Nenhum contexto retornado pelo sistema.");
+          return;
         }
-        loadDados();
-    }, [getContexto]);
 
-    // Agrupa salas por tipo_nome usando useMemo para performance
-    const salasAgrupadas = useMemo(() => {
-        const grupos = {};
-        
-        salas.forEach(sala => {
-            const tipo = sala.tipo_nome || "SEM TIPO";
-            if (!grupos[tipo]) {
-                grupos[tipo] = [];
-            }
-            grupos[tipo].push(sala);
-        });
-        
-        return grupos;
-    }, [salas]);
+        setUnidades(data.unidades || []);
+        setPerfis(data.perfis || []);
 
-    // Função para verificar se pode avançar para o próximo passo
-    const podeAvancar = () => {
-        switch (passoAtual) {
-            case 1: return !!idUnidade;
-            case 2: return !!idPerfil;
-            case 3: return !!idLocal;
-            case 4: return true; // Sala é opcional
-            default: return false;
+        const listaLocais = data.locais || [];
+        if (!listaLocais.some((l) => l.id_local === 0)) {
+          listaLocais.unshift({ id_local: 0, nome: "NÃO DEFINIDO" });
         }
-    };
+        setLocais(listaLocais);
 
-    // Função para avançar no fluxo obrigatório
-    const avancarPasso = () => {
-        if (podeAvancar()) {
-            setPassoAtual(passoAtual + 1);
-        }
-    };
+        // seleciona defaults se houver
+        if (data.unidades?.length) setIdUnidade(String(data.unidades[0].id_unidade));
+        if (data.perfis?.length) setIdPerfil(String(data.perfis[0].id_perfil));
+        if (listaLocais.length) setIdLocal(String(listaLocais[0].id_local));
+      } catch (err) {
+        console.error(err);
+        setErro("Falha ao carregar dados do contexto.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDados();
+  }, [getContexto]);
 
-    // Função para voltar no fluxo
-    const voltarPasso = () => {
-        if (passoAtual > 1) {
-            setPassoAtual(passoAtual - 1);
-        }
-    };
-
-    async function confirmarContexto() {
-        if (!idUnidade || !idPerfil) {
-            setErro("Unidade e Perfil são obrigatórios.");
-            return;
-        }
-        
-        try {
-            // Fluxo Canônico: Node -> Dispatcher -> AUTH.CONTEXTO.SET
-            const result = await setContexto({
-                id_unidade: parseInt(idUnidade),
-                id_perfil: parseInt(idPerfil),
-                id_local: idLocal === 0 || idLocal === null ? null : parseInt(idLocal),
-                id_sala: idSala === 0 || idSala === null ? null : parseInt(idSala)
-            });
-            
-            if (result && result.sucesso) {
-                // Redireciona para o operacional com contexto ATIVO
-                navigate("/operacional");
-            } else {
-                setErro(result?.mensagem || "Erro ao validar contexto no dispatcher.");
-            }
-        } catch (err) {
-            console.error("Erro ao definir contexto via dispatcher:", err);
-            setErro(err.message || "Erro de comunicação com o dispatcher.");
-        }
+  async function confirmarContexto(e) {
+    e.preventDefault();
+    if (!idUnidade || !idPerfil) {
+      setErro("Unidade e Perfil são obrigatórios.");
+      return;
     }
 
-    // Renderiza os cards de seleção baseados no passo atual
-    const renderizarCards = () => {
-        switch (passoAtual) {
-            case 1:
-                return (
-                    <div className="cards-grid">
-                        {unidades.map((u) => (
-                            <div 
-                                key={u.id_unidade} 
-                                className={`card-item ${idUnidade === u.id_unidade ? 'selected' : ''}`}
-                                onClick={() => setIdUnidade(u.id_unidade)}
-                            >
-                                <div className="card-icon">🏥</div>
-                                <div className="card-title">{u.nome}</div>
-                            </div>
-                        ))}
-                    </div>
-                );
-            
-            case 2:
-                return (
-                    <div className="cards-grid">
-                        {perfis.map((p) => (
-                            <div 
-                                key={p.id_perfil} 
-                                className={`card-item ${idPerfil === p.id_perfil ? 'selected' : ''}`}
-                                onClick={() => setIdPerfil(p.id_perfil)}
-                            >
-                                <div className="card-icon">👤</div>
-                                <div className="card-title">{p.nome}</div>
-                            </div>
-                        ))}
-                    </div>
-                );
-            
-            case 3:
-                return (
-                    <div className="cards-grid">
-                        {locais.map((l) => (
-                            <div 
-                                key={l.id_local || 0} 
-                                className={`card-item ${idLocal === l.id_local ? 'selected' : ''}`}
-                                onClick={() => setIdLocal(l.id_local)}
-                            >
-                                <div className="card-icon">📍</div>
-                                <div className="card-title">{l.nome}</div>
-                            </div>
-                        ))}
-                    </div>
-                );
-            
-            case 4:
-                // Renderiza salas agrupadas por tipo
-                return (
-                    <div className="salas-container">
-                        {Object.entries(salasAgrupadas).map(([tipo, salasDoTipo]) => (
-                            <div key={tipo} className="sala-tipo-group">
-                                <h3 className="sala-tipo-title">{tipo}</h3>
-                                <div className="cards-grid">
-                                    {salasDoTipo.map((s) => (
-                                        <div 
-                                            key={s.id_sala} 
-                                            className={`card-item ${idSala === s.id_sala ? 'selected' : ''}`}
-                                            onClick={() => setIdSala(s.id_sala)}
-                                        >
-                                            <div className="card-icon">🚪</div>
-                                            <div className="card-title">{s.nome}</div>
-                                            {s.id_sala !== 0 && s.tipo_codigo && (
-                                                <div className="card-subtitle">Código: {s.tipo_codigo}</div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                );
-            
-            default:
-                return null;
-        }
-    };
+    try {
+      const result = await setContexto({
+        id_unidade: parseInt(idUnidade, 10),
+        id_perfil: parseInt(idPerfil, 10),
+        id_local: idLocal === "0" ? null : parseInt(idLocal, 10),
+        id_sala: null, // não usado aqui
+      });
 
-    // Define o título do passo atual
-    const getTituloPasso = () => {
-        switch (passoAtual) {
-            case 1: return "Selecione a Unidade";
-            case 2: return "Selecione o Perfil";
-            case 3: return "Selecione o Local/Setor";
-            case 4: return "Selecione a Sala";
-            default: return "";
-        }
-    };
-
-    // Define o ícone do passo atual
-    const getIconePasso = () => {
-        switch (passoAtual) {
-            case 1: return "🏥";
-            case 2: return "👤";
-            case 3: return "📍";
-            case 4: return "🚪";
-            default: return "➡️";
-        }
-    };
-
-    if (loading) return <div className="contexto-loading">Acessando Dispatcher...</div>;
-
-    if (!unidades.length && !perfis.length) {
-        return (
-            <div className="contexto-container">
-                <div className="contexto-card">
-                    <div className="contexto-error">Usuário sem permissões mapeadas no banco.</div>
-                </div>
-            </div>
-        );
+      if (result?.sucesso) {
+        navigate("/operacional");
+      } else {
+        setErro(result?.mensagem || "Erro ao validar contexto.");
+      }
+    } catch (err) {
+      console.error(err);
+      setErro(err.message || "Erro ao salvar contexto.");
     }
+  }
 
-    return (
-        <div className="contexto-container">
-            <div className="contexto-card">
-                <div className="contexto-header">
-                    <h1>Iniciar Atendimento</h1>
-                    <p className="contexto-subtitle">Configurar Ambiente de Trabalho</p>
-                </div>
+  if (loading) return <div className="contexto-loading">Carregando...</div>;
+  if (!unidades.length && !perfis.length) return <div className="contexto-error">Usuário sem permissões.</div>;
 
-                {/* Indicador de progresso */}
-                <div className="progress-bar">
-                    <div className={`progress-step ${passoAtual >= 1 ? 'active' : ''}`}>1</div>
-                    <div className="progress-line"></div>
-                    <div className={`progress-step ${passoAtual >= 2 ? 'active' : ''}`}>2</div>
-                    <div className="progress-line"></div>
-                    <div className={`progress-step ${passoAtual >= 3 ? 'active' : ''}`}>3</div>
-                    <div className="progress-line"></div>
-                    <div className={`progress-step ${passoAtual >= 4 ? 'active' : ''}`}>4</div>
-                </div>
+  return (
+    <div className="contexto-wrapper">
+      <div className="contexto-logos">
+        <img src="/assets/img/prefeitura.png" alt="Prefeitura" onError={(e)=>e.target.style.display='none'} />
+        <img src="/assets/img/sistema.png" alt="Sistema" onError={(e)=>e.target.style.display='none'} />
+      </div>
 
-                {erro && <div className="contexto-error">{erro}</div>}
+      <div className="contexto-box">
+        <header className="contexto-header">
+          <h1>Selecionar Contexto</h1>
+          <p>Escolha a Unidade, Guichê/Local e Perfil para continuar.</p>
+        </header>
 
-                <div className="contexto-form">
-                    {/* Título do passo atual */}
-                    <div className="passo-header">
-                        <span className="passo-icone">{getIconePasso()}</span>
-                        <h2 className="passo-title">{getTituloPasso()}</h2>
-                    </div>
+        {erro && <div className="contexto-error">{erro}</div>}
 
-                    {/* Cards de seleção */}
-                    {renderizarCards()}
+        <form className="contexto-form" onSubmit={confirmarContexto}>
+          <label>
+            Unidade
+            <select value={idUnidade} onChange={(e) => setIdUnidade(e.target.value)} required>
+              {unidades.map((u) => (
+                <option key={u.id_unidade} value={u.id_unidade}>{u.nome}</option>
+              ))}
+            </select>
+          </label>
 
-                    {/* Botões de navegação */}
-                    <div className="botoes-navegacao">
-                        {passoAtual > 1 && (
-                            <button 
-                                className="btn-voltar" 
-                                onClick={voltarPasso}
-                            >
-                                ← Voltar
-                            </button>
-                        )}
-                        
-                        {passoAtual < 4 ? (
-                            <button 
-                                className="btn-avancar" 
-                                onClick={avancarPasso}
-                                disabled={!podeAvancar()}
-                            >
-                                Avançar →
-                            </button>
-                        ) : (
-                            <button 
-                                className="btn-confirmar" 
-                                onClick={confirmarContexto}
-                                disabled={!idUnidade || !idPerfil}
-                            >
-                                ✅ INICIAR ATENDIMENTO
-                            </button>
-                        )}
-                    </div>
+          <label>
+            Guichê / Local
+            <select value={idLocal} onChange={(e) => setIdLocal(e.target.value)} required>
+              {locais.map((l) => (
+                <option key={l.id_local} value={l.id_local}>{l.nome}</option>
+              ))}
+            </select>
+          </label>
 
-                    {/* Resumo das selections */}
-                    {(idUnidade || idPerfil || idLocal || idSala) && (
-                        <div className="resumo-selecao">
-                            <div className="resumo-titulo">Resumo da Configuração:</div>
-                            {idUnidade && <span className="resumo-item">🏥 {unidades.find(u => u.id_unidade === idUnidade)?.nome}</span>}
-                            {idPerfil && <span className="resumo-item">👤 {perfis.find(p => p.id_perfil === idPerfil)?.nome}</span>}
-                            {idLocal !== null && <span className="resumo-item">📍 {locais.find(l => l.id_local === idLocal)?.nome || "NÃO DEFINIDA"}</span>}
-                            {idSala !== null && <span className="resumo-item">🚪 {salas.find(s => s.id_sala === idSala)?.nome || "NÃO DEFINIDA"}</span>}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+          <label>
+            Perfil
+            <select value={idPerfil} onChange={(e) => setIdPerfil(e.target.value)} required>
+              {perfis.map((p) => (
+                <option key={p.id_perfil} value={p.id_perfil}>{p.nome}</option>
+              ))}
+            </select>
+          </label>
+
+          <button type="submit" className="contexto-submit">Confirmar</button>
+        </form>
+      </div>
+    </div>
+  );
 }
