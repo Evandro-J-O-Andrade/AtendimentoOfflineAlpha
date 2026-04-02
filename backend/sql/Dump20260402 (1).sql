@@ -32,6 +32,7 @@ CREATE TABLE `acompanhante` (
   `observacao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_acompanhante`),
   UNIQUE KEY `uk_acompanhante_por_ffa` (`id_pessoa`,`id_ffa`),
   KEY `id_ffa` (`id_ffa`),
@@ -63,6 +64,7 @@ CREATE TABLE `administracao_medicacao` (
   `via` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_admin`),
   KEY `id_prescricao` (`id_prescricao`),
   KEY `id_enfermeiro` (`id_enfermeiro`),
@@ -98,6 +100,7 @@ CREATE TABLE `administracao_medicacao_ordem` (
   `id_aprazamento` bigint DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `status` enum('ADMINISTRADO','NAO_ADMINISTRADO','ESTORNADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ADMINISTRADO',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_administracao`),
   KEY `idx_admin_item` (`id_item`),
   KEY `idx_admin_user` (`id_usuario`),
@@ -137,6 +140,7 @@ CREATE TABLE `agenda_disponibilidade` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_usuario_criador` bigint NOT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_disponibilidade`),
   KEY `ix_disp_prof` (`id_profissional`,`inicio_em`,`fim_em`),
   KEY `ix_disp_ctx` (`id_sistema`,`id_unidade`,`inicio_em`),
@@ -240,6 +244,7 @@ CREATE TABLE `agendamentos_eventos` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_usuario` bigint NOT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `ix_agev_agendamento` (`id_agendamento`,`criado_em`),
   KEY `fk_agev_usuario` (`id_usuario`),
@@ -284,6 +289,7 @@ CREATE TABLE `alerta` (
   `id_usuario_origem` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_alerta`),
   KEY `idx_alerta_codigo_status` (`codigo`,`status`),
   KEY `idx_alerta_unidade_local` (`id_unidade`,`id_local_operacional`,`status`),
@@ -321,6 +327,7 @@ CREATE TABLE `alerta_consumo` (
   `observacao` varchar(240) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_alerta_consumo`),
   UNIQUE KEY `ux_alerta_consumo` (`id_alerta`,`id_usuario`),
   KEY `idx_alerta_consumo_alerta` (`id_alerta`),
@@ -361,6 +368,7 @@ CREATE TABLE `alerta_destinatario` (
   `id_usuario_acao` bigint DEFAULT NULL,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_alerta_destinatario`),
   KEY `idx_ad_alerta` (`id_alerta`),
   KEY `idx_ad_tipo_codigo_status` (`tipo_destino`,`codigo_destino`,`status`),
@@ -398,6 +406,7 @@ CREATE TABLE `alerta_regra` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_alerta_regra`),
   UNIQUE KEY `uk_alerta_codigo_destino` (`codigo`,`id_sistema_destino`,`id_perfil_destino`),
   KEY `fk_alerta_regra_sistema` (`id_sistema_destino`),
@@ -433,6 +442,7 @@ CREATE TABLE `almoxarifado_central` (
   `quantidade_minima` int DEFAULT '100',
   `nfe_chave_acesso` varchar(44) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_unidade` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_validade` (`validade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -460,6 +470,7 @@ CREATE TABLE `anamnese` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_anamnese`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_usuario` (`id_usuario`),
@@ -490,6 +501,7 @@ CREATE TABLE `anotacao_enfermagem` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_usuario` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_anotacao`),
   KEY `id_internacao` (`id_internacao`),
   KEY `id_usuario` (`id_usuario`),
@@ -521,6 +533,7 @@ CREATE TABLE `assinatura_digital_documentos` (
   `hash_assinatura` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `certificado_serial` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_assinatura` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -548,6 +561,7 @@ CREATE TABLE `assinatura_digital_prontuario` (
   `certificado_serial` varchar(255) DEFAULT NULL,
   `data_assinatura` datetime DEFAULT CURRENT_TIMESTAMP,
   `id_usuario` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_ass_evolucao` (`id_ffa_evolucao`),
   KEY `idx_ass_usuario` (`id_usuario`),
@@ -583,6 +597,7 @@ CREATE TABLE `assistencia_social_atendimento` (
   `id_usuario_abertura` bigint NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_as`),
   KEY `fk_as_unidade` (`id_unidade`),
   KEY `fk_as_user` (`id_usuario_abertura`),
@@ -614,6 +629,7 @@ CREATE TABLE `assistencia_social_evento` (
   `detalhe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_as_evento_as` (`id_as`,`criado_em`),
   KEY `idx_as_evento_sessao` (`id_sessao_usuario`,`criado_em`),
@@ -652,7 +668,8 @@ CREATE TABLE `assistencial_checkpoint_global` (
   UNIQUE KEY `uk_checkpoint_ffa` (`id_ffa`),
   KEY `fk_assistencial_checkpoint_global_atendimento` (`id_atendimento`),
   KEY `idx_acg_ent` (`id_entidade`),
-  CONSTRAINT `fk_assistencial_checkpoint_global_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assistencial_checkpoint_global_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assistencial_checkpoint_global_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -679,6 +696,7 @@ CREATE TABLE `assistencial_circuit_breaker` (
   `falhas_consecutivas` int DEFAULT '0',
   `limite_falha` int DEFAULT '5',
   `atualizado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_circuit`),
   UNIQUE KEY `uk_circuit_componente` (`componente`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -706,6 +724,7 @@ CREATE TABLE `assistencial_evento_hash` (
   `id_ffa` bigint NOT NULL,
   `evento` varchar(60) NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_hash`),
   UNIQUE KEY `uk_assistencial_hash_fingerprint` (`hash_fingerprint`),
   KEY `idx_assistencial_hash_lookup` (`id_ffa`,`evento`)
@@ -739,6 +758,7 @@ CREATE TABLE `assistencial_minipal_metric` (
   `estabilidade_runtime` decimal(10,4) DEFAULT '0.0000',
   `estado_rede` varchar(40) DEFAULT 'NORMAL',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_metric`),
   KEY `idx_minipal_lookup` (`id_sistema`,`criado_em`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -768,6 +788,7 @@ CREATE TABLE `assistencial_quorum_clinico` (
   `unidades_confirmadas` int DEFAULT '0',
   `quorum_valido` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_quorum`),
   UNIQUE KEY `uk_quorum_ffa_evento` (`id_ffa`,`evento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -800,6 +821,7 @@ CREATE TABLE `assistencial_raim_metric` (
   `score_raim` decimal(10,4) DEFAULT '0.0000',
   `alerta_recomendacao` varchar(255) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_metric`),
   KEY `idx_raim_lookup` (`id_sistema`,`criado_em`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -834,7 +856,8 @@ CREATE TABLE `assistencial_runtime_federado` (
   KEY `idx_runtime_federado` (`id_sistema`,`sincronizado`),
   KEY `fk_assistencial_runtime_federado_atendimento` (`id_atendimento`),
   KEY `idx_arf_ent` (`id_entidade`),
-  CONSTRAINT `fk_assistencial_runtime_federado_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assistencial_runtime_federado_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assistencial_runtime_federado_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -871,7 +894,8 @@ CREATE TABLE `assistencial_runtime_panel` (
   UNIQUE KEY `uk_runtime_panel` (`id_panel`),
   KEY `fk_assistencial_runtime_panel_atendimento` (`id_atendimento`),
   KEY `idx_arp_ent` (`id_entidade`),
-  CONSTRAINT `fk_assistencial_runtime_panel_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assistencial_runtime_panel_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assistencial_runtime_panel_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -905,7 +929,8 @@ CREATE TABLE `assistencial_simulacao_futura` (
   KEY `idx_simulacao_horizonte` (`horizonte_minutos`),
   KEY `fk_assistencial_simulacao_futura_atendimento` (`id_atendimento`),
   KEY `idx_asf_ent` (`id_entidade`),
-  CONSTRAINT `fk_assistencial_simulacao_futura_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assistencial_simulacao_futura_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assistencial_simulacao_futura_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -937,7 +962,8 @@ CREATE TABLE `assistencial_snapshot_runtime` (
   UNIQUE KEY `uk_snapshot_ffa` (`id_ffa`),
   KEY `fk_assistencial_snapshot_runtime_atendimento` (`id_atendimento`),
   KEY `idx_asr_ent` (`id_entidade`),
-  CONSTRAINT `fk_assistencial_snapshot_runtime_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assistencial_snapshot_runtime_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assistencial_snapshot_runtime_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -971,7 +997,8 @@ CREATE TABLE `assistencial_telemetria_runtime` (
   KEY `idx_telemetria_lookup` (`componente`,`metrica`,`criado_em`),
   KEY `fk_assistencial_telemetria_runtime_atendimento` (`id_atendimento`),
   KEY `idx_atr_ent` (`id_entidade`),
-  CONSTRAINT `fk_assistencial_telemetria_runtime_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assistencial_telemetria_runtime_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assistencial_telemetria_runtime_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1004,7 +1031,8 @@ CREATE TABLE `assistencial_watchdog_fila` (
   UNIQUE KEY `uk_watchdog_unidade` (`unidade`),
   KEY `fk_assistencial_watchdog_fila_atendimento` (`id_atendimento`),
   KEY `idx_awf_ent` (`id_entidade`),
-  CONSTRAINT `fk_assistencial_watchdog_fila_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assistencial_watchdog_fila_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assistencial_watchdog_fila_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1052,7 +1080,6 @@ CREATE TABLE `atendimento` (
   KEY `idx_atendimento_entidade` (`id_entidade`),
   CONSTRAINT `fk_atendimento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_atendimento_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id_ffa`),
-  CONSTRAINT `fk_atendimento_saas` FOREIGN KEY (`id_saas_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_atendimento_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1089,9 +1116,9 @@ CREATE TABLE `atendimento_anamnese` (
   `id_atendimento` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_ffa` (`id_ffa`),
-  KEY `fk_atendimento_anamnese_entidade` (`id_entidade`),
   KEY `fk_atendimento_anamnese_atendimento` (`id_atendimento`),
   KEY `fk_aanam_unid` (`id_unidade`),
+  KEY `fk_atendimento_anamnese_entidade` (`id_entidade`),
   CONSTRAINT `fk_aanam_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_anamnese_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_atendimento_anamnese_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1348,8 +1375,8 @@ CREATE TABLE `atendimento_evento` (
   KEY `idx_evento_tempo` (`criado_em`),
   KEY `idx_evento_sessao` (`id_sessao_usuario`),
   KEY `idx_evento_hash` (`hash_evento`),
-  KEY `fk_atendimento_evento_entidade` (`id_entidade`),
   KEY `fk_aevt_unid` (`id_unidade`),
+  KEY `fk_atendimento_evento_entidade` (`id_entidade`),
   CONSTRAINT `fk_aevt_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_atendimento_evento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_atendimento_evento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
@@ -1452,9 +1479,9 @@ CREATE TABLE `atendimento_evolucao` (
   KEY `idx_ffa` (`id_ffa`),
   KEY `idx_usuario` (`id_usuario`),
   KEY `idx_sessao` (`id_sessao_usuario`),
-  KEY `fk_atendimento_evolucao_entidade` (`id_entidade`),
   KEY `fk_atendimento_evolucao_atendimento` (`id_atendimento`),
   KEY `fk_aevol_unid` (`id_unidade`),
+  KEY `fk_atendimento_evolucao_entidade` (`id_entidade`),
   CONSTRAINT `fk_aevol_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_atendimento_evolucao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_atendimento_evolucao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
@@ -1495,11 +1522,11 @@ CREATE TABLE `atendimento_exame_fisico` (
   `id_atendimento` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_atendimento_exame_fisico_atendimento` (`id_atendimento`),
-  KEY `fk_aexf_ent` (`id_entidade`),
   KEY `fk_aexf_unid` (`id_unidade`),
-  CONSTRAINT `fk_aexf_ent` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  KEY `fk_atendimento_exame_fisico_entidade` (`id_entidade`),
   CONSTRAINT `fk_aexf_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
-  CONSTRAINT `fk_atendimento_exame_fisico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_exame_fisico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_exame_fisico_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1640,6 +1667,7 @@ CREATE TABLE `atendimento_pedidos_exame` (
   KEY `fk_atendimento_pedidos_exame_atendimento` (`id_atendimento`),
   KEY `idx_apex_ent` (`id_entidade`),
   CONSTRAINT `fk_atendimento_pedidos_exame_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_pedidos_exame_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_pedido_tuss` FOREIGN KEY (`id_exame_tuss`) REFERENCES `tabela_tuss` (`codigo_tuss`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1673,6 +1701,7 @@ CREATE TABLE `atendimento_pre_hospitalar` (
   KEY `idx_pre_hosp_atendimento` (`id_atendimento`),
   KEY `idx_aph_ent` (`id_entidade`),
   CONSTRAINT `fk_atendimento_pre_hospitalar_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_pre_hospitalar_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_pre_hosp_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1709,11 +1738,11 @@ CREATE TABLE `atendimento_prescricao` (
   `id_atendimento` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_atendimento_prescricao_atendimento` (`id_atendimento`),
-  KEY `fk_apresc_ent` (`id_entidade`),
   KEY `fk_apresc_unid` (`id_unidade`),
-  CONSTRAINT `fk_apresc_ent` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  KEY `fk_atendimento_prescricao_entidade` (`id_entidade`),
   CONSTRAINT `fk_apresc_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
-  CONSTRAINT `fk_atendimento_prescricao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_prescricao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_prescricao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1744,7 +1773,8 @@ CREATE TABLE `atendimento_profissional` (
   PRIMARY KEY (`id`),
   KEY `fk_atendimento_profissional_atendimento` (`id_atendimento`),
   KEY `idx_aprof_ent` (`id_entidade`),
-  CONSTRAINT `fk_atendimento_profissional_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_profissional_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_profissional_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1778,7 +1808,8 @@ CREATE TABLE `atendimento_recepcao` (
   KEY `id_recepcionista` (`id_recepcionista`),
   KEY `idx_arec_ent` (`id_entidade`),
   CONSTRAINT `atendimento_recepcao_ibfk_2` FOREIGN KEY (`id_recepcionista`) REFERENCES `usuario` (`id_usuario`),
-  CONSTRAINT `fk_atendimento_recepcao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_recepcao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_recepcao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1814,7 +1845,8 @@ CREATE TABLE `atendimento_sinais_vitais` (
   PRIMARY KEY (`id`),
   KEY `fk_sv_atendimento` (`id_atendimento`),
   KEY `idx_asv_ent` (`id_entidade`),
-  CONSTRAINT `fk_atendimento_sinais_vitais_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_sinais_vitais_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_sinais_vitais_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1850,7 +1882,8 @@ CREATE TABLE `atendimento_sumario_alta` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_sumario_atend` (`id_atendimento`),
   KEY `idx_asumal_ent` (`id_entidade`),
-  CONSTRAINT `fk_atendimento_sumario_alta_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_sumario_alta_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_sumario_alta_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1884,7 +1917,8 @@ CREATE TABLE `atendimento_transicao_ledger` (
   KEY `idx_transicao_hash` (`fingerprint_hash`),
   KEY `fk_atendimento_transicao_ledger_atendimento` (`id_atendimento`),
   KEY `idx_atrans_ent` (`id_entidade`),
-  CONSTRAINT `fk_atendimento_transicao_ledger_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_transicao_ledger_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_transicao_ledger_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1925,10 +1959,10 @@ CREATE TABLE `atendimento_triagem` (
   PRIMARY KEY (`id`),
   KEY `idx_ffa` (`id_ffa`),
   KEY `fk_atendimento_triagem_atendimento` (`id_atendimento`),
-  KEY `fk_atri_ent` (`id_entidade`),
   KEY `fk_atri_unid` (`id_unidade`),
+  KEY `fk_atendimento_triagem_entidade` (`id_entidade`),
   CONSTRAINT `fk_atendimento_triagem_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_atri_ent` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  CONSTRAINT `fk_atendimento_triagem_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_atri_unid` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1960,7 +1994,8 @@ CREATE TABLE `atendimento_vinculo` (
   UNIQUE KEY `uk_ffa` (`id_ffa`),
   KEY `fk_atendimento_vinculo_atendimento` (`id_atendimento`),
   KEY `idx_avinc_ent` (`id_entidade`),
-  CONSTRAINT `fk_atendimento_vinculo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_atendimento_vinculo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimento_vinculo_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1990,6 +2025,7 @@ CREATE TABLE `auditoria_acesso` (
   `ip` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_auditoria_acesso`),
   KEY `idx_aud_acesso_sessao` (`id_sessao_usuario`),
   KEY `idx_aud_acesso_usuario` (`id_usuario`),
@@ -2023,6 +2059,7 @@ CREATE TABLE `auditoria_almoxarifado` (
   `quantidade` int NOT NULL,
   `id_usuario` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_log`),
   KEY `id_produto` (`id_produto`),
   KEY `id_local` (`id_local`),
@@ -2068,11 +2105,11 @@ CREATE TABLE `auditoria_contexto` (
   KEY `idx_local` (`id_local`),
   KEY `fk_aud_ctx_unidade` (`id_unidade`),
   CONSTRAINT `fk_aud_ctx_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE SET NULL,
-  CONSTRAINT `fk_aud_ctx_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`) ON DELETE RESTRICT,
   CONSTRAINT `fk_aud_ctx_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE RESTRICT,
   CONSTRAINT `fk_aud_ctx_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`) ON DELETE CASCADE,
   CONSTRAINT `fk_aud_ctx_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT,
   CONSTRAINT `fk_aud_ctx_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
+  CONSTRAINT `fk_auditoria_contexto_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `auditoria_contexto_chk_1` CHECK (((`detalhes` is null) or json_valid(`detalhes`)))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2102,6 +2139,7 @@ CREATE TABLE `auditoria_erro` (
   `mensagem` text,
   `contexto` text,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_auditoria_erro`),
   KEY `idx_aud_erro_criado` (`criado_em`),
   KEY `idx_aud_erro_rotina` (`rotina`),
@@ -2115,7 +2153,7 @@ CREATE TABLE `auditoria_erro` (
 
 LOCK TABLES `auditoria_erro` WRITE;
 /*!40000 ALTER TABLE `auditoria_erro` DISABLE KEYS */;
-INSERT INTO `auditoria_erro` VALUES (1,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:08:14'),(2,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:15:18'),(3,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'inicio_complementacao_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-13 06:37:56'),(4,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'s.tipo\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-13 06:38:13'),(5,3,'sp_operacao_encaminhar','45000',1644,'[NOT_FOUND] Falha de asserção.','Falha ao encaminhar (fila_operacional)','2026-02-13 06:38:31'),(6,123,'sp_recepcao_iniciar_complementacao','45000',1644,'[SESSAO] Sessão inválida/inativa/expirada.','Falha ao iniciar complementação','2026-02-15 03:13:12'),(7,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'criado_em\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-15 03:58:23'),(8,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:00'),(9,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:21'),(10,3,'sp_operacao_encaminhar','42S22',1054,'Unknown column \'fo.status\' in \'where clause\'','Falha ao encaminhar','2026-02-15 04:56:44'),(11,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:12'),(12,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:20'),(13,52,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 05:28:24'),(14,52,'sp_triagem_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-09 05:28:24'),(15,53,'sp_operacao_encaminhar','HY000',1267,'Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\'','Falha na rotina','2026-03-09 05:50:35'),(16,53,'sp_medico_encaminhar','45000',1644,'[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI','Falha na rotina','2026-03-09 05:50:35'),(17,53,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 05:51:00'),(18,54,'sp_operacao_encaminhar','HY000',1267,'Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\'','Falha na rotina','2026-03-09 06:17:54'),(19,54,'sp_medico_encaminhar','45000',1644,'[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI','Falha na rotina','2026-03-09 06:17:54'),(20,54,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 06:17:56'),(21,54,'sp_medico_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-09 06:17:56'),(22,57,'sp_recepcao_encaminhar_ffa','42000',1318,'Incorrect number of arguments for PROCEDURE pronto_atendimento.sp_operacao_encaminhar; expected 3, got 4','Falha ao encaminhar FFA','2026-03-09 06:59:24'),(23,57,'sp_estoque_movimento_criar','(n/a)',0,'(n/a)','Falha ao criar movimento','2026-03-09 07:02:29'),(24,57,'sp_estoque_movimento_item_add','(n/a)',0,'(n/a)','Falha ao inserir item movimento','2026-03-09 07:02:31'),(25,58,'sp_estoque_movimento_criar','(n/a)',0,'(n/a)','Falha ao criar movimento','2026-03-10 21:36:22'),(26,59,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-10 21:42:15'),(27,59,'sp_triagem_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-10 21:42:15'),(28,59,'sp_fila_chamar_proxima','(n/a)',0,'(n/a)','Falha ao chamar próxima fila','2026-03-10 21:42:26');
+INSERT INTO `auditoria_erro` VALUES (1,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:08:14',NULL),(2,2,'sp_senha_emitir','42000',1305,'PROCEDURE pronto_atendimento.sp_assert_true does not exist','Falha ao emitir senha','2026-02-13 06:15:18',NULL),(3,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'inicio_complementacao_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-13 06:37:56',NULL),(4,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'s.tipo\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-13 06:38:13',NULL),(5,3,'sp_operacao_encaminhar','45000',1644,'[NOT_FOUND] Falha de asserção.','Falha ao encaminhar (fila_operacional)','2026-02-13 06:38:31',NULL),(6,123,'sp_recepcao_iniciar_complementacao','45000',1644,'[SESSAO] Sessão inválida/inativa/expirada.','Falha ao iniciar complementação','2026-02-15 03:13:12',NULL),(7,3,'sp_recepcao_complementar_e_abrir_ffa','42S22',1054,'Unknown column \'criado_em\' in \'field list\'','Falha ao complementar e abrir FFA','2026-02-15 03:58:23',NULL),(8,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:00',NULL),(9,3,'sp_recepcao_iniciar_complementacao','42S22',1054,'Unknown column \'atualizado_em\' in \'field list\'','Falha ao iniciar complementação','2026-02-15 04:11:21',NULL),(10,3,'sp_operacao_encaminhar','42S22',1054,'Unknown column \'fo.status\' in \'where clause\'','Falha ao encaminhar','2026-02-15 04:56:44',NULL),(11,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:12',NULL),(12,3,'sp_painel_filtro_locais_seed','(n/a)',0,'(n/a)','Falha ao seedar filtro de locais do painel','2026-02-15 05:49:20',NULL),(13,52,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 05:28:24',NULL),(14,52,'sp_triagem_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-09 05:28:24',NULL),(15,53,'sp_operacao_encaminhar','HY000',1267,'Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\'','Falha na rotina','2026-03-09 05:50:35',NULL),(16,53,'sp_medico_encaminhar','45000',1644,'[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI','Falha na rotina','2026-03-09 05:50:35',NULL),(17,53,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 05:51:00',NULL),(18,54,'sp_operacao_encaminhar','HY000',1267,'Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation \'=\'','Falha na rotina','2026-03-09 06:17:54',NULL),(19,54,'sp_medico_encaminhar','45000',1644,'[ERRO_SQL] ROTINA=sp_operacao_encaminhar | SQLSTATE=HY000 | ERRNO=1267 | MSG=Illegal mix of collations (utf8mb4_general_ci,IMPLI','Falha na rotina','2026-03-09 06:17:54',NULL),(20,54,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-09 06:17:56',NULL),(21,54,'sp_medico_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-09 06:17:56',NULL),(22,57,'sp_recepcao_encaminhar_ffa','42000',1318,'Incorrect number of arguments for PROCEDURE pronto_atendimento.sp_operacao_encaminhar; expected 3, got 4','Falha ao encaminhar FFA','2026-03-09 06:59:24',NULL),(23,57,'sp_estoque_movimento_criar','(n/a)',0,'(n/a)','Falha ao criar movimento','2026-03-09 07:02:29',NULL),(24,57,'sp_estoque_movimento_item_add','(n/a)',0,'(n/a)','Falha ao inserir item movimento','2026-03-09 07:02:31',NULL),(25,58,'sp_estoque_movimento_criar','(n/a)',0,'(n/a)','Falha ao criar movimento','2026-03-10 21:36:22',NULL),(26,59,'sp_fila_finalizar','23000',1452,'Cannot add or update a child row: a foreign key constraint fails (`pronto_atendimento`.`fila_operacional_evento`, CONSTRAINT `fk_filaop_evt_fila` FOREIGN KEY (`id_fila`) REFERENCES `fila_operacional` (`id_fila`))','Falha na rotina','2026-03-10 21:42:15',NULL),(27,59,'sp_triagem_finalizar','45000',1644,'[ERRO_SQL] ROTINA=sp_fila_finalizar | SQLSTATE=23000 | ERRNO=1452 | MSG=Cannot add or update a child row: a foreign key constrai','Falha na rotina','2026-03-10 21:42:15',NULL),(28,59,'sp_fila_chamar_proxima','(n/a)',0,'(n/a)','Falha ao chamar próxima fila','2026-03-10 21:42:26',NULL);
 /*!40000 ALTER TABLE `auditoria_erro` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2134,6 +2172,7 @@ CREATE TABLE `auditoria_estoque` (
   `quantidade` int NOT NULL,
   `id_usuario` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_log`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2163,6 +2202,7 @@ CREATE TABLE `auditoria_estoque_sanitario` (
   `nivel_risco` enum('OK','CRITICO','VENCIDO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `criado_por` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2194,6 +2234,7 @@ CREATE TABLE `auditoria_evento` (
   `metadata` json DEFAULT NULL,
   `criado_em` datetime(6) NOT NULL,
   `status` varchar(20) DEFAULT 'OK',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_auditoria`),
   KEY `idx_usuario` (`id_usuario`),
   KEY `idx_sessao` (`id_sessao_usuario`),
@@ -2225,6 +2266,7 @@ CREATE TABLE `auditoria_excecoes` (
   `motivo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `chamado_por` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2252,6 +2294,7 @@ CREATE TABLE `auditoria_ffa` (
   `tipo_evento` enum('CRIACAO','STATUS','LAYOUT','CHAMADA_MEDICA','SOLICITACAO_RX','SOLICITACAO_MEDICACAO','ALTA_MEDICA','TRANSFERENCIA','INTERNACAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `acao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_auditoria_ffa_ffa` (`id_ffa`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -2263,7 +2306,7 @@ CREATE TABLE `auditoria_ffa` (
 
 LOCK TABLES `auditoria_ffa` WRITE;
 /*!40000 ALTER TABLE `auditoria_ffa` DISABLE KEYS */;
-INSERT INTO `auditoria_ffa` VALUES (1,4,1,'CRIACAO','CRIACAO: FFA aberta para paciente 8','2025-12-29 04:40:52'),(2,4,1,'CRIACAO','STATUS: ABERTO -> EM_ATENDIMENTO','2025-12-29 04:40:52'),(3,4,1,'CRIACAO','LAYOUT: TRIAGEM -> SALA_1','2025-12-29 04:40:52'),(4,5,1,'CRIACAO','CRIACAO: FFA aberta para paciente 9','2025-12-29 06:23:31'),(5,5,2,'CRIACAO','STATUS: ABERTO -> EM_TRIAGEM','2025-12-29 06:32:53'),(6,5,2,'CRIACAO','LAYOUT: TRIAGEM -> TRIAGEM_1','2025-12-29 06:32:53'),(7,5,2,'CRIACAO','INICIO TRIAGEM: FFA em TRIAGEM_1, classificacao AZUL','2025-12-29 06:32:53'),(8,5,2,'CRIACAO','STATUS: EM_TRIAGEM -> AGUARDANDO_CHAMADA_MEDICO','2025-12-29 06:35:45'),(9,5,2,'CRIACAO','LAYOUT: TRIAGEM_1 -> PAINEL_MEDICO','2025-12-29 06:35:45'),(10,5,2,'CRIACAO','FINALIZA TRIAGEM: classificacao AMARELO, encaminhado para PAINEL_MEDICO','2025-12-29 06:35:45'),(11,5,2,'CRIACAO','FINALIZA TRIAGEM: classificacao AMARELO, encaminhado para PAINEL_MEDICO','2025-12-29 06:37:09'),(12,4,1,'CRIACAO','STATUS: EM_ATENDIMENTO -> EM_ATENDIMENTO_MEDICO','2025-12-29 06:49:27'),(13,4,10,'CRIACAO','STATUS: EM_ATENDIMENTO_MEDICO -> AGUARDANDO_RX','2025-12-30 23:16:32'),(14,4,10,'CRIACAO','LAYOUT: SALA_1 -> RX','2025-12-30 23:16:32'),(15,4,10,'SOLICITACAO_RX','Paciente encaminhado para RX','2025-12-31 00:00:30'),(16,4,10,'CRIACAO','LAYOUT: RX -> PAINEL_CLINICO','2025-12-31 03:24:46');
+INSERT INTO `auditoria_ffa` VALUES (1,4,1,'CRIACAO','CRIACAO: FFA aberta para paciente 8','2025-12-29 04:40:52',1),(2,4,1,'CRIACAO','STATUS: ABERTO -> EM_ATENDIMENTO','2025-12-29 04:40:52',1),(3,4,1,'CRIACAO','LAYOUT: TRIAGEM -> SALA_1','2025-12-29 04:40:52',1),(4,5,1,'CRIACAO','CRIACAO: FFA aberta para paciente 9','2025-12-29 06:23:31',1),(5,5,2,'CRIACAO','STATUS: ABERTO -> EM_TRIAGEM','2025-12-29 06:32:53',1),(6,5,2,'CRIACAO','LAYOUT: TRIAGEM -> TRIAGEM_1','2025-12-29 06:32:53',1),(7,5,2,'CRIACAO','INICIO TRIAGEM: FFA em TRIAGEM_1, classificacao AZUL','2025-12-29 06:32:53',1),(8,5,2,'CRIACAO','STATUS: EM_TRIAGEM -> AGUARDANDO_CHAMADA_MEDICO','2025-12-29 06:35:45',1),(9,5,2,'CRIACAO','LAYOUT: TRIAGEM_1 -> PAINEL_MEDICO','2025-12-29 06:35:45',1),(10,5,2,'CRIACAO','FINALIZA TRIAGEM: classificacao AMARELO, encaminhado para PAINEL_MEDICO','2025-12-29 06:35:45',1),(11,5,2,'CRIACAO','FINALIZA TRIAGEM: classificacao AMARELO, encaminhado para PAINEL_MEDICO','2025-12-29 06:37:09',1),(12,4,1,'CRIACAO','STATUS: EM_ATENDIMENTO -> EM_ATENDIMENTO_MEDICO','2025-12-29 06:49:27',1),(13,4,10,'CRIACAO','STATUS: EM_ATENDIMENTO_MEDICO -> AGUARDANDO_RX','2025-12-30 23:16:32',1),(14,4,10,'CRIACAO','LAYOUT: SALA_1 -> RX','2025-12-30 23:16:32',1),(15,4,10,'SOLICITACAO_RX','Paciente encaminhado para RX','2025-12-31 00:00:30',1),(16,4,10,'CRIACAO','LAYOUT: RX -> PAINEL_CLINICO','2025-12-31 03:24:46',1);
 /*!40000 ALTER TABLE `auditoria_ffa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2280,6 +2323,7 @@ CREATE TABLE `auditoria_fila` (
   `id_usuario` bigint DEFAULT NULL,
   `acao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_fila` (`id_fila`),
   CONSTRAINT `auditoria_fila_ibfk_1` FOREIGN KEY (`id_fila`) REFERENCES `fila_senha` (`id`)
@@ -2313,6 +2357,7 @@ CREATE TABLE `auditoria_mestre` (
   `valor_novo` json DEFAULT NULL,
   `motivo_alteracao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `data_evento` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_audit_sessao_usuario` (`id_sessao_usuario`),
   CONSTRAINT `fk_audit_sessao_usuario` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`)
@@ -2342,6 +2387,7 @@ CREATE TABLE `auditoria_visualizacao_prontuario` (
   `ip_acesso` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   `contexto` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2373,6 +2419,7 @@ CREATE TABLE `auth_audit` (
   `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `sucesso` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_audit`),
   KEY `idx_audit_usuario` (`id_usuario`),
   KEY `idx_audit_sessao` (`id_sessao`),
@@ -2408,6 +2455,7 @@ CREATE TABLE `auth_bloqueio` (
   `desbloqueado_por` bigint DEFAULT NULL,
   `desbloqueado_em` datetime DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_bloqueio`),
   KEY `idx_bloqueio_usuario` (`id_usuario`),
   KEY `idx_bloqueio_expira` (`expira_em`),
@@ -2440,6 +2488,7 @@ CREATE TABLE `auth_grupo` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_por` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_grupo`),
   KEY `idx_grupo_unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2468,6 +2517,7 @@ CREATE TABLE `auth_grupo_permissao` (
   `acao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_grupo_permissao`),
   UNIQUE KEY `uk_grupo_recurso` (`id_grupo`,`recurso`,`acao`),
   CONSTRAINT `fk_gp_grupo` FOREIGN KEY (`id_grupo`) REFERENCES `auth_grupo` (`id_grupo`) ON DELETE CASCADE
@@ -2497,6 +2547,7 @@ CREATE TABLE `auth_grupo_usuario` (
   `papel` enum('MEMBRO','COORDENADOR','SUBCOORDENADOR') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'MEMBRO',
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_grupo_usuario`),
   UNIQUE KEY `uk_grupo_usuario` (`id_grupo`,`id_usuario`),
   KEY `idx_grupo_usuario_usuario` (`id_usuario`),
@@ -2532,6 +2583,7 @@ CREATE TABLE `auth_log` (
   `mensagem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `dados_extras` json DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_log`),
   KEY `idx_log_usuario` (`id_usuario`),
   KEY `idx_log_tipo` (`tipo_evento`),
@@ -2565,6 +2617,7 @@ CREATE TABLE `auth_notificacao` (
   `lido_em` datetime DEFAULT NULL,
   `dados_extras` json DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_notificacao`),
   KEY `idx_notif_usuario` (`id_usuario`),
   KEY `idx_notif_lido` (`lido`),
@@ -2596,6 +2649,7 @@ CREATE TABLE `auth_parametro` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `tipo_parametro` enum('SENHA','SESSAO','TOKEN','BLOQUEIO','GERAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'GERAL',
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_parametro`),
   UNIQUE KEY `uk_parametro_chave` (`chave`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2607,7 +2661,7 @@ CREATE TABLE `auth_parametro` (
 
 LOCK TABLES `auth_parametro` WRITE;
 /*!40000 ALTER TABLE `auth_parametro` DISABLE KEYS */;
-INSERT INTO `auth_parametro` VALUES (1,'senha_tamanho_minimo','6','Tamanho mínimo da senha','SENHA',1),(2,'senha_tamanho_maximo','20','Tamanho máximo da senha','SENHA',1),(3,'senha_exige_maiuscula','1','Exige letra maiúscula na senha','SENHA',1),(4,'senha_exige_minuscula','1','Exige letra minúscula na senha','SENHA',1),(5,'senha_exige_numero','1','Exige número na senha','SENHA',1),(6,'senha_exige_especial','0','Exige caractere especial na senha','SENHA',1),(7,'senha_dias_expiracao','90','Dias até expiração da senha','SENHA',1),(8,'senha_historico_tamanho','5','Quantidade de senhas no histórico','SENHA',1),(9,'login_tentativas_maximas','5','Máximo de tentativas de login','BLOQUEIO',1),(10,'login_bloqueio_minutos','30','Minutos de bloqueio após tentativas','BLOQUEIO',1),(11,'sessao_duracao_horas','8','Duração máxima da sessão em horas','SESSAO',1),(12,'token_refresh_dias','30','Dias de validade do token de refresh','TOKEN',1),(13,'token_recovery_minutos','15','Minutos de validade do token de recuperação','TOKEN',1);
+INSERT INTO `auth_parametro` VALUES (1,'senha_tamanho_minimo','6','Tamanho mínimo da senha','SENHA',1,NULL),(2,'senha_tamanho_maximo','20','Tamanho máximo da senha','SENHA',1,NULL),(3,'senha_exige_maiuscula','1','Exige letra maiúscula na senha','SENHA',1,NULL),(4,'senha_exige_minuscula','1','Exige letra minúscula na senha','SENHA',1,NULL),(5,'senha_exige_numero','1','Exige número na senha','SENHA',1,NULL),(6,'senha_exige_especial','0','Exige caractere especial na senha','SENHA',1,NULL),(7,'senha_dias_expiracao','90','Dias até expiração da senha','SENHA',1,NULL),(8,'senha_historico_tamanho','5','Quantidade de senhas no histórico','SENHA',1,NULL),(9,'login_tentativas_maximas','5','Máximo de tentativas de login','BLOQUEIO',1,NULL),(10,'login_bloqueio_minutos','30','Minutos de bloqueio após tentativas','BLOQUEIO',1,NULL),(11,'sessao_duracao_horas','8','Duração máxima da sessão em horas','SESSAO',1,NULL),(12,'token_refresh_dias','30','Dias de validade do token de refresh','TOKEN',1,NULL),(13,'token_recovery_minutos','15','Minutos de validade do token de recuperação','TOKEN',1,NULL);
 /*!40000 ALTER TABLE `auth_parametro` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2633,6 +2687,7 @@ CREATE TABLE `auth_sessao` (
   `expira_em` datetime NOT NULL,
   `ultima_atividade` datetime DEFAULT CURRENT_TIMESTAMP,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sessao`),
   KEY `idx_sessao_usuario` (`id_usuario`),
   KEY `idx_sessao_token` (`token_sessao`),
@@ -2669,6 +2724,7 @@ CREATE TABLE `auth_sessao_dispositivo` (
   `primeiro_acesso` datetime DEFAULT CURRENT_TIMESTAMP,
   `confiavel` tinyint(1) DEFAULT '0',
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_dispositivo_confiavel`),
   KEY `idx_dispositivo_usuario` (`id_usuario`),
   KEY `idx_dispositivo_hash` (`dispositivo_hash`),
@@ -2700,6 +2756,7 @@ CREATE TABLE `auth_tentativa_login` (
   `sucesso` tinyint(1) NOT NULL DEFAULT '0',
   `motivo_falha` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_tentativa`),
   KEY `idx_tentativa_login` (`login`),
   KEY `idx_tentativa_ip` (`ip_origem`),
@@ -2734,6 +2791,7 @@ CREATE TABLE `auth_token` (
   `expira_em` datetime NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `utilizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_token`),
   KEY `idx_token_usuario` (`id_usuario`),
   KEY `idx_token_hash` (`token_hash`),
@@ -2767,6 +2825,7 @@ CREATE TABLE `caixa` (
   `fechado_em` datetime DEFAULT NULL,
   `aberto_por` bigint DEFAULT NULL,
   `fechado_por` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_caixa`),
   KEY `idx_caixa_status` (`status`),
   KEY `fk_caixa_unidade` (`id_unidade`),
@@ -2802,6 +2861,7 @@ CREATE TABLE `caixa_evento` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_ce_caixa` (`id_caixa`,`criado_em`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -2839,6 +2899,7 @@ CREATE TABLE `cat_acidente_trabalho` (
   `id_usuario_criador` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_cat_atendimento` (`id_atendimento`),
   KEY `idx_cat_trabalhador` (`id_pessoa_trabalhador`),
@@ -2874,6 +2935,7 @@ CREATE TABLE `cat_acidente_trabalho_evento` (
   `id_sessao_usuario` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_cate_cat` (`id_cat`),
   KEY `fk_cate_sessao` (`id_sessao_usuario`),
@@ -2904,6 +2966,7 @@ CREATE TABLE `cat_evento` (
   `evento` varchar(50) NOT NULL,
   `payload_json` json DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_cat_evento`),
   KEY `ix_cat_evento_cat` (`id_cat`),
   KEY `ix_cat_evento_evt` (`evento`)
@@ -2943,6 +3006,7 @@ CREATE TABLE `cat_notificacao` (
   `protocolo_externo` varchar(80) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_cat`),
   KEY `ix_cat_ffa` (`id_ffa`),
   KEY `ix_cat_gpat` (`id_gpat`),
@@ -2972,6 +3036,7 @@ CREATE TABLE `cat_regra_item` (
   `descricao` varchar(255) DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_cat_regra`),
   UNIQUE KEY `uk_cat_regra_sigtap` (`codigo_sigtap`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -3007,6 +3072,7 @@ CREATE TABLE `chamado` (
   `glpi_ticket_id` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_chamado`),
   KEY `idx_ch_area_status` (`area_responsavel`,`status`),
   KEY `idx_ch_glpi` (`glpi_ticket_id`),
@@ -3043,6 +3109,7 @@ CREATE TABLE `chamado_evento` (
   `detalhe` text,
   `id_usuario` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_chamado_evento`),
   KEY `idx_chev_chamado` (`id_chamado`),
   KEY `fk_chev_user` (`id_usuario`),
@@ -3078,6 +3145,7 @@ CREATE TABLE `chamado_manutencao` (
   `aberto_por` bigint NOT NULL,
   `aberto_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `fechado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_chamado`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Chamados de manutenção predial, equipamentos e TI';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3136,6 +3204,7 @@ CREATE TABLE `classificacao_risco` (
   `cor` enum('VERMELHO','LARANJA','AMARELO','VERDE','AZUL') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tempo_max` int DEFAULT NULL,
   `descricao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_risco`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3146,7 +3215,7 @@ CREATE TABLE `classificacao_risco` (
 
 LOCK TABLES `classificacao_risco` WRITE;
 /*!40000 ALTER TABLE `classificacao_risco` DISABLE KEYS */;
-INSERT INTO `classificacao_risco` VALUES (1,'VERMELHO',0,'Emergência'),(2,'AMARELO',10,'Urgência'),(3,'VERDE',120,'Pouco Urgente');
+INSERT INTO `classificacao_risco` VALUES (1,'VERMELHO',0,'Emergência',NULL),(2,'AMARELO',10,'Urgência',NULL),(3,'VERDE',120,'Pouco Urgente',NULL);
 /*!40000 ALTER TABLE `classificacao_risco` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3165,6 +3234,7 @@ CREATE TABLE `cliente` (
   `email` varchar(150) DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_cliente`),
   UNIQUE KEY `uk_cliente_doc` (`documento`),
   KEY `idx_cliente_nome` (`nome`)
@@ -3198,6 +3268,7 @@ CREATE TABLE `codigo_externo_map` (
   `payload` json DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_map`),
   UNIQUE KEY `uk_externo` (`dominio`,`sistema_externo`,`codigo_externo`),
   KEY `idx_map_codigo` (`id_codigo`),
@@ -3232,6 +3303,7 @@ CREATE TABLE `codigo_externo_vinculo` (
   `id_sessao_usuario` bigint NOT NULL,
   `observacao` varchar(255) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_vinculo`),
   UNIQUE KEY `uk_vinculo` (`tipo`,`sistema_externo`,`codigo_externo`),
   KEY `ix_vinculo_codigo` (`id_codigo_universal`)
@@ -3265,6 +3337,7 @@ CREATE TABLE `codigo_prefixo_config` (
   `observacao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_prefixo`),
   UNIQUE KEY `uk_prefixo_escopo` (`dominio`,`prefixo_5`,`id_unidade`,`id_local_operacional`,`id_laboratorio`),
   KEY `idx_prefixo_lookup` (`dominio`,`ativo`,`id_unidade`,`id_local_operacional`,`id_laboratorio`)
@@ -3297,6 +3370,7 @@ CREATE TABLE `codigo_prefixo_regra` (
   `observacao` varchar(255) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_regra`),
   UNIQUE KEY `uk_prefixo_tipo_ctx` (`tipo`,`id_unidade`,`id_local_operacional`),
   KEY `ix_prefixo_tipo` (`tipo`),
@@ -3312,7 +3386,7 @@ CREATE TABLE `codigo_prefixo_regra` (
 
 LOCK TABLES `codigo_prefixo_regra` WRITE;
 /*!40000 ALTER TABLE `codigo_prefixo_regra` DISABLE KEYS */;
-INSERT INTO `codigo_prefixo_regra` VALUES (1,'GPAT',1,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-16 07:20:27',NULL),(2,'LAB',1,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-16 07:20:27',NULL),(3,'FARM_PRODUTO',1,NULL,'40000',1,'Prefixo padrão produto','2026-02-16 07:50:28',NULL),(4,'PDV',1,NULL,'41000',1,'Prefixo padrão venda PDV','2026-02-16 07:50:28',NULL),(5,'INVENTARIO',1,NULL,'42000',1,'Prefixo padrão inventário','2026-02-16 07:50:28',NULL),(6,'FAT',1,NULL,'43000',1,'Prefixo padrão faturamento','2026-02-16 07:50:28',NULL),(7,'GPAT',1,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-17 10:32:12',NULL),(8,'LAB',1,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-17 10:32:12',NULL);
+INSERT INTO `codigo_prefixo_regra` VALUES (1,'GPAT',1,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-16 07:20:27',NULL,NULL),(2,'LAB',1,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-16 07:20:27',NULL,NULL),(3,'FARM_PRODUTO',1,NULL,'40000',1,'Prefixo padrão produto','2026-02-16 07:50:28',NULL,NULL),(4,'PDV',1,NULL,'41000',1,'Prefixo padrão venda PDV','2026-02-16 07:50:28',NULL,NULL),(5,'INVENTARIO',1,NULL,'42000',1,'Prefixo padrão inventário','2026-02-16 07:50:28',NULL,NULL),(6,'FAT',1,NULL,'43000',1,'Prefixo padrão faturamento','2026-02-16 07:50:28',NULL,NULL),(7,'GPAT',1,NULL,'10000',1,'Prefixo padrão GPAT (ajuste por unidade/local)','2026-02-17 10:32:12',NULL,NULL),(8,'LAB',1,NULL,'30000',1,'Prefixo padrão LAB (ajuste por unidade/local)','2026-02-17 10:32:12',NULL,NULL);
 /*!40000 ALTER TABLE `codigo_prefixo_regra` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3342,6 +3416,7 @@ CREATE TABLE `codigo_universal` (
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_codigo`),
   UNIQUE KEY `uk_codigo_interno` (`codigo_interno`),
   UNIQUE KEY `uk_barcode` (`barcode`),
@@ -3384,6 +3459,7 @@ CREATE TABLE `config_leitos` (
   `tipo` enum('OBSERVACAO','EMERGENCIA','INTERNACAO','ISOLAMENTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status_ocupacao` enum('LIVRE','OCUPADO','RESERVADO','HIGIENIZACAO','MANUTENCAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'LIVRE',
   `id_atendimento_atual` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_config_leitos_unidade` (`id_unidade`),
   CONSTRAINT `fk_config_leitos_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
@@ -3412,6 +3488,7 @@ CREATE TABLE `config_locais` (
   `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipo` enum('RECEPCAO','TRIAGEM','CONSULTORIO','EXAME','MEDICACAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_config_locais_unidade` (`id_unidade`),
   CONSTRAINT `fk_config_locais_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
@@ -3439,6 +3516,7 @@ CREATE TABLE `config_sistema` (
   `id_unidade` bigint unsigned NOT NULL,
   `parametro` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `valor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_config_unid` (`id_unidade`),
   CONSTRAINT `fk_config_sistema_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
@@ -3464,6 +3542,7 @@ DROP TABLE IF EXISTS `configuracao`;
 CREATE TABLE `configuracao` (
   `chave` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `valor` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`chave`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3489,6 +3568,7 @@ CREATE TABLE `conselho_profissional` (
   `sigla` varchar(10) NOT NULL,
   `nome` varchar(100) NOT NULL,
   `uf` char(2) DEFAULT 'SP',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_conselho`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3499,7 +3579,7 @@ CREATE TABLE `conselho_profissional` (
 
 LOCK TABLES `conselho_profissional` WRITE;
 /*!40000 ALTER TABLE `conselho_profissional` DISABLE KEYS */;
-INSERT INTO `conselho_profissional` VALUES (1,'CRM','Conselho Regional de Medicina','SP'),(2,'COREM','Conselho Regional de Enfermagem','SP'),(3,'CREFITO','Conselho Regional de Fisioterapia','SP'),(4,'CRF','Conselho Regional de Farmácia','SP'),(5,'CRN','Conselho Regional de Nutrição','SP'),(6,'CRP','Conselho Regional de Psicologia','SP'),(7,'CRESS','Conselho Regional de Serviço Social','SP');
+INSERT INTO `conselho_profissional` VALUES (1,'CRM','Conselho Regional de Medicina','SP',NULL),(2,'COREM','Conselho Regional de Enfermagem','SP',NULL),(3,'CREFITO','Conselho Regional de Fisioterapia','SP',NULL),(4,'CRF','Conselho Regional de Farmácia','SP',NULL),(5,'CRN','Conselho Regional de Nutrição','SP',NULL),(6,'CRP','Conselho Regional de Psicologia','SP',NULL),(7,'CRESS','Conselho Regional de Serviço Social','SP',NULL);
 /*!40000 ALTER TABLE `conselho_profissional` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3519,6 +3599,7 @@ CREATE TABLE `consumo_insumo` (
   `usado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `registrado_por` bigint NOT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_consumo`),
   KEY `idx_ffa` (`id_ffa`),
   KEY `idx_origem` (`origem`)
@@ -3551,6 +3632,7 @@ CREATE TABLE `consumo_limpeza` (
   `registrado_por` bigint NOT NULL COMMENT 'Usuário da limpeza',
   `motivo` enum('ROTINA','REPOSICAO','CONTAMINACAO','INTERCORRENCIA','OUTRO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ROTINA',
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_consumo`),
   KEY `idx_setor` (`id_setor`),
   KEY `idx_produto` (`id_produto`)
@@ -3581,6 +3663,7 @@ CREATE TABLE `consumo_manutencao` (
   `unidade` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `consumido_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `registrado_por` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_consumo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Consumo de materiais em manutenção';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3609,6 +3692,7 @@ CREATE TABLE `contexto_atendimento` (
   `usa_fila` tinyint(1) DEFAULT NULL,
   `usa_chamada` tinyint(1) DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_contexto`),
   KEY `id_sistema` (`id_sistema`),
   CONSTRAINT `contexto_atendimento_ibfk_1` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`)
@@ -3636,6 +3720,7 @@ CREATE TABLE `contrato` (
   `nome` varchar(100) NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_contrato`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3671,8 +3756,8 @@ CREATE TABLE `coordenador_estado_global` (
   KEY `idx_coord_uuid` (`uuid_runtime`),
   KEY `idx_coord_estado` (`estado_atual`),
   KEY `fk_coordenador_estado_global_unidade` (`id_unidade`),
-  KEY `fk_coord_estado_entidade` (`id_entidade`),
-  CONSTRAINT `fk_coord_estado_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  KEY `fk_coordenador_estado_global_entidade` (`id_entidade`),
+  CONSTRAINT `fk_coordenador_estado_global_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_coordenador_estado_global_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3704,6 +3789,7 @@ CREATE TABLE `dispensacao_medicacao` (
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   `status` enum('ENTREGUE','ESTORNADO') DEFAULT 'ENTREGUE',
   `observacao` text,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_dispensacao`),
   KEY `fk_disp_ordem` (`id_ordem`),
   KEY `fk_disp_lote` (`id_lote`),
@@ -3735,6 +3821,7 @@ CREATE TABLE `dispositivo` (
   `tipo` varchar(50) DEFAULT NULL,
   `ip_registro` varchar(45) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_dispositivo`),
   UNIQUE KEY `uk_dispositivo_identificador` (`identificador`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -3765,6 +3852,7 @@ CREATE TABLE `dispositivo_tipo` (
   `usa_tts` tinyint(1) DEFAULT '0',
   `exibe_painel` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_dispositivo_tipo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3775,7 +3863,7 @@ CREATE TABLE `dispositivo_tipo` (
 
 LOCK TABLES `dispositivo_tipo` WRITE;
 /*!40000 ALTER TABLE `dispositivo_tipo` DISABLE KEYS */;
-INSERT INTO `dispositivo_tipo` VALUES (1,'PAINEL','Painel de chamadas',0,1,1,1,'2026-03-06 22:19:47.151708'),(2,'TOTEM','Totem auto atendimento',1,1,0,0,'2026-03-06 22:19:47.151708'),(3,'TERMINAL','Terminal fixo atendimento',1,1,0,0,'2026-03-06 22:19:47.151708'),(4,'TABLET','Tablet assistencial',1,1,0,0,'2026-03-06 22:19:47.151708'),(5,'MOBILE','Dispositivo mobile profissional',1,1,0,0,'2026-03-06 22:19:47.151708'),(6,'DESKTOP','Computador administrativo',1,1,0,0,'2026-03-06 22:19:47.151708');
+INSERT INTO `dispositivo_tipo` VALUES (1,'PAINEL','Painel de chamadas',0,1,1,1,'2026-03-06 22:19:47.151708',NULL),(2,'TOTEM','Totem auto atendimento',1,1,0,0,'2026-03-06 22:19:47.151708',NULL),(3,'TERMINAL','Terminal fixo atendimento',1,1,0,0,'2026-03-06 22:19:47.151708',NULL),(4,'TABLET','Tablet assistencial',1,1,0,0,'2026-03-06 22:19:47.151708',NULL),(5,'MOBILE','Dispositivo mobile profissional',1,1,0,0,'2026-03-06 22:19:47.151708',NULL),(6,'DESKTOP','Computador administrativo',1,1,0,0,'2026-03-06 22:19:47.151708',NULL);
 /*!40000 ALTER TABLE `dispositivo_tipo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3796,6 +3884,7 @@ CREATE TABLE `documento_arquivo` (
   `storage_uri` varchar(255) DEFAULT NULL,
   `conteudo_blob` longblob,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_documento`,`formato`),
   KEY `idx_doc_arq_sha` (`sha256`),
   CONSTRAINT `fk_doc_arq_documento` FOREIGN KEY (`id_documento`) REFERENCES `documento_emissao` (`id_documento`)
@@ -3837,6 +3926,7 @@ CREATE TABLE `documento_emissao` (
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_documento`),
   UNIQUE KEY `ux_doc_tipo_ref` (`tipo_documento`,`entidade_ref`,`id_ref`),
   KEY `idx_doc_ffa` (`id_ffa`),
@@ -3875,6 +3965,7 @@ CREATE TABLE `documento_emissao_evento` (
   `id_sessao_usuario` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_doc_ev_doc` (`id_documento`),
   KEY `idx_doc_ev_data` (`criado_em`),
@@ -3906,6 +3997,7 @@ CREATE TABLE `documento_tipo_config` (
   `template_codigo` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3916,7 +4008,7 @@ CREATE TABLE `documento_tipo_config` (
 
 LOCK TABLES `documento_tipo_config` WRITE;
 /*!40000 ALTER TABLE `documento_tipo_config` DISABLE KEYS */;
-INSERT INTO `documento_tipo_config` VALUES ('ATESTADO','Atestado','PACIENTE',0,'ATEST',1,'2026-02-06 04:18:02'),('ENCAMINHAMENTO','Encaminhamento/Referência','PACIENTE',0,'ENC',1,'2026-02-06 04:18:02'),('MEDICACAO_INTERNA','Prescrição/Ordem de Medicação Interna (Enfermagem)','ENFERMAGEM',0,'MED_INT',1,'2026-02-06 04:18:02'),('RECEITA_CONTROLADO','Receita de Medicamento Controlado (exige farmacêutico)','FARMACIA',1,'RX_CTRL',1,'2026-02-06 04:18:02'),('RECEITUARIO_CASA','Receituário para Uso Domiciliar','PACIENTE',0,'RX_CASA',1,'2026-02-06 04:18:02'),('REGISTRO_ATENDIMENTO','Registro de Atendimento (dados paciente + médico + resumo)','PACIENTE',0,'REG_ATEND',1,'2026-02-06 04:18:02'),('SOLIC_EXAME','Solicitação de Exame','PACIENTE',0,'SOL_EX',1,'2026-02-06 04:18:02');
+INSERT INTO `documento_tipo_config` VALUES ('ATESTADO','Atestado','PACIENTE',0,'ATEST',1,'2026-02-06 04:18:02',NULL),('ENCAMINHAMENTO','Encaminhamento/Referência','PACIENTE',0,'ENC',1,'2026-02-06 04:18:02',NULL),('MEDICACAO_INTERNA','Prescrição/Ordem de Medicação Interna (Enfermagem)','ENFERMAGEM',0,'MED_INT',1,'2026-02-06 04:18:02',NULL),('RECEITA_CONTROLADO','Receita de Medicamento Controlado (exige farmacêutico)','FARMACIA',1,'RX_CTRL',1,'2026-02-06 04:18:02',NULL),('RECEITUARIO_CASA','Receituário para Uso Domiciliar','PACIENTE',0,'RX_CASA',1,'2026-02-06 04:18:02',NULL),('REGISTRO_ATENDIMENTO','Registro de Atendimento (dados paciente + médico + resumo)','PACIENTE',0,'REG_ATEND',1,'2026-02-06 04:18:02',NULL),('SOLIC_EXAME','Solicitação de Exame','PACIENTE',0,'SOL_EX',1,'2026-02-06 04:18:02',NULL);
 /*!40000 ALTER TABLE `documento_tipo_config` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3932,6 +4024,7 @@ CREATE TABLE `enfermagem` (
   `coren` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `uf_coren` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipo` enum('ENFERMEIRO','TECNICO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `uk_coren` (`coren`,`uf_coren`),
   CONSTRAINT `enfermagem_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
@@ -3965,6 +4058,7 @@ CREATE TABLE `enfermagem_aprazamento` (
   `id_usuario_execucao` bigint DEFAULT NULL,
   `status` enum('AGUARDANDO','REALIZADO','ATRASADO','SUSPENSO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'AGUARDANDO',
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_apraz_atend` (`id_atendimento`),
   KEY `idx_apraz_hora` (`horario_previsto`)
@@ -3995,6 +4089,7 @@ CREATE TABLE `enfermagem_diagnosticos` (
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_ffa_diagnostico` (`id_ffa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -4023,6 +4118,7 @@ CREATE TABLE `erro_catalogo` (
   `descricao` varchar(255) NOT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_erro_catalogo`),
   UNIQUE KEY `codigo` (`codigo`),
   KEY `idx_erro_catalogo_dominio` (`dominio`)
@@ -4035,7 +4131,7 @@ CREATE TABLE `erro_catalogo` (
 
 LOCK TABLES `erro_catalogo` WRITE;
 /*!40000 ALTER TABLE `erro_catalogo` DISABLE KEYS */;
-INSERT INTO `erro_catalogo` VALUES (1,'E001','SISTEMA','Sessão inválida ou expirada',1,'2026-03-19 06:37:29.807214'),(2,'E002','FILA','Transição de estado não permitida na matriz',1,'2026-03-19 06:37:29.807214'),(3,'E003','SEGURANCA','Usuário sem permissão para esta ação',1,'2026-03-19 06:37:29.807214'),(4,'E004','DISPATCHER','Erro crítico na execução dinâmica da Procedure',1,'2026-03-19 06:37:29.807214'),(5,'E005','ASSISTENCIAL','Paciente com atendimento já finalizado',1,'2026-03-19 06:37:29.807214');
+INSERT INTO `erro_catalogo` VALUES (1,'E001','SISTEMA','Sessão inválida ou expirada',1,'2026-03-19 06:37:29.807214',NULL),(2,'E002','FILA','Transição de estado não permitida na matriz',1,'2026-03-19 06:37:29.807214',NULL),(3,'E003','SEGURANCA','Usuário sem permissão para esta ação',1,'2026-03-19 06:37:29.807214',NULL),(4,'E004','DISPATCHER','Erro crítico na execução dinâmica da Procedure',1,'2026-03-19 06:37:29.807214',NULL),(5,'E005','ASSISTENCIAL','Paciente com atendimento já finalizado',1,'2026-03-19 06:37:29.807214',NULL);
 /*!40000 ALTER TABLE `erro_catalogo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4057,6 +4153,7 @@ CREATE TABLE `erro_evento` (
   `stack_trace` json DEFAULT NULL,
   `payload_tentativa` json DEFAULT NULL,
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_erro`),
   KEY `idx_erro_sessao` (`id_sessao_usuario`),
   KEY `idx_erro_data` (`criado_em`),
@@ -4071,7 +4168,7 @@ CREATE TABLE `erro_evento` (
 
 LOCK TABLES `erro_evento` WRITE;
 /*!40000 ALTER TABLE `erro_evento` DISABLE KEYS */;
-INSERT INTO `erro_evento` VALUES (1,1,NULL,'9b28a2a5-8b4e-40bd-93fd-4dd7d720b939','TESTE','PING','Table \'pronto_atendimento.painel_recepcao\' doesn\'t exist','{\"stack_trace\": []}','{}','2026-03-19 06:57:19.415250');
+INSERT INTO `erro_evento` VALUES (1,1,NULL,'9b28a2a5-8b4e-40bd-93fd-4dd7d720b939','TESTE','PING','Table \'pronto_atendimento.painel_recepcao\' doesn\'t exist','{\"stack_trace\": []}','{}','2026-03-19 06:57:19.415250',NULL);
 /*!40000 ALTER TABLE `erro_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4090,6 +4187,7 @@ CREATE TABLE `escala_medica` (
   `turno` enum('MANHA','TARDE','NOITE','24H') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status_presenca` enum('PREVISTO','CONFIRMADO','FALTOU','SUBSTITUIDO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PREVISTO',
   `id_substituto` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_escala_dia` (`data_plantao`,`id_unidade`),
   KEY `fk_escala_medica_unidade` (`id_unidade`),
@@ -4121,6 +4219,7 @@ CREATE TABLE `escala_plantao` (
   `id_plantao_modelo` bigint NOT NULL,
   `observacao` varchar(255) DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_escala`),
   KEY `idx_escala_data` (`id_unidade`,`data`),
   KEY `fk_esc_sistema` (`id_sistema`),
@@ -4156,6 +4255,7 @@ CREATE TABLE `escala_plantao_atual` (
   `data_inicio` datetime DEFAULT NULL,
   `data_fim` datetime DEFAULT NULL,
   `status_plantao` enum('ATIVO','ENCERRADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ATIVO',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_plantao_ativo` (`id_usuario`,`status_plantao`),
   KEY `fk_escala_plantao_atual_unidade` (`id_unidade`),
@@ -4189,6 +4289,7 @@ CREATE TABLE `escala_profissional` (
   `tipo_escala` enum('PLANTAO','DIURNO','NOTURNO','SOBREAVISO') DEFAULT 'PLANTAO',
   `observacao` text,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_escala_profissional`),
   KEY `idx_ep_funcionario` (`id_funcionario`),
   KEY `idx_ep_unidade` (`id_unidade`),
@@ -4222,6 +4323,7 @@ CREATE TABLE `especialidade` (
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_especialidade`),
   UNIQUE KEY `nome` (`nome`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -4249,6 +4351,7 @@ CREATE TABLE `estoque_alerta` (
   `tipo_alerta` enum('BAIXO','CRITICO','VENCIMENTO_PROXIMO') NOT NULL,
   `gerado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `resolvido` tinyint(1) DEFAULT '0',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_alerta`),
   KEY `fk_alerta_saldo` (`id_saldo`),
   CONSTRAINT `fk_alerta_saldo` FOREIGN KEY (`id_saldo`) REFERENCES `estoque_produto_saldo` (`id_saldo`)
@@ -4281,6 +4384,7 @@ CREATE TABLE `estoque_almoxarifado_central` (
   `id_fornecedor` int DEFAULT NULL,
   `nota_fiscal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_entrada` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4309,6 +4413,7 @@ CREATE TABLE `estoque_audit_stream` (
   `payload` json DEFAULT NULL,
   `hash_pipeline` char(64) DEFAULT NULL,
   `criado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_audit`),
   KEY `idx_ref` (`id_referencia_externa`),
   KEY `idx_hash` (`hash_pipeline`)
@@ -4343,6 +4448,7 @@ CREATE TABLE `estoque_conciliacao_atomica` (
   `divergencia_valor` decimal(10,2) DEFAULT NULL,
   `validado_em` datetime DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_movimento_item` (`id_movimento_item`),
   UNIQUE KEY `uk_hash_execucao` (`hash_execucao`),
@@ -4373,6 +4479,7 @@ CREATE TABLE `estoque_conta` (
   `codigo` varchar(30) NOT NULL,
   `descricao` varchar(150) NOT NULL,
   `tipo` enum('FISICO','RESERVA','PERDA','AJUSTE','TRANSITO','CONSUMO_ASSISTENCIAL') NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_conta`),
   UNIQUE KEY `codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -4408,6 +4515,7 @@ CREATE TABLE `estoque_documento_execucao` (
   `hash_pipeline_atual` char(64) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_hash_execucao` (`hash_execucao`),
   UNIQUE KEY `uk_doc_tipo` (`id_documento`,`tipo_documento`),
@@ -4445,6 +4553,7 @@ CREATE TABLE `estoque_evento_confirmacao` (
   `status_confirmacao` enum('PENDENTE','CONFIRMADO','REJEITADO') NOT NULL DEFAULT 'PENDENTE',
   `criado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   UNIQUE KEY `uk_evento_execucao` (`hash_execucao`),
   KEY `idx_evento_movimento` (`id_movimento`),
@@ -4473,6 +4582,7 @@ CREATE TABLE `estoque_execucao` (
   `id_sessao_usuario` bigint NOT NULL,
   `contexto_operacional` varchar(100) NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`hash_execucao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4498,6 +4608,7 @@ CREATE TABLE `estoque_execucao_pipeline` (
   `estado` enum('PROCESSANDO','CONCLUIDO','FALHA') NOT NULL,
   `lease_expira_em` timestamp NOT NULL,
   `criado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`pipeline_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4529,6 +4640,7 @@ CREATE TABLE `estoque_fluxo_assistencial` (
   `quantidade` decimal(10,3) NOT NULL,
   `hash_execucao` char(64) NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_ffaitem_movimento` (`id_ffaitem`,`id_movimento_item`),
   UNIQUE KEY `uk_hash_execucao` (`hash_execucao`),
@@ -4566,6 +4678,7 @@ CREATE TABLE `estoque_inventario` (
   `aberto_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fechado_em` datetime DEFAULT NULL,
   `observacao` varchar(255) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_inventario`),
   KEY `ix_inv_local` (`id_estoque_local`),
   KEY `ix_inv_status` (`status`)
@@ -4598,6 +4711,7 @@ CREATE TABLE `estoque_inventario_item` (
   `divergencia` decimal(14,3) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `ix_inv_item_inv` (`id_inventario`),
   KEY `ix_inv_item_prod` (`id_produto`)
@@ -4631,6 +4745,7 @@ CREATE TABLE `estoque_item` (
   `is_faturavel` tinyint(1) DEFAULT '1',
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   UNIQUE KEY `codigo_interno` (`codigo_interno`),
   UNIQUE KEY `codigo_barras` (`codigo_barras`)
@@ -4661,6 +4776,7 @@ CREATE TABLE `estoque_ledger` (
   `tipo_dc` enum('D','C') NOT NULL,
   `quantidade` decimal(15,4) NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_ledger`),
   KEY `fk_ledger_mov_item` (`id_movimento_item`),
   KEY `idx_ledger_lote` (`id_lote`),
@@ -4698,6 +4814,7 @@ CREATE TABLE `estoque_local` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_estoque_local`),
   UNIQUE KEY `uk_codigo_unidade` (`codigo`,`id_unidade`),
   KEY `fk_local_sessao` (`id_sessao_usuario`),
@@ -4728,6 +4845,7 @@ CREATE TABLE `estoque_lote` (
   `numero_lote` varchar(100) NOT NULL,
   `data_validade` date NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_lote`),
   KEY `fk_lote_item` (`id_item`),
   CONSTRAINT `fk_lote_item` FOREIGN KEY (`id_item`) REFERENCES `estoque_item` (`id_item`)
@@ -4760,6 +4878,7 @@ CREATE TABLE `estoque_lote_snapshot` (
   `hash_anterior` char(64) DEFAULT NULL,
   `hash_atual` char(64) NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_snapshot`),
   KEY `fk_snap_lote` (`id_lote`),
   KEY `fk_snap_mov_item` (`id_movimento_item`),
@@ -4795,6 +4914,7 @@ CREATE TABLE `estoque_movimentacao` (
   `confirmado` tinyint(1) NOT NULL DEFAULT '0',
   `confirmado_em` datetime DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_movimentacao`),
   KEY `fk_mov_saldo` (`id_saldo`),
   CONSTRAINT `fk_mov_saldo` FOREIGN KEY (`id_saldo`) REFERENCES `estoque_produto_saldo` (`id_saldo`)
@@ -4824,6 +4944,7 @@ CREATE TABLE `estoque_movimentacao_itens` (
   `quantidade_saida` decimal(12,4) NOT NULL,
   `id_usuario_quem_deu_baixa` bigint NOT NULL,
   `data_movimento` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_mov_atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -4857,6 +4978,7 @@ CREATE TABLE `estoque_movimento` (
   `hash_duplicidade` char(64) DEFAULT NULL,
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_movimento`),
   UNIQUE KEY `hash_duplicidade` (`hash_duplicidade`),
   KEY `fk_estq_mov_item_ref` (`id_item`),
@@ -4893,6 +5015,7 @@ CREATE TABLE `estoque_movimento_item` (
   `valor_unitario` decimal(15,6) NOT NULL DEFAULT '0.000000',
   `id_ffa_item` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_movimento_item`),
   KEY `fk_item_mov` (`id_movimento`),
   KEY `idx_item_produto` (`id_produto`),
@@ -4923,6 +5046,7 @@ CREATE TABLE `estoque_pipeline_estado` (
   `bloqueado` tinyint DEFAULT '1',
   `lease_expira_em` datetime DEFAULT NULL,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`hash_execucao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4966,6 +5090,7 @@ CREATE TABLE `estoque_produto` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_produto`),
   UNIQUE KEY `uk_sku` (`sku_interno`),
   UNIQUE KEY `uk_barcode` (`barcode`),
@@ -4997,6 +5122,7 @@ CREATE TABLE `estoque_produto_codigo_externo` (
   `preferencial` tinyint(1) NOT NULL DEFAULT '0',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_sessao_usuario` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_codigo_ext`),
   UNIQUE KEY `uk_prod_sistema` (`id_produto`,`sistema_externo`,`codigo_externo`),
   KEY `fk_cod_ext_sessao` (`id_sessao_usuario`),
@@ -5033,6 +5159,7 @@ CREATE TABLE `estoque_reserva` (
   `hash_atual` char(64) NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_reserva`),
   KEY `fk_reserva_local` (`id_estoque_local`),
   KEY `fk_reserva_produto` (`id_produto`),
@@ -5069,6 +5196,7 @@ CREATE TABLE `estoque_reserva_evento` (
   `hash_anterior` char(64) DEFAULT NULL,
   `hash_atual` char(64) NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `fk_evento_reserva` (`id_reserva`),
   KEY `fk_evento_sessao` (`id_sessao_usuario`),
@@ -5104,6 +5232,7 @@ CREATE TABLE `estoque_saldo` (
   `qtd_projetada` decimal(15,4) GENERATED ALWAYS AS ((`qtd_fisica` - `qtd_reservada`)) STORED,
   `id_sessao_usuario` bigint NOT NULL,
   `ultima_atualizacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_saldo`),
   UNIQUE KEY `uk_estoque_global` (`id_unidade`,`id_local`,`id_item`,`id_lote`),
   KEY `idx_lock` (`id_item`,`id_local`,`id_lote`),
@@ -5138,6 +5267,7 @@ CREATE TABLE `estoque_saldo_central` (
   `qtd_projetada` decimal(15,4) GENERATED ALWAYS AS ((`qtd_fisica` - `qtd_reservada`)) STORED,
   `id_sessao_usuario` bigint NOT NULL,
   `ultima_atualizacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_saldo`),
   UNIQUE KEY `uk_central_his` (`id_unidade`,`id_local`,`id_item`,`id_lote`),
   KEY `idx_central_lock` (`id_item`,`id_local`,`id_lote`),
@@ -5175,6 +5305,7 @@ CREATE TABLE `estoque_saldo_master` (
   `qtd_projetada` decimal(15,4) GENERATED ALWAYS AS ((`qtd_fisica` - `qtd_reservada`)) STORED,
   `id_sessao_usuario` bigint NOT NULL,
   `ultima_atualizacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_saldo`),
   UNIQUE KEY `uk_master_his` (`id_unidade`,`id_local`,`id_item`,`id_lote`),
   KEY `idx_master_lock` (`id_item`,`id_local`,`id_lote`),
@@ -5212,6 +5343,7 @@ CREATE TABLE `evento_ffa` (
   `status_destino` enum('ABERTO','EM_TRIAGEM','AGUARDANDO_CHAMADA_MEDICO','CHAMANDO_MEDICO','EM_ATENDIMENTO_MEDICO','OBSERVACAO','AGUARDANDO_MEDICACAO','MEDICACAO','AGUARDANDO_RX','EM_RX','AGUARDANDO_COLETA','EM_COLETA','AGUARDANDO_ECG','EM_ECG','ALTA','TRANSFERENCIA','INTERNACAO','FINALIZADO','AGUARDANDO_RETORNO','EMERGENCIA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `payload` json DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_evento_ffa` (`id_ffa`),
   KEY `idx_evento_tipo` (`tipo_evento`),
@@ -5245,6 +5377,7 @@ CREATE TABLE `evento_geral` (
   `payload` json DEFAULT NULL,
   `metadata` json DEFAULT NULL,
   `criado_em` datetime(6) NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_usuario` (`id_usuario`),
   KEY `idx_unidade` (`id_unidade`),
@@ -5277,6 +5410,7 @@ CREATE TABLE `evento_limpeza` (
   `registrado_por` bigint NOT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_setor` (`id_setor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Eventos operacionais da equipe de limpeza';
@@ -5308,6 +5442,7 @@ CREATE TABLE `eventos_fluxo` (
   `perfil_usuario` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `local` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5334,6 +5469,7 @@ CREATE TABLE `evolucao_enfermagem` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_enfermeiro` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evolucao`),
   KEY `id_internacao` (`id_internacao`),
   KEY `id_enfermeiro` (`id_enfermeiro`),
@@ -5364,6 +5500,7 @@ CREATE TABLE `evolucao_medica` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_medico` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evolucao`),
   KEY `id_internacao` (`id_internacao`),
   KEY `id_medico` (`id_medico`),
@@ -5395,6 +5532,7 @@ CREATE TABLE `evolucao_multidisciplinar` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_usuario` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evolucao`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_usuario` (`id_usuario`),
@@ -5423,6 +5561,7 @@ CREATE TABLE `exame` (
   `codigo` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tipo` enum('LAB','RX','OUTROS') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_exame`),
   UNIQUE KEY `codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -5450,6 +5589,7 @@ CREATE TABLE `exame_fisico` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_exame`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_usuario` (`id_usuario`),
@@ -5480,6 +5620,7 @@ CREATE TABLE `exame_historico` (
   `descricao` text,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_pedido_hist` (`id_pedido`),
   CONSTRAINT `fk_hist_exame_pedido` FOREIGN KEY (`id_pedido`) REFERENCES `exame_pedido` (`id_pedido`)
@@ -5511,6 +5652,7 @@ CREATE TABLE `exame_pedido` (
   `status` enum('SOLICITADO','COLETADO','EM_LABORATORIO','FINALIZADO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'SOLICITADO',
   `id_usuario_solicitante` bigint NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pedido`),
   UNIQUE KEY `codigo_interno` (`codigo_interno`),
   KEY `fk_exame_senha` (`id_senha`),
@@ -5543,6 +5685,7 @@ CREATE TABLE `exame_pedido_item` (
   `material` varchar(50) DEFAULT NULL,
   `valor_custo` decimal(10,2) DEFAULT '0.00',
   `valor_venda` decimal(10,2) DEFAULT '0.00',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `fk_item_pedido` (`id_pedido`),
   CONSTRAINT `fk_item_pedido` FOREIGN KEY (`id_pedido`) REFERENCES `exame_pedido` (`id_pedido`)
@@ -5586,7 +5729,8 @@ CREATE TABLE `farm_atendimento_externo` (
   KEY `ix_fext_status` (`status`),
   KEY `fk_farm_atendimento_externo_atendimento` (`id_atendimento`),
   KEY `idx_farm_ext_ent` (`id_entidade`),
-  CONSTRAINT `fk_farm_atendimento_externo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_farm_atendimento_externo_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_farm_atendimento_externo_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5612,6 +5756,7 @@ CREATE TABLE `farm_convenio_autorizacao` (
   `numero_autorizacao` varchar(80) DEFAULT NULL,
   `status` enum('PENDENTE','APROVADO','NEGADO') NOT NULL DEFAULT 'PENDENTE',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_autorizacao`),
   KEY `fk_conv_disp` (`id_dispensacao`),
   CONSTRAINT `fk_conv_disp` FOREIGN KEY (`id_dispensacao`) REFERENCES `farm_dispensacao` (`id_dispensacao`)
@@ -5644,6 +5789,7 @@ CREATE TABLE `farm_dispensacao` (
   `segunda_baixa_em` datetime DEFAULT NULL,
   `status` enum('ABERTA','PARCIAL','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'ABERTA',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_dispensacao`),
   KEY `fk_disp_receita` (`id_receita`),
   CONSTRAINT `fk_disp_receita` FOREIGN KEY (`id_receita`) REFERENCES `farm_receita_controlada` (`id_receita`)
@@ -5673,6 +5819,7 @@ CREATE TABLE `farm_dispensacao_item` (
   `lote` bigint DEFAULT NULL,
   `quantidade` decimal(12,3) NOT NULL,
   `valor_unitario` decimal(12,2) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `fk_item_dispensacao` (`id_dispensacao`),
   KEY `fk_farm_disp_item_estoque_lote` (`lote`),
@@ -5704,6 +5851,7 @@ CREATE TABLE `farm_operacao` (
   `tipo_operacao` enum('INTERNO','VENDA_BALCAO','CONVENIO') NOT NULL,
   `exige_dupla_baixa` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_operacao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5741,6 +5889,7 @@ CREATE TABLE `farm_receita_controlada` (
   `id_usuario_baixa_final` bigint DEFAULT NULL,
   `baixa_final_em` datetime DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_receita`),
   KEY `ix_receita_status` (`status`),
   KEY `fk_rc_operacao` (`id_operacao`),
@@ -5787,7 +5936,8 @@ CREATE TABLE `farmacia_atendimento_externo_dispensacao` (
   CONSTRAINT `fk_faed_item` FOREIGN KEY (`id_item`) REFERENCES `farmacia_atendimento_externo_item` (`id_item`),
   CONSTRAINT `fk_faed_local` FOREIGN KEY (`id_local_estoque`) REFERENCES `local_atendimento` (`id_local`),
   CONSTRAINT `fk_faed_lote` FOREIGN KEY (`id_lote`) REFERENCES `farmaco_lote` (`id_lote`),
-  CONSTRAINT `fk_farmacia_atendimento_externo_dispensacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_farmacia_atendimento_externo_dispensacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_farmacia_atendimento_externo_dispensacao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5821,6 +5971,7 @@ CREATE TABLE `farmacia_atendimento_externo_item` (
   `atualizado_por` bigint DEFAULT NULL,
   `id_lote` bigint NOT NULL,
   `id_local_estoque` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `idx_faei` (`id_atendimento`,`status`),
   KEY `fk_faei_farmaco` (`id_farmaco`),
@@ -5852,6 +6003,7 @@ CREATE TABLE `farmacia_dispensacao_log` (
   `id_lote` bigint DEFAULT NULL,
   `quantidade` decimal(14,3) NOT NULL,
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_prescricao_item` (`id_prescricao_item`),
   KEY `idx_sessao_usuario` (`id_sessao_usuario`),
@@ -5886,6 +6038,7 @@ CREATE TABLE `farmacia_externo_evento` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_fee` (`id_atendimento`,`criado_em`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -5916,6 +6069,7 @@ CREATE TABLE `farmaco_auditoria` (
   `dados_depois` json DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
   `data_evento` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_auditoria`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5946,6 +6100,7 @@ CREATE TABLE `farmaco_auditoria_bloqueio` (
   `usuario` bigint NOT NULL,
   `motivo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_bloq_farmaco` (`id_farmaco`),
   KEY `idx_bloq_lote` (`id_lote`),
@@ -5982,6 +6137,7 @@ CREATE TABLE `farmaco_movimentacao` (
   `observacao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `realizado_por` bigint NOT NULL,
   `data_mov` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_movimentacao`),
   KEY `fk_mov_farmaco` (`id_farmaco`),
   KEY `fk_mov_lote` (`id_lote`),
@@ -6013,6 +6169,7 @@ CREATE TABLE `farmaco_unidade` (
   `cota_maxima` int DEFAULT NULL,
   `atualizado_por` bigint NOT NULL,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_farmaco`,`id_cidade`),
   CONSTRAINT `fk_fu_farmaco` FOREIGN KEY (`id_farmaco`) REFERENCES `farmaco` (`id_farmaco`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6044,6 +6201,7 @@ CREATE TABLE `faturamento_codigo` (
   `ativo` tinyint NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_codigo`),
   UNIQUE KEY `uq_faturamento_codigo` (`sistema`,`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6089,6 +6247,7 @@ CREATE TABLE `faturamento_conta` (
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `cancelado_em` datetime DEFAULT NULL,
   `cancelado_por` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_conta`),
   KEY `fk_fat_conta_ffa` (`id_ffa`),
   KEY `idx_fat_conta_numero` (`numero_conta`),
@@ -6123,6 +6282,7 @@ CREATE TABLE `faturamento_conta_item` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `id_conta` bigint NOT NULL,
   `id_item` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Relaciona itens faturáveis à conta';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6151,6 +6311,7 @@ CREATE TABLE `faturamento_conta_paciente` (
   `valor_total` decimal(12,2) DEFAULT '0.00',
   `numero_guia_principal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_fechamento` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_conta_atend` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6176,6 +6337,7 @@ CREATE TABLE `faturamento_conta_seq` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6205,6 +6367,7 @@ CREATE TABLE `faturamento_convenio` (
   `status_guia` enum('ABERTA','ENVIADA','PAGA','GLOSADA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ABERTA',
   `xml_gerado` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `data_emissao` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6230,6 +6393,7 @@ CREATE TABLE `faturamento_convenios` (
   `nome_fantasia` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `registro_ans` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_tabela_precos` int DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6260,6 +6424,7 @@ CREATE TABLE `faturamento_evento` (
   `id_sessao_usuario` bigint DEFAULT NULL,
   `tipo` enum('ABRIR','ADICIONAR_ITEM','CANCELAR_ITEM','FECHAR','REABRIR','CANCELAR_CONTA','OBS') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `detalhe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_conta` (`id_conta`),
   KEY `idx_fat_evt_sessao` (`id_sessao_usuario`),
@@ -6290,6 +6455,7 @@ CREATE TABLE `faturamento_insumo` (
   `id_produto` bigint NOT NULL,
   `lote` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `validade` date DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_fat_insumo`),
   KEY `idx_item` (`id_item`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Detalhe do insumo faturado';
@@ -6332,6 +6498,7 @@ CREATE TABLE `faturamento_item` (
   `desconto` decimal(10,2) NOT NULL DEFAULT '0.00',
   `total_linha` decimal(10,2) NOT NULL DEFAULT '0.00',
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `idx_fat_item_conta` (`id_conta`),
   KEY `idx_fat_item_codigo` (`id_codigo`),
@@ -6364,6 +6531,7 @@ CREATE TABLE `faturamento_producao` (
   `cbo_profissional` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status_faturamento` enum('PENDENTE','PROCESSADO','GLOSADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6392,6 +6560,7 @@ CREATE TABLE `faturamento_producao_sus` (
   `cns_paciente` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_producao` date DEFAULT NULL,
   `status_remessa` enum('PENDENTE','ENVIADO','REJEITADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sus_atend` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6420,6 +6589,7 @@ CREATE TABLE `faturamento_regras_validacao` (
   `possui_cbo` tinyint(1) DEFAULT '0',
   `possui_prescricao` tinyint(1) DEFAULT '0',
   `apto_para_faturar` tinyint(1) GENERATED ALWAYS AS (((0 <> `possui_cid`) and (0 <> `possui_cbo`))) STORED,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_fatura_atend` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6448,6 +6618,7 @@ CREATE TABLE `faturamento_sigtap` (
   `valor_sh` decimal(10,2) DEFAULT NULL,
   `valor_sa` decimal(10,2) DEFAULT NULL,
   `complexidade` enum('BASICA','MEDIA','ALTA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_sigtap_cod` (`codigo_procedimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6474,6 +6645,7 @@ CREATE TABLE `faturamento_sus_config` (
   `id_unidade` bigint unsigned DEFAULT NULL,
   `cnes_unidade` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `gestao_municipal_estadual` enum('M','E') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6540,6 +6712,7 @@ CREATE TABLE `ffa_demandas_externas` (
   `profissional_externo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` enum('PENDENTE','REALIZADO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_demanda_atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6573,6 +6746,7 @@ CREATE TABLE `ffa_diagnostico` (
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_diagnostico`),
   UNIQUE KEY `ux_diag_ffa_cid_tipo` (`id_ffa`,`cid10`,`tipo`),
   KEY `idx_diag_ffa` (`id_ffa`),
@@ -6603,6 +6777,7 @@ CREATE TABLE `ffa_estado` (
   `nome` varchar(100) NOT NULL,
   `descricao` varchar(255) DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_estado`),
   UNIQUE KEY `uk_ffa_estado_nome` (`nome`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -6631,6 +6806,7 @@ CREATE TABLE `ffa_estoque_conciliacao` (
   `valor_faturado` decimal(15,6) DEFAULT NULL,
   `valor_custo` decimal(15,6) DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_conciliacao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6665,6 +6841,7 @@ CREATE TABLE `ffa_evolucao` (
   `user_agent` varchar(255) DEFAULT NULL,
   `hash_integridade` varchar(64) DEFAULT NULL,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evolucao`),
   KEY `idx_evo_ffa` (`id_ffa`),
   KEY `idx_evo_sessao` (`id_sessao_usuario`),
@@ -6696,6 +6873,7 @@ CREATE TABLE `ffa_extra` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `status` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6723,6 +6901,7 @@ CREATE TABLE `ffa_historico_status` (
   `status_novo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_mudanca` datetime DEFAULT CURRENT_TIMESTAMP,
   `id_usuario_acao` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_hist_ffa` (`id_ffa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6757,6 +6936,7 @@ CREATE TABLE `ffa_item` (
   `id_unidade` bigint unsigned NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_ffa_item`),
   KEY `fk_ffa_produto` (`id_produto`),
   KEY `fk_ffa_sessao` (`id_sessao_usuario`),
@@ -6788,6 +6968,7 @@ CREATE TABLE `ffa_prioridade` (
   `codigo_prioridade` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -6820,6 +7001,7 @@ CREATE TABLE `ffa_procedimento` (
   `iniciado_em` datetime DEFAULT NULL,
   `finalizado_em` datetime DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_procedimento`),
   KEY `idx_ffa` (`id_ffa`),
   KEY `idx_status` (`status`)
@@ -6860,6 +7042,7 @@ CREATE TABLE `ffa_sinais_vitais` (
   `escala_dor` tinyint DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sinais`),
   KEY `idx_ffa_sinais_ffa` (`id_ffa`,`data_coleta`),
   KEY `idx_ffa_sinais_sessao` (`id_sessao_usuario`),
@@ -6896,6 +7079,7 @@ CREATE TABLE `ffa_substatus` (
   `finalizado_em` datetime DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_usuario` (`id_usuario`),
   KEY `idx_ffa_categoria` (`id_ffa`,`categoria`,`ativo`),
@@ -6927,6 +7111,7 @@ CREATE TABLE `fila_evento` (
   `id_local` bigint DEFAULT NULL,
   `detalhe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_fila` (`id_fila`),
   CONSTRAINT `fila_evento_ibfk_1` FOREIGN KEY (`id_fila`) REFERENCES `fila_senha` (`id`)
@@ -6939,7 +7124,7 @@ CREATE TABLE `fila_evento` (
 
 LOCK TABLES `fila_evento` WRITE;
 /*!40000 ALTER TABLE `fila_evento` DISABLE KEYS */;
-INSERT INTO `fila_evento` VALUES (5,3,'ABERTURA_FFA',10,NULL,'Teste com fila válida','2026-01-14 04:31:01');
+INSERT INTO `fila_evento` VALUES (5,3,'ABERTURA_FFA',10,NULL,'Teste com fila válida','2026-01-14 04:31:01',1);
 /*!40000 ALTER TABLE `fila_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -6969,6 +7154,7 @@ CREATE TABLE `fila_operacional` (
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'Notas ou observações específicas',
   `id_local` bigint DEFAULT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_fila`),
   KEY `id_responsavel` (`id_responsavel`),
   KEY `id_local` (`id_local`),
@@ -7004,6 +7190,7 @@ CREATE TABLE `fila_operacional_evento` (
   `tipo_evento` varchar(64) NOT NULL,
   `detalhe` text,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_filaop_evt_fila` (`id_fila`),
   KEY `idx_filaop_evt_sessao` (`id_sessao_usuario`),
@@ -7037,6 +7224,7 @@ CREATE TABLE `fila_painel_runtime` (
   `status` varchar(50) DEFAULT NULL,
   `prioridade` int DEFAULT NULL,
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_unidade` (`id_unidade`),
   KEY `idx_local` (`id_local`),
@@ -7066,6 +7254,7 @@ CREATE TABLE `fila_retorno` (
   `retorno_em` datetime NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_fila` (`id_fila`),
   CONSTRAINT `fila_retorno_ibfk_1` FOREIGN KEY (`id_fila`) REFERENCES `fila_senha` (`id`)
@@ -7078,7 +7267,7 @@ CREATE TABLE `fila_retorno` (
 
 LOCK TABLES `fila_retorno` WRITE;
 /*!40000 ALTER TABLE `fila_retorno` DISABLE KEYS */;
-INSERT INTO `fila_retorno` VALUES (1,1,'2025-12-29 03:12:37',1,'2025-12-29 03:07:37');
+INSERT INTO `fila_retorno` VALUES (1,1,'2025-12-29 03:12:37',1,'2025-12-29 03:07:37',NULL);
 /*!40000 ALTER TABLE `fila_retorno` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7094,6 +7283,7 @@ CREATE TABLE `fila_senha` (
   `id_senha` bigint NOT NULL,
   `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'AGUARDANDO',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_fila_senha_id_senha` (`id_senha`),
   KEY `idx_fs_senha` (`id_senha`)
@@ -7106,7 +7296,7 @@ CREATE TABLE `fila_senha` (
 
 LOCK TABLES `fila_senha` WRITE;
 /*!40000 ALTER TABLE `fila_senha` DISABLE KEYS */;
-INSERT INTO `fila_senha` VALUES (1,3,'EM_COMPLEMENTACAO','2026-02-13 06:17:42'),(2,4,'EM_COMPLEMENTACAO','2026-02-13 06:19:25');
+INSERT INTO `fila_senha` VALUES (1,3,'EM_COMPLEMENTACAO','2026-02-13 06:17:42',NULL),(2,4,'EM_COMPLEMENTACAO','2026-02-13 06:19:25',NULL);
 /*!40000 ALTER TABLE `fila_senha` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7126,6 +7316,7 @@ CREATE TABLE `financeiro_repasse_medico` (
   `valor_final_medico` decimal(10,2) DEFAULT NULL,
   `status_pagamento` enum('PREVIA','APROVADO','PAGO','GLOSADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PREVIA',
   `data_competencia` date DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_repasse_medico` (`id_usuario_medico`,`data_competencia`),
   KEY `idx_financeiro_competencia` (`data_competencia`,`status_pagamento`)
@@ -7166,7 +7357,8 @@ CREATE TABLE `fluxo_orquestrador_canonico` (
   UNIQUE KEY `uk_ffa_orquestrador_fluxo` (`dominio_fluxo`,`estado_atual`,`estado_proximo`),
   KEY `fk_fluxo_orquestrador_canonico_atendimento` (`id_atendimento`),
   KEY `idx_foc_ent` (`id_entidade`),
-  CONSTRAINT `fk_fluxo_orquestrador_canonico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_fluxo_orquestrador_canonico_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_fluxo_orquestrador_canonico_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -7194,6 +7386,7 @@ CREATE TABLE `fluxo_status` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_fluxo_status`),
   UNIQUE KEY `uk_fluxo_status_codigo` (`codigo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -7205,7 +7398,7 @@ CREATE TABLE `fluxo_status` (
 
 LOCK TABLES `fluxo_status` WRITE;
 /*!40000 ALTER TABLE `fluxo_status` DISABLE KEYS */;
-INSERT INTO `fluxo_status` VALUES (1,'INICIO','Entrada do paciente','INICIAL',1,'2026-02-28 21:44:16.647161',NULL),(2,'AGUARDANDO_TRIAGEM','Aguardando triagem','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL),(3,'EM_TRIAGEM','Em triagem','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL),(4,'AGUARDANDO_CONSULTA','Aguardando consulta médica','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL),(5,'EM_CONSULTA','Em consulta médica','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL),(6,'AGUARDANDO_EXAMES','Aguardando exames','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL),(7,'EM_EXAME','Em exame','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL),(8,'MEDICACAO_INTERNA','Em medicação interna','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL),(9,'ALTA_MEDICA','Alta médica concedida','INTERMEDIARIO',1,'2026-02-28 21:44:16.647161',NULL),(10,'EVASAO','Paciente evadiu','FINAL',1,'2026-02-28 21:44:16.647161',NULL),(11,'NAO_COMPARECEU','Não compareceu à chamada','FINAL',1,'2026-02-28 21:44:16.647161',NULL),(12,'FINALIZADO','Atendimento finalizado','FINAL',1,'2026-02-28 21:44:16.647161',NULL);
+INSERT INTO `fluxo_status` VALUES (1,'INICIO','Entrada do paciente','INICIAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(2,'AGUARDANDO_TRIAGEM','Aguardando triagem','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(3,'EM_TRIAGEM','Em triagem','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(4,'AGUARDANDO_CONSULTA','Aguardando consulta médica','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(5,'EM_CONSULTA','Em consulta médica','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(6,'AGUARDANDO_EXAMES','Aguardando exames','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(7,'EM_EXAME','Em exame','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(8,'MEDICACAO_INTERNA','Em medicação interna','OPERACIONAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(9,'ALTA_MEDICA','Alta médica concedida','INTERMEDIARIO',1,'2026-02-28 21:44:16.647161',NULL,NULL),(10,'EVASAO','Paciente evadiu','FINAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(11,'NAO_COMPARECEU','Não compareceu à chamada','FINAL',1,'2026-02-28 21:44:16.647161',NULL,NULL),(12,'FINALIZADO','Atendimento finalizado','FINAL',1,'2026-02-28 21:44:16.647161',NULL,NULL);
 /*!40000 ALTER TABLE `fluxo_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7227,6 +7420,7 @@ CREATE TABLE `fluxo_transicao` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_fluxo_transicao`),
   UNIQUE KEY `uk_fluxo_regra` (`id_contrato`,`id_status_origem`,`id_status_destino`,`id_perfil_requerido`),
   KEY `idx_fluxo_contrato` (`id_contrato`),
@@ -7268,6 +7462,7 @@ CREATE TABLE `fluxo_transicao_matriz` (
   `prioridade` int DEFAULT '0',
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_fluxo_transicao`),
   KEY `idx_fluxo` (`dominio_fluxo`,`estado_origem`,`estado_destino`),
   KEY `idx_acao` (`acao`),
@@ -7281,7 +7476,7 @@ CREATE TABLE `fluxo_transicao_matriz` (
 
 LOCK TABLES `fluxo_transicao_matriz` WRITE;
 /*!40000 ALTER TABLE `fluxo_transicao_matriz` DISABLE KEYS */;
-INSERT INTO `fluxo_transicao_matriz` VALUES (1,'ASSISTENCIAL','ABRIR_ATENDIMENTO','INICIAL','AGUARDANDO_TRIAGEM',NULL,NULL,0,1,0,1,'2026-03-21 02:01:35.935255'),(2,'ASSISTENCIAL','TRIAGEM_INICIAR','AGUARDANDO_TRIAGEM','EM_TRIAGEM',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801'),(3,'ASSISTENCIAL','TRIAGEM_FINALIZAR','EM_TRIAGEM','AGUARDANDO_ATENDIMENTO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801'),(4,'ASSISTENCIAL','ATENDIMENTO_INICIAR','AGUARDANDO_ATENDIMENTO','EM_ATENDIMENTO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801'),(5,'ASSISTENCIAL','ATENDIMENTO_FINALIZAR','EM_ATENDIMENTO','ALTA',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801'),(6,'ASSISTENCIAL','REGISTRAR_EVASAO','AGUARDANDO_ATENDIMENTO','EVASAO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801'),(7,'ASSISTENCIAL','REGISTRAR_EVASAO','EM_ATENDIMENTO','EVASAO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801'),(8,'ASSISTENCIAL','ATENDIMENTO_FINALIZAR','EM_ATENDIMENTO','ALTA',NULL,NULL,0,1,0,1,'2026-03-21 03:11:07.817776');
+INSERT INTO `fluxo_transicao_matriz` VALUES (1,'ASSISTENCIAL','ABRIR_ATENDIMENTO','INICIAL','AGUARDANDO_TRIAGEM',NULL,NULL,0,1,0,1,'2026-03-21 02:01:35.935255',NULL),(2,'ASSISTENCIAL','TRIAGEM_INICIAR','AGUARDANDO_TRIAGEM','EM_TRIAGEM',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801',NULL),(3,'ASSISTENCIAL','TRIAGEM_FINALIZAR','EM_TRIAGEM','AGUARDANDO_ATENDIMENTO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801',NULL),(4,'ASSISTENCIAL','ATENDIMENTO_INICIAR','AGUARDANDO_ATENDIMENTO','EM_ATENDIMENTO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801',NULL),(5,'ASSISTENCIAL','ATENDIMENTO_FINALIZAR','EM_ATENDIMENTO','ALTA',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801',NULL),(6,'ASSISTENCIAL','REGISTRAR_EVASAO','AGUARDANDO_ATENDIMENTO','EVASAO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801',NULL),(7,'ASSISTENCIAL','REGISTRAR_EVASAO','EM_ATENDIMENTO','EVASAO',NULL,NULL,0,1,0,1,'2026-03-21 02:27:19.993801',NULL),(8,'ASSISTENCIAL','ATENDIMENTO_FINALIZAR','EM_ATENDIMENTO','ALTA',NULL,NULL,0,1,0,1,'2026-03-21 03:11:07.817776',NULL);
 /*!40000 ALTER TABLE `fluxo_transicao_matriz` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7296,6 +7491,7 @@ CREATE TABLE `forma_pagamento` (
   `id_forma_pagamento` int NOT NULL AUTO_INCREMENT,
   `codigo` varchar(30) NOT NULL,
   `descricao` varchar(80) DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_forma_pagamento`),
   UNIQUE KEY `uk_fp_codigo` (`codigo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -7307,7 +7503,7 @@ CREATE TABLE `forma_pagamento` (
 
 LOCK TABLES `forma_pagamento` WRITE;
 /*!40000 ALTER TABLE `forma_pagamento` DISABLE KEYS */;
-INSERT INTO `forma_pagamento` VALUES (1,'DINHEIRO','Dinheiro'),(2,'PIX','PIX'),(3,'DEBITO','Cartão de débito'),(4,'CREDITO','Cartão de crédito'),(5,'CARTAO_DEBITO','Cartão Débito'),(6,'CARTAO_CREDITO','Cartão Crédito'),(7,'CONVENIO','Convênio'),(8,'OUTRO','Outro');
+INSERT INTO `forma_pagamento` VALUES (1,'DINHEIRO','Dinheiro',NULL),(2,'PIX','PIX',NULL),(3,'DEBITO','Cartão de débito',NULL),(4,'CREDITO','Cartão de crédito',NULL),(5,'CARTAO_DEBITO','Cartão Débito',NULL),(6,'CARTAO_CREDITO','Cartão Crédito',NULL),(7,'CONVENIO','Convênio',NULL),(8,'OUTRO','Outro',NULL);
 /*!40000 ALTER TABLE `forma_pagamento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7326,6 +7522,7 @@ CREATE TABLE `fornecedor` (
   `contato` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_fornecedor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7393,6 +7590,7 @@ CREATE TABLE `funcionario_conselho_profissional` (
   `uf` char(2) NOT NULL,
   `situacao` enum('ATIVO','SUSPENSO','CANCELADO') DEFAULT 'ATIVO',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_funcionario_conselho`),
   KEY `idx_fcp_funcionario` (`id_funcionario`),
   CONSTRAINT `fk_fcp_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`)
@@ -7405,7 +7603,7 @@ CREATE TABLE `funcionario_conselho_profissional` (
 
 LOCK TABLES `funcionario_conselho_profissional` WRITE;
 /*!40000 ALTER TABLE `funcionario_conselho_profissional` DISABLE KEYS */;
-INSERT INTO `funcionario_conselho_profissional` VALUES (1,1,'CRM','123456','SP','ATIVO','2026-03-11 00:09:49.112799'),(2,2,'CRM','654321','SP','ATIVO','2026-03-11 00:09:49.112799'),(3,3,'CRM','112233','SP','ATIVO','2026-03-11 00:09:49.112799'),(4,1,'CRM','123456','SP','ATIVO','2026-03-11 00:12:33.841638'),(5,2,'CRM','654321','SP','ATIVO','2026-03-11 00:12:33.841638'),(6,3,'CRM','112233','SP','ATIVO','2026-03-11 00:12:33.841638');
+INSERT INTO `funcionario_conselho_profissional` VALUES (1,1,'CRM','123456','SP','ATIVO','2026-03-11 00:09:49.112799',NULL),(2,2,'CRM','654321','SP','ATIVO','2026-03-11 00:09:49.112799',NULL),(3,3,'CRM','112233','SP','ATIVO','2026-03-11 00:09:49.112799',NULL),(4,1,'CRM','123456','SP','ATIVO','2026-03-11 00:12:33.841638',NULL),(5,2,'CRM','654321','SP','ATIVO','2026-03-11 00:12:33.841638',NULL),(6,3,'CRM','112233','SP','ATIVO','2026-03-11 00:12:33.841638',NULL);
 /*!40000 ALTER TABLE `funcionario_conselho_profissional` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7422,6 +7620,7 @@ CREATE TABLE `funcionario_especialidade` (
   `especialidade` varchar(150) NOT NULL,
   `principal` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_funcionario_especialidade`),
   KEY `idx_fe_funcionario` (`id_funcionario`),
   CONSTRAINT `fk_fe_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`)
@@ -7434,7 +7633,7 @@ CREATE TABLE `funcionario_especialidade` (
 
 LOCK TABLES `funcionario_especialidade` WRITE;
 /*!40000 ALTER TABLE `funcionario_especialidade` DISABLE KEYS */;
-INSERT INTO `funcionario_especialidade` VALUES (1,1,'CLINICA GERAL',1,'2026-03-11 00:09:41.161529'),(2,2,'PEDIATRIA',1,'2026-03-11 00:09:41.161529'),(3,3,'ORTOPEDIA',1,'2026-03-11 00:09:41.161529'),(4,4,'CLINICA GERAL',1,'2026-03-11 00:09:41.161529'),(5,4,'CARDIOLOGIA',0,'2026-03-11 00:09:41.161529');
+INSERT INTO `funcionario_especialidade` VALUES (1,1,'CLINICA GERAL',1,'2026-03-11 00:09:41.161529',NULL),(2,2,'PEDIATRIA',1,'2026-03-11 00:09:41.161529',NULL),(3,3,'ORTOPEDIA',1,'2026-03-11 00:09:41.161529',NULL),(4,4,'CLINICA GERAL',1,'2026-03-11 00:09:41.161529',NULL),(5,4,'CARDIOLOGIA',0,'2026-03-11 00:09:41.161529',NULL);
 /*!40000 ALTER TABLE `funcionario_especialidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7455,6 +7654,7 @@ CREATE TABLE `funcionario_unidade` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_funcionario_unidade`),
   KEY `idx_fu_funcionario` (`id_funcionario`),
   KEY `idx_fu_unidade` (`id_unidade`),
@@ -7469,7 +7669,7 @@ CREATE TABLE `funcionario_unidade` (
 
 LOCK TABLES `funcionario_unidade` WRITE;
 /*!40000 ALTER TABLE `funcionario_unidade` DISABLE KEYS */;
-INSERT INTO `funcionario_unidade` VALUES (1,1,1,'MEDICO_PLANTONISTA',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL),(2,2,1,'MEDICO_PEDIATRA',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL),(3,3,1,'MEDICO_ORTOPEDISTA',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL),(4,4,1,'MEDICO_CLINICO',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL),(5,1,1,'MEDICO_PLANTONISTA',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL),(6,2,1,'MEDICO_PEDIATRA',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL),(7,3,1,'MEDICO_ORTOPEDISTA',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL),(8,4,1,'MEDICO_CLINICO',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL);
+INSERT INTO `funcionario_unidade` VALUES (1,1,1,'MEDICO_PLANTONISTA',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL,NULL),(2,2,1,'MEDICO_PEDIATRA',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL,NULL),(3,3,1,'MEDICO_ORTOPEDISTA',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL,NULL),(4,4,1,'MEDICO_CLINICO',NULL,NULL,1,'2026-03-11 00:09:58.209762',NULL,NULL),(5,1,1,'MEDICO_PLANTONISTA',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL,NULL),(6,2,1,'MEDICO_PEDIATRA',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL,NULL),(7,3,1,'MEDICO_ORTOPEDISTA',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL,NULL),(8,4,1,'MEDICO_CLINICO',NULL,NULL,1,'2026-03-11 00:12:40.369048',NULL,NULL);
 /*!40000 ALTER TABLE `funcionario_unidade` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7488,6 +7688,7 @@ CREATE TABLE `gaso_evento` (
   `id_usuario` bigint DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_gaso_evento`),
   KEY `idx_ge_gaso` (`id_gaso`),
   KEY `fk_ge_user` (`id_usuario`),
@@ -7525,6 +7726,7 @@ CREATE TABLE `gaso_solicitacao` (
   `id_usuario_abertura` bigint NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_gaso`),
   KEY `idx_gaso_status` (`status`),
   KEY `fk_gaso_unidade` (`id_unidade`),
@@ -7560,6 +7762,7 @@ CREATE TABLE `gasoterapia_consumo` (
   `data_fim` datetime DEFAULT NULL,
   `status` enum('EM_USO','ENCERRADO','CANCELADO') DEFAULT 'EM_USO',
   `id_usuario_registro` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_gaso_atendimento` (`id_atendimento`),
   KEY `fk_gaso_leito` (`id_leito`),
@@ -7591,6 +7794,7 @@ CREATE TABLE `gasoterapia_consumo_evento` (
   `id_usuario` bigint DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_gce_consumo` (`id_consumo`),
   KEY `idx_gce_sessao` (`id_sessao_usuario`),
@@ -7624,6 +7828,7 @@ CREATE TABLE `gpat` (
   `observacao` varchar(255) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_gpat`),
   UNIQUE KEY `uk_gpat_ffa` (`id_ffa`),
   UNIQUE KEY `uk_gpat_codigo` (`codigo_gpat`),
@@ -7677,6 +7882,7 @@ CREATE TABLE `gpat_atendimento` (
   KEY `fk_gpat_atendimento_atendimento` (`id_atendimento`),
   KEY `idx_gpat_ent` (`id_entidade`),
   CONSTRAINT `fk_gpat_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_gpat_atendimento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_gpat_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`),
   CONSTRAINT `fk_gpat_prescritor_ext` FOREIGN KEY (`id_prescritor_externo`) REFERENCES `prescritor_externo` (`id_prescritor_externo`),
   CONSTRAINT `fk_gpat_usuario_medico` FOREIGN KEY (`id_usuario_medico`) REFERENCES `usuario` (`id_usuario`)
@@ -7711,6 +7917,7 @@ CREATE TABLE `gpat_dispensacao` (
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `entregue_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `estornado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_gpat_dispensacao`),
   KEY `idx_gpat_disp_item` (`id_gpat_item`),
   KEY `idx_gpat_disp_lote` (`id_lote`),
@@ -7749,6 +7956,7 @@ CREATE TABLE `gpat_evento` (
   `id_usuario` bigint DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_gpat_evento`),
   KEY `idx_gpat_evento_gpat` (`id_gpat`),
   KEY `idx_gpat_evento_tipo` (`tipo_evento`),
@@ -7787,6 +7995,7 @@ CREATE TABLE `gpat_item` (
   `status` enum('ATIVO','SUSPENSO','ENCERRADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ATIVO',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_gpat_item`),
   KEY `idx_gpat_item_gpat` (`id_gpat`),
   KEY `idx_gpat_item_farmaco` (`id_farmaco`),
@@ -7819,6 +8028,7 @@ CREATE TABLE `guardiao_acl_runtime` (
   `recurso` varchar(120) NOT NULL,
   `permitido` tinyint DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_guardiao_acl`),
   KEY `idx_acl_usuario` (`id_usuario`),
   KEY `idx_acl_contexto` (`contexto`),
@@ -7856,8 +8066,8 @@ CREATE TABLE `guardiao_runtime_final` (
   KEY `idx_guardiao_uuid` (`uuid_runtime`),
   KEY `idx_guardiao_estado` (`estado_permitido`),
   KEY `fk_guardiao_runtime_final_unidade` (`id_unidade`),
-  KEY `fk_guardiao_entidade` (`id_entidade`),
-  CONSTRAINT `fk_guardiao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
+  KEY `fk_guardiao_runtime_final_entidade` (`id_entidade`),
+  CONSTRAINT `fk_guardiao_runtime_final_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_guardiao_runtime_final_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7882,6 +8092,7 @@ CREATE TABLE `hardening_sp_excecao` (
   `sp_nome` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `motivo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`sp_nome`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7909,6 +8120,7 @@ CREATE TABLE `hipotese_diagnostica` (
   `principal` tinyint(1) DEFAULT '0',
   `id_medico` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_hipotese`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_medico` (`id_medico`),
@@ -7939,6 +8151,7 @@ CREATE TABLE `hospital_leitos` (
   `tipo_leito` enum('OBSERVACAO','EMERGENCIA','INTERNACAO','ISOLAMENTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` enum('LIVRE','OCUPADO','RESERVADO','LIMPEZA','MANUTENCAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'LIVRE',
   `id_atendimento_atual` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_leito`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7967,6 +8180,7 @@ CREATE TABLE `identificador_global_assistencial` (
   `origem_runtime` varchar(120) NOT NULL,
   `bloqueado` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_global`),
   UNIQUE KEY `uk_global_uuid` (`uuid_assistencial`),
   KEY `idx_global_tipo` (`tipo_entidade`)
@@ -7997,6 +8211,7 @@ CREATE TABLE `integracao_mensageria_externa` (
   `conteudo_raw` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `status_processamento` enum('PENDENTE','PROCESSADO','ERRO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_recebimento` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -8024,6 +8239,7 @@ CREATE TABLE `interconsulta` (
   `motivo` text,
   `status` enum('SOLICITADA','RESPONDIDA') DEFAULT 'SOLICITADA',
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_interconsulta`),
   KEY `fk_interconsulta_especialidade` (`id_especialidade`),
   CONSTRAINT `fk_interconsulta_especialidade` FOREIGN KEY (`id_especialidade`) REFERENCES `especialidade` (`id_especialidade`) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -8054,6 +8270,7 @@ CREATE TABLE `intercorrencia` (
   `gravidade` enum('LEVE','MODERADA','GRAVE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'LEVE',
   `id_usuario` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_intercorrencia`),
   KEY `id_usuario` (`id_usuario`),
   KEY `idx_intercorrencia_atendimento` (`id_atendimento`),
@@ -8115,6 +8332,7 @@ CREATE TABLE `internacao` (
   KEY `fk_internacao_atendimento` (`id_atendimento`),
   KEY `idx_int_ent` (`id_entidade`),
   CONSTRAINT `fk_internacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_internacao_leito` FOREIGN KEY (`id_leito`) REFERENCES `leito` (`id_leito`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Internação e observação clínica';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -8152,6 +8370,7 @@ CREATE TABLE `internacao_braden_avaliacao` (
   `id_usuario_responsavel` bigint NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao_braden_avaliacao`),
   KEY `idx_iba_internacao` (`id_internacao`),
   KEY `idx_iba_data_hora` (`data_hora`),
@@ -8193,6 +8412,7 @@ CREATE TABLE `internacao_cuidados` (
   `tipo_cuidado` enum('DECUBITO','CURATIVO','DRENO','SONDA','OXIGENIO','SINAIS_VITAIS') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `posicionamento` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `frequencia_checagem` int DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_cuidado_presc` (`id_prescricao_item`),
   CONSTRAINT `fk_cuidado_presc` FOREIGN KEY (`id_prescricao_item`) REFERENCES `prescricao_itens` (`id`)
@@ -8221,6 +8441,7 @@ CREATE TABLE `internacao_dietas` (
   `consistencia` enum('LIVRE','BRANDAS','PASTOSA','LIQUIDA','ZERO','ENTERAL','PARENTERAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `restricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `volume_total_dia` int DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_dieta_presc` (`id_prescricao_item`),
   CONSTRAINT `fk_dieta_presc` FOREIGN KEY (`id_prescricao_item`) REFERENCES `prescricao_itens` (`id`)
@@ -8253,6 +8474,7 @@ CREATE TABLE `internacao_dispositivos` (
   `data_prevista_troca` datetime DEFAULT NULL,
   `id_usuario_insercao` bigint NOT NULL,
   `status` enum('ATIVO','REMOVIDO','SUBSTITUIDO') DEFAULT 'ATIVO',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_dispositivo`),
   KEY `fk_disp_internacao` (`id_internacao`),
   CONSTRAINT `fk_disp_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`)
@@ -8293,6 +8515,7 @@ CREATE TABLE `internacao_ferida_avaliacao` (
   `id_usuario_responsavel` bigint NOT NULL,
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_internacao_ferida_avaliacao`),
   KEY `idx_ifa_internacao` (`id_internacao`),
   KEY `idx_ifa_data_hora` (`data_hora`),
@@ -8330,6 +8553,7 @@ CREATE TABLE `internacao_historico` (
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_internacao` (`id_internacao`),
   KEY `idx_intern_hist_internacao_data` (`id_internacao`,`criado_em`)
@@ -8377,7 +8601,8 @@ CREATE TABLE `internacao_medicacao_administracao` (
   CONSTRAINT `fk_ima_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_ima_item` FOREIGN KEY (`id_internacao_prescricao_item`) REFERENCES `internacao_prescricao_item` (`id_internacao_prescricao_item`),
   CONSTRAINT `fk_ima_usuario` FOREIGN KEY (`id_usuario_responsavel`) REFERENCES `usuario` (`id_usuario`),
-  CONSTRAINT `fk_internacao_medicacao_administracao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_internacao_medicacao_administracao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_medicacao_administracao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8418,6 +8643,7 @@ CREATE TABLE `internacao_movimentacao` (
   KEY `fk_internacao_movimentacao_atendimento` (`id_atendimento`),
   KEY `idx_int_mov_ent` (`id_entidade`),
   CONSTRAINT `fk_internacao_movimentacao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_movimentacao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_internacao_movimentacao_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_mov_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -8460,6 +8686,7 @@ CREATE TABLE `internacao_prescricao` (
   KEY `fk_internacao_prescricao_atendimento` (`id_atendimento`),
   KEY `idx_int_presc_ent` (`id_entidade`),
   CONSTRAINT `fk_internacao_prescricao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_prescricao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_ip_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_ip_usuario` FOREIGN KEY (`id_usuario_prescritor`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -8503,6 +8730,7 @@ CREATE TABLE `internacao_prescricao_item` (
   KEY `fk_internacao_prescricao_item_atendimento` (`id_atendimento`),
   KEY `idx_int_prescitem_ent` (`id_entidade`),
   CONSTRAINT `fk_internacao_prescricao_item_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_prescricao_item_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_ipi_prescricao` FOREIGN KEY (`id_internacao_prescricao`) REFERENCES `internacao_prescricao` (`id_internacao_prescricao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -8552,6 +8780,7 @@ CREATE TABLE `internacao_registro_enfermagem` (
   KEY `fk_internacao_registro_enfermagem_atendimento` (`id_atendimento`),
   KEY `idx_int_regenf_ent` (`id_entidade`),
   CONSTRAINT `fk_internacao_registro_enfermagem_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_registro_enfermagem_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_ire_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_ire_usuario` FOREIGN KEY (`id_usuario_responsavel`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -8594,6 +8823,7 @@ CREATE TABLE `internacao_turno_registro` (
   KEY `fk_internacao_turno_registro_atendimento` (`id_atendimento`),
   KEY `idx_int_turno_ent` (`id_entidade`),
   CONSTRAINT `fk_internacao_turno_registro_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_internacao_turno_registro_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_itr_internacao` FOREIGN KEY (`id_internacao`) REFERENCES `internacao` (`id_internacao`),
   CONSTRAINT `fk_itr_usuario` FOREIGN KEY (`id_usuario_responsavel`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -8630,6 +8860,7 @@ CREATE TABLE `kernel_authz_policy` (
   `decision_fingerprint` char(64) DEFAULT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_policy`),
   UNIQUE KEY `uk_policy_runtime` (`id_tenant`,`id_perfil`,`contexto`,`recurso`,`estado_origem`,`estado_destino`,`id_dispositivo_norm`),
   KEY `idx_policy_lookup` (`id_tenant`,`contexto`,`recurso`,`ativo`,`permitido`)
@@ -8642,7 +8873,7 @@ CREATE TABLE `kernel_authz_policy` (
 
 LOCK TABLES `kernel_authz_policy` WRITE;
 /*!40000 ALTER TABLE `kernel_authz_policy` DISABLE KEYS */;
-INSERT INTO `kernel_authz_policy` (`id_policy`, `id_tenant`, `id_perfil`, `id_usuario`, `contexto`, `recurso`, `estado_origem`, `estado_destino`, `id_dispositivo`, `permitido`, `decision_fingerprint`, `ativo`, `criado_em`) VALUES (1,1,2,NULL,'ATENDIMENTO','ATENDIMENTO_INICIAR','*','*',NULL,1,'5659b2b8bf643b502db844a6221bb923a75455d366aac478646ab063c5fc3dd7',1,'2026-03-05 06:01:17.130764');
+INSERT INTO `kernel_authz_policy` (`id_policy`, `id_tenant`, `id_perfil`, `id_usuario`, `contexto`, `recurso`, `estado_origem`, `estado_destino`, `id_dispositivo`, `permitido`, `decision_fingerprint`, `ativo`, `criado_em`, `id_entidade`) VALUES (1,1,2,NULL,'ATENDIMENTO','ATENDIMENTO_INICIAR','*','*',NULL,1,'5659b2b8bf643b502db844a6221bb923a75455d366aac478646ab063c5fc3dd7',1,'2026-03-05 06:01:17.130764',NULL);
 /*!40000 ALTER TABLE `kernel_authz_policy` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -8675,6 +8906,7 @@ CREATE TABLE `kernel_identity_trust_chain` (
   `lineage_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_chain`),
   UNIQUE KEY `uk_nonce_runtime` (`nonce_runtime`),
   KEY `idx_runtime_fp` (`fingerprint_runtime`),
@@ -8718,6 +8950,7 @@ CREATE TABLE `kernel_ledger` (
   `mensagem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `id_tenant` bigint DEFAULT '1',
   `registrado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_transacao`),
   KEY `idx_usuario` (`id_usuario`,`registrado_em`),
   KEY `idx_acao` (`acao`,`registrado_em`),
@@ -8753,11 +8986,13 @@ CREATE TABLE `kernel_runtime_evento` (
   `payload` json DEFAULT NULL,
   `hash_evento` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `id_entidade` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_runtime_evento_uuid` (`uuid_runtime`),
   KEY `idx_runtime_evento_tipo` (`tipo_evento`),
-  KEY `idx_runtime_evento_referencia` (`entidade_alvo`,`id_referencia`)
+  KEY `idx_runtime_evento_referencia` (`entidade_alvo`,`id_referencia`),
+  KEY `fk_kernel_runtime_evento_entidade` (`id_entidade`),
+  CONSTRAINT `fk_kernel_runtime_evento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -8783,6 +9018,7 @@ CREATE TABLE `kernel_runtime_heartbeat` (
   `estado_runtime` varchar(80) NOT NULL,
   `ultimo_ping` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_heartbeat`),
   UNIQUE KEY `uk_heartbeat_runtime` (`uuid_runtime`),
   KEY `idx_heartbeat_estado` (`estado_runtime`)
@@ -8811,6 +9047,7 @@ CREATE TABLE `kernel_runtime_single_writer_lock` (
   `id_sessao_usuario` bigint NOT NULL,
   `estado_lock` enum('ATIVO','LIBERADO','EXPIRADO') DEFAULT 'ATIVO',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_lock`),
   KEY `idx_lock_contexto` (`contexto_runtime`),
   KEY `idx_lock_estado` (`estado_lock`)
@@ -8838,6 +9075,7 @@ CREATE TABLE `kernel_single_writer_lock` (
   `uuid_runtime` char(36) NOT NULL,
   `bloqueado` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_lock`),
   UNIQUE KEY `uk_kernel_runtime` (`uuid_runtime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -8872,6 +9110,7 @@ CREATE TABLE `lab_amostra` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
   `id_ffa` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_amostra`),
   UNIQUE KEY `uk_lab_codigo` (`codigo_amostra`),
   KEY `idx_lab_status` (`status`,`criado_em`),
@@ -8909,6 +9148,7 @@ CREATE TABLE `lab_evento` (
   `id_usuario` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   `payload_auditoria` text,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_evento_lab_pedido` (`id_pedido`),
   CONSTRAINT `fk_evento_lab_pedido` FOREIGN KEY (`id_pedido`) REFERENCES `lab_pedido` (`id_pedido`)
@@ -8941,6 +9181,7 @@ CREATE TABLE `lab_pedido` (
   `status` enum('SOLICITADO','COLETADO','ENVIADO','RECEBIDO_LAB','FINALIZADO','CANCELADO') DEFAULT 'SOLICITADO',
   `impresso` tinyint(1) DEFAULT '0',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pedido`),
   UNIQUE KEY `protocolo_interno` (`protocolo_interno`),
   KEY `fk_lab_senha` (`id_senha`),
@@ -8971,6 +9212,7 @@ CREATE TABLE `lab_protocolo_interno` (
   `tipo_material` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status_laboratorial` enum('COLETADO','EM_TRANSPORTE','NA_BANCADA','CONCLUIDO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `impresso` tinyint(1) DEFAULT '0',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `codigo_amostra` (`codigo_amostra`),
   KEY `fk_lab_protocolo_ffa_v1` (`id_ffa`)
@@ -9003,6 +9245,7 @@ CREATE TABLE `lab_resultado` (
   `recebido_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_resultado`),
   KEY `idx_lab_res_protocolo` (`protocolo_interno`),
   KEY `idx_lab_res_ffa` (`id_ffa`)
@@ -9038,6 +9281,7 @@ CREATE TABLE `laboratorio_protocolo` (
   `codigo_externo` varchar(80) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_laboratorio_protocolo`),
   UNIQUE KEY `uk_lab_codigo` (`codigo`),
   UNIQUE KEY `uk_lab_item` (`id_pedido_item`),
@@ -9071,6 +9315,7 @@ CREATE TABLE `laboratorio_protocolo_evento` (
   `detalhe` varchar(255) DEFAULT NULL,
   `payload_json` json DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `ix_lab_evt_proto` (`id_laboratorio_protocolo`),
   KEY `ix_lab_evt_evt` (`evento`)
@@ -9110,6 +9355,7 @@ CREATE TABLE `ledger_evento_sincronizacao` (
   `timestamp_registro` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `versao_schema` int NOT NULL,
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_ledger_tenant` (`id_tenant`),
   KEY `idx_ledger_sistema` (`id_sistema`),
@@ -9154,6 +9400,7 @@ CREATE TABLE `ledger_evento_sincronizacao_local` (
   `timestamp_registro` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `versao_schema` int NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_ledger_tenant` (`id_tenant`),
   KEY `idx_ledger_unidade` (`id_unidade`),
@@ -9201,6 +9448,7 @@ CREATE TABLE `ledger_global_sincronismo` (
   `criado_por` bigint DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`ulid_evento`),
   KEY `idx_ledger_tenant` (`id_tenant`),
   KEY `idx_ledger_unidade` (`id_unidade`),
@@ -9235,6 +9483,7 @@ CREATE TABLE `leito` (
   `id_setor` int NOT NULL,
   `identificacao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` enum('DISPONIVEL','OCUPADO','RESERVADO','LIMPEZA','MANUTENCAO','INTERDITADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'DISPONIVEL',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_leito`),
   UNIQUE KEY `uk_setor_leito` (`id_setor`,`identificacao`),
   KEY `idx_leito_setor_status` (`id_setor`,`status`),
@@ -9270,9 +9519,12 @@ CREATE TABLE `local` (
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_local`),
   KEY `idx_local_unidade` (`id_unidade`),
   KEY `idx_local_tipo` (`id_tipo_local`),
+  KEY `idx_local_entidade` (`id_entidade`),
+  CONSTRAINT `fk_local_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_local_tipo` FOREIGN KEY (`id_tipo_local`) REFERENCES `tipo_local` (`id_tipo_local`),
   CONSTRAINT `fk_local_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -9284,7 +9536,7 @@ CREATE TABLE `local` (
 
 LOCK TABLES `local` WRITE;
 /*!40000 ALTER TABLE `local` DISABLE KEYS */;
-INSERT INTO `local` VALUES (1,1,1,'HOSPITAL','HOSPITAL CENTRAL','Hospital central',NULL,NULL,1,'2026-03-17 05:19:48.545358','2026-03-17 05:19:48.545358'),(2,1,2,'HC-TRI-01','Sala de Triagem',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.285627'),(3,1,3,'HC-MED-01','Consultório Médico 1',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.289226'),(4,1,3,'HC-MED-02','Consultório Médico 2',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.292803'),(5,1,4,'HC-ENF-A','Enfermaria A',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.295215'),(6,1,4,'HC-ENF-B','Enfermaria B',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.298372'),(7,1,5,'HC-EME-01','Sala de Emergência',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.301005'),(8,1,6,'HC-LAB-01','Laboratório',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.303238'),(9,1,7,'HC-FAR-01','Farmácia Central',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.305763'),(10,1,8,'HC-EST-01','Estoque Geral',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.307966'),(11,2,1,'UPA-REC-01','Recepção UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.310087'),(12,2,2,'UPA-TRI-01','Triagem UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.312598'),(13,2,5,'UPA-EME-01','Emergência UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.314920'),(14,2,7,'UPA-FAR-01','Farmácia UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.317352'),(15,1,9,'HC-AMB-01','Frota Ambulâncias',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.319702'),(16,1,13,'HC-NUT-01','Nutrição',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.321234'),(17,1,14,'HC-SOC-01','Assistência Social',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.322845'),(18,1,15,'HC-FAT-01','Faturamento',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.325211'),(19,1,16,'HC-CAT-01','CAT',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.326903'),(20,1,17,'HC-OBT-01','Serviço de Óbito',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.328897'),(21,1,18,'HC-PDV-01','PDV/Vendas',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.330434'),(22,1,19,'HC-GAS-01','Gasoterapia',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.332010'),(23,1,20,'HC-MAN-01','Manutenção',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.333580'),(24,1,12,'HC-ADM-01','Administração',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-03-17 06:43:40.336411');
+INSERT INTO `local` VALUES (1,1,1,'HOSPITAL','HOSPITAL CENTRAL','Hospital central',NULL,NULL,1,'2026-03-17 05:19:48.545358','2026-04-02 04:51:38.543725',1),(2,1,2,'HC-TRI-01','Sala de Triagem',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(3,1,3,'HC-MED-01','Consultório Médico 1',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(4,1,3,'HC-MED-02','Consultório Médico 2',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(5,1,4,'HC-ENF-A','Enfermaria A',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(6,1,4,'HC-ENF-B','Enfermaria B',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(7,1,5,'HC-EME-01','Sala de Emergência',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(8,1,6,'HC-LAB-01','Laboratório',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(9,1,7,'HC-FAR-01','Farmácia Central',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(10,1,8,'HC-EST-01','Estoque Geral',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(11,2,1,'UPA-REC-01','Recepção UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(12,2,2,'UPA-TRI-01','Triagem UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(13,2,5,'UPA-EME-01','Emergência UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(14,2,7,'UPA-FAR-01','Farmácia UPA',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(15,1,9,'HC-AMB-01','Frota Ambulâncias',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(16,1,13,'HC-NUT-01','Nutrição',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(17,1,14,'HC-SOC-01','Assistência Social',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(18,1,15,'HC-FAT-01','Faturamento',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(19,1,16,'HC-CAT-01','CAT',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(20,1,17,'HC-OBT-01','Serviço de Óbito',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(21,1,18,'HC-PDV-01','PDV/Vendas',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(22,1,19,'HC-GAS-01','Gasoterapia',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(23,1,20,'HC-MAN-01','Manutenção',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1),(24,1,12,'HC-ADM-01','Administração',NULL,NULL,NULL,1,'2026-03-17 06:43:40.000000','2026-04-02 04:51:38.543725',1);
 /*!40000 ALTER TABLE `local` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9301,6 +9553,7 @@ CREATE TABLE `local_capacidade` (
   `capacidade_maxima` int DEFAULT NULL,
   `ocupacao_atual` int DEFAULT '0',
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_local_capacidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9326,6 +9579,7 @@ CREATE TABLE `local_dispositivo` (
   `id_local` bigint NOT NULL,
   `id_dispositivo` bigint NOT NULL,
   `ativo` tinyint DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_local_dispositivo`),
   KEY `id_local` (`id_local`),
   CONSTRAINT `local_dispositivo_ibfk_1` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`)
@@ -9356,6 +9610,7 @@ CREATE TABLE `local_fila` (
   `prioridade` int DEFAULT '0',
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_local_fila`),
   KEY `idx_fila_local` (`id_local`),
   CONSTRAINT `fk_fila_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`)
@@ -9390,6 +9645,7 @@ CREATE TABLE `local_runtime` (
   `permite_procedimento` tinyint DEFAULT '0',
   `dispositivo_tipo` varchar(40) DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_local_runtime`),
   KEY `idx_runtime_local` (`id_local`),
   CONSTRAINT `fk_runtime_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`)
@@ -9419,6 +9675,7 @@ CREATE TABLE `local_turno` (
   `inicio` time DEFAULT NULL,
   `fim` time DEFAULT NULL,
   `ativo` tinyint DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_local_turno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9446,6 +9703,7 @@ CREATE TABLE `log_acesso_prontuario` (
   `ip_maquina` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_hora_acesso` datetime DEFAULT CURRENT_TIMESTAMP,
   `modulo_acessado` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_lgpd_paciente` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -9477,6 +9735,7 @@ CREATE TABLE `log_auditoria` (
   `depois` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `justificativa` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_log`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9487,7 +9746,7 @@ CREATE TABLE `log_auditoria` (
 
 LOCK TABLES `log_auditoria` WRITE;
 /*!40000 ALTER TABLE `log_auditoria` DISABLE KEYS */;
-INSERT INTO `log_auditoria` VALUES (1,10,'INSERT','ffa',1,NULL,'status: ABERTO, paciente: 1',NULL,'2026-01-14 03:52:41'),(2,5,'INSERT','ffa',2,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:20:16'),(3,5,'INSERT','ffa',3,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:20:42'),(4,5,'INSERT','ffa',4,NULL,'status: EM_TRIAGEM, paciente: 8',NULL,'2026-01-28 06:21:25'),(5,5,'INSERT','ffa',5,NULL,'status: ABERTO, paciente: 1',NULL,'2026-01-28 06:21:57'),(6,5,'INSERT','ffa',6,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:22:20'),(7,5,'INSERT','ffa',7,NULL,'status: ABERTO, paciente: 1',NULL,'2026-01-28 06:22:54'),(8,5,'INSERT','ffa',8,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:26:06'),(9,5,'INSERT','ffa',9,NULL,'status: ABERTO, paciente: 31',NULL,'2026-01-28 06:29:42'),(10,5,'INSERT','ffa',10,NULL,'status: ABERTO, paciente: 17',NULL,'2026-01-28 06:30:20'),(11,5,'INSERT','ffa',11,NULL,'status: ABERTO, paciente: 17',NULL,'2026-01-28 06:31:19');
+INSERT INTO `log_auditoria` VALUES (1,10,'INSERT','ffa',1,NULL,'status: ABERTO, paciente: 1',NULL,'2026-01-14 03:52:41',1),(2,5,'INSERT','ffa',2,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:20:16',1),(3,5,'INSERT','ffa',3,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:20:42',1),(4,5,'INSERT','ffa',4,NULL,'status: EM_TRIAGEM, paciente: 8',NULL,'2026-01-28 06:21:25',1),(5,5,'INSERT','ffa',5,NULL,'status: ABERTO, paciente: 1',NULL,'2026-01-28 06:21:57',1),(6,5,'INSERT','ffa',6,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:22:20',1),(7,5,'INSERT','ffa',7,NULL,'status: ABERTO, paciente: 1',NULL,'2026-01-28 06:22:54',1),(8,5,'INSERT','ffa',8,NULL,'status: ABERTO, paciente: 8',NULL,'2026-01-28 06:26:06',1),(9,5,'INSERT','ffa',9,NULL,'status: ABERTO, paciente: 31',NULL,'2026-01-28 06:29:42',1),(10,5,'INSERT','ffa',10,NULL,'status: ABERTO, paciente: 17',NULL,'2026-01-28 06:30:20',1),(11,5,'INSERT','ffa',11,NULL,'status: ABERTO, paciente: 17',NULL,'2026-01-28 06:31:19',1);
 /*!40000 ALTER TABLE `log_auditoria` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9504,6 +9763,7 @@ CREATE TABLE `log_leitura_prontuario` (
   `id_usuario` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   `motivo_acesso` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9534,13 +9794,14 @@ CREATE TABLE `login_tentativa` (
   `sucesso` tinyint(1) NOT NULL DEFAULT '0',
   `metadata` json DEFAULT NULL,
   `criado_em` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_tentativa`),
   KEY `idx_login_tentativa_login` (`login`),
   KEY `idx_login_tentativa_ip` (`ip_origem`),
   KEY `idx_login_tentativa_usuario` (`id_usuario`),
   KEY `idx_login_tentativa_dispositivo` (`dispositivo_origem`),
   CONSTRAINT `fk_login_tentativa_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=400 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=408 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9549,7 +9810,7 @@ CREATE TABLE `login_tentativa` (
 
 LOCK TABLES `login_tentativa` WRITE;
 /*!40000 ALTER TABLE `login_tentativa` DISABLE KEYS */;
-INSERT INTO `login_tentativa` VALUES (325,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"local\": 1, \"motivo\": \"senha_invalida\", \"perfil\": 1, \"unidade\": 1}','2026-03-17 02:33:51.791824'),(326,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-18 23:35:02.867801'),(327,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:17:53.899340'),(328,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:18:11.174637'),(329,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:21:43.064339'),(330,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:22:23.671894'),(331,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:24:40.138020'),(332,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:26:57.827559'),(333,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:33:03.647368'),(334,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:34:47.922935'),(335,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:45:49.530441'),(336,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:46:27.426464'),(337,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:03:23.176693'),(338,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:32:30.353930'),(339,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:35:21.193754'),(340,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:38:20.941715'),(341,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:43:28.918931'),(342,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:51:54.563315'),(343,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:59:21.944160'),(344,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:07:58.857052'),(345,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:29:07.799726'),(346,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:01.385918'),(347,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:44.134117'),(348,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:39:04.870962'),(349,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:56:36.074630'),(350,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 04:20:56.795283'),(351,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:29:05.750402'),(352,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-19 05:46:18.668307'),(353,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:47:15.194814'),(354,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 06:47:43.612246'),(355,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:04:37.222352'),(356,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:13:38.423107'),(357,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:42:10.867097'),(358,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:47:18.824939'),(359,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 07:01:42.146645'),(360,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:28:06.551802'),(361,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:45:43.421264'),(362,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 23:44:59.395948'),(363,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:32:57.400556'),(364,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:35:20.784309'),(365,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:05:13.411954'),(366,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:06:15.923965'),(367,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:12:02.917807'),(368,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:15:25.635568'),(369,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:22:44.567497'),(370,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:27:35.718147'),(371,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:33:07.181700'),(372,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:40:56.352604'),(373,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:50:04.448304'),(374,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:56:46.860397'),(375,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:57:16.479923'),(376,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:39:30.603997'),(377,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:41:33.291690'),(378,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:44:45.980447'),(379,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:10:37.669751'),(380,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:15:26.495818'),(381,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:16:44.802733'),(382,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:29:49.567458'),(383,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:31:15.284804'),(384,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:48:04.035035'),(385,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 04:01:00.897517'),(386,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:08:31.083628'),(387,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 06:12:16.514016'),(388,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:12:21.995073'),(389,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:24:30.160536'),(390,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:30:26.367121'),(391,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:31:09.559027'),(392,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:39:24.289807'),(393,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:45:36.449857'),(394,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:54:13.777840'),(395,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 07:10:29.789741'),(396,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 07:10:34.615048'),(397,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:11:12.463856'),(398,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:11:28.283489'),(399,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:13:34.285539');
+INSERT INTO `login_tentativa` VALUES (325,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"local\": 1, \"motivo\": \"senha_invalida\", \"perfil\": 1, \"unidade\": 1}','2026-03-17 02:33:51.791824',1),(326,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-18 23:35:02.867801',1),(327,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:17:53.899340',1),(328,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:18:11.174637',1),(329,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:21:43.064339',1),(330,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:22:23.671894',1),(331,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:24:40.138020',1),(332,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:26:57.827559',1),(333,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:33:03.647368',1),(334,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:34:47.922935',1),(335,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:45:49.530441',1),(336,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 01:46:27.426464',1),(337,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:03:23.176693',1),(338,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:32:30.353930',1),(339,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:35:21.193754',1),(340,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:38:20.941715',1),(341,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:43:28.918931',1),(342,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:51:54.563315',1),(343,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 02:59:21.944160',1),(344,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:07:58.857052',1),(345,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:29:07.799726',1),(346,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:01.385918',1),(347,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:37:44.134117',1),(348,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:39:04.870962',1),(349,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 03:56:36.074630',1),(350,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 04:20:56.795283',1),(351,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:29:05.750402',1),(352,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-19 05:46:18.668307',1),(353,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 05:47:15.194814',1),(354,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"local\": 1, \"perfil\": 42, \"status\": \"sucesso\", \"unidade\": 1}','2026-03-19 06:47:43.612246',1),(355,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:04:37.222352',1),(356,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:13:38.423107',1),(357,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:42:10.867097',1),(358,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 06:47:18.824939',1),(359,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 07:01:42.146645',1),(360,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:28:06.551802',1),(361,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 21:45:43.421264',1),(362,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-22 23:44:59.395948',1),(363,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:32:57.400556',1),(364,1,'evandro.andrade','::1','curl/8.13.0',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 00:35:20.784309',1),(365,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:05:13.411954',1),(366,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:06:15.923965',1),(367,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:12:02.917807',1),(368,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:15:25.635568',1),(369,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:22:44.567497',1),(370,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:27:35.718147',1),(371,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:33:07.181700',1),(372,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:40:56.352604',1),(373,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:50:04.448304',1),(374,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:56:46.860397',1),(375,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 01:57:16.479923',1),(376,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:39:30.603997',1),(377,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:41:33.291690',1),(378,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 02:44:45.980447',1),(379,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:10:37.669751',1),(380,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:15:26.495818',1),(381,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:16:44.802733',1),(382,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:29:49.567458',1),(383,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:31:15.284804',1),(384,1,'evandro.andrade','::1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 03:48:04.035035',1),(385,1,'evandro.andrade','::ffff:127.0.0.1','curl/8.13.0',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 04:01:00.897517',1),(386,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:08:31.083628',1),(387,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 06:12:16.514016',1),(388,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:12:21.995073',1),(389,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:24:30.160536',1),(390,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:30:26.367121',1),(391,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:31:09.559027',1),(392,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:39:24.289807',1),(393,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:45:36.449857',1),(394,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 06:54:13.777840',1),(395,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-03-23 07:10:29.789741',1),(396,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-23 07:10:34.615048',1),(397,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:11:12.463856',1),(398,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:11:28.283489',1),(399,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:13:34.285539',1),(400,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:42:19.262536',1),(401,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 06:48:25.435077',1),(402,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-03-27 07:08:33.013835',1),(403,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,0,'{\"motivo\": \"senha_invalida\"}','2026-04-01 21:45:40.289094',1),(404,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-04-01 21:45:45.434625',1),(405,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-04-01 21:45:45.916185',1),(406,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-04-01 23:05:14.572236',1),(407,1,'evandro.andrade','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa',NULL,1,'{\"status\": \"sucesso\"}','2026-04-01 23:13:55.198701',1);
 /*!40000 ALTER TABLE `login_tentativa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9570,6 +9831,7 @@ CREATE TABLE `logradouro` (
   `cidade` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `uf` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_logradouro`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9598,6 +9860,7 @@ CREATE TABLE `manutencao_execucao` (
   `inicio_em` datetime DEFAULT NULL,
   `fim_em` datetime DEFAULT NULL,
   `status` enum('INICIADO','PAUSADO','FINALIZADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'INICIADO',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_execucao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Execução técnica do chamado de manutenção';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9633,6 +9896,7 @@ CREATE TABLE `md_arquivo_fonte` (
   `status` enum('PENDENTE','BAIXADO','PROCESSADO','ERRO') NOT NULL DEFAULT 'PENDENTE',
   `mensagem_erro` varchar(500) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_md_arquivo_fonte`),
   KEY `idx_md_fonte_tipo_comp` (`tipo`,`competencia`),
   KEY `idx_md_fonte_status` (`status`),
@@ -9666,6 +9930,7 @@ CREATE TABLE `md_arquivo_fonte_evento` (
   `detalhes` varchar(500) DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_md_arquivo_fonte_evento`),
   KEY `idx_md_fonte_evt_fonte` (`id_md_arquivo_fonte`),
   KEY `idx_md_fonte_evt_dt` (`ocorrido_em`),
@@ -9704,6 +9969,7 @@ CREATE TABLE `md_cid10` (
   `idade_max_meses` int DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`competencia`,`codigo`),
   KEY `idx_cid10_codigo` (`codigo`),
   KEY `idx_cid10_comp` (`competencia`)
@@ -9743,6 +10009,7 @@ CREATE TABLE `md_cnes_estabelecimento` (
   `esfera_adm` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`cnes`),
   KEY `idx_cnes_comp` (`competencia`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -9771,6 +10038,7 @@ CREATE TABLE `md_competencia` (
   `dt_fim` date DEFAULT NULL,
   `ativa` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`competencia`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9802,6 +10070,7 @@ CREATE TABLE `md_sigpat_medicamento` (
   `via_administracao` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`competencia`,`codigo`),
   KEY `idx_sigpat_codigo` (`codigo`),
   KEY `idx_sigpat_comp` (`competencia`),
@@ -9838,6 +10107,7 @@ CREATE TABLE `md_sigtap_procedimento` (
   `valor_sus` decimal(10,2) DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`competencia`,`codigo`),
   KEY `idx_sigtap_codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -9872,6 +10142,7 @@ CREATE TABLE `medicacao_reavaliacao` (
   `id_usuario_executor` bigint DEFAULT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_reavaliacao`),
   KEY `idx_reav_fila` (`id_fila_medicacao`,`status`,`previsto_em`),
   KEY `idx_reav_ffa` (`id_ffa`,`status`,`previsto_em`),
@@ -9910,6 +10181,7 @@ CREATE TABLE `medico` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario`),
   KEY `fk_medico_especialidade` (`id_especialidade`),
   CONSTRAINT `fk_medico_especialidade` FOREIGN KEY (`id_especialidade`) REFERENCES `especialidade` (`id_especialidade`) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -9936,6 +10208,7 @@ DROP TABLE IF EXISTS `medico_especialidade`;
 CREATE TABLE `medico_especialidade` (
   `id_usuario` bigint NOT NULL,
   `id_especialidade` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario`,`id_especialidade`),
   KEY `fk_medico_especialidade_assoc` (`id_especialidade`),
   CONSTRAINT `fk_medico_especialidade_assoc` FOREIGN KEY (`id_especialidade`) REFERENCES `especialidade` (`id_especialidade`) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -9971,6 +10244,7 @@ CREATE TABLE `notificacao_epidemiologica` (
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `protocolo_ms` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_notif_epid_sessao` (`id_sessao_usuario`),
   KEY `idx_notif_epid_usuario` (`id_usuario_criador`)
@@ -10001,6 +10275,7 @@ CREATE TABLE `notificacao_epidemiologica_evento` (
   `detalhe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_ne_evento_notif` (`id_notificacao`,`criado_em`),
   KEY `idx_ne_evento_sessao` (`id_sessao_usuario`,`criado_em`),
@@ -10042,6 +10317,7 @@ CREATE TABLE `notificacao_violencia` (
   `protocolo_externo` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_nv_atendimento` (`id_atendimento`),
   KEY `idx_nv_status` (`status_notificacao`),
@@ -10075,6 +10351,7 @@ CREATE TABLE `notificacao_violencia_evento` (
   `id_sessao_usuario` bigint NOT NULL,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_nve_notif` (`id_notificacao`),
   KEY `idx_nve_sessao` (`id_sessao_usuario`),
@@ -10105,6 +10382,7 @@ CREATE TABLE `nucleo_governanca_assistencial` (
   `descricao_release` text,
   `estado_nucleo` enum('ATIVO','MIGRANDO','BLOQUEADO') DEFAULT 'ATIVO',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_nucleo`),
   UNIQUE KEY `uk_nucleo_hash` (`hash_nucleo_estrutura`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -10116,7 +10394,7 @@ CREATE TABLE `nucleo_governanca_assistencial` (
 
 LOCK TABLES `nucleo_governanca_assistencial` WRITE;
 /*!40000 ALTER TABLE `nucleo_governanca_assistencial` DISABLE KEYS */;
-INSERT INTO `nucleo_governanca_assistencial` VALUES (1,'HASH_DO_SCHEMA_ATUAL',1,'Inicialização do núcleo canônico paciente','ATIVO','2026-03-01 05:45:50.085350');
+INSERT INTO `nucleo_governanca_assistencial` VALUES (1,'HASH_DO_SCHEMA_ATUAL',1,'Inicialização do núcleo canônico paciente','ATIVO','2026-03-01 05:45:50.085350',NULL);
 /*!40000 ALTER TABLE `nucleo_governanca_assistencial` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10142,6 +10420,7 @@ CREATE TABLE `obito` (
   `atualizado_em` datetime DEFAULT NULL,
   `cancelado_em` datetime DEFAULT NULL,
   `cancelado_por` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_obito`),
   UNIQUE KEY `uk_obito_ffa` (`id_ffa`),
   KEY `idx_obito_data` (`data_hora_obito`),
@@ -10174,6 +10453,7 @@ CREATE TABLE `obito_evento` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_obito_evento`),
   KEY `idx_ob_evt_obito` (`id_obito`),
   KEY `idx_ob_evt_tipo` (`tipo_evento`,`criado_em`),
@@ -10201,7 +10481,7 @@ DROP TABLE IF EXISTS `observacoes_eventos`;
 CREATE TABLE `observacoes_eventos` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `entidade` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'FILA_SENHA, FFA, PRESCRICAO, AGENDAMENTO',
-  `id_entidade` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `contexto` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'MEDICO, ENFERMAGEM, TECNICA, ADMIN',
   `tipo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'OBSERVACAO, ALERTA, EVASAO, ORIENTACAO',
   `texto` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -10210,6 +10490,8 @@ CREATE TABLE `observacoes_eventos` (
   PRIMARY KEY (`id`),
   KEY `id_usuario` (`id_usuario`),
   KEY `idx_entidade` (`entidade`,`id_entidade`),
+  KEY `fk_observacoes_eventos_entidade` (`id_entidade`),
+  CONSTRAINT `fk_observacoes_eventos_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `observacoes_eventos_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Observações e comunicações como eventos';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -10237,6 +10519,7 @@ CREATE TABLE `operacao_idempotencia` (
   `referencia_id` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `resultado` json DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -10282,7 +10565,8 @@ CREATE TABLE `ordem_assistencial` (
   KEY `idx_ordem_tipo` (`tipo_ordem`),
   KEY `fk_ordem_assistencial_atendimento` (`id_atendimento`),
   KEY `idx_oass_ent` (`id_entidade`),
-  CONSTRAINT `fk_ordem_assistencial_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_ordem_assistencial_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ordem_assistencial_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10328,7 +10612,8 @@ CREATE TABLE `ordem_assistencial_aprazamento` (
   CONSTRAINT `fk_apraz_exec_local` FOREIGN KEY (`id_local_operacional_execucao`) REFERENCES `local_operacional` (`id_local_operacional`),
   CONSTRAINT `fk_apraz_exec_user` FOREIGN KEY (`id_usuario_execucao`) REFERENCES `usuario` (`id_usuario`),
   CONSTRAINT `fk_apraz_item` FOREIGN KEY (`id_item`) REFERENCES `ordem_assistencial_item` (`id_item`),
-  CONSTRAINT `fk_ordem_assistencial_aprazamento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_ordem_assistencial_aprazamento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ordem_assistencial_aprazamento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10369,7 +10654,8 @@ CREATE TABLE `ordem_assistencial_execucao` (
   KEY `idx_oasse_ent` (`id_entidade`),
   CONSTRAINT `fk_exec_apraz` FOREIGN KEY (`id_aprazamento`) REFERENCES `ordem_assistencial_aprazamento` (`id_aprazamento`),
   CONSTRAINT `fk_exec_item` FOREIGN KEY (`id_item`) REFERENCES `ordem_assistencial_item` (`id_item`),
-  CONSTRAINT `fk_ordem_assistencial_execucao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_ordem_assistencial_execucao_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ordem_assistencial_execucao_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10426,7 +10712,8 @@ CREATE TABLE `ordem_assistencial_item` (
   KEY `idx_oassi_ent` (`id_entidade`),
   CONSTRAINT `fk_item_farmaco` FOREIGN KEY (`id_farmaco`) REFERENCES `farmaco` (`id_farmaco`),
   CONSTRAINT `fk_item_ordem` FOREIGN KEY (`id_ordem`) REFERENCES `ordem_assistencial` (`id`),
-  CONSTRAINT `fk_ordem_assistencial_item_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_ordem_assistencial_item_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ordem_assistencial_item_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10452,6 +10739,7 @@ CREATE TABLE `ordem_tipo_documento_config` (
   `somente_controlado` tinyint(1) NOT NULL DEFAULT '0',
   `somente_nao_controlado` tinyint(1) NOT NULL DEFAULT '0',
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`tipo_ordem`,`tipo_documento`),
   KEY `fk_ordem_doc_tipo` (`tipo_documento`),
   CONSTRAINT `fk_ordem_doc_tipo` FOREIGN KEY (`tipo_documento`) REFERENCES `documento_tipo_config` (`codigo`)
@@ -10464,7 +10752,7 @@ CREATE TABLE `ordem_tipo_documento_config` (
 
 LOCK TABLES `ordem_tipo_documento_config` WRITE;
 /*!40000 ALTER TABLE `ordem_tipo_documento_config` DISABLE KEYS */;
-INSERT INTO `ordem_tipo_documento_config` VALUES ('ATESTADO','ATESTADO',0,0,1),('ENCAMINHAMENTO','ENCAMINHAMENTO',0,0,1),('EXAME','SOLIC_EXAME',0,0,1),('MEDICACAO','MEDICACAO_INTERNA',0,0,1),('RECEITA','RECEITA_CONTROLADO',1,0,1),('RECEITA','RECEITUARIO_CASA',0,0,1);
+INSERT INTO `ordem_tipo_documento_config` VALUES ('ATESTADO','ATESTADO',0,0,1,NULL),('ENCAMINHAMENTO','ENCAMINHAMENTO',0,0,1,NULL),('EXAME','SOLIC_EXAME',0,0,1,NULL),('MEDICACAO','MEDICACAO_INTERNA',0,0,1,NULL),('RECEITA','RECEITA_CONTROLADO',1,0,1,NULL),('RECEITA','RECEITUARIO_CASA',0,0,1,NULL);
 /*!40000 ALTER TABLE `ordem_tipo_documento_config` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10525,6 +10813,7 @@ CREATE TABLE `paciente_alertas` (
   `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `grau_severidade` enum('BAIXO','MODERADO','ALTO','CRITICO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_registro` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -10557,6 +10846,7 @@ CREATE TABLE `paciente_canonico` (
   `estado_paciente` enum('ATIVO','INATIVO','BLOQUEADO','DUPLICADO_PENDENTE_RECONCILIACAO') DEFAULT 'ATIVO',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_paciente`),
   UNIQUE KEY `uk_paciente_uuid` (`uuid_paciente`),
   UNIQUE KEY `uk_paciente_hash` (`hash_identidade`),
@@ -10591,6 +10881,7 @@ CREATE TABLE `paciente_cns` (
   `observacao` varchar(255) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_paciente_cns`),
   UNIQUE KEY `uk_paciente_cns_ativo` (`id_paciente`,`cns`,`status`),
   KEY `ix_paciente_cns_paciente` (`id_paciente`),
@@ -10622,6 +10913,7 @@ CREATE TABLE `paciente_cns_evento` (
   `detalhe` varchar(255) DEFAULT NULL,
   `payload_json` json DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `ix_pcns_evt` (`id_paciente_cns`),
   KEY `ix_pcns_evt_tipo` (`evento`)
@@ -10659,6 +10951,7 @@ CREATE TABLE `painel` (
   `atualizado_em` datetime DEFAULT NULL,
   `intervalo_segundos` int NOT NULL DEFAULT '120',
   `id_sistema` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_painel`),
   UNIQUE KEY `uk_painel_codigo` (`codigo`),
   KEY `idx_painel_unidade` (`id_unidade`),
@@ -10673,7 +10966,7 @@ CREATE TABLE `painel` (
 
 LOCK TABLES `painel` WRITE;
 /*!40000 ALTER TABLE `painel` DISABLE KEYS */;
-INSERT INTO `painel` VALUES (1,'RECEPCAO','PAINEL','Painel Recepção','Fila de senha (chamada manual) + últimos chamados',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(2,'TRIAGEM','PAINEL','Painel Triagem','Fila setorial TRIAGEM (somente leitura)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(3,'CLINICO','PAINEL','Painel Clínico','Fila do médico clínico (adulto)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(4,'PEDIATRICO','PAINEL','Painel Pediátrico','Fila do médico pediátrico',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(5,'MEDICACAO','PAINEL','Painel Medicação','Fila setorial MEDICACAO',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(6,'COLETA','PAINEL','Painel Coleta','Fila setorial EXAME/COLETA',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(7,'RX','PAINEL','Painel RX','Fila setorial RX',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(8,'CONFORTO','PAINEL','Painel Conforto','Resumo de espera e últimas chamadas (sala de espera)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(9,'TOTEM_SENHA','TOTEM','Totem Senha','Geração de senha + banner plantão do dia',2,NULL,0,0,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(10,'TOTEM_SATISFACAO','TOTEM','Totem Satisfação','Coleta de feedback do paciente',2,NULL,0,0,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(11,'TV_ROTATIVO','TV','TV Rotativo','TV única rotativa (2 min por tela)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4),(23,'MEDICO_CLINICO','PAINEL','Painel Médico Clínico',NULL,2,NULL,0,20,1,'2026-02-03 06:19:42','2026-02-15 06:22:13',0,4),(24,'MEDICO_PEDI','PAINEL','Painel Médico Pediátrico',NULL,2,NULL,0,20,1,'2026-02-03 06:19:42','2026-02-15 06:22:13',0,4),(78,'MEDICACAO_ADULTO','PAINEL','Painel Medicação Adulto',NULL,2,NULL,1,20,1,'2026-02-03 23:59:51','2026-02-15 06:22:13',0,4),(79,'MEDICACAO_PEDI','PAINEL','Painel Medicação Pediátrica',NULL,2,NULL,1,20,1,'2026-02-03 23:59:51','2026-02-15 06:22:13',0,4),(150,'MEDICACAO_INF','PAINEL','Painel Medicação Infantil',NULL,2,NULL,1,20,1,'2026-02-04 00:02:19','2026-02-15 06:22:13',0,4),(221,'RX_2','PAINEL','Painel RX 2',NULL,1,123,1,20,1,'2026-02-04 00:05:17','2026-02-15 06:22:13',0,4),(247,'MEDICO_CLINICO_SALA3','PAINEL','Painel Médico Clínico - Sala 3',NULL,1,123,0,20,1,'2026-02-04 01:43:20','2026-02-15 06:22:13',0,4),(249,'TV_CLINICO','TV','TV Rotativa - Clínico',NULL,2,NULL,0,20,1,'2026-02-04 04:03:41','2026-02-15 06:22:13',120,4),(250,'MONITOR_MEDICOS','PAINEL','Painel Monitoramento Médicos','Mosaico/KPIs por especialidade/local',2,NULL,1,20,1,'2026-02-04 07:01:23','2026-02-15 06:22:13',15,4);
+INSERT INTO `painel` VALUES (1,'RECEPCAO','PAINEL','Painel Recepção','Fila de senha (chamada manual) + últimos chamados',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(2,'TRIAGEM','PAINEL','Painel Triagem','Fila setorial TRIAGEM (somente leitura)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(3,'CLINICO','PAINEL','Painel Clínico','Fila do médico clínico (adulto)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(4,'PEDIATRICO','PAINEL','Painel Pediátrico','Fila do médico pediátrico',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(5,'MEDICACAO','PAINEL','Painel Medicação','Fila setorial MEDICACAO',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(6,'COLETA','PAINEL','Painel Coleta','Fila setorial EXAME/COLETA',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(7,'RX','PAINEL','Painel RX','Fila setorial RX',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(8,'CONFORTO','PAINEL','Painel Conforto','Resumo de espera e últimas chamadas (sala de espera)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(9,'TOTEM_SENHA','TOTEM','Totem Senha','Geração de senha + banner plantão do dia',2,NULL,0,0,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(10,'TOTEM_SATISFACAO','TOTEM','Totem Satisfação','Coleta de feedback do paciente',2,NULL,0,0,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(11,'TV_ROTATIVO','TV','TV Rotativo','TV única rotativa (2 min por tela)',2,NULL,1,20,1,'2026-02-03 05:52:46','2026-02-15 06:22:13',120,4,NULL),(23,'MEDICO_CLINICO','PAINEL','Painel Médico Clínico',NULL,2,NULL,0,20,1,'2026-02-03 06:19:42','2026-02-15 06:22:13',0,4,NULL),(24,'MEDICO_PEDI','PAINEL','Painel Médico Pediátrico',NULL,2,NULL,0,20,1,'2026-02-03 06:19:42','2026-02-15 06:22:13',0,4,NULL),(78,'MEDICACAO_ADULTO','PAINEL','Painel Medicação Adulto',NULL,2,NULL,1,20,1,'2026-02-03 23:59:51','2026-02-15 06:22:13',0,4,NULL),(79,'MEDICACAO_PEDI','PAINEL','Painel Medicação Pediátrica',NULL,2,NULL,1,20,1,'2026-02-03 23:59:51','2026-02-15 06:22:13',0,4,NULL),(150,'MEDICACAO_INF','PAINEL','Painel Medicação Infantil',NULL,2,NULL,1,20,1,'2026-02-04 00:02:19','2026-02-15 06:22:13',0,4,NULL),(221,'RX_2','PAINEL','Painel RX 2',NULL,1,123,1,20,1,'2026-02-04 00:05:17','2026-02-15 06:22:13',0,4,NULL),(247,'MEDICO_CLINICO_SALA3','PAINEL','Painel Médico Clínico - Sala 3',NULL,1,123,0,20,1,'2026-02-04 01:43:20','2026-02-15 06:22:13',0,4,NULL),(249,'TV_CLINICO','TV','TV Rotativa - Clínico',NULL,2,NULL,0,20,1,'2026-02-04 04:03:41','2026-02-15 06:22:13',120,4,NULL),(250,'MONITOR_MEDICOS','PAINEL','Painel Monitoramento Médicos','Mosaico/KPIs por especialidade/local',2,NULL,1,20,1,'2026-02-04 07:01:23','2026-02-15 06:22:13',15,4,NULL);
 /*!40000 ALTER TABLE `painel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10690,6 +10983,7 @@ CREATE TABLE `painel_alertas_tempo` (
   `mensagem` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `nivel` enum('AVISO','CRITICO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `data_alerta` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -10723,6 +11017,7 @@ CREATE TABLE `painel_config` (
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_painel_config`),
   UNIQUE KEY `uk_painel_config_painel_chave` (`id_painel`,`chave`),
   KEY `idx_painel_config_chave` (`chave`),
@@ -10738,7 +11033,7 @@ CREATE TABLE `painel_config` (
 
 LOCK TABLES `painel_config` WRITE;
 /*!40000 ALTER TABLE `painel_config` DISABLE KEYS */;
-INSERT INTO `painel_config` VALUES (1,1,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[\"REC01\"]',NULL,'2026-02-15 06:26:42',3,5),(2,2,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[\"TRI01\"]',NULL,'2026-02-15 06:26:42',3,5),(3,78,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5),(4,150,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5),(7,23,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5),(8,247,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5),(9,24,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5),(10,7,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5),(11,221,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5),(13,79,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-02-15 06:26:42',3,5);
+INSERT INTO `painel_config` VALUES (1,1,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[\"REC01\"]',NULL,'2026-04-02 02:01:57',3,5,1),(2,2,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[\"TRI01\"]',NULL,'2026-04-02 02:01:57',3,5,1),(3,78,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1),(4,150,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1),(7,23,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1),(8,247,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1),(9,24,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1),(10,7,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1),(11,221,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1),(13,79,'FILTRO_LOCAIS_CODIGOS_JSON',NULL,NULL,NULL,NULL,'[]',NULL,'2026-04-02 02:01:57',3,5,1);
 /*!40000 ALTER TABLE `painel_config` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10766,6 +11061,7 @@ CREATE TABLE `painel_config_def` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_painel_config_def`),
   UNIQUE KEY `uk_painel_config_def_chave` (`chave`),
   UNIQUE KEY `uk_painel_cfgdef_aplica_chave` (`aplica_em`,`chave`),
@@ -10780,7 +11076,7 @@ CREATE TABLE `painel_config_def` (
 
 LOCK TABLES `painel_config_def` WRITE;
 /*!40000 ALTER TABLE `painel_config_def` DISABLE KEYS */;
-INSERT INTO `painel_config_def` VALUES (1,'BANNER_PLANTAO_HABILITADO','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'TOTEM','Totem de senha: exibir banner superior com plantão.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(2,'EXIBIR_NOME_PACIENTE','TODOS','BOOL',0,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Painel público: exibir nome do paciente (padrão: NÃO).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(3,'EXIBIR_NOME_SOCIAL','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Se exibir nome, preferir nome social quando existir.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(4,'EXIBIR_TEMPO_ESPERA','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir tempo de espera no painel.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(5,'EXIBIR_TEMPO_ATENDIMENTO','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir tempo em atendimento (quando aplicável).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(6,'EXIBIR_ULTIMA_CHAMADA','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir última senha chamada.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(7,'EXIBIR_NAO_COMPARECEU','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir indicador/lista de não compareceu.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(8,'TTS_VOZ','TODOS','TEXT',NULL,NULL,NULL,'pt-BR',NULL,NULL,'TTS','Nome/código da voz do TTS.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(9,'TTS_REPETICOES','TODOS','INT',NULL,1,NULL,NULL,NULL,NULL,'TTS','Qtd de repetições por chamada.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(10,'TTS_VELOCIDADE','TODOS','DECIMAL',NULL,NULL,1.0000,NULL,NULL,NULL,'TTS','Velocidade do TTS (1.00 = normal).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(11,'PISCAR_CHAMADA','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Ativa efeito de piscada ao chamar.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(12,'PISCAR_CHAMADA_SEG','TODOS','INT',NULL,8,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Duração da piscada (segundos).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(13,'TV_ROTATIVO_HABILITADO','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'TV','TV rotativo: habilitar rotação de telas.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(14,'TV_ROTATIVO_INTERVALO_SEG','TODOS','INT',NULL,10,NULL,NULL,NULL,NULL,'TV','Intervalo padrão de rotação (seg), se tela não definir.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33'),(15,'FILTRO_LOCAIS_CODIGOS_JSON','PAINEL','JSON',NULL,NULL,NULL,NULL,'[]',NULL,'FILTRO','Lista (JSON array) de códigos de local_operacional que este painel deve exibir. Ex.: [\"MEDP01\",\"MEDP02\"]',NULL,1,'2026-02-15 05:02:55','2026-02-15 05:02:55');
+INSERT INTO `painel_config_def` VALUES (1,'BANNER_PLANTAO_HABILITADO','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'TOTEM','Totem de senha: exibir banner superior com plantão.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(2,'EXIBIR_NOME_PACIENTE','TODOS','BOOL',0,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Painel público: exibir nome do paciente (padrão: NÃO).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(3,'EXIBIR_NOME_SOCIAL','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Se exibir nome, preferir nome social quando existir.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(4,'EXIBIR_TEMPO_ESPERA','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir tempo de espera no painel.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(5,'EXIBIR_TEMPO_ATENDIMENTO','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir tempo em atendimento (quando aplicável).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(6,'EXIBIR_ULTIMA_CHAMADA','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir última senha chamada.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(7,'EXIBIR_NAO_COMPARECEU','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Exibir indicador/lista de não compareceu.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(8,'TTS_VOZ','TODOS','TEXT',NULL,NULL,NULL,'pt-BR',NULL,NULL,'TTS','Nome/código da voz do TTS.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(9,'TTS_REPETICOES','TODOS','INT',NULL,1,NULL,NULL,NULL,NULL,'TTS','Qtd de repetições por chamada.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(10,'TTS_VELOCIDADE','TODOS','DECIMAL',NULL,NULL,1.0000,NULL,NULL,NULL,'TTS','Velocidade do TTS (1.00 = normal).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(11,'PISCAR_CHAMADA','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Ativa efeito de piscada ao chamar.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(12,'PISCAR_CHAMADA_SEG','TODOS','INT',NULL,8,NULL,NULL,NULL,NULL,'PAINEL_PUBLICO','Duração da piscada (segundos).',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(13,'TV_ROTATIVO_HABILITADO','TODOS','BOOL',1,NULL,NULL,NULL,NULL,NULL,'TV','TV rotativo: habilitar rotação de telas.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(14,'TV_ROTATIVO_INTERVALO_SEG','TODOS','INT',NULL,10,NULL,NULL,NULL,NULL,'TV','Intervalo padrão de rotação (seg), se tela não definir.',NULL,1,'2026-02-13 09:23:33','2026-02-13 09:23:33',NULL),(15,'FILTRO_LOCAIS_CODIGOS_JSON','PAINEL','JSON',NULL,NULL,NULL,NULL,'[]',NULL,'FILTRO','Lista (JSON array) de códigos de local_operacional que este painel deve exibir. Ex.: [\"MEDP01\",\"MEDP02\"]',NULL,1,'2026-02-15 05:02:55','2026-02-15 05:02:55',NULL);
 /*!40000 ALTER TABLE `painel_config_def` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10798,6 +11094,7 @@ CREATE TABLE `painel_consumo_evento` (
   `painel_tipo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_local_operacional` bigint DEFAULT NULL,
   `consumido_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_consumo`),
   UNIQUE KEY `uk_painel_consumo` (`origem`,`id_evento`,`painel_tipo`),
   KEY `idx_painel_local` (`id_local_operacional`,`consumido_em`)
@@ -10831,6 +11128,7 @@ CREATE TABLE `painel_evento_stream` (
   `payload` json NOT NULL,
   `processado` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_painel` (`id_painel`,`processado`),
   KEY `idx_ref` (`id_referencia`),
@@ -10857,6 +11155,7 @@ DROP TABLE IF EXISTS `painel_fila_tipo`;
 CREATE TABLE `painel_fila_tipo` (
   `id_painel` bigint NOT NULL,
   `tipo_fila` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_painel`,`tipo_fila`),
   CONSTRAINT `fk_painel_fila_tipo_painel` FOREIGN KEY (`id_painel`) REFERENCES `painel` (`id_painel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -10868,7 +11167,7 @@ CREATE TABLE `painel_fila_tipo` (
 
 LOCK TABLES `painel_fila_tipo` WRITE;
 /*!40000 ALTER TABLE `painel_fila_tipo` DISABLE KEYS */;
-INSERT INTO `painel_fila_tipo` VALUES (1,'RECEPCAO'),(2,'TRIAGEM'),(5,'MEDICACAO'),(6,'EXAME'),(7,'RX'),(23,'MEDICO'),(24,'MEDICO'),(150,'MEDICACAO'),(247,'MEDICO_CLINICO');
+INSERT INTO `painel_fila_tipo` VALUES (1,'RECEPCAO',NULL),(2,'TRIAGEM',NULL),(5,'MEDICACAO',NULL),(6,'EXAME',NULL),(7,'RX',NULL),(23,'MEDICO',NULL),(24,'MEDICO',NULL),(150,'MEDICACAO',NULL),(247,'MEDICO_CLINICO',NULL);
 /*!40000 ALTER TABLE `painel_fila_tipo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10886,6 +11185,7 @@ CREATE TABLE `painel_grupo` (
   `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_grupo`),
   UNIQUE KEY `uk_grupo_codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -10910,6 +11210,7 @@ DROP TABLE IF EXISTS `painel_grupo_local`;
 CREATE TABLE `painel_grupo_local` (
   `id_grupo` bigint NOT NULL,
   `id_local_operacional` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_grupo`,`id_local_operacional`),
   KEY `idx_pgl_local` (`id_local_operacional`),
   CONSTRAINT `fk_pgl_grupo` FOREIGN KEY (`id_grupo`) REFERENCES `painel_grupo` (`id_grupo`)
@@ -10935,6 +11236,7 @@ DROP TABLE IF EXISTS `painel_lane`;
 CREATE TABLE `painel_lane` (
   `id_painel` bigint NOT NULL,
   `lane` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_painel`,`lane`),
   CONSTRAINT `fk_painel_lane_painel` FOREIGN KEY (`id_painel`) REFERENCES `painel` (`id_painel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -10946,7 +11248,7 @@ CREATE TABLE `painel_lane` (
 
 LOCK TABLES `painel_lane` WRITE;
 /*!40000 ALTER TABLE `painel_lane` DISABLE KEYS */;
-INSERT INTO `painel_lane` VALUES (23,'ADULTO'),(24,'PEDIATRICO'),(150,'PEDIATRICO'),(247,'CLINICO');
+INSERT INTO `painel_lane` VALUES (23,'ADULTO',NULL),(24,'PEDIATRICO',NULL),(150,'PEDIATRICO',NULL),(247,'CLINICO',NULL);
 /*!40000 ALTER TABLE `painel_lane` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10960,6 +11262,7 @@ DROP TABLE IF EXISTS `painel_local`;
 CREATE TABLE `painel_local` (
   `id_painel` bigint NOT NULL,
   `id_local_operacional` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_painel`,`id_local_operacional`),
   KEY `idx_painel_local_local` (`id_local_operacional`),
   CONSTRAINT `fk_painel_local_local` FOREIGN KEY (`id_local_operacional`) REFERENCES `local_operacional` (`id_local_operacional`),
@@ -10995,6 +11298,7 @@ CREATE TABLE `painel_mensagem` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `criado_por` bigint DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_mensagem`),
   KEY `idx_msg_painel` (`id_painel`,`ativo`,`criado_em`),
   KEY `idx_msg_expira` (`expira_em`),
@@ -11024,6 +11328,7 @@ CREATE TABLE `painel_mensagem_consumo` (
   `id_painel` bigint NOT NULL,
   `consumido_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `consumido_por` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_consumo`),
   UNIQUE KEY `uk_msg_consumo` (`id_mensagem`,`id_painel`),
   KEY `idx_consumo_painel` (`id_painel`,`consumido_em`),
@@ -11055,6 +11360,7 @@ CREATE TABLE `painel_monitoramento_especialidade` (
   `id_local_operacional` bigint DEFAULT NULL,
   `ordem` int NOT NULL DEFAULT '1',
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_cfg`),
   KEY `idx_cfg_painel` (`id_painel`),
   KEY `idx_cfg_local_operacional` (`id_local_operacional`),
@@ -11085,6 +11391,7 @@ CREATE TABLE `pdv_cliente` (
   `telefone` varchar(40) DEFAULT NULL,
   `email` varchar(120) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_cliente`),
   KEY `ix_cliente_doc` (`documento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -11114,6 +11421,7 @@ CREATE TABLE `pdv_pagamento` (
   `nsu` varchar(80) DEFAULT NULL,
   `autorizacao` varchar(80) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pagamento`),
   KEY `ix_pag_venda` (`id_venda`),
   CONSTRAINT `fk_pdv_pag_venda` FOREIGN KEY (`id_venda`) REFERENCES `pdv_venda` (`id_venda`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -11150,6 +11458,7 @@ CREATE TABLE `pdv_venda` (
   `id_sessao_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `pago_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_venda`),
   KEY `ix_venda_status` (`status`),
   KEY `ix_venda_cliente` (`id_cliente`),
@@ -11187,6 +11496,7 @@ CREATE TABLE `pdv_venda_item` (
   `valor_unitario` decimal(14,4) NOT NULL,
   `valor_total` decimal(14,2) NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `ix_venda_item_venda` (`id_venda`),
   KEY `ix_venda_item_prod` (`id_produto`),
@@ -11223,6 +11533,7 @@ CREATE TABLE `pedido_medico` (
   `justificativa` varchar(500) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pedido_medico`),
   KEY `ix_pedido_medico_ffa` (`id_ffa`),
   KEY `ix_pedido_medico_status` (`status`),
@@ -11265,6 +11576,7 @@ CREATE TABLE `pedido_medico_item` (
   `exige_sinan` tinyint(1) NOT NULL DEFAULT '0',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pedido_item`),
   UNIQUE KEY `uk_pedido_item_externo` (`sistema_externo`,`codigo_externo`),
   KEY `ix_pedido_item_pedido` (`id_pedido_medico`),
@@ -11295,6 +11607,7 @@ CREATE TABLE `pep_assinatura_digital` (
   `hash_conteudo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `assinatura_base64` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `data_assinatura` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_pep_assinatura` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -11330,6 +11643,7 @@ CREATE TABLE `pep_registro` (
   `hash_assinatura` varchar(128) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pep_registro`),
   KEY `ix_pep_ffa` (`id_ffa`),
   KEY `ix_pep_gpat` (`id_gpat`),
@@ -11362,6 +11676,7 @@ CREATE TABLE `perfil` (
   `contexto` varchar(40) DEFAULT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_perfil`),
   UNIQUE KEY `uk_perfil_codigo` (`codigo`),
   KEY `idx_perfil_ativo` (`ativo`)
@@ -11374,7 +11689,7 @@ CREATE TABLE `perfil` (
 
 LOCK TABLES `perfil` WRITE;
 /*!40000 ALTER TABLE `perfil` DISABLE KEYS */;
-INSERT INTO `perfil` VALUES (2,'RECEPCAO','Recepcionista','Atendimento na recepção','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(3,'ENFERMAGEM','Enfermeiro','Triagem e enfermagem','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(4,'MEDICO','Médico','Atendimento médico','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(5,'FARMACIA','Farmacêutico','Dispensação de medicamentos','FARMACIA',1,'2026-03-17 06:46:37.000000'),(6,'LABORATORIO','Técnico de Laboratório','Análises laboratoriais','LABORATORIO',1,'2026-03-17 06:46:37.000000'),(7,'AUX_ENF','Auxiliar de Enfermagem','Apoio à enfermagem','ATENDIMENTO',1,'2026-03-17 06:46:37.000000'),(8,'ESTOQUE','Estoquista','Gestão de estoque','ESTOQUE',1,'2026-03-17 06:46:37.000000'),(9,'AMBULANCIA','Técnico de Ambulância','Transporte de pacientes','AMBULANCIA',1,'2026-03-17 06:46:37.000000'),(10,'ASSIST_SOCIAL','Assistente Social','Serviço social','SOCIAL',1,'2026-03-17 06:46:37.000000'),(11,'NUTRICAO','Nutricionista','Nutrição e dietas','NUTRICAO',1,'2026-03-17 06:46:37.000000'),(12,'FATURAMENTO','Faturista','Faturamento','FATURAMENTO',1,'2026-03-17 06:46:37.000000'),(13,'MANUTENCAO','Técnico de Manutenção','Manutenção','MANUTENCAO',1,'2026-03-17 06:46:37.000000'),(14,'GASOTERAPIA','Gasoterapeuta','Gasoterapia','GASOTERAPIA',1,'2026-03-17 06:46:37.000000'),(15,'PDV','Atendente PDV','Ponto de venda','COMERCIAL',1,'2026-03-17 06:46:37.000000'),(16,'COORDENADOR','Coordenador','Coordenação de setor','GERAL',1,'2026-03-17 06:46:37.000000'),(42,'ADMIN','Administrador','Perfil administrativo padrão','HIS/PA',1,'2026-03-15 04:01:01.967149');
+INSERT INTO `perfil` VALUES (2,'RECEPCAO','Recepcionista','Atendimento na recepção','ATENDIMENTO',1,'2026-03-17 06:46:37.000000',NULL),(3,'ENFERMAGEM','Enfermeiro','Triagem e enfermagem','ATENDIMENTO',1,'2026-03-17 06:46:37.000000',NULL),(4,'MEDICO','Médico','Atendimento médico','ATENDIMENTO',1,'2026-03-17 06:46:37.000000',NULL),(5,'FARMACIA','Farmacêutico','Dispensação de medicamentos','FARMACIA',1,'2026-03-17 06:46:37.000000',NULL),(6,'LABORATORIO','Técnico de Laboratório','Análises laboratoriais','LABORATORIO',1,'2026-03-17 06:46:37.000000',NULL),(7,'AUX_ENF','Auxiliar de Enfermagem','Apoio à enfermagem','ATENDIMENTO',1,'2026-03-17 06:46:37.000000',NULL),(8,'ESTOQUE','Estoquista','Gestão de estoque','ESTOQUE',1,'2026-03-17 06:46:37.000000',NULL),(9,'AMBULANCIA','Técnico de Ambulância','Transporte de pacientes','AMBULANCIA',1,'2026-03-17 06:46:37.000000',NULL),(10,'ASSIST_SOCIAL','Assistente Social','Serviço social','SOCIAL',1,'2026-03-17 06:46:37.000000',NULL),(11,'NUTRICAO','Nutricionista','Nutrição e dietas','NUTRICAO',1,'2026-03-17 06:46:37.000000',NULL),(12,'FATURAMENTO','Faturista','Faturamento','FATURAMENTO',1,'2026-03-17 06:46:37.000000',NULL),(13,'MANUTENCAO','Técnico de Manutenção','Manutenção','MANUTENCAO',1,'2026-03-17 06:46:37.000000',NULL),(14,'GASOTERAPIA','Gasoterapeuta','Gasoterapia','GASOTERAPIA',1,'2026-03-17 06:46:37.000000',NULL),(15,'PDV','Atendente PDV','Ponto de venda','COMERCIAL',1,'2026-03-17 06:46:37.000000',NULL),(16,'COORDENADOR','Coordenador','Coordenação de setor','GERAL',1,'2026-03-17 06:46:37.000000',NULL),(42,'ADMIN','Administrador','Perfil administrativo padrão','HIS/PA',1,'2026-03-15 04:01:01.967149',NULL);
 /*!40000 ALTER TABLE `perfil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -11389,6 +11704,7 @@ CREATE TABLE `perfil_permissao` (
   `id_perfil` bigint NOT NULL,
   `id_permissao` bigint NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_perfil`,`id_permissao`),
   KEY `idx_pp_perfil` (`id_perfil`),
   KEY `idx_pp_permissao` (`id_permissao`),
@@ -11405,7 +11721,7 @@ CREATE TABLE `perfil_permissao` (
 
 LOCK TABLES `perfil_permissao` WRITE;
 /*!40000 ALTER TABLE `perfil_permissao` DISABLE KEYS */;
-INSERT INTO `perfil_permissao` VALUES (1,1,'2026-03-17 07:02:03.000000'),(1,2,'2026-03-17 07:02:03.000000'),(1,3,'2026-03-17 07:02:03.000000'),(1,4,'2026-03-17 07:02:03.000000'),(1,5,'2026-03-17 07:02:03.000000'),(1,6,'2026-03-17 07:02:03.000000'),(1,7,'2026-03-17 07:02:03.000000'),(1,8,'2026-03-17 07:02:03.000000'),(1,9,'2026-03-17 07:02:03.000000'),(1,10,'2026-03-17 07:02:03.000000'),(1,11,'2026-03-17 07:02:03.000000'),(1,12,'2026-03-17 07:02:03.000000'),(1,14,'2026-03-17 07:02:03.000000'),(1,15,'2026-03-17 07:02:03.000000'),(1,16,'2026-03-17 07:02:03.000000'),(1,17,'2026-03-17 07:02:03.000000'),(1,18,'2026-03-17 07:02:03.000000'),(1,19,'2026-03-17 07:02:03.000000'),(1,20,'2026-03-17 07:02:03.000000'),(1,21,'2026-03-17 07:02:03.000000'),(1,22,'2026-03-17 07:02:03.000000'),(2,14,'2026-03-17 06:46:37.000000'),(2,15,'2026-03-17 06:46:37.000000'),(3,14,'2026-03-17 06:46:37.000000'),(3,16,'2026-03-17 06:46:37.000000'),(3,17,'2026-03-17 06:46:37.000000'),(4,14,'2026-03-17 06:46:37.000000'),(4,18,'2026-03-17 06:46:37.000000'),(5,14,'2026-03-17 06:46:37.000000'),(5,19,'2026-03-17 06:46:37.000000'),(6,14,'2026-03-17 06:46:37.000000'),(6,20,'2026-03-17 06:46:37.000000'),(7,16,'2026-03-17 06:46:37.000000'),(7,17,'2026-03-17 06:46:37.000000'),(8,14,'2026-03-17 06:46:37.000000'),(8,22,'2026-03-17 06:46:37.000000'),(9,2,'2026-03-17 06:46:37.000000'),(9,3,'2026-03-17 06:46:37.000000'),(9,14,'2026-03-17 06:46:37.000000'),(10,6,'2026-03-17 06:46:37.000000'),(10,14,'2026-03-17 06:46:37.000000'),(11,11,'2026-03-17 06:46:37.000000'),(11,14,'2026-03-17 06:46:37.000000'),(12,7,'2026-03-17 06:46:37.000000'),(12,14,'2026-03-17 06:46:37.000000'),(13,4,'2026-03-17 06:46:37.000000'),(13,14,'2026-03-17 06:46:37.000000'),(14,5,'2026-03-17 06:46:37.000000'),(14,14,'2026-03-17 06:46:37.000000'),(15,10,'2026-03-17 06:46:37.000000'),(15,14,'2026-03-17 06:46:37.000000'),(16,1,'2026-03-17 06:46:37.000000'),(16,14,'2026-03-17 06:46:37.000000'),(16,15,'2026-03-17 06:46:37.000000'),(16,16,'2026-03-17 06:46:37.000000'),(16,17,'2026-03-17 06:46:37.000000'),(16,18,'2026-03-17 06:46:37.000000'),(16,19,'2026-03-17 06:46:37.000000'),(16,20,'2026-03-17 06:46:37.000000'),(16,21,'2026-03-17 06:46:37.000000'),(16,22,'2026-03-17 06:46:37.000000'),(42,1,'2026-03-15 05:48:13.000000'),(42,2,'2026-03-17 06:16:18.000000'),(42,3,'2026-03-17 06:16:19.000000'),(42,4,'2026-03-17 06:16:19.000000'),(42,5,'2026-03-17 06:16:20.000000'),(42,6,'2026-03-17 06:16:20.000000'),(42,7,'2026-03-17 06:16:20.000000'),(42,8,'2026-03-17 06:16:20.000000'),(42,9,'2026-03-17 06:16:20.000000'),(42,10,'2026-03-17 06:16:21.000000'),(42,11,'2026-03-17 06:16:21.000000'),(42,12,'2026-03-17 06:16:21.000000');
+INSERT INTO `perfil_permissao` VALUES (1,1,'2026-03-17 07:02:03.000000',NULL),(1,2,'2026-03-17 07:02:03.000000',NULL),(1,3,'2026-03-17 07:02:03.000000',NULL),(1,4,'2026-03-17 07:02:03.000000',NULL),(1,5,'2026-03-17 07:02:03.000000',NULL),(1,6,'2026-03-17 07:02:03.000000',NULL),(1,7,'2026-03-17 07:02:03.000000',NULL),(1,8,'2026-03-17 07:02:03.000000',NULL),(1,9,'2026-03-17 07:02:03.000000',NULL),(1,10,'2026-03-17 07:02:03.000000',NULL),(1,11,'2026-03-17 07:02:03.000000',NULL),(1,12,'2026-03-17 07:02:03.000000',NULL),(1,14,'2026-03-17 07:02:03.000000',NULL),(1,15,'2026-03-17 07:02:03.000000',NULL),(1,16,'2026-03-17 07:02:03.000000',NULL),(1,17,'2026-03-17 07:02:03.000000',NULL),(1,18,'2026-03-17 07:02:03.000000',NULL),(1,19,'2026-03-17 07:02:03.000000',NULL),(1,20,'2026-03-17 07:02:03.000000',NULL),(1,21,'2026-03-17 07:02:03.000000',NULL),(1,22,'2026-03-17 07:02:03.000000',NULL),(2,14,'2026-03-17 06:46:37.000000',NULL),(2,15,'2026-03-17 06:46:37.000000',NULL),(3,14,'2026-03-17 06:46:37.000000',NULL),(3,16,'2026-03-17 06:46:37.000000',NULL),(3,17,'2026-03-17 06:46:37.000000',NULL),(4,14,'2026-03-17 06:46:37.000000',NULL),(4,18,'2026-03-17 06:46:37.000000',NULL),(5,14,'2026-03-17 06:46:37.000000',NULL),(5,19,'2026-03-17 06:46:37.000000',NULL),(6,14,'2026-03-17 06:46:37.000000',NULL),(6,20,'2026-03-17 06:46:37.000000',NULL),(7,16,'2026-03-17 06:46:37.000000',NULL),(7,17,'2026-03-17 06:46:37.000000',NULL),(8,14,'2026-03-17 06:46:37.000000',NULL),(8,22,'2026-03-17 06:46:37.000000',NULL),(9,2,'2026-03-17 06:46:37.000000',NULL),(9,3,'2026-03-17 06:46:37.000000',NULL),(9,14,'2026-03-17 06:46:37.000000',NULL),(10,6,'2026-03-17 06:46:37.000000',NULL),(10,14,'2026-03-17 06:46:37.000000',NULL),(11,11,'2026-03-17 06:46:37.000000',NULL),(11,14,'2026-03-17 06:46:37.000000',NULL),(12,7,'2026-03-17 06:46:37.000000',NULL),(12,14,'2026-03-17 06:46:37.000000',NULL),(13,4,'2026-03-17 06:46:37.000000',NULL),(13,14,'2026-03-17 06:46:37.000000',NULL),(14,5,'2026-03-17 06:46:37.000000',NULL),(14,14,'2026-03-17 06:46:37.000000',NULL),(15,10,'2026-03-17 06:46:37.000000',NULL),(15,14,'2026-03-17 06:46:37.000000',NULL),(16,1,'2026-03-17 06:46:37.000000',NULL),(16,14,'2026-03-17 06:46:37.000000',NULL),(16,15,'2026-03-17 06:46:37.000000',NULL),(16,16,'2026-03-17 06:46:37.000000',NULL),(16,17,'2026-03-17 06:46:37.000000',NULL),(16,18,'2026-03-17 06:46:37.000000',NULL),(16,19,'2026-03-17 06:46:37.000000',NULL),(16,20,'2026-03-17 06:46:37.000000',NULL),(16,21,'2026-03-17 06:46:37.000000',NULL),(16,22,'2026-03-17 06:46:37.000000',NULL),(42,1,'2026-03-15 05:48:13.000000',NULL),(42,2,'2026-03-17 06:16:18.000000',NULL),(42,3,'2026-03-17 06:16:19.000000',NULL),(42,4,'2026-03-17 06:16:19.000000',NULL),(42,5,'2026-03-17 06:16:20.000000',NULL),(42,6,'2026-03-17 06:16:20.000000',NULL),(42,7,'2026-03-17 06:16:20.000000',NULL),(42,8,'2026-03-17 06:16:20.000000',NULL),(42,9,'2026-03-17 06:16:20.000000',NULL),(42,10,'2026-03-17 06:16:21.000000',NULL),(42,11,'2026-03-17 06:16:21.000000',NULL),(42,12,'2026-03-17 06:16:21.000000',NULL);
 /*!40000 ALTER TABLE `perfil_permissao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -11431,6 +11747,7 @@ CREATE TABLE `permissao` (
   `icone` varchar(60) DEFAULT NULL,
   `ordem_menu` int DEFAULT NULL,
   `visivel_menu` tinyint DEFAULT '1',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_permissao`),
   UNIQUE KEY `uk_permissao_codigo` (`codigo`),
   KEY `idx_perm_dominio` (`dominio`),
@@ -11444,7 +11761,7 @@ CREATE TABLE `permissao` (
 
 LOCK TABLES `permissao` WRITE;
 /*!40000 ALTER TABLE `permissao` DISABLE KEYS */;
-INSERT INTO `permissao` VALUES (1,'ADMIN','Painel Admin','Permite acessar o painel administrativo','GERAL',NULL,'painel_admin',NULL,1,'2026-03-15 05:42:57.000000','ADMIN',NULL,NULL,1),(2,'AMBULANCIA','Painel Ambulância','Acesso ao painel de ambulância/transporte','AMBULANCIA',NULL,'painel_ambulancia',NULL,1,'2026-03-17 06:12:47.000000','AMBULANCIA',NULL,NULL,1),(3,'REMOCAO','Painel Remoção','Acesso ao painel de remoção','REMOCAO',NULL,'painel_remocao',NULL,1,'2026-03-17 06:12:47.000000','REMOCAO',NULL,NULL,1),(4,'MANUTENCAO','Painel Manutenção','Acesso ao painel de manutenção','MANUTENCAO',NULL,'painel_manutencao',NULL,1,'2026-03-17 06:12:47.000000','MANUTENCAO',NULL,NULL,1),(5,'GASOTERAPIA','Painel Gasoterapia','Acesso ao painel de gasoterapia','GASOTERAPIA',NULL,'painel_gasoterapia',NULL,1,'2026-03-17 06:12:47.000000','GASOTERAPIA',NULL,NULL,1),(6,'ASSISTENCIA_SOCIAL','Painel Assistência Social','Acesso ao painel de assistência social','ASSISTENCIA_SOCIAL',NULL,'painel_assistencia_social',NULL,1,'2026-03-17 06:12:47.000000','ASSISTENCIA_SOCIAL',NULL,NULL,1),(7,'FATURAMENTO','Painel Faturamento','Acesso ao painel de faturamento','FATURAMENTO',NULL,'painel_faturamento',NULL,1,'2026-03-17 06:12:47.000000','FATURAMENTO',NULL,NULL,1),(8,'CAT','Painel CAT','Acesso ao painel de CAT (Acidentes de Trabalho)','CAT',NULL,'painel_cat',NULL,1,'2026-03-17 06:12:47.000000','CAT',NULL,NULL,1),(9,'OBITO','Painel Óbito','Acesso ao painel de óbito','OBITO',NULL,'painel_obito',NULL,1,'2026-03-17 06:12:47.000000','OBITO',NULL,NULL,1),(10,'PDV','Painel PDV','Acesso ao painel de PDV/Vendas','PDV',NULL,'painel_pdv',NULL,1,'2026-03-17 06:12:47.000000','PDV',NULL,NULL,1),(11,'NUTRICAO','Painel Nutrição','Acesso ao painel de nutrição','NUTRICAO',NULL,'painel_nutricao',NULL,1,'2026-03-17 06:12:47.000000','NUTRICAO',NULL,NULL,1),(12,'INTERCONSULTA','Painel Interconsulta','Acesso ao painel de interconsulta','INTERCONSULTA',NULL,'painel_interconsulta',NULL,1,'2026-03-17 06:12:47.000000','INTERCONSULTA',NULL,NULL,1),(14,'DASHBOARD','Dashboard',NULL,'GERAL',NULL,'painel_dashboard',NULL,1,'2026-03-17 06:46:37.000000','DASHBOARD',NULL,NULL,1),(15,'RECEPCAO','Recepção',NULL,'RECEPCAO',NULL,'painel_recepcao',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(16,'TRIAGEM','Triagem',NULL,'ATENDIMENTO',NULL,'painel_triagem',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(17,'ENFERMAGEM','Enfermagem',NULL,'ATENDIMENTO',NULL,'painel_enfermagem',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(18,'MEDICO','Atendimento Médico',NULL,'ATENDIMENTO',NULL,'painel_medico',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1),(19,'FARMACIA','Farmácia',NULL,'FARMACIA',NULL,'painel_farmacia',NULL,1,'2026-03-17 06:46:37.000000','FARMACIA',NULL,NULL,1),(20,'LABORATORIO','Laboratório',NULL,'LABORATORIO',NULL,'painel_laboratorio',NULL,1,'2026-03-17 06:46:37.000000','LABORATORIO',NULL,NULL,1),(21,'INTERNACAO','Internação',NULL,'INTERNACAO',NULL,'painel_internacao',NULL,1,'2026-03-17 06:46:37.000000','INTERNACAO',NULL,NULL,1),(22,'ESTOQUE','Estoque',NULL,'ESTOQUE',NULL,'painel_estoque',NULL,1,'2026-03-17 06:46:37.000000','ESTOQUE',NULL,NULL,1),(36,'ASSISTENCIAL.ATENDIMENTO_FINALIZAR','Finalizar Atendimento','Executor responsável por finalizar atendimento médico e registrar evolução','ASSISTENCIAL','sp_executor_assistencial_atendimento_finalizar',NULL,NULL,1,'2026-03-21 04:19:51.709427',NULL,NULL,NULL,1);
+INSERT INTO `permissao` VALUES (1,'ADMIN','Painel Admin','Permite acessar o painel administrativo','GERAL',NULL,'painel_admin',NULL,1,'2026-03-15 05:42:57.000000','ADMIN',NULL,NULL,1,NULL),(2,'AMBULANCIA','Painel Ambulância','Acesso ao painel de ambulância/transporte','AMBULANCIA',NULL,'painel_ambulancia',NULL,1,'2026-03-17 06:12:47.000000','AMBULANCIA',NULL,NULL,1,NULL),(3,'REMOCAO','Painel Remoção','Acesso ao painel de remoção','REMOCAO',NULL,'painel_remocao',NULL,1,'2026-03-17 06:12:47.000000','REMOCAO',NULL,NULL,1,NULL),(4,'MANUTENCAO','Painel Manutenção','Acesso ao painel de manutenção','MANUTENCAO',NULL,'painel_manutencao',NULL,1,'2026-03-17 06:12:47.000000','MANUTENCAO',NULL,NULL,1,NULL),(5,'GASOTERAPIA','Painel Gasoterapia','Acesso ao painel de gasoterapia','GASOTERAPIA',NULL,'painel_gasoterapia',NULL,1,'2026-03-17 06:12:47.000000','GASOTERAPIA',NULL,NULL,1,NULL),(6,'ASSISTENCIA_SOCIAL','Painel Assistência Social','Acesso ao painel de assistência social','ASSISTENCIA_SOCIAL',NULL,'painel_assistencia_social',NULL,1,'2026-03-17 06:12:47.000000','ASSISTENCIA_SOCIAL',NULL,NULL,1,NULL),(7,'FATURAMENTO','Painel Faturamento','Acesso ao painel de faturamento','FATURAMENTO',NULL,'painel_faturamento',NULL,1,'2026-03-17 06:12:47.000000','FATURAMENTO',NULL,NULL,1,NULL),(8,'CAT','Painel CAT','Acesso ao painel de CAT (Acidentes de Trabalho)','CAT',NULL,'painel_cat',NULL,1,'2026-03-17 06:12:47.000000','CAT',NULL,NULL,1,NULL),(9,'OBITO','Painel Óbito','Acesso ao painel de óbito','OBITO',NULL,'painel_obito',NULL,1,'2026-03-17 06:12:47.000000','OBITO',NULL,NULL,1,NULL),(10,'PDV','Painel PDV','Acesso ao painel de PDV/Vendas','PDV',NULL,'painel_pdv',NULL,1,'2026-03-17 06:12:47.000000','PDV',NULL,NULL,1,NULL),(11,'NUTRICAO','Painel Nutrição','Acesso ao painel de nutrição','NUTRICAO',NULL,'painel_nutricao',NULL,1,'2026-03-17 06:12:47.000000','NUTRICAO',NULL,NULL,1,NULL),(12,'INTERCONSULTA','Painel Interconsulta','Acesso ao painel de interconsulta','INTERCONSULTA',NULL,'painel_interconsulta',NULL,1,'2026-03-17 06:12:47.000000','INTERCONSULTA',NULL,NULL,1,NULL),(14,'DASHBOARD','Dashboard',NULL,'GERAL',NULL,'painel_dashboard',NULL,1,'2026-03-17 06:46:37.000000','DASHBOARD',NULL,NULL,1,NULL),(15,'RECEPCAO','Recepção',NULL,'RECEPCAO',NULL,'painel_recepcao',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1,NULL),(16,'TRIAGEM','Triagem',NULL,'ATENDIMENTO',NULL,'painel_triagem',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1,NULL),(17,'ENFERMAGEM','Enfermagem',NULL,'ATENDIMENTO',NULL,'painel_enfermagem',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1,NULL),(18,'MEDICO','Atendimento Médico',NULL,'ATENDIMENTO',NULL,'painel_medico',NULL,1,'2026-03-17 06:46:37.000000','ATENDIMENTO',NULL,NULL,1,NULL),(19,'FARMACIA','Farmácia',NULL,'FARMACIA',NULL,'painel_farmacia',NULL,1,'2026-03-17 06:46:37.000000','FARMACIA',NULL,NULL,1,NULL),(20,'LABORATORIO','Laboratório',NULL,'LABORATORIO',NULL,'painel_laboratorio',NULL,1,'2026-03-17 06:46:37.000000','LABORATORIO',NULL,NULL,1,NULL),(21,'INTERNACAO','Internação',NULL,'INTERNACAO',NULL,'painel_internacao',NULL,1,'2026-03-17 06:46:37.000000','INTERNACAO',NULL,NULL,1,NULL),(22,'ESTOQUE','Estoque',NULL,'ESTOQUE',NULL,'painel_estoque',NULL,1,'2026-03-17 06:46:37.000000','ESTOQUE',NULL,NULL,1,NULL),(36,'ASSISTENCIAL.ATENDIMENTO_FINALIZAR','Finalizar Atendimento','Executor responsável por finalizar atendimento médico e registrar evolução','ASSISTENCIAL','sp_executor_assistencial_atendimento_finalizar',NULL,NULL,1,'2026-03-21 04:19:51.709427',NULL,NULL,NULL,1,NULL);
 /*!40000 ALTER TABLE `permissao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -11507,6 +11824,7 @@ CREATE TABLE `pessoa_alergias` (
   `gravidade` enum('LEVE','MODERADA','GRAVE/CHOQUE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `registrado_por` bigint DEFAULT NULL,
   `data_registro` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_alergia_pessoa` (`id_pessoa`),
   CONSTRAINT `fk_alergia_pessoa` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
@@ -11539,6 +11857,7 @@ CREATE TABLE `pessoa_conselho_registro` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa_conselho`),
   UNIQUE KEY `uk_pessoa_conselho` (`id_pessoa`,`id_conselho`,`uf_registro`,`registro`),
   KEY `idx_pessoa_principal` (`id_pessoa`,`eh_principal`,`ativo`),
@@ -11570,6 +11889,7 @@ CREATE TABLE `pessoa_contato` (
   `tipo` enum('EMAIL','TELEFONE','WHATSAPP') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `valor` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `principal` tinyint(1) DEFAULT '0',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_pessoa` (`id_pessoa`),
   CONSTRAINT `pessoa_contato_ibfk_1` FOREIGN KEY (`id_pessoa`) REFERENCES `pessoa` (`id_pessoa`)
@@ -11606,6 +11926,7 @@ CREATE TABLE `pessoa_documento` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa_documento`),
   KEY `idx_doc_pessoa` (`id_pessoa`),
   KEY `idx_doc_tipo` (`tipo_documento`),
@@ -11642,6 +11963,7 @@ CREATE TABLE `pessoa_email` (
   `valido_ate` date DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa_email`),
   UNIQUE KEY `uk_email_unico` (`email`),
   KEY `idx_email_pessoa` (`id_pessoa`),
@@ -11685,6 +12007,7 @@ CREATE TABLE `pessoa_endereco` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa_endereco`),
   KEY `idx_pessoa_endereco_pessoa` (`id_pessoa`),
   KEY `idx_pessoa_endereco_cidade` (`id_cidade`),
@@ -11721,6 +12044,7 @@ CREATE TABLE `pessoa_identificador` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa_identificador`),
   KEY `idx_pid_pessoa` (`id_pessoa`),
   KEY `idx_pid_tipo` (`tipo_identificador`),
@@ -11752,6 +12076,7 @@ CREATE TABLE `pessoa_logradouro` (
   `data_inicio` date NOT NULL,
   `data_fim` date DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa`,`id_logradouro`,`data_inicio`),
   KEY `id_logradouro` (`id_logradouro`),
   KEY `idx_pessoa_logradouro_ativo` (`id_pessoa`,`ativo`),
@@ -11789,6 +12114,7 @@ CREATE TABLE `pessoa_telefone` (
   `valido_ate` date DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa_telefone`),
   KEY `idx_telefone_pessoa` (`id_pessoa`),
   KEY `idx_telefone_principal` (`principal`),
@@ -11821,6 +12147,7 @@ CREATE TABLE `pessoa_vinculo` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_pessoa_vinculo`),
   KEY `idx_vinculo_origem` (`id_pessoa_origem`),
   KEY `idx_vinculo_destino` (`id_pessoa_destino`),
@@ -11856,6 +12183,7 @@ CREATE TABLE `plantao` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_plantao`),
   KEY `idx_plantao_global` (`id_unidade`,`ativo`,`inicio_plantao`,`fim_plantao`),
   KEY `idx_plantao_funcionario` (`id_funcionario`),
@@ -11895,6 +12223,7 @@ CREATE TABLE `plantao_escala` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_plantao_escala`),
   UNIQUE KEY `uk_plantao_escala_global` (`id_unidade`,`id_funcionario`,`data`,`turno`),
   KEY `idx_pe_unidade_data` (`id_unidade`,`data`),
@@ -11931,6 +12260,7 @@ CREATE TABLE `plantao_modelo` (
   `horas_previstas` decimal(6,2) DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_plantao_modelo`),
   UNIQUE KEY `uk_plantao_modelo_nome` (`nome`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -11960,6 +12290,7 @@ CREATE TABLE `prescricao` (
   `id_medico` bigint DEFAULT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   `bloqueada` tinyint(1) DEFAULT '0',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_prescricao`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_medico` (`id_medico`),
@@ -11990,6 +12321,7 @@ CREATE TABLE `prescricao_checagem` (
   `data_hora_checagem` datetime DEFAULT CURRENT_TIMESTAMP,
   `status` enum('ADMINISTRADO','RECUSADO','PACIENTE_AUSENTE','JEJUM') DEFAULT 'ADMINISTRADO',
   `observacao` text,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_checagem`),
   KEY `fk_checagem_item` (`id_prescricao_item`),
   KEY `fk_checagem_usuario` (`id_usuario_enfermeiro`),
@@ -12019,6 +12351,7 @@ CREATE TABLE `prescricao_checagem_dupla` (
   `id_checagem_principal` bigint NOT NULL,
   `id_usuario_testemunha` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_dupla_checagem`),
   KEY `fk_dupla_principal` (`id_checagem_principal`),
   KEY `fk_dupla_testemunha` (`id_usuario_testemunha`),
@@ -12050,6 +12383,7 @@ CREATE TABLE `prescricao_continua` (
   `id_medico` bigint NOT NULL,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   `ativa` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_prescricao`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_medico` (`id_medico`),
@@ -12081,6 +12415,7 @@ CREATE TABLE `prescricao_internacao` (
   `id_medico` bigint NOT NULL,
   `ativa` tinyint(1) DEFAULT '1',
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_prescricao`),
   KEY `id_internacao` (`id_internacao`),
   KEY `id_medico` (`id_medico`),
@@ -12117,6 +12452,7 @@ CREATE TABLE `prescricao_item` (
   `dispensado_em` datetime(6) DEFAULT NULL,
   `id_usuario_dispensacao` bigint DEFAULT NULL,
   `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'PENDENTE',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_item`),
   KEY `id_prescricao` (`id_prescricao`),
   CONSTRAINT `prescricao_item_ibfk_1` FOREIGN KEY (`id_prescricao`) REFERENCES `prescricao_continua` (`id_prescricao`)
@@ -12152,6 +12488,7 @@ CREATE TABLE `prescricao_itens` (
   `data_inicio` datetime DEFAULT CURRENT_TIMESTAMP,
   `data_suspensao` datetime DEFAULT NULL,
   `status` enum('ATIVO','SUSPENSO','CONCLUIDO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ATIVO',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_presc_tipo` (`id_atendimento`,`tipo_item`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -12180,6 +12517,7 @@ CREATE TABLE `prescricao_kit_itens` (
   `dose` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `via` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `frequencia` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_kit_master_link` (`id_kit`),
   CONSTRAINT `fk_kit_master_link` FOREIGN KEY (`id_kit`) REFERENCES `prescricao_kit_master` (`id`)
@@ -12192,7 +12530,7 @@ CREATE TABLE `prescricao_kit_itens` (
 
 LOCK TABLES `prescricao_kit_itens` WRITE;
 /*!40000 ALTER TABLE `prescricao_kit_itens` DISABLE KEYS */;
-INSERT INTO `prescricao_kit_itens` VALUES (1,1,'SORO FISIOLOGICO 0,9%','500ML','EV','AGORA'),(2,1,'DIPIRONA 1G','2ML','EV','SE DOR/FEBRE'),(3,2,'CEFTRIAXONA 1G','2G','EV','AGORA'),(4,2,'SORO FISIOLOGICO 0,9%','1000ML','EV','IMEDIATO'),(5,2,'COLETA DE HEMOCULTURA','2 AMOSTRAS','LAB','AGORA');
+INSERT INTO `prescricao_kit_itens` VALUES (1,1,'SORO FISIOLOGICO 0,9%','500ML','EV','AGORA',NULL),(2,1,'DIPIRONA 1G','2ML','EV','SE DOR/FEBRE',NULL),(3,2,'CEFTRIAXONA 1G','2G','EV','AGORA',NULL),(4,2,'SORO FISIOLOGICO 0,9%','1000ML','EV','IMEDIATO',NULL),(5,2,'COLETA DE HEMOCULTURA','2 AMOSTRAS','LAB','AGORA',NULL);
 /*!40000 ALTER TABLE `prescricao_kit_itens` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12208,6 +12546,7 @@ CREATE TABLE `prescricao_kit_master` (
   `nome_kit` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12218,7 +12557,7 @@ CREATE TABLE `prescricao_kit_master` (
 
 LOCK TABLES `prescricao_kit_master` WRITE;
 /*!40000 ALTER TABLE `prescricao_kit_master` DISABLE KEYS */;
-INSERT INTO `prescricao_kit_master` VALUES (1,'PROTOCOLO DENGUE','Hidratação e sintomáticos para suspeita de arboviroses',1),(2,'PROTOCOLO SEPSE','Ação rápida para infecção generalizada (Antibiótico + Expansão)',1);
+INSERT INTO `prescricao_kit_master` VALUES (1,'PROTOCOLO DENGUE','Hidratação e sintomáticos para suspeita de arboviroses',1,NULL),(2,'PROTOCOLO SEPSE','Ação rápida para infecção generalizada (Antibiótico + Expansão)',1,NULL);
 /*!40000 ALTER TABLE `prescricao_kit_master` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12239,6 +12578,7 @@ CREATE TABLE `prescricao_medica` (
   `frequencia` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` enum('ATIVA','SUSPENSA','CONCLUIDA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ATIVA',
   `data_prescricao` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12267,6 +12607,7 @@ CREATE TABLE `prescricao_medicacao` (
   `controlada` tinyint(1) DEFAULT '0' COMMENT 'Se exige liberação da farmácia',
   `criada_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `ativa` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_prescricao`),
   KEY `id_medico` (`id_medico`),
   KEY `idx_ffa` (`id_ffa`),
@@ -12300,6 +12641,7 @@ CREATE TABLE `prescritor_externo` (
   `telefone` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_prescritor_externo`),
   UNIQUE KEY `uk_prescritor_conselho` (`conselho`,`numero_conselho`,`uf`),
   KEY `idx_prescritor_nome` (`nome`)
@@ -12328,6 +12670,7 @@ CREATE TABLE `prioridade_social` (
   `descricao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `peso` int NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `codigo` (`codigo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -12339,7 +12682,7 @@ CREATE TABLE `prioridade_social` (
 
 LOCK TABLES `prioridade_social` WRITE;
 /*!40000 ALTER TABLE `prioridade_social` DISABLE KEYS */;
-INSERT INTO `prioridade_social` VALUES (1,'IDOSO','Paciente idoso',20,1),(2,'AUTISTA','Paciente com TEA',25,1),(3,'PCD','Pessoa com deficiência',20,1),(4,'GESTANTE','Gestante',15,1),(5,'CRIANCACOLO','Criança de colo',15,1);
+INSERT INTO `prioridade_social` VALUES (1,'IDOSO','Paciente idoso',20,1,NULL),(2,'AUTISTA','Paciente com TEA',25,1,NULL),(3,'PCD','Pessoa com deficiência',20,1,NULL),(4,'GESTANTE','Gestante',15,1,NULL),(5,'CRIANCACOLO','Criança de colo',15,1,NULL);
 /*!40000 ALTER TABLE `prioridade_social` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12362,6 +12705,7 @@ CREATE TABLE `procedimento_protocolo` (
   `id_usuario_criacao` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_protocolo`),
   UNIQUE KEY `uk_protocolo_codigo` (`codigo`),
   UNIQUE KEY `uk_protocolo_fila` (`id_fila`,`tipo`),
@@ -12398,6 +12742,7 @@ CREATE TABLE `procedimento_protocolo_evento` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_evt_proto` (`id_protocolo`,`criado_em`),
   KEY `idx_evt_tipo` (`tipo_evento`,`criado_em`),
@@ -12434,6 +12779,7 @@ CREATE TABLE `procedimento_protocolo_resultado` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_resultado`),
   UNIQUE KEY `uk_pp_res` (`id_protocolo`,`categoria`,`versao`),
   KEY `idx_pp_res_proto` (`id_protocolo`,`criado_em`),
@@ -12467,6 +12813,7 @@ CREATE TABLE `procedimentos_sigtap` (
   `codigo_procedimento` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `nome_procedimento` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `valor_sus` decimal(10,2) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`codigo_procedimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12496,6 +12843,7 @@ CREATE TABLE `produtividade_evento` (
   `id_senha` bigint DEFAULT NULL,
   `ocorrido_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `detalhe` varchar(255) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_pe_user_time` (`id_usuario`,`ocorrido_em`),
   KEY `idx_pe_tipo_time` (`tipo`,`ocorrido_em`),
@@ -12539,6 +12887,7 @@ CREATE TABLE `produto` (
   `codigo_gpat` varchar(50) DEFAULT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_produto`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12569,6 +12918,7 @@ CREATE TABLE `profissional_registro` (
   `data_validade` date DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_profissional_registro`),
   KEY `idx_pr_funcionario` (`id_funcionario`),
   CONSTRAINT `fk_pr_funcionario` FOREIGN KEY (`id_funcionario`) REFERENCES `funcionario` (`id_funcionario`)
@@ -12599,6 +12949,7 @@ CREATE TABLE `prontuario_evolucao` (
   `status` enum('ATIVO','REVISADO','CANCELADO') DEFAULT 'ATIVO',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `alterado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evolucao`),
   KEY `fk_evolucao_atendimento` (`id_atendimento`),
   KEY `fk_evolucao_usuario` (`id_usuario`),
@@ -12638,7 +12989,8 @@ CREATE TABLE `protocolo_assistencial_global` (
   KEY `idx_protocolo_dominio` (`dominio_fluxo`,`versao_protocolo`),
   KEY `fk_protocolo_assistencial_global_atendimento` (`id_atendimento`),
   KEY `idx_pag_ent` (`id_entidade`),
-  CONSTRAINT `fk_protocolo_assistencial_global_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_protocolo_assistencial_global_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_protocolo_assistencial_global_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12672,6 +13024,7 @@ CREATE TABLE `protocolo_emissao` (
   `id_senha` bigint DEFAULT NULL,
   `id_cliente` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_emissao`),
   UNIQUE KEY `uk_protocolo_emissao_codigo` (`codigo`),
   KEY `idx_prot_tipo_data` (`tipo`,`ano`,`data_ref`,`criado_em`),
@@ -12708,6 +13061,7 @@ CREATE TABLE `protocolo_sequencia` (
   `ultimo_numero` int NOT NULL DEFAULT '0',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`chave`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12735,6 +13089,7 @@ CREATE TABLE `qualidade_eventos_adversos` (
   `gravidade` enum('LEVE','MODERADA','GRAVE','SENTINELA') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `data_evento` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -12767,7 +13122,8 @@ CREATE TABLE `reabertura_atendimento` (
   KEY `idx_ffa` (`id_ffa`),
   KEY `fk_reabertura_atendimento_atendimento` (`id_atendimento`),
   KEY `idx_reab_ent` (`id_entidade`),
-  CONSTRAINT `fk_reabertura_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_reabertura_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_reabertura_atendimento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Reabertura de episódio/atendimento';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -12801,6 +13157,7 @@ CREATE TABLE `reg_anexo` (
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_anexo`),
   KEY `idx_reg_anexo_ref` (`entidade_ref`,`id_ref`),
   KEY `idx_reg_anexo_sha` (`sha256`),
@@ -12837,6 +13194,7 @@ CREATE TABLE `reg_auditoria_acesso_sensivel` (
   `motivo` varchar(255) DEFAULT NULL,
   `ip_origem` varchar(60) DEFAULT NULL,
   `user_agent` varchar(255) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_acesso`),
   KEY `idx_reg_acesso_dt` (`ocorrido_em`),
   KEY `idx_reg_acesso_ref` (`entidade_ref`,`id_ref`),
@@ -12873,6 +13231,7 @@ CREATE TABLE `reg_export_arquivo` (
   `storage_uri` varchar(255) DEFAULT NULL,
   `conteudo_blob` longblob,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_export_arquivo`),
   KEY `idx_reg_arq_lote` (`id_export_lote`),
   KEY `idx_reg_arq_sha` (`sha256`),
@@ -12905,6 +13264,7 @@ CREATE TABLE `reg_export_erro_validacao` (
   `campo` varchar(120) DEFAULT NULL,
   `mensagem` varchar(500) NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_export_erro`),
   KEY `idx_reg_erro_item` (`id_export_item`),
   KEY `idx_reg_erro_arquivo` (`id_export_arquivo`),
@@ -12942,6 +13302,7 @@ CREATE TABLE `reg_export_item` (
   `ultima_tentativa_em` datetime DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_export_item`),
   UNIQUE KEY `uk_reg_item_lote_ref` (`id_export_lote`,`entidade_ref`,`id_ref`),
   KEY `idx_reg_item_status` (`status`),
@@ -12979,6 +13340,7 @@ CREATE TABLE `reg_export_lote` (
   `observacao` text,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_export_lote`),
   KEY `idx_reg_lote_tipo_status` (`tipo`,`status`),
   KEY `idx_reg_lote_competencia` (`competencia`),
@@ -13023,6 +13385,7 @@ CREATE TABLE `reg_formulario_snapshot` (
   `id_usuario_criador` bigint DEFAULT NULL,
   `sigilo_nivel` enum('NORMAL','SENSIVEL','MUITO_SENSIVEL') NOT NULL DEFAULT 'SENSIVEL',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_snapshot`),
   UNIQUE KEY `uk_reg_snapshot_ref` (`entidade_ref`,`id_ref`,`tipo_formulario`,`versao_layout`),
   KEY `idx_reg_snapshot_hash` (`payload_hash`),
@@ -13053,7 +13416,8 @@ DROP TABLE IF EXISTS `regra_timeout`;
 CREATE TABLE `regra_timeout` (
   `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `minutos` int DEFAULT NULL,
-  `evento_timeout` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+  `evento_timeout` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13082,10 +13446,12 @@ CREATE TABLE `regulacao_evento` (
   `tipo_regulacao` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `observacao` text COLLATE utf8mb4_unicode_ci,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `id_entidade` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_regulacao`),
   KEY `idx_reg_ffa` (`id_ffa`),
-  CONSTRAINT `fk_reg_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id_ffa`)
+  KEY `fk_regulacao_evento_entidade` (`id_entidade`),
+  CONSTRAINT `fk_reg_ffa` FOREIGN KEY (`id_ffa`) REFERENCES `ffa` (`id_ffa`),
+  CONSTRAINT `fk_regulacao_evento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13121,6 +13487,7 @@ CREATE TABLE `remocao` (
   `id_usuario_solicitante` bigint NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_remocao`),
   KEY `idx_rem_status` (`status`),
   KEY `fk_rem_unidade` (`id_unidade`),
@@ -13155,6 +13522,7 @@ CREATE TABLE `remocao_evento` (
   `detalhe` text,
   `id_usuario` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_remocao_evento`),
   KEY `idx_re_remocao` (`id_remocao`),
   KEY `fk_re_user` (`id_usuario`),
@@ -13188,6 +13556,7 @@ CREATE TABLE `remocao_logistica` (
   `destino` varchar(255) NOT NULL,
   `status` enum('PENDENTE','EM_REMOCAO','CONCLUIDO') DEFAULT 'PENDENTE',
   `data_saida` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_remocao`),
   KEY `fk_rem_ffa_heranca` (`id_ffa`),
   KEY `fk_rem_atend_heranca` (`id_atendimento`)
@@ -13223,7 +13592,8 @@ CREATE TABLE `retorno_atendimento` (
   KEY `id_atendimento_retorno` (`id_atendimento_retorno`),
   KEY `fk_retorno_atendimento_atendimento` (`id_atendimento`),
   KEY `idx_ret_ent` (`id_entidade`),
-  CONSTRAINT `fk_retorno_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_retorno_atendimento_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_retorno_atendimento_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13254,6 +13624,7 @@ CREATE TABLE `retry_semantico_controle` (
   `ultimo_erro` varchar(255) DEFAULT NULL,
   `proxima_tentativa` datetime(6) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_retry`),
   KEY `idx_retry_fila` (`bloqueado`,`proxima_tentativa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -13284,6 +13655,7 @@ CREATE TABLE `rh_evento` (
   `detalhe` varchar(255) DEFAULT NULL,
   `payload_json` json DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `ix_rh_evt_vinc` (`id_rh_vinculo`),
   KEY `ix_rh_evt_reg` (`id_registro`),
@@ -13329,6 +13701,7 @@ CREATE TABLE `rh_pessoa_vinculo` (
   `observacao` text,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_rh_vinculo`),
   UNIQUE KEY `uk_rh_matricula` (`matricula`),
   KEY `ix_rh_pessoa` (`id_pessoa`),
@@ -13365,6 +13738,7 @@ CREATE TABLE `rh_registro_profissional` (
   `origem` enum('MANUAL','RH','IMPORTADO','INTEGRACAO') NOT NULL DEFAULT 'MANUAL',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_registro`),
   UNIQUE KEY `uk_registro` (`conselho`,`numero`,`uf_norm`),
   KEY `ix_registro_pessoa` (`id_pessoa`),
@@ -13399,6 +13773,7 @@ CREATE TABLE `runtime_api_session_token` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `ultimo_acesso` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_token`),
   UNIQUE KEY `uk_uuid_runtime` (`uuid_runtime`),
   KEY `idx_token_hash` (`token_hash`),
@@ -13433,6 +13808,7 @@ CREATE TABLE `runtime_concurrency_guard` (
   `status_guard` enum('PROVISIONAL','CONFIRMADO','REJEITADO','CONFLITO') DEFAULT 'PROVISIONAL',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `confirmado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_guard`),
   UNIQUE KEY `uk_guard_concurrency` (`dominio_fluxo`,`id_recurso`,`versao_estado`,`token_execucao`),
   KEY `idx_guard_status` (`status_guard`)
@@ -13467,6 +13843,7 @@ CREATE TABLE `runtime_contexto` (
   `iniciado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `finalizado_em` datetime(6) DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_runtime_contexto`),
   KEY `idx_runtime_sessao` (`id_sessao_usuario`),
   KEY `fk_runtime_contexto_unidade` (`id_unidade`),
@@ -13501,6 +13878,7 @@ CREATE TABLE `runtime_dispositivo` (
   `status_runtime` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'ONLINE',
   `ultimo_heartbeat` datetime(6) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_runtime_dispositivo`),
   UNIQUE KEY `uk_runtime_uuid` (`uuid_runtime`),
   KEY `fk_runtime_dispositivo` (`id_dispositivo`),
@@ -13540,6 +13918,7 @@ CREATE TABLE `runtime_edge_evento` (
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `sincronizado_em` datetime(6) DEFAULT NULL,
   `id_orquestrador` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   UNIQUE KEY `uk_runtime_evento_uuid` (`uuid_evento`),
   KEY `idx_runtime_evento_sync` (`status_sync`),
@@ -13574,6 +13953,7 @@ CREATE TABLE `runtime_estado_sobrevivencia` (
   `hash_snapshot_runtime` char(64) DEFAULT NULL,
   `evento_seguranca` json DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_estado`),
   UNIQUE KEY `uk_runtime_device` (`runtime_device_id`),
   KEY `idx_runtime_modo` (`modo_operacao`)
@@ -13608,6 +13988,7 @@ CREATE TABLE `runtime_evento_provisional` (
   `criticidade_fluxo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `sincronizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_provisional`),
   UNIQUE KEY `uk_provisional_uuid` (`uuid_evento`),
   KEY `idx_provisional_status` (`status_provisional`),
@@ -13647,6 +14028,7 @@ CREATE TABLE `runtime_execution_queue` (
   `resultado` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_status` (`status`,`criado_em`),
   KEY `idx_usuario` (`id_usuario`),
@@ -13679,11 +14061,13 @@ CREATE TABLE `runtime_invariant_log` (
   `hash_payload` char(64) NOT NULL,
   `estado_valido` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `id_entidade` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_invariant`),
   KEY `idx_invariant_uuid` (`uuid_runtime`),
   KEY `idx_invariant_estado` (`estado_valido`),
   KEY `fk_runtime_invariant_log_unidade` (`id_unidade`),
+  KEY `fk_runtime_invariant_log_entidade` (`id_entidade`),
+  CONSTRAINT `fk_runtime_invariant_log_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_runtime_invariant_log_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -13710,6 +14094,7 @@ CREATE TABLE `runtime_kernel_locks` (
   `locked_by` int NOT NULL,
   `acquired_at` datetime(6) NOT NULL,
   `expires_at` datetime(6) NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_runtime` (`uuid_runtime`,`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -13739,6 +14124,7 @@ CREATE TABLE `runtime_lock_semantico` (
   `token_lock` char(36) NOT NULL,
   `expiracao_lock` datetime(6) NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_lock`),
   UNIQUE KEY `uk_lock_recurso` (`dominio_fluxo`,`id_recurso`),
   KEY `idx_lock_expiracao` (`expiracao_lock`)
@@ -13770,6 +14156,7 @@ CREATE TABLE `runtime_snapshot_governanca` (
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_governanca`),
   UNIQUE KEY `uk_snapshot_governanca_fluxo` (`dominio_fluxo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -13801,6 +14188,7 @@ CREATE TABLE `runtime_snapshot_metadata` (
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `expiracao_snapshot` datetime(6) NOT NULL,
   `ultima_validacao_runtime` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_snapshot`),
   UNIQUE KEY `uk_snapshot_fluxo_hash` (`hash_snapshot`),
   KEY `idx_snapshot_fluxo` (`dominio_fluxo`,`versao_fluxo`),
@@ -13833,11 +14221,13 @@ CREATE TABLE `runtime_sync_log` (
   `hash_payload` char(64) DEFAULT NULL,
   `sincronizado` tinyint(1) DEFAULT '0',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
-  `id_entidade` bigint unsigned DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sync`),
   KEY `idx_sync_unidade` (`id_unidade`),
   KEY `idx_sync_uuid` (`uuid_evento`),
   KEY `idx_sync_status` (`sincronizado`),
+  KEY `fk_runtime_sync_log_entidade` (`id_entidade`),
+  CONSTRAINT `fk_runtime_sync_log_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_runtime_sync_log_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -13865,6 +14255,7 @@ CREATE TABLE `runtime_sync_queue` (
   `ultimo_erro` text,
   `proximo_retry_em` datetime(6) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_queue`),
   UNIQUE KEY `uk_sync_queue_evento` (`uuid_evento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -13895,7 +14286,7 @@ CREATE TABLE `saas_contrato` (
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_contrato`),
   KEY `idx_contrato_entidade_status` (`id_entidade`,`status`),
-  CONSTRAINT `fk_contrato_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
+  CONSTRAINT `fk_saas_contrato_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13917,7 +14308,7 @@ DROP TABLE IF EXISTS `saas_entidade`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `saas_entidade` (
-  `id_entidade` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `id_entidade` bigint unsigned NOT NULL,
   `nome_fantasia` varchar(200) NOT NULL,
   `razao_social` varchar(200) DEFAULT NULL,
   `cnpj` varchar(20) DEFAULT NULL,
@@ -13926,7 +14317,7 @@ CREATE TABLE `saas_entidade` (
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_entidade`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13957,6 +14348,7 @@ CREATE TABLE `sala_notificacao` (
   `id_usuario_abertura` bigint NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_notificacao`),
   KEY `fk_sn_unidade` (`id_unidade`),
   KEY `fk_sn_user` (`id_usuario_abertura`),
@@ -13989,6 +14381,7 @@ CREATE TABLE `sala_notificacao_evento` (
   `detalhe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `id_usuario` bigint NOT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_sn_evento_notif` (`id_notificacao`,`criado_em`),
   KEY `idx_sn_evento_sessao` (`id_sessao_usuario`,`criado_em`),
@@ -14021,6 +14414,7 @@ CREATE TABLE `schema_patch_execucao` (
   `status_execucao` enum('SUCESSO','ERRO') COLLATE utf8mb4_unicode_ci NOT NULL,
   `detalhes` json DEFAULT NULL,
   `executado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_patch_execucao`),
   KEY `idx_patch_nome_data` (`patch_nome`,`executado_em`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -14095,6 +14489,7 @@ CREATE TABLE `senha_eventos` (
   `status_de` varchar(50) DEFAULT NULL,
   `status_para` varchar(50) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_se_senha_criado` (`id_senha`,`criado_em`),
   KEY `idx_se_sessao_criado` (`id_sessao_usuario`,`criado_em`),
@@ -14108,7 +14503,7 @@ CREATE TABLE `senha_eventos` (
 
 LOCK TABLES `senha_eventos` WRITE;
 /*!40000 ALTER TABLE `senha_eventos` DISABLE KEYS */;
-INSERT INTO `senha_eventos` VALUES (1,3,4,'INICIAR_COMPLEMENTACAO','local_operacional=1','AGUARDANDO','EM_COMPLEMENTACAO','2026-02-15 03:36:47'),(2,3,3,'INICIAR_COMPLEMENTACAO','local_operacional=1','CHAMANDO','EM_COMPLEMENTACAO','2026-02-15 03:38:24'),(3,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','AGUARDANDO','EM_COMPLEMENTACAO','2026-02-15 04:24:39'),(4,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','EM_COMPLEMENTACAO','EM_COMPLEMENTACAO','2026-02-15 04:27:57'),(5,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','EM_COMPLEMENTACAO','EM_COMPLEMENTACAO','2026-02-15 04:30:13'),(6,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','EM_COMPLEMENTACAO','EM_COMPLEMENTACAO','2026-02-15 04:31:10'),(7,3,1,'COMPLEMENTAR_E_ABRIR_FFA','id_pessoa=34|id_paciente=8|id_ffa=12|gpat=GPAT-20260215-0000000001','EM_COMPLEMENTACAO','ENCAMINHADO','2026-02-15 04:31:10');
+INSERT INTO `senha_eventos` VALUES (1,3,4,'INICIAR_COMPLEMENTACAO','local_operacional=1','AGUARDANDO','EM_COMPLEMENTACAO','2026-02-15 03:36:47',NULL),(2,3,3,'INICIAR_COMPLEMENTACAO','local_operacional=1','CHAMANDO','EM_COMPLEMENTACAO','2026-02-15 03:38:24',NULL),(3,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','AGUARDANDO','EM_COMPLEMENTACAO','2026-02-15 04:24:39',NULL),(4,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','EM_COMPLEMENTACAO','EM_COMPLEMENTACAO','2026-02-15 04:27:57',NULL),(5,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','EM_COMPLEMENTACAO','EM_COMPLEMENTACAO','2026-02-15 04:30:13',NULL),(6,3,1,'INICIAR_COMPLEMENTACAO','local_operacional=1','EM_COMPLEMENTACAO','EM_COMPLEMENTACAO','2026-02-15 04:31:10',NULL),(7,3,1,'COMPLEMENTAR_E_ABRIR_FFA','id_pessoa=34|id_paciente=8|id_ffa=12|gpat=GPAT-20260215-0000000001','EM_COMPLEMENTACAO','ENCAMINHADO','2026-02-15 04:31:10',NULL);
 /*!40000 ALTER TABLE `senha_eventos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14125,6 +14520,7 @@ CREATE TABLE `senha_sequencia` (
   `data_ref` date NOT NULL,
   `prefixo` varchar(5) NOT NULL,
   `ultimo_numero` int NOT NULL DEFAULT '0',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_sistema`,`id_unidade`,`data_ref`,`prefixo`),
   KEY `fk_senha_sequencia_unidade` (`id_unidade`),
   CONSTRAINT `fk_senha_sequencia_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
@@ -14137,7 +14533,7 @@ CREATE TABLE `senha_sequencia` (
 
 LOCK TABLES `senha_sequencia` WRITE;
 /*!40000 ALTER TABLE `senha_sequencia` DISABLE KEYS */;
-INSERT INTO `senha_sequencia` VALUES (1,1,'2026-03-11','C',8),(1,1,'2026-03-11','P',20),(1,1,'2026-03-15','P',2),(1,1,'2026-03-16','C',2),(1,1,'2026-03-16','P',1),(1,1,'2026-03-19','C',1),(1,1,'2026-03-19','P',5);
+INSERT INTO `senha_sequencia` VALUES (1,1,'2026-03-11','C',8,NULL),(1,1,'2026-03-11','P',20,NULL),(1,1,'2026-03-15','P',2,NULL),(1,1,'2026-03-16','C',2,NULL),(1,1,'2026-03-16','P',1,NULL),(1,1,'2026-03-19','C',1,NULL),(1,1,'2026-03-19','P',5,NULL);
 /*!40000 ALTER TABLE `senha_sequencia` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14154,6 +14550,7 @@ CREATE TABLE `senha_status` (
   `descricao` varchar(150) NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `ordem_fluxo` int NOT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_senha_status`),
   UNIQUE KEY `uk_senha_status_codigo` (`codigo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -14165,7 +14562,7 @@ CREATE TABLE `senha_status` (
 
 LOCK TABLES `senha_status` WRITE;
 /*!40000 ALTER TABLE `senha_status` DISABLE KEYS */;
-INSERT INTO `senha_status` VALUES (1,'EMITIDA','Senha emitida e aguardando chamada',1,1),(2,'CHAMANDO','Senha sendo chamada no painel',1,2),(3,'EM_ATENDIMENTO','Paciente em atendimento',1,3),(4,'NAO_COMPARECEU','Paciente não compareceu',1,4),(5,'FINALIZADA','Atendimento concluído',1,5),(6,'CANCELADA','Senha cancelada',1,6);
+INSERT INTO `senha_status` VALUES (1,'EMITIDA','Senha emitida e aguardando chamada',1,1,NULL),(2,'CHAMANDO','Senha sendo chamada no painel',1,2,NULL),(3,'EM_ATENDIMENTO','Paciente em atendimento',1,3,NULL),(4,'NAO_COMPARECEU','Paciente não compareceu',1,4,NULL),(5,'FINALIZADA','Atendimento concluído',1,5,NULL),(6,'CANCELADA','Senha cancelada',1,6,NULL);
 /*!40000 ALTER TABLE `senha_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14182,6 +14579,7 @@ CREATE TABLE `senha_transicao_matriz` (
   `id_status_destino` bigint NOT NULL,
   `permite_retorno` tinyint(1) DEFAULT '0',
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_senha_transicao`),
   UNIQUE KEY `uk_transicao` (`id_status_origem`,`id_status_destino`),
   KEY `id_status_destino` (`id_status_destino`),
@@ -14196,7 +14594,7 @@ CREATE TABLE `senha_transicao_matriz` (
 
 LOCK TABLES `senha_transicao_matriz` WRITE;
 /*!40000 ALTER TABLE `senha_transicao_matriz` DISABLE KEYS */;
-INSERT INTO `senha_transicao_matriz` VALUES (1,1,6,0,1),(2,4,2,0,1),(3,1,2,0,1),(4,2,3,0,1),(5,3,5,0,1),(6,2,4,0,1);
+INSERT INTO `senha_transicao_matriz` VALUES (1,1,6,0,1,NULL),(2,4,2,0,1,NULL),(3,1,2,0,1,NULL),(4,2,3,0,1,NULL),(5,3,5,0,1,NULL),(6,2,4,0,1,NULL);
 /*!40000 ALTER TABLE `senha_transicao_matriz` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14220,6 +14618,7 @@ CREATE TABLE `servico_agendamento` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_servico`),
   UNIQUE KEY `uk_servico_ctx_codigo` (`id_sistema`,`id_unidade`,`codigo`),
   KEY `ix_servico_ctx` (`id_sistema`,`id_unidade`),
@@ -14250,6 +14649,7 @@ CREATE TABLE `sessao_ativa` (
   `token_sessao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `ip_origem` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ultimo_clique` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `uk_token` (`token_sessao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -14290,11 +14690,11 @@ CREATE TABLE `sessao_contexto_historico` (
   KEY `idx_hist_local` (`id_local`),
   KEY `fk_hist_ctx_unidade` (`id_unidade`),
   CONSTRAINT `fk_hist_ctx_atend` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE SET NULL,
-  CONSTRAINT `fk_hist_ctx_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`) ON DELETE RESTRICT,
   CONSTRAINT `fk_hist_ctx_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`) ON DELETE RESTRICT,
   CONSTRAINT `fk_hist_ctx_sessao` FOREIGN KEY (`id_sessao_usuario`) REFERENCES `sessao_usuario` (`id_sessao_usuario`) ON DELETE CASCADE,
   CONSTRAINT `fk_hist_ctx_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`) ON DELETE RESTRICT,
   CONSTRAINT `fk_hist_ctx_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sessao_contexto_historico_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `sessao_contexto_historico_chk_1` CHECK (((`contexto_anterior` is null) or json_valid(`contexto_anterior`))),
   CONSTRAINT `sessao_contexto_historico_chk_2` CHECK (((`contexto_novo` is null) or json_valid(`contexto_novo`)))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -14325,6 +14725,7 @@ CREATE TABLE `sessao_evento` (
   `payload` json DEFAULT NULL,
   `ip_origem` varchar(45) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_evento_sessao` (`id_sessao_usuario`),
   KEY `idx_evento_usuario` (`id_usuario`),
@@ -14341,7 +14742,7 @@ CREATE TABLE `sessao_evento` (
 
 LOCK TABLES `sessao_evento` WRITE;
 /*!40000 ALTER TABLE `sessao_evento` DISABLE KEYS */;
-INSERT INTO `sessao_evento` VALUES (1,190,4,'LOGIN_REALIZADO','auth','{\"metodo\": \"jwt\"}',NULL,'2026-03-15 01:11:01.749682'),(2,190,4,'PAINEL_CHAMADA','senha','{\"senha\": \"A102\"}',NULL,'2026-03-15 01:12:01.613710');
+INSERT INTO `sessao_evento` VALUES (1,190,4,'LOGIN_REALIZADO','auth','{\"metodo\": \"jwt\"}',NULL,'2026-03-15 01:11:01.749682',1),(2,190,4,'PAINEL_CHAMADA','senha','{\"senha\": \"A102\"}',NULL,'2026-03-15 01:12:01.613710',1);
 /*!40000 ALTER TABLE `sessao_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14380,6 +14781,7 @@ CREATE TABLE `sessao_usuario` (
   `token_hash` varchar(128) DEFAULT NULL,
   `refresh_hash` varchar(128) DEFAULT NULL,
   `device_fingerprint` varchar(255) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sessao_usuario`),
   UNIQUE KEY `uk_sessao_uuid` (`uuid_sessao`),
   KEY `idx_sessao_usuario` (`id_usuario`),
@@ -14392,12 +14794,15 @@ CREATE TABLE `sessao_usuario` (
   KEY `idx_sessao_ativo` (`ativo`),
   KEY `idx_sessao_local` (`id_local`),
   KEY `idx_sessao_sala` (`id_sala`),
+  KEY `idx_sessao_user_ent` (`id_usuario`,`id_entidade`),
+  KEY `fk_sessao_usuario_entidade` (`id_entidade`),
+  CONSTRAINT `fk_sessao_usuario_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_sessao_usuario_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`),
   CONSTRAINT `fk_sessao_usuario_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
   CONSTRAINT `fk_sessao_usuario_sistema` FOREIGN KEY (`id_sistema`) REFERENCES `sistema` (`id_sistema`),
   CONSTRAINT `fk_sessao_usuario_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_sessao_usuario_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=190 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=197 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14406,7 +14811,7 @@ CREATE TABLE `sessao_usuario` (
 
 LOCK TABLES `sessao_usuario` WRITE;
 /*!40000 ALTER TABLE `sessao_usuario` DISABLE KEYS */;
-INSERT INTO `sessao_usuario` VALUES (7,'63c37b7d-452b-4a86-aea0-d86a37df5023',1,42,1,1,NULL,NULL,NULL,'1372fc2f1b036f2b2eaaeb43b4c848d2bc1f6d000fe7547ee335ffaa5c7962a2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:05.817284','2026-03-15 12:01:05.816000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:05.817284',NULL,NULL,NULL,NULL,NULL,NULL),(8,'b39ce1df-7561-459d-acc9-94d0ebe3eb21',1,42,1,1,NULL,NULL,NULL,'eb37f4e0fc8692e22c3fb36c6534970edad66762027721b31fd4066240f0e23d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:41.237955','2026-03-15 12:01:41.237000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:41.237955',NULL,NULL,NULL,NULL,NULL,NULL),(9,'4cb66dd7-0573-420e-8ee3-35a16c0b8354',1,42,1,1,NULL,NULL,NULL,'cee05051dc58779e8644c9ca5504d973527acd3089c95ada44df2750bdebe2a4',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:03:46.388138','2026-03-15 12:03:46.387000',NULL,NULL,NULL,1,0,'2026-03-15 04:03:46.388138',NULL,NULL,NULL,NULL,NULL,NULL),(10,'2d3f8c43-6965-4796-bb51-5cfa62cda2da',1,42,1,1,NULL,NULL,NULL,'f51713aca9e0affe852e6a510cb8d87fb8447b521523209a210768507ffc6302',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:27.379626','2026-03-15 12:08:27.368000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:27.379626',NULL,NULL,NULL,NULL,NULL,NULL),(11,'2f6d3f77-1f54-4564-8fb7-014d6f78866f',1,42,1,1,NULL,NULL,NULL,'e7317224ce17d218708316ed36838c06f4027a4ca72dd982971a395a771dd4a1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:50.176704','2026-03-15 12:08:50.175000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:50.176704',NULL,NULL,NULL,NULL,NULL,NULL),(12,'e144b098-9911-4205-8ae1-06828e2f987f',1,42,1,1,NULL,NULL,NULL,'3adb704fa919ccda9b98001ad2c36762917b309fbfd58d9813ab44e074c8f7b6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:12:14.179418','2026-03-15 12:12:14.178000',NULL,NULL,NULL,1,0,'2026-03-15 04:12:14.179418',NULL,NULL,NULL,NULL,NULL,NULL),(13,'397ae7a5-01eb-41c9-bde3-b71553c18da1',1,42,1,1,NULL,NULL,NULL,'a3e36c54a2f521f2403d7dbf972699b009b3778d4262f26b03fe0d216d3131b7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:11.011380','2026-03-15 12:14:11.004000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:11.011380',NULL,NULL,NULL,NULL,NULL,NULL),(14,'dd97f6f7-55f8-45bd-8866-be0c7b7f7afd',1,42,1,1,NULL,NULL,NULL,'871d0b640f96992252ffbf2d9f83382a3a08398e010ef1a2b7ffdb52fff3ca75',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:29.945664','2026-03-15 12:14:29.944000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:29.945664',NULL,NULL,NULL,NULL,NULL,NULL),(15,'13249301-44c2-49fc-8f06-a941c8dbd883',1,42,1,1,NULL,NULL,NULL,'b902ac1b34000f57048d9a7b455389d4853b5de92dea9731e64c366ec1de6db2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:05.577331','2026-03-15 12:29:05.527000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:05.577331',NULL,NULL,NULL,NULL,NULL,NULL),(16,'1ab7c4ec-55ec-44a8-9fed-e5993231f768',1,42,1,1,NULL,NULL,NULL,'12d51baea86c236f511a88c8a4771b5ea749b48b59b3566892cfea9228594aab',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:28.697984','2026-03-15 12:29:28.696000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:28.697984',NULL,NULL,NULL,NULL,NULL,NULL),(17,'1f103d68-a824-4fe1-a51d-16ada7bfaa2f',1,42,1,1,NULL,NULL,NULL,'882dd04c16cb0024d88c6d2792071e763f5e5906fccca406b99fa523be1806ad',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:38:21.583153','2026-03-15 12:38:21.579000',NULL,NULL,NULL,1,0,'2026-03-15 04:38:21.583153',NULL,NULL,NULL,NULL,NULL,NULL),(18,'58075872-3163-4505-9c92-660c35893b77',1,42,1,1,NULL,NULL,NULL,'ee653d551b1cb460d4f3707c99772ac5b81f530dca5cb43d29134d878ebf3eb6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:29.831578','2026-03-15 12:43:29.830000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:29.831578',NULL,NULL,NULL,NULL,NULL,NULL),(19,'c9cd4225-14ec-4a92-b6b3-47c521ce771b',1,42,1,1,NULL,NULL,NULL,'d0785168510e09119c38365c10ef25a5c8673d9f7da617f22c286348fb18ef85',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:42.608531','2026-03-15 12:43:42.607000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:42.608531',NULL,NULL,NULL,NULL,NULL,NULL),(20,'3c5da068-7630-4c91-a709-47fa8cef55d6',1,42,1,1,NULL,NULL,NULL,'7f34ec46414d5dfa85aa6823ed0b9772616a831ff2c0d8718fa5fc7a7a1eeaf5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:44:05.883072','2026-03-15 12:44:05.882000',NULL,NULL,NULL,1,0,'2026-03-15 04:44:05.883072',NULL,NULL,NULL,NULL,NULL,NULL),(21,'8fe9121c-c63c-43a0-88f5-81f6f1e70ff3',1,42,1,1,NULL,NULL,NULL,'26f46ab3f1e78157bf5dd91e81437d6a6251c78ae7cc5fb9dc9db79c8feecd1e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:46:52.323077','2026-03-15 12:46:52.321000',NULL,NULL,NULL,1,0,'2026-03-15 04:46:52.323077',NULL,NULL,NULL,NULL,NULL,NULL),(22,'55a81184-9657-4b28-8540-5bf0e217eeae',1,42,1,1,NULL,NULL,NULL,'a18136a06af71bcb136c75c5bbfbc166b3ca9c853956997d9efc0e6ad9e3996d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:52:07.194269','2026-03-15 12:52:07.192000',NULL,NULL,NULL,1,0,'2026-03-15 04:52:07.194269',NULL,NULL,NULL,NULL,NULL,NULL),(23,'c3e7b60e-d6b7-4042-9b8e-045d61d9518c',1,42,1,1,NULL,NULL,NULL,'fb00d6352697002685225620f45f854828ba6d29e6a87719928dea3e1aae6a8c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.549440','2026-03-15 12:53:57.548000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.549440',NULL,NULL,NULL,NULL,NULL,NULL),(24,'d99e2221-1442-41a9-88ea-8b93eb13912a',1,42,1,1,NULL,NULL,NULL,'560906d8554298e4dca2f11fcfd9c327c39322471fcb34f11243b240a6259ec9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.812067','2026-03-15 12:53:57.805000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.812067',NULL,NULL,NULL,NULL,NULL,NULL),(25,'0d218d46-92b4-45f5-90f0-3fe1b281eb72',1,42,1,1,NULL,NULL,NULL,'d53958ce98a94e0adf1628b3a524fecf24acefe9f521ae8b2fbf6b2a092675af',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:54:44.965119','2026-03-15 12:54:44.964000',NULL,NULL,NULL,1,0,'2026-03-15 04:54:44.965119',NULL,NULL,NULL,NULL,NULL,NULL),(26,'a4a074ec-0b7a-4186-ac94-c67f0fc9fb26',1,42,1,1,NULL,NULL,NULL,'777637c164c144831659549628ecd2238b224efd07c38d44afe82d100a3ab66d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:59:02.337344','2026-03-15 12:59:02.335000',NULL,NULL,NULL,1,0,'2026-03-15 04:59:02.337344',NULL,NULL,NULL,NULL,NULL,NULL),(27,'afe722c9-ef79-4fcb-bf7c-360d9670d6ec',1,42,1,1,NULL,NULL,NULL,'3c8ddda048fa01707486bc2623b27b795be575fdfcac170816e033bc50b65fd5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:01:49.926764','2026-03-15 13:01:49.925000',NULL,NULL,NULL,1,0,'2026-03-15 05:01:49.926764',NULL,NULL,NULL,NULL,NULL,NULL),(28,'9b9c4550-4e6d-444c-a3dc-b4e94f3bc3e4',1,42,1,1,NULL,NULL,NULL,'1722fb2391563a12a08db86c7a6185846b41cf32e351038b802d8debdc935d7d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:04:31.209876','2026-03-15 13:04:31.208000',NULL,NULL,NULL,1,0,'2026-03-15 05:04:31.209876',NULL,NULL,NULL,NULL,NULL,NULL),(29,'8ac9f6d8-fb40-4885-9986-65b5fc5c84b2',1,42,1,1,NULL,NULL,NULL,'6c61a69433e695be84fbf9b9f59b788e5593ca03e34d1889992bee938f4a27c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:05:24.089442','2026-03-15 13:05:24.087000',NULL,NULL,NULL,1,0,'2026-03-15 05:05:24.089442',NULL,NULL,NULL,NULL,NULL,NULL),(30,'b18c5b34-8442-4215-a99d-50b355959639',1,42,1,1,NULL,NULL,NULL,'524f43c0cae88f5940ed43a9a9bfa507041d6e263c25ac292b43c9399dc579a8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:07:02.949027','2026-03-15 13:07:02.946000',NULL,NULL,NULL,1,0,'2026-03-15 05:07:02.949027',NULL,NULL,NULL,NULL,NULL,NULL),(31,'2de510c9-3d05-4f64-ba88-724ccaa67cd9',1,42,1,1,NULL,NULL,NULL,'86fada34141e91b2111e1a4adb1d608192278d8d003bdf76ce238c0d3b34896b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:10:18.915385','2026-03-15 13:10:18.913000',NULL,NULL,NULL,1,0,'2026-03-15 05:10:18.915385',NULL,NULL,NULL,NULL,NULL,NULL),(32,'e412dc45-9a52-4c20-8872-e279fb7c5ee3',1,42,1,1,NULL,NULL,NULL,'ec2214b4e05e9a2ac5ceb8e8d7928747260cc0f312548dc13ca82275987d9280',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:11:06.087464','2026-03-15 13:11:06.086000',NULL,NULL,NULL,1,0,'2026-03-15 05:11:06.087464',NULL,NULL,NULL,NULL,NULL,NULL),(33,'07d17b58-4172-4d4b-ac37-fd4a4478c275',1,42,1,1,NULL,NULL,NULL,'c4d78d54a26ea192a604b14e20b74a9658d9a1c338fe30d67fdd5a797bbeae96',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:13:08.825375','2026-03-15 13:13:08.824000',NULL,NULL,NULL,1,0,'2026-03-15 05:13:08.825375',NULL,NULL,NULL,NULL,NULL,NULL),(34,'d31b6c73-2d2c-4452-8c1e-376ec08adace',1,42,1,1,NULL,NULL,NULL,'e7f8c8b98aa3e810fa7613e91f71cf9384282a3a15b9491d9a0455a184ad38d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:19:33.582081','2026-03-15 13:19:33.580000',NULL,NULL,NULL,1,0,'2026-03-15 05:19:33.582081',NULL,NULL,NULL,NULL,NULL,NULL),(35,'f3f52003-da54-4489-8c3b-84582fb4b097',1,42,1,1,NULL,NULL,NULL,'9f1793aeb07425915397c5a27f8be18767b13d8ac692cfe3722483ca0ca26f16',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:20:16.048413','2026-03-15 13:20:16.047000',NULL,NULL,NULL,1,0,'2026-03-15 05:20:16.048413',NULL,NULL,NULL,NULL,NULL,NULL),(36,'f669359c-77b2-4e95-a951-e94f19a4c3f0',1,42,1,1,NULL,NULL,NULL,'4f5fb83da594beb48268959b625532c8eca7d8aea1f07fac379c7b5a420cbb9c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:23:45.486190','2026-03-15 13:23:45.485000',NULL,NULL,NULL,1,0,'2026-03-15 05:23:45.486190',NULL,NULL,NULL,NULL,NULL,NULL),(37,'a47179c5-7506-4981-8874-4d375b6db2a5',1,42,1,1,NULL,NULL,NULL,'3f1fe25ae0e4f047a55d2e2fa4306b8c05157969c8ff46dc60daa9765e6b4670',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:24:05.181714','2026-03-15 13:24:05.180000',NULL,NULL,NULL,1,0,'2026-03-15 05:24:05.181714',NULL,NULL,NULL,NULL,NULL,NULL),(38,'f8e70a89-7e2a-499b-9ad8-a3041ca84674',1,42,1,1,NULL,NULL,NULL,'1fc1055ff66c52efff0f050e9b9f6563b50215f5a2c441ac9700e1c25c88ad22',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:25:01.357715','2026-03-15 13:25:01.356000',NULL,NULL,NULL,1,0,'2026-03-15 05:25:01.357715',NULL,NULL,NULL,NULL,NULL,NULL),(39,'2585de0f-319a-486a-ba66-c0fb9290b0fb',1,42,1,1,NULL,NULL,NULL,'d677c12877e0cecd198e649b8efee8312f25554bb5fe7dd772948bc8d20bbae6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:28:23.799640','2026-03-15 13:28:23.797000',NULL,NULL,NULL,1,0,'2026-03-15 05:28:23.799640',NULL,NULL,NULL,NULL,NULL,NULL),(40,'faf72121-36ce-463b-a77a-318d5ddc9e0f',1,42,1,1,NULL,NULL,NULL,'a6a1c717a2807104c181ab4f659558b611239fb88dc3a459852900d571a1de4e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:24.565813','2026-03-15 13:29:24.564000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:24.565813',NULL,NULL,NULL,NULL,NULL,NULL),(41,'6e513914-1319-4d5d-be03-fde1eb0222b9',1,42,1,1,NULL,NULL,NULL,'a1d23df2b021e98171cf65e5803a7276152e6b2d724c8a5c4033fc47a3c02330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:42.507935','2026-03-15 13:29:42.506000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:42.507935',NULL,NULL,NULL,NULL,NULL,NULL),(42,'4816f1ab-c5e8-4515-a20d-8cc56613fabb',1,42,1,1,NULL,NULL,NULL,'4d7a1e2d9ac6f80e53a72219992fd6cea2a671934edb62d9459504afb09552f1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:34:19.502653','2026-03-15 13:34:19.501000',NULL,NULL,NULL,1,0,'2026-03-15 05:34:19.502653',NULL,NULL,NULL,NULL,NULL,NULL),(43,'3ed53aee-4311-4bbc-8f36-6ae72bdaf19e',1,42,1,1,NULL,NULL,NULL,'5303f79f6960a59ca5aaf5e734eed88f83205405fb72d3e72d2e772c17918794',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:47:06.103453','2026-03-15 13:47:06.101000',NULL,NULL,NULL,1,0,'2026-03-15 05:47:06.103453',NULL,NULL,NULL,NULL,NULL,NULL),(44,'b18293a4-59cb-4ff2-8656-4062d0c0b85f',1,42,1,1,NULL,NULL,NULL,'acb1d550e8f4e2b8dba1035a6ac81477289c6d38a0527fcc2c8c5658ce993f9a',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:04.716838','2026-03-15 13:49:04.715000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:04.716838',NULL,NULL,NULL,NULL,NULL,NULL),(45,'1af2b45c-ac3a-4434-b220-acb2c566fb67',1,42,1,1,NULL,NULL,NULL,'c144c2a5f987ee11854fba3963bcec76fb5193156ceef574096654849e401da8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:51.795570','2026-03-15 13:49:51.794000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:51.795570',NULL,NULL,NULL,NULL,NULL,NULL),(46,'0176059d-2ca7-47fa-b75c-fec17e8e5d84',1,42,1,1,NULL,NULL,NULL,'92b3eb710653308e3bf4bd243e79b62153a54a4d427a7fd472a345ed6ba1a4c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:51:18.543658','2026-03-15 13:51:18.543000',NULL,NULL,NULL,1,0,'2026-03-15 05:51:18.543658',NULL,NULL,NULL,NULL,NULL,NULL),(47,'68640f65-cd41-437e-b5ca-1f3bfbd0ba73',1,42,1,1,NULL,NULL,NULL,'f6730df241ca451cb6cc9aa1e2fa1b5f8ab8f5060d94123cb17d6ad6411463d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:52:40.592110','2026-03-15 13:52:40.590000',NULL,NULL,NULL,1,0,'2026-03-15 05:52:40.592110',NULL,NULL,NULL,NULL,NULL,NULL),(48,'a3106b09-f571-4853-abcb-24616ea7bf2d',1,42,1,1,NULL,NULL,NULL,'a69c2b85547f87d8ce9ef80a1f1bae89f2baa86a4a09c75dbd553315ca025fa9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:53:20.003322','2026-03-15 13:53:20.001000',NULL,NULL,NULL,1,0,'2026-03-15 05:53:20.003322',NULL,NULL,NULL,NULL,NULL,NULL),(49,'4a05a12b-efd9-4afd-a675-87ae6c71505a',1,42,1,1,NULL,NULL,NULL,'41a2228d80125b77416308aa72c7ada8e1b92ed81eeaa8e107b989896a5fcae7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:15:43.228380','2026-03-15 14:15:43.227000',NULL,NULL,NULL,1,0,'2026-03-15 06:15:43.228380',NULL,NULL,NULL,NULL,NULL,NULL),(50,'5d15c751-c5aa-41f3-a6a1-2ba53b051ad2',1,42,1,1,NULL,NULL,NULL,'4803775615d816cdc13c43b6482d76854cf32928fb4f4f0f129dc096ce84a18b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:29:47.314898','2026-03-15 14:29:47.313000',NULL,NULL,NULL,1,0,'2026-03-15 06:29:47.314898',NULL,NULL,NULL,NULL,NULL,NULL),(51,'0d3dfb20-53c1-46c9-9998-a1cfd26396cc',1,42,1,1,NULL,NULL,NULL,'0e0390b5245ca5e54eec47bbe454a7ac8843d94c4cba035e9f1cd9488134f330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:41:11.699902','2026-03-15 14:41:11.698000',NULL,NULL,NULL,1,0,'2026-03-15 06:41:11.699902',NULL,NULL,NULL,NULL,NULL,NULL),(52,'bca53638-a182-44fe-9451-a80b8ee440bc',1,42,1,1,NULL,NULL,NULL,'a2bdbbaf06a9708d00051add445c25e8ba9422832889fd41d1ab977735d9fe80',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:43:58.577254','2026-03-15 14:43:58.575000',NULL,NULL,NULL,1,0,'2026-03-15 06:43:58.577254',NULL,NULL,NULL,NULL,NULL,NULL),(53,'522e2766-d026-410d-85dd-f21b37e23d1d',1,42,1,1,NULL,NULL,NULL,'409cf7bad8ffebf248f3dcb5106bbba228db8bce130521af8fcabd101a23d7cc',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:47:51.929614','2026-03-15 14:47:51.927000',NULL,NULL,NULL,1,0,'2026-03-15 06:47:51.929614',NULL,NULL,NULL,NULL,NULL,NULL),(54,'e32c3349-14c1-4b9c-bbcf-ae81432eea55',1,42,1,1,NULL,NULL,NULL,'9bd4705293555f6ac1ca2feadc9fc296d8b74310af622eefb9cc48e5833ab717',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:52:08.454722','2026-03-15 14:52:08.453000',NULL,NULL,NULL,1,0,'2026-03-15 06:52:08.454722',NULL,NULL,NULL,NULL,NULL,NULL),(55,'670299a1-f54e-4e5f-a4a6-e73ef010e578',1,42,1,1,NULL,NULL,NULL,'87418159553fb03bd6e62cb7b80aeb7af3e52128feaeb5dcea81643c83d81629',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:55:27.345484','2026-03-15 14:55:27.342000',NULL,NULL,NULL,1,0,'2026-03-15 06:55:27.345484',NULL,NULL,NULL,NULL,NULL,NULL),(56,'ce264be2-c41e-427d-93cf-4faf1870740d',1,42,1,1,NULL,NULL,NULL,'b81b4c61a9330dfa0290e9a5b3cc77109d0ca292c95a7d6e105326aa5f7710fb',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:24:04.569310','2026-03-17 06:24:04.554000',NULL,NULL,NULL,1,0,'2026-03-16 22:24:04.569310',NULL,NULL,NULL,NULL,NULL,NULL),(57,'0db5dde4-0fa2-41ae-a8d6-8d042cd2e082',1,42,1,1,NULL,NULL,NULL,'eb335f0c74a9e213608127a17dc82ca476719214773266aec02b6b1fafec0fff',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.812490','2026-03-17 06:25:25.811000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.812490',NULL,NULL,NULL,NULL,NULL,NULL),(58,'0f8bd2f2-9667-4acc-a56d-e035d5303759',1,42,1,1,NULL,NULL,NULL,'8861b5cf060a3fdcfa568589c04cef2b157a3027ffa043732f941727ec790976',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.940807','2026-03-17 06:25:25.938000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.940807',NULL,NULL,NULL,NULL,NULL,NULL),(59,'4dde9d25-9151-49c6-b88f-8225669b5c1a',1,42,1,1,NULL,NULL,NULL,'f341d4930e8ed0054aedd5055572e8e531494c5a9a508ddc462275a3f8e7c35e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:35:23.378417','2026-03-17 06:35:23.376000',NULL,NULL,NULL,1,0,'2026-03-16 22:35:23.378417',NULL,NULL,NULL,NULL,NULL,NULL),(60,'7d293064-9697-4f28-af2a-2d147b68f3bf',1,42,1,1,NULL,NULL,NULL,'2465ee9007e950467e2731a05f6940c42b2add6269f88497dd9e0bbda0e46aab',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:38:51.083680','2026-03-17 06:38:51.082000',NULL,NULL,NULL,1,0,'2026-03-16 22:38:51.083680',NULL,NULL,NULL,NULL,NULL,NULL),(61,'0b362983-ea96-435d-b349-1182b4864a98',1,42,1,1,NULL,NULL,NULL,'cab38f6d7dac91e02f1abd9885e1dfd51e6d01cb3099558b27685d947f1df373',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:40:01.718458','2026-03-17 06:40:01.717000',NULL,NULL,NULL,1,0,'2026-03-16 22:40:01.718458',NULL,NULL,NULL,NULL,NULL,NULL),(62,'205e5718-bdd1-4576-bb7d-b186f62c6fc1',1,42,1,1,NULL,NULL,NULL,'ed5a4e43c718119c84dbaa4563d2b6c079d4e6737224ebe766591789ed97878f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:03.769537','2026-03-17 06:43:03.768000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:03.769537',NULL,NULL,NULL,NULL,NULL,NULL),(63,'e6bfb0c4-5d28-4102-a911-b7f0f7b7f1de',1,42,1,1,NULL,NULL,NULL,'12cafcefbeba26e5c96db7ba273371d0b50ca5ce31e7589994b421830ab74582',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:21.698424','2026-03-17 06:43:21.697000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:21.698424',NULL,NULL,NULL,NULL,NULL,NULL),(64,'8296bcf0-c33f-4d0a-b674-caf510a6286d',1,42,1,1,NULL,NULL,NULL,'594167c174364ed6863af304f145356e220e9fd37cb4db5f7ce0d50708fdd731',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:52:13.880474','2026-03-17 06:52:13.879000',NULL,NULL,NULL,1,0,'2026-03-16 22:52:13.880474',NULL,NULL,NULL,NULL,NULL,NULL),(65,'6e7c7a1b-2590-44cf-b4ab-d5b746edebc8',1,42,1,1,NULL,NULL,NULL,'d57a14c6abefa3a8a62a22fb3f5c93ad87110d77df7978353ceec76625a4bea4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:54:35.486146','2026-03-17 06:54:35.485000',NULL,NULL,NULL,1,0,'2026-03-16 22:54:35.486146',NULL,NULL,NULL,NULL,NULL,NULL),(66,'58cf0196-1fba-4b9b-87e8-9f461b079fb5',1,42,1,1,NULL,NULL,NULL,'de6e277deb3a1c05a51bb86ccdab7b02d210ef8662882f51318a5a13b5135419',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:21.990369','2026-03-17 06:57:21.988000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:21.990369',NULL,NULL,NULL,NULL,NULL,NULL),(67,'d1805ea1-d6cf-4d7a-ad86-b5b34c098b28',1,42,1,1,NULL,NULL,NULL,'45100470d323ffc68ea37a87c251e9de9a8e4fdecd3745998c69d1a28b1b5cba',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:44.317456','2026-03-17 06:57:44.316000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:44.317456',NULL,NULL,NULL,NULL,NULL,NULL),(68,'2f12c7c9-3d29-4013-acf0-723b2a179f9d',1,42,1,1,NULL,NULL,NULL,'1e4d84197e1128f080a571e2a8c3dcdbaa5d5670a58c784f2e943e95d102481e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:12.306487','2026-03-17 06:58:12.305000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:12.306487',NULL,NULL,NULL,NULL,NULL,NULL),(69,'f22372a2-a564-421d-8e0a-a5553071e740',1,42,1,1,NULL,NULL,NULL,'68f7de146c3ce12e5ebe82a60bf7277e9d622240508dce923e6219be86628581',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:30.889045','2026-03-17 06:58:30.887000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:30.889045',NULL,NULL,NULL,NULL,NULL,NULL),(70,'fbedc517-f035-4224-a8bb-8f13839285b4',1,42,1,1,NULL,NULL,NULL,'804e18ee16c4e652e3cf0bdd0f36445b52359a6e45e9bfa1931d51f14c606c00',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:59:43.851763','2026-03-17 06:59:43.850000',NULL,NULL,NULL,1,0,'2026-03-16 22:59:43.851763',NULL,NULL,NULL,NULL,NULL,NULL),(71,'44e4f97b-5ace-4279-aedd-eeffe8c37bd1',1,42,1,1,NULL,NULL,NULL,'366a33456c208d33b00f848b5182d9dc77fb699f729c8684711e46ca99335ff8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:12:02.595586','2026-03-17 07:12:02.595000',NULL,NULL,NULL,1,0,'2026-03-16 23:12:02.595586',NULL,NULL,NULL,NULL,NULL,NULL),(72,'b93fa42b-428b-42d3-b256-43fd2750e343',1,42,1,1,NULL,NULL,NULL,'92edc1447539a63f2882d1e34b7fc909b82ebff0f900587e57391ac24b54c572',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:35:42.036490','2026-03-17 07:35:42.035000',NULL,NULL,NULL,1,0,'2026-03-16 23:35:42.036490',NULL,NULL,NULL,NULL,NULL,NULL),(73,'66c87673-862c-441f-9a5a-317ff725f5ac',1,42,1,1,NULL,NULL,NULL,'befa220ec4bdeac6412aa243c8b736af6c71e1eaf2665aadf18d9cce594dec50',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:37:33.276373','2026-03-17 07:37:33.274000',NULL,NULL,NULL,1,0,'2026-03-16 23:37:33.276373',NULL,NULL,NULL,NULL,NULL,NULL),(74,'8d938f96-45d2-40ef-a25f-06b545ca0188',1,42,1,1,NULL,NULL,NULL,'51df221db516bad738304aa5ed695fd5bdec441ab2280f4dcbb8a80054988fd4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:50:53.630289','2026-03-17 07:50:53.629000',NULL,NULL,NULL,1,0,'2026-03-16 23:50:53.630289',NULL,NULL,NULL,NULL,NULL,NULL),(78,'3b817e39-233c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4ODc3MDIsImV4cCI6MTc3MzkxNjUwMn0.0SJm2FT5mgk0cEtaF752tWHd2UMHPFOHcOjlCFqXmdI',NULL,'::1','curl/8.13.0','2026-03-18 23:35:02.854844','2026-03-19 23:35:02.854844',NULL,NULL,NULL,1,0,'2026-03-18 23:35:02.854844',NULL,NULL,NULL,NULL,NULL,NULL),(79,'61576bee-09d5-42df-88ef-d509585ed06c',1,42,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3MjAsImV4cCI6MTc3MzkyMjUyMH0.wy0lwa6mw4LgT2050PzSyFKlB4sk9TCBTtA0IDuTpP4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:15:20.257667','2026-03-20 01:15:20.252000',NULL,NULL,NULL,1,0,'2026-03-19 01:15:20.257667','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(80,'daa7e12b-fc80-4bc7-ab55-683fec51173c',1,42,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3NjAsImV4cCI6MTc3MzkyMjU2MH0.h0jR45ip_ANARg6gQgl587t9wEDtIqBEjtvFgqAS8I8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:16:00.352448','2026-03-20 01:16:00.351000',NULL,NULL,NULL,1,0,'2026-03-19 01:16:00.352448','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(81,'99baf4e6-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4NzMsImV4cCI6MTc3MzkyMjY3M30.mdBPnnBO5Auwj-h1-ro0ndF47WgmakRY_WrOWwQFiFI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:17:53.891454','2026-03-20 01:17:53.891454',NULL,NULL,NULL,1,0,'2026-03-19 01:17:53.891454',NULL,NULL,NULL,NULL,NULL,NULL),(82,'a407badb-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4OTEsImV4cCI6MTc3MzkyMjY5MX0.hAw7Wh2zCpSxRDBE_FX5Vk6Sk8ABR7-tJD59kCwTBfU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:18:11.171812','2026-03-20 01:18:11.171812',NULL,NULL,NULL,1,0,'2026-03-19 01:18:11.171812',NULL,NULL,NULL,NULL,NULL,NULL),(83,'2253416f-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxMDMsImV4cCI6MTc3MzkyMjkwM30.MuE2l9617U93NCrowzGR_-Eu6AEh7PIMuqguX6dH4s4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:21:43.059699','2026-03-20 01:21:43.059699',NULL,NULL,NULL,1,0,'2026-03-19 01:21:43.059699',NULL,NULL,NULL,NULL,NULL,NULL),(84,'3a87ba86-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxNDMsImV4cCI6MTc3MzkyMjk0M30.m9CR0MQDPQB_Xj0u1NWgzlRFKc6I-yLwJVs82EgBgcM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:22:23.668904','2026-03-20 01:22:23.668904',NULL,NULL,NULL,1,0,'2026-03-19 01:22:23.668904',NULL,NULL,NULL,NULL,NULL,NULL),(85,'8bd193cd-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQyODAsImV4cCI6MTc3MzkyMzA4MH0.uzCjkX4jCPYFtlRJATxdx4qKlG64HL1bR2VueJLaw6Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:24:40.048329','2026-03-20 01:24:40.048329',NULL,NULL,NULL,1,0,'2026-03-19 01:24:40.048329',NULL,NULL,NULL,NULL,NULL,NULL),(86,'ddf05a6e-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ0MTcsImV4cCI6MTc3MzkyMzIxN30.YyqewlducVMkzvA3K31Wu2YWD5219J1h8vrDw7gXksg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:26:57.823193','2026-03-20 01:26:57.823193',NULL,NULL,NULL,1,0,'2026-03-19 01:26:57.823193',NULL,NULL,NULL,NULL,NULL,NULL),(87,'b7e93564-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ3ODMsImV4cCI6MTc3Mzg5ODM4M30.MvVHy2_1mE7CYYvoRlQJF0-47KoWZd4QgD7qSM1CoMU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:33:03.519678','2026-03-20 01:33:03.519678',NULL,NULL,NULL,1,0,'2026-03-19 01:33:03.519678',NULL,NULL,NULL,NULL,NULL,NULL),(88,'f623921c-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ4ODcsImV4cCI6MTc3Mzg5ODQ4N30.ny-59Ux4z6Qumy1tcWgNHMiTi1oTisnZANrc-w4_wQU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:34:47.920900','2026-03-20 01:34:47.920900',NULL,NULL,NULL,1,0,'2026-03-19 01:34:47.920900',NULL,NULL,NULL,NULL,NULL,NULL),(89,'807c65ef-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1NDksImV4cCI6MTc3Mzg5OTE0OX0.j9KbSZ9aKspBoblfo6m8IL54hdxPG2AZzXFNneUH6NM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:45:49.525350','2026-03-20 01:45:49.525350',NULL,NULL,NULL,1,0,'2026-03-19 01:45:49.525350',NULL,NULL,NULL,NULL,NULL,NULL),(90,'9713279e-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1ODcsImV4cCI6MTc3Mzg5OTE4N30.3uRLQ3w__cnPLEx2DZ4wU0JKCn-flXbSIc1RjMNdabA',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:46:27.423224','2026-03-20 01:46:27.423224',NULL,NULL,NULL,1,0,'2026-03-19 01:46:27.423224',NULL,NULL,NULL,NULL,NULL,NULL),(91,'f4823728-2350-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTY2MDMsImV4cCI6MTc3MzkwMDIwM30.ROXuwACgFYKfhhnKbIrWPxbTDZ-8qykclCAEr5s-s-I',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:03:23.172639','2026-03-20 02:03:23.172639',NULL,NULL,NULL,1,0,'2026-03-19 02:03:23.172639',NULL,NULL,NULL,NULL,NULL,NULL),(92,'05e86b18-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTgzNTAsImV4cCI6MTc3MzkwMTk1MH0.5e_Jo-MJrXheKXJ76zPbmBKwyUtXZoymHZBdGoMKib0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:32:30.350621','2026-03-20 02:32:30.350621',NULL,NULL,NULL,1,0,'2026-03-19 02:32:30.350621',NULL,NULL,NULL,NULL,NULL,NULL),(93,'6bbc96e5-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg1MjEsImV4cCI6MTc3MzkwMjEyMX0.AXOatB6alSgWn9s7ouThQiSD6RSWsi7sKg7CRU_qqLM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:35:21.190987','2026-03-20 02:35:21.190987',NULL,NULL,NULL,1,0,'2026-03-19 02:35:21.190987',NULL,NULL,NULL,NULL,NULL,NULL),(94,'d6dfd7e6-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg3MDAsImV4cCI6MTc3MzkwMjMwMH0.M_eq_NnB1GD2Yz6guy_d92JXJBuLQ9mxybPFQ9HEnaE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:38:20.938238','2026-03-20 02:38:20.938238',NULL,NULL,NULL,1,0,'2026-03-19 02:38:20.938238',NULL,NULL,NULL,NULL,NULL,NULL),(95,'8e718d15-2356-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTkwMDgsImV4cCI6MTc3MzkwMjYwOH0.x5w-LQQT0tf7t2Kf8rMNc6Dat-XDaMQTW-oZzsXft2Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:43:28.916202','2026-03-20 02:43:28.916202',NULL,NULL,NULL,1,0,'2026-03-19 02:43:28.916202',NULL,NULL,NULL,NULL,NULL,NULL),(96,'bbd4c3c5-2357-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk1MTQsImV4cCI6MTc3MzkwMzExNH0.V_8jJqkHOxZ4b2ERbwbSsIGQtybGC3ro09ZFlpEMw28',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:51:54.560610','2026-03-20 02:51:54.560610',NULL,NULL,NULL,1,0,'2026-03-19 02:51:54.560610',NULL,NULL,NULL,NULL,NULL,NULL),(97,'c67d7bbf-2358-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk5NjEsImV4cCI6MTc3MzkwMzU2MX0.ZoY3A7wDnBVhHwrJV3yEbo4mcNLGNo3kOdd2bEgkbqE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:59:21.940270','2026-03-20 02:59:21.940270',NULL,NULL,NULL,1,0,'2026-03-19 02:59:21.940270',NULL,NULL,NULL,NULL,NULL,NULL),(98,'fa983a96-2359-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDA0NzgsImV4cCI6MTc3MzkwNDA3OH0.ClzU14UooBL1tuYmPX2ja7E0mdCp-xFf3fHMycauJx0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:07:58.853802','2026-03-20 03:07:58.853802',NULL,NULL,NULL,1,0,'2026-03-19 03:07:58.853802',NULL,NULL,NULL,NULL,NULL,NULL),(99,'eef123e8-235c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDE3NDcsImV4cCI6MTc3MzkwNTM0N30.83IYHRGpQcuZstgyVBXzPv3cjglWBa74sfaHZmI_XCg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:29:07.794022','2026-03-20 03:29:07.794022',NULL,NULL,NULL,1,0,'2026-03-19 03:29:07.794022',NULL,NULL,NULL,NULL,NULL,NULL),(100,'092c6d95-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyMjEsImV4cCI6MTc3MzkwNTgyMX0.HnfUJAYvDHJ4B35si8QCph0UIjEFFex6pKyaenTHtk4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:01.300062','2026-03-20 03:37:01.300062',NULL,NULL,NULL,1,0,'2026-03-19 03:37:01.300062',NULL,NULL,NULL,NULL,NULL,NULL),(101,'22b406fb-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyNjQsImV4cCI6MTc3MzkwNTg2NH0.Fm7uXm1ddAZlVLoZGC82zECvOyGvHCGcHwggPzFEopQ',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:44.131764','2026-03-20 03:37:44.131764',NULL,NULL,NULL,1,0,'2026-03-19 03:37:44.131764',NULL,NULL,NULL,NULL,NULL,NULL),(102,'52c7c313-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIzNDQsImV4cCI6MTc3MzkwNTk0NH0.7hZPPoxhOuV3X_8pfOFsCUTAxlgi4ZUyTS0Kru4WwnI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:39:04.791734','2026-03-20 03:39:04.791734',NULL,NULL,NULL,1,0,'2026-03-19 03:39:04.791734',NULL,NULL,NULL,NULL,NULL,NULL),(103,'c557739f-2360-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDMzOTUsImV4cCI6MTc3MzkwNjk5NX0.Pi-i7G43HaRH3m-1lxERRKpu6aw541AxtatGoG3ZA5s',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:56:35.987141','2026-03-20 03:56:35.987141',NULL,NULL,NULL,1,0,'2026-03-19 03:56:35.987141',NULL,NULL,NULL,NULL,NULL,NULL),(104,'2be94184-2364-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDQ4NTYsImV4cCI6MTc3MzkwODQ1Nn0.mOE3hSflaxGaiGw6I_vf2sBz6cMtXneSvulADYcnEQE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 04:20:56.560475','2026-03-20 04:20:56.560475',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.560475',NULL,NULL,NULL,NULL,NULL,NULL),(105,'3546ebdb-b7a4-4b7b-8cf4-0f0926be1893',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 04:20:56.967102','2026-03-20 04:20:56.963000',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.967102','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(106,'b141994e-236d-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDg5NDUsImV4cCI6MTc3MzkxMjU0NX0.21n99e5T9nLpiU2J4FbQdmAesm6NM2iCmTyu8Rmmosk',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:29:05.746978','2026-03-20 05:29:05.746978',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.746978',NULL,NULL,NULL,NULL,NULL,NULL),(107,'d3d57e7a-81f4-4022-a178-d6a327f2042d',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:29:05.753761','2026-03-20 05:29:05.753000',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.753761','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(108,'3a9d926a-2370-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTAwMzUsImV4cCI6MTc3MzkxMzYzNX0.ee1i2TSJqxBwdjTdo_FM4ILdH7MrNOXhG8iyoMA6hZ8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:47:15.191052','2026-03-20 05:47:15.191052',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.191052',NULL,NULL,NULL,NULL,NULL,NULL),(109,'5ca0b438-93dd-49ed-81f4-53e07203fad2',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:47:15.261044','2026-03-20 05:47:15.258000',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.261044','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(110,'ad463124-2378-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTM2NjMsImV4cCI6MTc3MzkxNzI2M30.3-pM_a8yKIW76voMl3BkpDeizUQMTEOHRzmf7-p7dow',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 06:47:43.530219','2026-03-20 06:47:43.530219',NULL,NULL,NULL,1,0,'2026-03-19 06:47:43.530219',NULL,NULL,NULL,NULL,NULL,NULL),(111,'620be80c-7487-4cec-871a-b0ea17a477b1',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 06:47:44.034757','2026-03-20 06:47:44.033000',NULL,NULL,NULL,1,0,'2026-03-19 06:47:44.034757','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(112,'13514605-ebe8-4ed3-93c4-a5942984ab24',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 20:17:17.490857','2026-03-22 20:17:17.485000',NULL,NULL,NULL,1,0,'2026-03-21 20:17:17.490857','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(113,'06c11a3b-00ab-4628-a059-30b80acc4b6a',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:01:18.523492','2026-03-22 22:01:18.522000',NULL,NULL,NULL,1,0,'2026-03-21 22:01:18.523492','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(114,'afcdcf54-12a6-454f-831e-c14d7e8c49f4',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:05:47.816819','2026-03-22 22:05:47.816000',NULL,NULL,NULL,1,0,'2026-03-21 22:05:47.816819','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(115,'bd411ee8-da90-4c78-a039-94d228ee38db',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:13:12.723586','2026-03-22 22:13:12.723000',NULL,NULL,NULL,1,0,'2026-03-21 22:13:12.723586','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(116,'8ea3f884-6c59-4347-a118-2cc4b464bc1e',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:54:48.899185','2026-03-22 22:54:48.898000',NULL,NULL,NULL,1,0,'2026-03-21 22:54:48.899185','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(117,'e1fcd390-f520-4af0-b824-fe3cd59b568f',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:04:04.214475','2026-03-22 23:04:04.213000',NULL,NULL,NULL,1,0,'2026-03-21 23:04:04.214475','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(118,'ddec17c8-f5c5-4f7e-94a2-e24b9cc5d1da',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:14:30.340244','2026-03-22 23:14:30.339000',NULL,NULL,NULL,1,0,'2026-03-21 23:14:30.340244','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(119,'4fe9d288-a188-4ec5-b886-f16e5c99b790',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:23:43.049903','2026-03-22 23:23:43.049000',NULL,NULL,NULL,1,0,'2026-03-21 23:23:43.049903','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(120,'adae467e-2596-11f1-a946-c8d3ff00effc',1,NULL,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzQxNDY0NTEsImV4cCI6MTc3NDE1MDA1MX0.jVi8IwgN8AUaycoN2TVByxcjihHGFPIoI46jwNFRJ84',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-21 23:27:31.439796','2026-03-22 23:27:31.439796',NULL,NULL,NULL,1,0,'2026-03-21 23:27:31.439796','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(121,'6e7353db-138d-414b-98c7-9346f55e0e3c',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:43:54.485114','2026-03-23 02:43:54.482000',NULL,NULL,NULL,1,0,'2026-03-22 02:43:54.485114','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(122,'ebc0c4fa-4fc9-4e57-af2a-68bd5de385da',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:49:03.520101','2026-03-23 02:49:03.519000',NULL,NULL,NULL,1,0,'2026-03-22 02:49:03.520101','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(123,'70e80883-546e-464b-97ce-2160554c3c1d',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 03:52:41.778381','2026-03-23 03:52:41.777000',NULL,NULL,NULL,1,0,'2026-03-22 03:52:41.778381','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(124,'6a218f0e-e202-43f6-95e0-4bdf4bb6ea02',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:11:57.906932','2026-03-23 04:11:57.905000',NULL,NULL,NULL,1,0,'2026-03-22 04:11:57.906932','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(125,'ea928a15-a02a-47f9-adda-b529bf48e3df',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:16:33.133245','2026-03-23 04:16:33.132000',NULL,NULL,NULL,1,0,'2026-03-22 04:16:33.133245','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(126,'eba31484-53d7-4a4e-8eaa-86607cf6cfcf',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:30:41.073134','2026-03-23 04:30:41.071000',NULL,NULL,NULL,1,0,'2026-03-22 04:30:41.073134','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(127,'df4cde48-0460-4ccc-97af-ba51bb287af3',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:40:31.295705','2026-03-23 04:40:31.289000',NULL,NULL,NULL,1,0,'2026-03-22 04:40:31.295705','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(128,'177ef741-afb6-47d7-b80d-afac77f3c6da',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:44.622548','2026-03-23 06:04:44.621000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:44.622548','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(129,'e96d7631-c52a-4232-8bfe-658cdfd0b47c',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:49.730618','2026-03-23 06:04:49.729000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:49.730618','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(130,'98d999be-4860-4d92-a08d-91a9f4610205',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:05:00.794544','2026-03-23 06:05:00.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:05:00.794544','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(131,'60e1d88a-9976-4403-9dbf-4e2e3facbc83',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:09:04.274769','2026-03-23 06:09:04.274000',NULL,NULL,NULL,1,0,'2026-03-22 06:09:04.274769','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(132,'0b71a86c-920e-42a7-a039-e153dab2b7ef',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:13:51.431374','2026-03-23 06:13:51.429000',NULL,NULL,NULL,1,0,'2026-03-22 06:13:51.431374','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(133,'3c4c04d6-cbf9-41e9-9a55-6ea4f0d8090c',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:17:24.499182','2026-03-23 06:17:24.498000',NULL,NULL,NULL,1,0,'2026-03-22 06:17:24.499182','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(134,'b549a0d5-2167-43cd-abbc-9704480db180',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:23:02.413532','2026-03-23 06:23:02.412000',NULL,NULL,NULL,1,0,'2026-03-22 06:23:02.413532','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(135,'587f75e2-7122-4071-b1e7-086ecc768c27',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:26:28.794172','2026-03-23 06:26:28.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:26:28.794172','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(136,'5624e91f-94b0-4035-8c4b-0beccb9b0754',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:35:30.127910','2026-03-23 06:35:30.126000',NULL,NULL,NULL,1,0,'2026-03-22 06:35:30.127910','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(137,'0895d3e2-b153-42b2-938e-ba644c36c2b1',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:39:34.545146','2026-03-23 06:39:34.544000',NULL,NULL,NULL,1,0,'2026-03-22 06:39:34.545146','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(138,'5b0da3d3-3876-44a1-bd88-77de1381ff63',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:13.728007','2026-03-23 06:40:13.727000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:13.728007','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(139,'f7846d0d-71d7-48e9-bd8a-3dafce434b05',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:43.223912','2026-03-23 06:40:43.222000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:43.223912','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(140,'81f092a7-eab5-4212-8477-772efa2e69fb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:42:23.117742','2026-03-23 06:42:23.117000',NULL,NULL,NULL,1,0,'2026-03-22 06:42:23.117742','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(141,'341a7157-16d4-4831-b0ef-02999e6a59f7',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:45:06.717408','2026-03-23 06:45:06.716000',NULL,NULL,NULL,1,0,'2026-03-22 06:45:06.717408','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(142,'f708b04a-5895-4666-95bc-3c837568b656',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:46:34.114181','2026-03-23 06:46:34.113000',NULL,NULL,NULL,1,0,'2026-03-22 06:46:34.114181','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(143,'97bb320d-b926-405f-9511-de9fca557dcb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:47:26.474349','2026-03-23 06:47:26.473000',NULL,NULL,NULL,1,0,'2026-03-22 06:47:26.474349','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(144,'805fc296-b0cc-4721-9607-1363f44d6004',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:59:15.847959','2026-03-23 06:59:15.847000',NULL,NULL,NULL,1,0,'2026-03-22 06:59:15.847959','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(145,'c60554d8-ba64-4501-8712-80a3576ba3db',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 07:01:54.979601','2026-03-23 07:01:54.978000',NULL,NULL,NULL,1,0,'2026-03-22 07:01:54.979601','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(146,'9a82f5fe-a060-4eae-90a3-57bd11797d01',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:25:47.577442','2026-03-23 21:25:47.573000',NULL,NULL,NULL,1,0,'2026-03-22 21:25:47.577442','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(147,'8ab13198-84f8-4972-a056-8ed814e63f02',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:13.182556','2026-03-23 21:28:13.181000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:13.182556','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(148,'1d71bee1-2a64-43f1-91e6-9c5ca15937a3',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:39.428636','2026-03-23 21:28:39.427000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:39.428636','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(149,'7df3b3bf-c66b-4919-96b8-e9eef49925e9',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:32:00.570805','2026-03-23 21:32:00.569000',NULL,NULL,NULL,1,0,'2026-03-22 21:32:00.570805','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(150,'3e73b0fc-af6e-4728-8527-2f3bd64ab1ed',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:39:15.813284','2026-03-23 21:39:15.812000',NULL,NULL,NULL,1,0,'2026-03-22 21:39:15.813284','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(151,'79c3e4c4-b508-4c6f-83ce-a473b87e8428',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:45:48.782773','2026-03-23 21:45:48.781000',NULL,NULL,NULL,1,0,'2026-03-22 21:45:48.782773','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(152,'a6ea1d4b-641e-47df-9ad6-cf9bbdb2f6c7',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:17.715143','2026-03-23 21:49:17.714000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:17.715143','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(153,'d915a7d1-5cc4-4ff8-b070-27a5a0560e36',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:55.392969','2026-03-23 21:49:55.392000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:55.392969','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(154,'e80db09a-bcc6-4033-b2ce-7ae55fdc3dcb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 22:20:33.586502','2026-03-23 22:20:33.585000',NULL,NULL,NULL,1,0,'2026-03-22 22:20:33.586502','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(155,'675d5849-40a7-4e6c-8b89-f14e0ae768c1',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:38:42.688728','2026-03-23 23:38:42.687000',NULL,NULL,NULL,1,0,'2026-03-22 23:38:42.688728','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(156,'f3138709-167c-45f6-835d-932b72bbddfe',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:45:06.336952','2026-03-23 23:45:06.336000',NULL,NULL,NULL,1,0,'2026-03-22 23:45:06.336952','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(157,'7e18ae9a-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODcxMywiZXhwIjoxNzc0MjY3NTEzfQ.zQFtQuD31qWpVdsj3KguN-hRcSIpiMOO3FKgZ68ZWn8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4NzEzLCJleHAiOjE3NzQ4NDM1MTN9.PEgnCIuGOemPccGXIGErsHvAKHTuiPHjDFDBZ95-cRI','::1','curl/8.13.0','2026-03-23 01:05:13.390164','2026-03-23 09:05:13.390164',NULL,NULL,NULL,1,0,'2026-03-23 01:05:13.390164','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(158,'a35bfe4e-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODc3NSwiZXhwIjoxNzc0MjY3NTc1fQ.ye1vxGPaYoSB-o-uOSOMxLlYrwZNc5X0FFWIO8pVc7A','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4Nzc1LCJleHAiOjE3NzQ4NDM1NzV9.rHlN4YGO1BxOMJiTOmcy1qBqX_c7LLDcgTD2hO3Sr8E','::1','curl/8.13.0','2026-03-23 01:06:15.920040','2026-03-23 09:06:15.920040',NULL,NULL,NULL,1,0,'2026-03-23 01:06:15.920040','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(159,'722f3588-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTEyMiwiZXhwIjoxNzc0MjY3OTIyfQ.pbWMN-E9-AHD6Oc__mPO0gqmC8kywgE-LP5ToHE_aR8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MTIyLCJleHAiOjE3NzQ4NDM5MjJ9.Lg2LVmr1443qYme60M5qAznnUfsSENGTqjtNkHyZ0Rk','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:12:02.914950','2026-03-23 09:12:02.914950',NULL,NULL,NULL,1,0,'2026-03-23 01:12:02.914950','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(160,'eb03520a-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTMyNSwiZXhwIjoxNzc0MjY4MTI1fQ.fIH7btEBY6Ti5FDOBBVs7FSpeuEuGWe8OnYu4_pABxY','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MzI1LCJleHAiOjE3NzQ4NDQxMjV9.pai6e1MZT77UMCIdXGVKY08J2ZBHT0DXfryJtpFeKFQ','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:15:25.631562','2026-03-23 09:15:25.631562',NULL,NULL,NULL,1,0,'2026-03-23 01:15:25.631562','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(161,'f09fdef1-266f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTc2NCwiZXhwIjoxNzc0MjY4NTY0fQ.SfNI0O7awW6Ye2cMRPjKvnVKQtUbiFVzcTYt3P9hh68','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5NzY0LCJleHAiOjE3NzQ4NDQ1NjR9.jSJvtNFaHetjaQNvFyoP35A4L3fT9zJQr6VE9gzsSYQ','::1','curl/8.13.0','2026-03-23 01:22:44.542861','2026-03-23 09:22:44.542861',NULL,NULL,NULL,1,0,'2026-03-23 01:22:44.542861','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(162,'9e2cb782-2670-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDA1NSwiZXhwIjoxNzc0MjY4ODU1fQ.EQkp_RbQTz5JNetCzXGuPtePgMi6YBzLFLvBcMLd1CA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMDU1LCJleHAiOjE3NzQ4NDQ4NTV9.nA0LEUxpGJfOoCXDVRUf5HRikOg_efjwZUSU9LnpBKk','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:27:35.711845','2026-03-23 09:27:35.711845',NULL,NULL,NULL,1,0,'2026-03-23 01:27:35.711845','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(163,'63be6edf-2671-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDM4NywiZXhwIjoxNzc0MjY5MTg3fQ.rzrJlgwh2mNY1St8Zmn3wrHe6KV0nQ5IG9Y9CjQzdK8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMzg3LCJleHAiOjE3NzQ4NDUxODd9.oq6HtvdAxhxFZJ8u0TVRCltB9Eb5Q88qiC_jjNj4mv8','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:33:07.177919','2026-03-23 09:33:07.177919',NULL,NULL,NULL,1,0,'2026-03-23 01:33:07.177919','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(164,'7b63f6a7-2672-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDg1NiwiZXhwIjoxNzc0MjY5NjU2fQ.ViSakqbkCeUU1-26dIUuxjOSTvzDedl7surfbQT_cRU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwODU2LCJleHAiOjE3NzQ4NDU2NTZ9.cEfQOrn_rCurOFHf2YdrJ1hmnlgB8IizDZ7uIpYUL34','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:40:56.347102','2026-03-23 09:40:56.347102',NULL,NULL,NULL,1,0,'2026-03-23 01:40:56.347102','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(165,'c2146fcf-2673-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTQwNCwiZXhwIjoxNzc0MjcwMjA0fQ.FN0GBkcd-zkJ8ClO3A5dZauNfpLabTyhyCcQvCxokBI','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxNDA0LCJleHAiOjE3NzQ4NDYyMDR9.da-7BjN_FgYFbmXhBg9X9BMAUyBTBL9ft9hr_eTKHBE','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:50:04.440784','2026-03-23 09:50:04.440784',NULL,NULL,NULL,1,0,'2026-03-23 01:50:04.440784','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(166,'b1f01862-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgwNiwiZXhwIjoxNzc0MjcwNjA2fQ.hU38lfZ8evt5SEOEr3ziFcLe6-pFohZcIKLg-6OANEg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODA2LCJleHAiOjE3NzQ4NDY2MDZ9.H4GfHLsGDDZXFoZmpxN17tM8_1dheoWlvi3F_9sKor0','::1','curl/8.13.0','2026-03-23 01:56:46.855745','2026-03-23 09:56:46.855745',NULL,NULL,NULL,1,0,'2026-03-23 01:56:46.855745','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(167,'c397b513-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgzNiwiZXhwIjoxNzc0MjcwNjM2fQ.GQpSHeDryN0R-sVB0BNIBOD8oSrO7l8gmc6Dq7J_KLA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODM2LCJleHAiOjE3NzQ4NDY2MzZ9.QqyeA-9EDGMTVPTy7UIxGBSLVzo2zmJVhz5cRjaEkjU','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:57:16.475605','2026-03-23 09:57:16.475605',NULL,NULL,NULL,1,0,'2026-03-23 01:57:16.475605','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(168,'aa0c06a9-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDM3MCwiZXhwIjoxNzc0MjczMTcwfQ.hsy2tOyUjXBb0_wCwy14rQxbuaRe1p-AlBm7q_tb7X0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0MzcwLCJleHAiOjE3NzQ4NDkxNzB9.7SEhzQlreNPgNqLLEelgfWN-Cz3OV5TutGspPdoAKX8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:39:30.597075','2026-03-23 10:39:30.597075',NULL,NULL,NULL,1,0,'2026-03-23 02:39:30.597075','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(169,'f32d241f-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDQ5MywiZXhwIjoxNzc0MjczMjkzfQ.VSd7dB0Yhk_dkH3kbI7GTSGS39A1qm71NIxIHyFkkOQ','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0NDkzLCJleHAiOjE3NzQ4NDkyOTN9.kNrd88JYngvvSzCre_t-Cx5YFNDHotzYW5Dbx4IA8tM','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:41:33.288162','2026-03-23 10:41:33.288162',NULL,NULL,NULL,1,0,'2026-03-23 02:41:33.288162','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(170,'66070192-267b-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDY4NSwiZXhwIjoxNzc0MjczNDg1fQ.IvxtCGSQFQZRGzEqsYqyPu7ZL83KghvVQnx9OcJaZF0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0Njg1LCJleHAiOjE3NzQ4NDk0ODV9.3IJLj7mcBkynNyQac6VrJpOuphAJjOPSzK3mhFoRFL0','::1','curl/8.13.0','2026-03-23 02:44:45.976122','2026-03-23 10:44:45.976122',NULL,NULL,NULL,1,0,'2026-03-23 02:44:45.976122','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(171,'02e7d533-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjIzNywiZXhwIjoxNzc0Mjc1MDM3fQ.S0Uuk2f4zVuP3B2BAHnNpdoIK0jvwa4BbE7I2q9nnc8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2MjM3LCJleHAiOjE3NzQ4NTEwMzd9.DbfRdeOQQU39sc-HPpq1VHVHv-2Zrg0bJF5-6hODm8c','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:10:37.664407','2026-03-23 11:10:37.664407',NULL,NULL,NULL,1,0,'2026-03-23 03:10:37.664407','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(172,'af0ec837-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjUyNiwiZXhwIjoxNzc0Mjc1MzI2fQ.6hBlKH7km9yh2Es3KbmtCGLzrfYaQsDnCN-CZTK1mQg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NTI2LCJleHAiOjE3NzQ4NTEzMjZ9.yVNH57p6eSdeOeWG9y_RN5KKMrxCrh1TOjEtmVypJrw','::1','curl/8.13.0','2026-03-23 03:15:26.487803','2026-03-23 11:15:26.487803',NULL,NULL,NULL,1,0,'2026-03-23 03:15:26.487803','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(173,'ddbbb9f0-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjYwNCwiZXhwIjoxNzc0Mjc1NDA0fQ.qsmcGzLB2lDp2tOJCP7OtMSyLt1p7q0NEb7szGCj4ok','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NjA0LCJleHAiOjE3NzQ4NTE0MDR9.WSocl8pTCUhLe13UGMHr70wtEkvuZSvT8rX-C7VxQ7U','::1','curl/8.13.0','2026-03-23 03:16:44.796282','2026-03-23 11:16:44.796282',NULL,NULL,NULL,1,0,'2026-03-23 03:16:44.796282','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(174,'b1710f4f-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzM4OSwiZXhwIjoxNzc0Mjc2MTg5fQ.NeEcIvLAxRBfz2fcsqDSwgmOcGBS4Xz1LQuy8WLHqyU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3Mzg5LCJleHAiOjE3NzQ4NTIxODl9.r8ar95BS2-LugMF5D2e5w4des3okyg5SiUQSuOEEyFI','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:29:49.480812','2026-03-23 11:29:49.480812',NULL,NULL,NULL,1,0,'2026-03-23 03:29:49.480812','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(175,'e494ca28-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzQ3NSwiZXhwIjoxNzc0Mjc2Mjc1fQ.9-a1KvN1m03NDBfBuhnN8WF9HvnN6fWBNcfmfUS4D1s','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3NDc1LCJleHAiOjE3NzQ4NTIyNzV9.m_yTjYwCJ1aATo5yQLrxQWOClIjQ8psBXoKlRHDlHSo','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:31:15.278808','2026-03-23 11:31:15.278808',NULL,NULL,NULL,1,0,'2026-03-23 03:31:15.278808','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(176,'3dbe90c4-2684-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0ODQ4NCwiZXhwIjoxNzc0Mjc3Mjg0fQ.npQSnFL5sktJ8gg35WhW6E6WDRtNdWacpoiyHrf0gik','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ4NDg0LCJleHAiOjE3NzQ4NTMyODR9.9oUdrcuI-kkcglrMd8xIsfm4oYawHg_jG3WDZ5u3PKo','::1','curl/8.13.0','2026-03-23 03:48:03.863168','2026-03-23 11:48:03.863168',NULL,NULL,NULL,1,0,'2026-03-23 03:48:03.863168','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(177,'0ce3cae6-2686-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0OTI2MCwiZXhwIjoxNzc0Mjc4MDYwfQ.5vIQyGQbNNX9PE2iEJkYNN7-Q-tr-DEVGLcPV7rs0Ag','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ5MjYwLCJleHAiOjE3NzQ4NTQwNjB9.Z98aDEVJWNl64eaXa_ne7fmOMDj4129galMEblEy01s','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 04:01:00.892296','2026-03-23 12:01:00.892296',NULL,NULL,NULL,1,0,'2026-03-23 04:01:00.892296','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(178,'dcc0f3b2-2697-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1NjkxMSwiZXhwIjoxNzc0Mjg1NzExfQ.GpqmMl-mQxT_CNAR3qw3JdE2sBfpAHpNK1WFD6rVkGo','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU2OTExLCJleHAiOjE3NzQ4NjE3MTF9.4xY1Olj6XpKv6uUaRM3-p5lPYcaQ_ko76Q9_w00uxSo','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:08:31.074212','2026-03-23 14:08:31.074212',NULL,NULL,NULL,1,0,'2026-03-23 06:08:31.074212','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(179,'66641617-2698-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1NzE0MSwiZXhwIjoxNzc0Mjg1OTQxfQ.0w5QIP-lw3-HxDBj7A49SfHFfG1AIFUt-PDmgNdZg7Q','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU3MTQxLCJleHAiOjE3NzQ4NjE5NDF9.5CpxOhTiD0QM6UctOa-vN2zzriOe8rl93q0V1dpbOVY','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:12:21.991364','2026-03-23 14:12:21.991364',NULL,NULL,NULL,1,0,'2026-03-23 06:12:21.991364','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(180,'18695c13-269a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1Nzg3MCwiZXhwIjoxNzc0Mjg2NjcwfQ.8h-wmmYtN-q_lOTpAEtWcbdKnZ8vsGoUBQRrJ2bnxWo','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU3ODcwLCJleHAiOjE3NzQ4NjI2NzB9.B3pINOYoTJYPT4RZh6nWH6xC3prK-E7o9Vj76RnVueQ','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:24:30.157213','2026-03-23 14:24:30.157213',NULL,NULL,NULL,1,0,'2026-03-23 06:24:30.157213','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(181,'ec9c0445-269a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODIyNiwiZXhwIjoxNzc0Mjg3MDI2fQ.R2CeGVxty9I1TYG0v6kiI94nv0Vd--NmCLvek_NYrKA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4MjI2LCJleHAiOjE3NzQ4NjMwMjZ9.2Z0WQ2IdpBm_uvntDrrrEzPpWqmJPBwqdPjJ0eLrwbk','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:30:26.165769','2026-03-23 14:30:26.165769',NULL,NULL,NULL,1,0,'2026-03-23 06:30:26.165769','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(182,'0678ab59-269b-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODI2OSwiZXhwIjoxNzc0Mjg3MDY5fQ.Ks8hZ6aWTJF7fUNfi5W-oGqmgfOLcsh6QnkEiShHFWw','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4MjY5LCJleHAiOjE3NzQ4NjMwNjl9.P4HaHgYbHVrQ3lrCYbHaMFNGaXIo9u2GxdZN4_394Ng','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:31:09.555281','2026-03-23 14:31:09.555281',NULL,NULL,NULL,1,0,'2026-03-23 06:31:09.555281','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(183,'2d5a3526-269c-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODc2NCwiZXhwIjoxNzc0Mjg3NTY0fQ.XFqhDx9sInxxWFUAX38dxcsL2bNT_wgohR10LIbdkL4','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4NzY0LCJleHAiOjE3NzQ4NjM1NjR9.FPDb3w6gNXDkPvuYWXKrTEi6p3RbPkYUReMD4eYR9l0','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:39:24.283425','2026-03-23 14:39:24.283425',NULL,NULL,NULL,1,0,'2026-03-23 06:39:24.283425','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(184,'0b2d7821-269d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1OTEzNiwiZXhwIjoxNzc0Mjg3OTM2fQ.oZWEXAdfRd69gJ1noOxS2R5uhujSc_OyIAGjExiOsFY','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU5MTM2LCJleHAiOjE3NzQ4NjM5MzZ9.GAmYEV4unE0Fu0eXPS1od5ddTpMwWnBx2IDoxg8a7d8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:45:36.444444','2026-03-23 14:45:36.444444',NULL,NULL,NULL,1,0,'2026-03-23 06:45:36.444444','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(185,'3f879c2d-269e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1OTY1MywiZXhwIjoxNzc0Mjg4NDUzfQ.20O8eVzhuJVFjE6CGWgfQafWzs4imowuozIrfkBkph8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU5NjUzLCJleHAiOjE3NzQ4NjQ0NTN9.dOElfz0zt76ggDHRV8IqIBvpCsyhP81QxXE6yBwPwxw','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:54:13.773460','2026-03-23 14:54:13.773460',NULL,NULL,NULL,1,0,'2026-03-23 06:54:13.773460','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(186,'88277981-26a0-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI2MDYzNCwiZXhwIjoxNzc0Mjg5NDM0fQ.-PWUFhFztgBpRwxpp8ZCuS1-53c3JgJ5dVtFi9jXVY8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjYwNjM0LCJleHAiOjE3NzQ4NjU0MzR9.ePrT-7CilP2o1XrQDtGrqVwkbKkNfolwLMcKeyQ2ecc','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 07:10:34.610551','2026-03-23 15:10:34.610551',NULL,NULL,NULL,1,0,'2026-03-23 07:10:34.610551','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL),(187,'e6325ea2-29bc-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjY3MiwiZXhwIjoxNzc0NjMxNDcyfQ.u4VNlLj8Tb9bBIXPROZ-1AQR96f-Pj5ecR86GG8jips','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyNjcyLCJleHAiOjE3NzUyMDc0NzJ9.pSY_DpNwWAj7TOykkGCXfQcITgEwJav2mOt6sfVaxAM','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:11:11.784551','2026-03-27 14:11:11.784551',NULL,NULL,NULL,1,0,'2026-03-27 06:11:11.784551','2026-03-27 06:11:12.664721',NULL,NULL,NULL,NULL,NULL),(188,'effb4edd-29bc-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjY4OCwiZXhwIjoxNzc0NjMxNDg4fQ.RMejGTgaIP5SfQRVmtmejN0mL1gF_FFRDjqQ3pp_i1o','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyNjg4LCJleHAiOjE3NzUyMDc0ODh9._6gMdvHrGxwSYZV3HFqgtQa9tUUKE-smqOS0al5Usds','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:11:28.200977','2026-03-27 14:11:28.200977',NULL,NULL,NULL,1,0,'2026-03-27 06:11:28.200977','2026-03-27 06:11:28.403067',NULL,NULL,NULL,NULL,NULL),(189,'3b21d869-29bd-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjgxNCwiZXhwIjoxNzc0NjMxNjE0fQ.B538eolAJC-daw8sY63FhQKcA9KShhiE54m-ceMjttw','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyODE0LCJleHAiOjE3NzUyMDc2MTR9.OhAz2URzoXhIVKaxZ-KckmIz0pzTABKp5huUaS4tC4A','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:13:34.282593','2026-03-27 14:13:34.282593',NULL,NULL,NULL,1,0,'2026-03-27 06:13:34.282593','2026-03-27 06:13:34.289312',NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `sessao_usuario` VALUES (7,'63c37b7d-452b-4a86-aea0-d86a37df5023',1,42,1,1,NULL,NULL,NULL,'1372fc2f1b036f2b2eaaeb43b4c848d2bc1f6d000fe7547ee335ffaa5c7962a2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:05.817284','2026-03-15 12:01:05.816000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:05.817284',NULL,NULL,NULL,NULL,NULL,NULL,0),(8,'b39ce1df-7561-459d-acc9-94d0ebe3eb21',1,42,1,1,NULL,NULL,NULL,'eb37f4e0fc8692e22c3fb36c6534970edad66762027721b31fd4066240f0e23d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:01:41.237955','2026-03-15 12:01:41.237000',NULL,NULL,NULL,1,0,'2026-03-15 04:01:41.237955',NULL,NULL,NULL,NULL,NULL,NULL,0),(9,'4cb66dd7-0573-420e-8ee3-35a16c0b8354',1,42,1,1,NULL,NULL,NULL,'cee05051dc58779e8644c9ca5504d973527acd3089c95ada44df2750bdebe2a4',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:03:46.388138','2026-03-15 12:03:46.387000',NULL,NULL,NULL,1,0,'2026-03-15 04:03:46.388138',NULL,NULL,NULL,NULL,NULL,NULL,0),(10,'2d3f8c43-6965-4796-bb51-5cfa62cda2da',1,42,1,1,NULL,NULL,NULL,'f51713aca9e0affe852e6a510cb8d87fb8447b521523209a210768507ffc6302',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:27.379626','2026-03-15 12:08:27.368000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:27.379626',NULL,NULL,NULL,NULL,NULL,NULL,0),(11,'2f6d3f77-1f54-4564-8fb7-014d6f78866f',1,42,1,1,NULL,NULL,NULL,'e7317224ce17d218708316ed36838c06f4027a4ca72dd982971a395a771dd4a1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:08:50.176704','2026-03-15 12:08:50.175000',NULL,NULL,NULL,1,0,'2026-03-15 04:08:50.176704',NULL,NULL,NULL,NULL,NULL,NULL,0),(12,'e144b098-9911-4205-8ae1-06828e2f987f',1,42,1,1,NULL,NULL,NULL,'3adb704fa919ccda9b98001ad2c36762917b309fbfd58d9813ab44e074c8f7b6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:12:14.179418','2026-03-15 12:12:14.178000',NULL,NULL,NULL,1,0,'2026-03-15 04:12:14.179418',NULL,NULL,NULL,NULL,NULL,NULL,0),(13,'397ae7a5-01eb-41c9-bde3-b71553c18da1',1,42,1,1,NULL,NULL,NULL,'a3e36c54a2f521f2403d7dbf972699b009b3778d4262f26b03fe0d216d3131b7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:11.011380','2026-03-15 12:14:11.004000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:11.011380',NULL,NULL,NULL,NULL,NULL,NULL,0),(14,'dd97f6f7-55f8-45bd-8866-be0c7b7f7afd',1,42,1,1,NULL,NULL,NULL,'871d0b640f96992252ffbf2d9f83382a3a08398e010ef1a2b7ffdb52fff3ca75',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:14:29.945664','2026-03-15 12:14:29.944000',NULL,NULL,NULL,1,0,'2026-03-15 04:14:29.945664',NULL,NULL,NULL,NULL,NULL,NULL,0),(15,'13249301-44c2-49fc-8f06-a941c8dbd883',1,42,1,1,NULL,NULL,NULL,'b902ac1b34000f57048d9a7b455389d4853b5de92dea9731e64c366ec1de6db2',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:05.577331','2026-03-15 12:29:05.527000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:05.577331',NULL,NULL,NULL,NULL,NULL,NULL,0),(16,'1ab7c4ec-55ec-44a8-9fed-e5993231f768',1,42,1,1,NULL,NULL,NULL,'12d51baea86c236f511a88c8a4771b5ea749b48b59b3566892cfea9228594aab',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:29:28.697984','2026-03-15 12:29:28.696000',NULL,NULL,NULL,1,0,'2026-03-15 04:29:28.697984',NULL,NULL,NULL,NULL,NULL,NULL,0),(17,'1f103d68-a824-4fe1-a51d-16ada7bfaa2f',1,42,1,1,NULL,NULL,NULL,'882dd04c16cb0024d88c6d2792071e763f5e5906fccca406b99fa523be1806ad',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:38:21.583153','2026-03-15 12:38:21.579000',NULL,NULL,NULL,1,0,'2026-03-15 04:38:21.583153',NULL,NULL,NULL,NULL,NULL,NULL,0),(18,'58075872-3163-4505-9c92-660c35893b77',1,42,1,1,NULL,NULL,NULL,'ee653d551b1cb460d4f3707c99772ac5b81f530dca5cb43d29134d878ebf3eb6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:29.831578','2026-03-15 12:43:29.830000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:29.831578',NULL,NULL,NULL,NULL,NULL,NULL,0),(19,'c9cd4225-14ec-4a92-b6b3-47c521ce771b',1,42,1,1,NULL,NULL,NULL,'d0785168510e09119c38365c10ef25a5c8673d9f7da617f22c286348fb18ef85',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:43:42.608531','2026-03-15 12:43:42.607000',NULL,NULL,NULL,1,0,'2026-03-15 04:43:42.608531',NULL,NULL,NULL,NULL,NULL,NULL,0),(20,'3c5da068-7630-4c91-a709-47fa8cef55d6',1,42,1,1,NULL,NULL,NULL,'7f34ec46414d5dfa85aa6823ed0b9772616a831ff2c0d8718fa5fc7a7a1eeaf5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:44:05.883072','2026-03-15 12:44:05.882000',NULL,NULL,NULL,1,0,'2026-03-15 04:44:05.883072',NULL,NULL,NULL,NULL,NULL,NULL,0),(21,'8fe9121c-c63c-43a0-88f5-81f6f1e70ff3',1,42,1,1,NULL,NULL,NULL,'26f46ab3f1e78157bf5dd91e81437d6a6251c78ae7cc5fb9dc9db79c8feecd1e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:46:52.323077','2026-03-15 12:46:52.321000',NULL,NULL,NULL,1,0,'2026-03-15 04:46:52.323077',NULL,NULL,NULL,NULL,NULL,NULL,0),(22,'55a81184-9657-4b28-8540-5bf0e217eeae',1,42,1,1,NULL,NULL,NULL,'a18136a06af71bcb136c75c5bbfbc166b3ca9c853956997d9efc0e6ad9e3996d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:52:07.194269','2026-03-15 12:52:07.192000',NULL,NULL,NULL,1,0,'2026-03-15 04:52:07.194269',NULL,NULL,NULL,NULL,NULL,NULL,0),(23,'c3e7b60e-d6b7-4042-9b8e-045d61d9518c',1,42,1,1,NULL,NULL,NULL,'fb00d6352697002685225620f45f854828ba6d29e6a87719928dea3e1aae6a8c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.549440','2026-03-15 12:53:57.548000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.549440',NULL,NULL,NULL,NULL,NULL,NULL,0),(24,'d99e2221-1442-41a9-88ea-8b93eb13912a',1,42,1,1,NULL,NULL,NULL,'560906d8554298e4dca2f11fcfd9c327c39322471fcb34f11243b240a6259ec9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:53:57.812067','2026-03-15 12:53:57.805000',NULL,NULL,NULL,1,0,'2026-03-15 04:53:57.812067',NULL,NULL,NULL,NULL,NULL,NULL,0),(25,'0d218d46-92b4-45f5-90f0-3fe1b281eb72',1,42,1,1,NULL,NULL,NULL,'d53958ce98a94e0adf1628b3a524fecf24acefe9f521ae8b2fbf6b2a092675af',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:54:44.965119','2026-03-15 12:54:44.964000',NULL,NULL,NULL,1,0,'2026-03-15 04:54:44.965119',NULL,NULL,NULL,NULL,NULL,NULL,0),(26,'a4a074ec-0b7a-4186-ac94-c67f0fc9fb26',1,42,1,1,NULL,NULL,NULL,'777637c164c144831659549628ecd2238b224efd07c38d44afe82d100a3ab66d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 04:59:02.337344','2026-03-15 12:59:02.335000',NULL,NULL,NULL,1,0,'2026-03-15 04:59:02.337344',NULL,NULL,NULL,NULL,NULL,NULL,0),(27,'afe722c9-ef79-4fcb-bf7c-360d9670d6ec',1,42,1,1,NULL,NULL,NULL,'3c8ddda048fa01707486bc2623b27b795be575fdfcac170816e033bc50b65fd5',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:01:49.926764','2026-03-15 13:01:49.925000',NULL,NULL,NULL,1,0,'2026-03-15 05:01:49.926764',NULL,NULL,NULL,NULL,NULL,NULL,0),(28,'9b9c4550-4e6d-444c-a3dc-b4e94f3bc3e4',1,42,1,1,NULL,NULL,NULL,'1722fb2391563a12a08db86c7a6185846b41cf32e351038b802d8debdc935d7d',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:04:31.209876','2026-03-15 13:04:31.208000',NULL,NULL,NULL,1,0,'2026-03-15 05:04:31.209876',NULL,NULL,NULL,NULL,NULL,NULL,0),(29,'8ac9f6d8-fb40-4885-9986-65b5fc5c84b2',1,42,1,1,NULL,NULL,NULL,'6c61a69433e695be84fbf9b9f59b788e5593ca03e34d1889992bee938f4a27c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:05:24.089442','2026-03-15 13:05:24.087000',NULL,NULL,NULL,1,0,'2026-03-15 05:05:24.089442',NULL,NULL,NULL,NULL,NULL,NULL,0),(30,'b18c5b34-8442-4215-a99d-50b355959639',1,42,1,1,NULL,NULL,NULL,'524f43c0cae88f5940ed43a9a9bfa507041d6e263c25ac292b43c9399dc579a8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:07:02.949027','2026-03-15 13:07:02.946000',NULL,NULL,NULL,1,0,'2026-03-15 05:07:02.949027',NULL,NULL,NULL,NULL,NULL,NULL,0),(31,'2de510c9-3d05-4f64-ba88-724ccaa67cd9',1,42,1,1,NULL,NULL,NULL,'86fada34141e91b2111e1a4adb1d608192278d8d003bdf76ce238c0d3b34896b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:10:18.915385','2026-03-15 13:10:18.913000',NULL,NULL,NULL,1,0,'2026-03-15 05:10:18.915385',NULL,NULL,NULL,NULL,NULL,NULL,0),(32,'e412dc45-9a52-4c20-8872-e279fb7c5ee3',1,42,1,1,NULL,NULL,NULL,'ec2214b4e05e9a2ac5ceb8e8d7928747260cc0f312548dc13ca82275987d9280',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:11:06.087464','2026-03-15 13:11:06.086000',NULL,NULL,NULL,1,0,'2026-03-15 05:11:06.087464',NULL,NULL,NULL,NULL,NULL,NULL,0),(33,'07d17b58-4172-4d4b-ac37-fd4a4478c275',1,42,1,1,NULL,NULL,NULL,'c4d78d54a26ea192a604b14e20b74a9658d9a1c338fe30d67fdd5a797bbeae96',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:13:08.825375','2026-03-15 13:13:08.824000',NULL,NULL,NULL,1,0,'2026-03-15 05:13:08.825375',NULL,NULL,NULL,NULL,NULL,NULL,0),(34,'d31b6c73-2d2c-4452-8c1e-376ec08adace',1,42,1,1,NULL,NULL,NULL,'e7f8c8b98aa3e810fa7613e91f71cf9384282a3a15b9491d9a0455a184ad38d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:19:33.582081','2026-03-15 13:19:33.580000',NULL,NULL,NULL,1,0,'2026-03-15 05:19:33.582081',NULL,NULL,NULL,NULL,NULL,NULL,0),(35,'f3f52003-da54-4489-8c3b-84582fb4b097',1,42,1,1,NULL,NULL,NULL,'9f1793aeb07425915397c5a27f8be18767b13d8ac692cfe3722483ca0ca26f16',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:20:16.048413','2026-03-15 13:20:16.047000',NULL,NULL,NULL,1,0,'2026-03-15 05:20:16.048413',NULL,NULL,NULL,NULL,NULL,NULL,0),(36,'f669359c-77b2-4e95-a951-e94f19a4c3f0',1,42,1,1,NULL,NULL,NULL,'4f5fb83da594beb48268959b625532c8eca7d8aea1f07fac379c7b5a420cbb9c',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:23:45.486190','2026-03-15 13:23:45.485000',NULL,NULL,NULL,1,0,'2026-03-15 05:23:45.486190',NULL,NULL,NULL,NULL,NULL,NULL,0),(37,'a47179c5-7506-4981-8874-4d375b6db2a5',1,42,1,1,NULL,NULL,NULL,'3f1fe25ae0e4f047a55d2e2fa4306b8c05157969c8ff46dc60daa9765e6b4670',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:24:05.181714','2026-03-15 13:24:05.180000',NULL,NULL,NULL,1,0,'2026-03-15 05:24:05.181714',NULL,NULL,NULL,NULL,NULL,NULL,0),(38,'f8e70a89-7e2a-499b-9ad8-a3041ca84674',1,42,1,1,NULL,NULL,NULL,'1fc1055ff66c52efff0f050e9b9f6563b50215f5a2c441ac9700e1c25c88ad22',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:25:01.357715','2026-03-15 13:25:01.356000',NULL,NULL,NULL,1,0,'2026-03-15 05:25:01.357715',NULL,NULL,NULL,NULL,NULL,NULL,0),(39,'2585de0f-319a-486a-ba66-c0fb9290b0fb',1,42,1,1,NULL,NULL,NULL,'d677c12877e0cecd198e649b8efee8312f25554bb5fe7dd772948bc8d20bbae6',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:28:23.799640','2026-03-15 13:28:23.797000',NULL,NULL,NULL,1,0,'2026-03-15 05:28:23.799640',NULL,NULL,NULL,NULL,NULL,NULL,0),(40,'faf72121-36ce-463b-a77a-318d5ddc9e0f',1,42,1,1,NULL,NULL,NULL,'a6a1c717a2807104c181ab4f659558b611239fb88dc3a459852900d571a1de4e',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:24.565813','2026-03-15 13:29:24.564000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:24.565813',NULL,NULL,NULL,NULL,NULL,NULL,0),(41,'6e513914-1319-4d5d-be03-fde1eb0222b9',1,42,1,1,NULL,NULL,NULL,'a1d23df2b021e98171cf65e5803a7276152e6b2d724c8a5c4033fc47a3c02330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:29:42.507935','2026-03-15 13:29:42.506000',NULL,NULL,NULL,1,0,'2026-03-15 05:29:42.507935',NULL,NULL,NULL,NULL,NULL,NULL,0),(42,'4816f1ab-c5e8-4515-a20d-8cc56613fabb',1,42,1,1,NULL,NULL,NULL,'4d7a1e2d9ac6f80e53a72219992fd6cea2a671934edb62d9459504afb09552f1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:34:19.502653','2026-03-15 13:34:19.501000',NULL,NULL,NULL,1,0,'2026-03-15 05:34:19.502653',NULL,NULL,NULL,NULL,NULL,NULL,0),(43,'3ed53aee-4311-4bbc-8f36-6ae72bdaf19e',1,42,1,1,NULL,NULL,NULL,'5303f79f6960a59ca5aaf5e734eed88f83205405fb72d3e72d2e772c17918794',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:47:06.103453','2026-03-15 13:47:06.101000',NULL,NULL,NULL,1,0,'2026-03-15 05:47:06.103453',NULL,NULL,NULL,NULL,NULL,NULL,0),(44,'b18293a4-59cb-4ff2-8656-4062d0c0b85f',1,42,1,1,NULL,NULL,NULL,'acb1d550e8f4e2b8dba1035a6ac81477289c6d38a0527fcc2c8c5658ce993f9a',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:04.716838','2026-03-15 13:49:04.715000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:04.716838',NULL,NULL,NULL,NULL,NULL,NULL,0),(45,'1af2b45c-ac3a-4434-b220-acb2c566fb67',1,42,1,1,NULL,NULL,NULL,'c144c2a5f987ee11854fba3963bcec76fb5193156ceef574096654849e401da8',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:49:51.795570','2026-03-15 13:49:51.794000',NULL,NULL,NULL,1,0,'2026-03-15 05:49:51.795570',NULL,NULL,NULL,NULL,NULL,NULL,0),(46,'0176059d-2ca7-47fa-b75c-fec17e8e5d84',1,42,1,1,NULL,NULL,NULL,'92b3eb710653308e3bf4bd243e79b62153a54a4d427a7fd472a345ed6ba1a4c1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:51:18.543658','2026-03-15 13:51:18.543000',NULL,NULL,NULL,1,0,'2026-03-15 05:51:18.543658',NULL,NULL,NULL,NULL,NULL,NULL,0),(47,'68640f65-cd41-437e-b5ca-1f3bfbd0ba73',1,42,1,1,NULL,NULL,NULL,'f6730df241ca451cb6cc9aa1e2fa1b5f8ab8f5060d94123cb17d6ad6411463d1',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:52:40.592110','2026-03-15 13:52:40.590000',NULL,NULL,NULL,1,0,'2026-03-15 05:52:40.592110',NULL,NULL,NULL,NULL,NULL,NULL,0),(48,'a3106b09-f571-4853-abcb-24616ea7bf2d',1,42,1,1,NULL,NULL,NULL,'a69c2b85547f87d8ce9ef80a1f1bae89f2baa86a4a09c75dbd553315ca025fa9',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 05:53:20.003322','2026-03-15 13:53:20.001000',NULL,NULL,NULL,1,0,'2026-03-15 05:53:20.003322',NULL,NULL,NULL,NULL,NULL,NULL,0),(49,'4a05a12b-efd9-4afd-a675-87ae6c71505a',1,42,1,1,NULL,NULL,NULL,'41a2228d80125b77416308aa72c7ada8e1b92ed81eeaa8e107b989896a5fcae7',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:15:43.228380','2026-03-15 14:15:43.227000',NULL,NULL,NULL,1,0,'2026-03-15 06:15:43.228380',NULL,NULL,NULL,NULL,NULL,NULL,0),(50,'5d15c751-c5aa-41f3-a6a1-2ba53b051ad2',1,42,1,1,NULL,NULL,NULL,'4803775615d816cdc13c43b6482d76854cf32928fb4f4f0f129dc096ce84a18b',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:29:47.314898','2026-03-15 14:29:47.313000',NULL,NULL,NULL,1,0,'2026-03-15 06:29:47.314898',NULL,NULL,NULL,NULL,NULL,NULL,0),(51,'0d3dfb20-53c1-46c9-9998-a1cfd26396cc',1,42,1,1,NULL,NULL,NULL,'0e0390b5245ca5e54eec47bbe454a7ac8843d94c4cba035e9f1cd9488134f330',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:41:11.699902','2026-03-15 14:41:11.698000',NULL,NULL,NULL,1,0,'2026-03-15 06:41:11.699902',NULL,NULL,NULL,NULL,NULL,NULL,0),(52,'bca53638-a182-44fe-9451-a80b8ee440bc',1,42,1,1,NULL,NULL,NULL,'a2bdbbaf06a9708d00051add445c25e8ba9422832889fd41d1ab977735d9fe80',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:43:58.577254','2026-03-15 14:43:58.575000',NULL,NULL,NULL,1,0,'2026-03-15 06:43:58.577254',NULL,NULL,NULL,NULL,NULL,NULL,0),(53,'522e2766-d026-410d-85dd-f21b37e23d1d',1,42,1,1,NULL,NULL,NULL,'409cf7bad8ffebf248f3dcb5106bbba228db8bce130521af8fcabd101a23d7cc',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:47:51.929614','2026-03-15 14:47:51.927000',NULL,NULL,NULL,1,0,'2026-03-15 06:47:51.929614',NULL,NULL,NULL,NULL,NULL,NULL,0),(54,'e32c3349-14c1-4b9c-bbcf-ae81432eea55',1,42,1,1,NULL,NULL,NULL,'9bd4705293555f6ac1ca2feadc9fc296d8b74310af622eefb9cc48e5833ab717',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:52:08.454722','2026-03-15 14:52:08.453000',NULL,NULL,NULL,1,0,'2026-03-15 06:52:08.454722',NULL,NULL,NULL,NULL,NULL,NULL,0),(55,'670299a1-f54e-4e5f-a4a6-e73ef010e578',1,42,1,1,NULL,NULL,NULL,'87418159553fb03bd6e62cb7b80aeb7af3e52128feaeb5dcea81643c83d81629',NULL,'::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-15 06:55:27.345484','2026-03-15 14:55:27.342000',NULL,NULL,NULL,1,0,'2026-03-15 06:55:27.345484',NULL,NULL,NULL,NULL,NULL,NULL,0),(56,'ce264be2-c41e-427d-93cf-4faf1870740d',1,42,1,1,NULL,NULL,NULL,'b81b4c61a9330dfa0290e9a5b3cc77109d0ca292c95a7d6e105326aa5f7710fb',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:24:04.569310','2026-03-17 06:24:04.554000',NULL,NULL,NULL,1,0,'2026-03-16 22:24:04.569310',NULL,NULL,NULL,NULL,NULL,NULL,0),(57,'0db5dde4-0fa2-41ae-a8d6-8d042cd2e082',1,42,1,1,NULL,NULL,NULL,'eb335f0c74a9e213608127a17dc82ca476719214773266aec02b6b1fafec0fff',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.812490','2026-03-17 06:25:25.811000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.812490',NULL,NULL,NULL,NULL,NULL,NULL,0),(58,'0f8bd2f2-9667-4acc-a56d-e035d5303759',1,42,1,1,NULL,NULL,NULL,'8861b5cf060a3fdcfa568589c04cef2b157a3027ffa043732f941727ec790976',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:25:25.940807','2026-03-17 06:25:25.938000',NULL,NULL,NULL,1,0,'2026-03-16 22:25:25.940807',NULL,NULL,NULL,NULL,NULL,NULL,0),(59,'4dde9d25-9151-49c6-b88f-8225669b5c1a',1,42,1,1,NULL,NULL,NULL,'f341d4930e8ed0054aedd5055572e8e531494c5a9a508ddc462275a3f8e7c35e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:35:23.378417','2026-03-17 06:35:23.376000',NULL,NULL,NULL,1,0,'2026-03-16 22:35:23.378417',NULL,NULL,NULL,NULL,NULL,NULL,0),(60,'7d293064-9697-4f28-af2a-2d147b68f3bf',1,42,1,1,NULL,NULL,NULL,'2465ee9007e950467e2731a05f6940c42b2add6269f88497dd9e0bbda0e46aab',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:38:51.083680','2026-03-17 06:38:51.082000',NULL,NULL,NULL,1,0,'2026-03-16 22:38:51.083680',NULL,NULL,NULL,NULL,NULL,NULL,0),(61,'0b362983-ea96-435d-b349-1182b4864a98',1,42,1,1,NULL,NULL,NULL,'cab38f6d7dac91e02f1abd9885e1dfd51e6d01cb3099558b27685d947f1df373',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:40:01.718458','2026-03-17 06:40:01.717000',NULL,NULL,NULL,1,0,'2026-03-16 22:40:01.718458',NULL,NULL,NULL,NULL,NULL,NULL,0),(62,'205e5718-bdd1-4576-bb7d-b186f62c6fc1',1,42,1,1,NULL,NULL,NULL,'ed5a4e43c718119c84dbaa4563d2b6c079d4e6737224ebe766591789ed97878f',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:03.769537','2026-03-17 06:43:03.768000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:03.769537',NULL,NULL,NULL,NULL,NULL,NULL,0),(63,'e6bfb0c4-5d28-4102-a911-b7f0f7b7f1de',1,42,1,1,NULL,NULL,NULL,'12cafcefbeba26e5c96db7ba273371d0b50ca5ce31e7589994b421830ab74582',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:43:21.698424','2026-03-17 06:43:21.697000',NULL,NULL,NULL,1,0,'2026-03-16 22:43:21.698424',NULL,NULL,NULL,NULL,NULL,NULL,0),(64,'8296bcf0-c33f-4d0a-b674-caf510a6286d',1,42,1,1,NULL,NULL,NULL,'594167c174364ed6863af304f145356e220e9fd37cb4db5f7ce0d50708fdd731',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:52:13.880474','2026-03-17 06:52:13.879000',NULL,NULL,NULL,1,0,'2026-03-16 22:52:13.880474',NULL,NULL,NULL,NULL,NULL,NULL,0),(65,'6e7c7a1b-2590-44cf-b4ab-d5b746edebc8',1,42,1,1,NULL,NULL,NULL,'d57a14c6abefa3a8a62a22fb3f5c93ad87110d77df7978353ceec76625a4bea4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:54:35.486146','2026-03-17 06:54:35.485000',NULL,NULL,NULL,1,0,'2026-03-16 22:54:35.486146',NULL,NULL,NULL,NULL,NULL,NULL,0),(66,'58cf0196-1fba-4b9b-87e8-9f461b079fb5',1,42,1,1,NULL,NULL,NULL,'de6e277deb3a1c05a51bb86ccdab7b02d210ef8662882f51318a5a13b5135419',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:21.990369','2026-03-17 06:57:21.988000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:21.990369',NULL,NULL,NULL,NULL,NULL,NULL,0),(67,'d1805ea1-d6cf-4d7a-ad86-b5b34c098b28',1,42,1,1,NULL,NULL,NULL,'45100470d323ffc68ea37a87c251e9de9a8e4fdecd3745998c69d1a28b1b5cba',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:57:44.317456','2026-03-17 06:57:44.316000',NULL,NULL,NULL,1,0,'2026-03-16 22:57:44.317456',NULL,NULL,NULL,NULL,NULL,NULL,0),(68,'2f12c7c9-3d29-4013-acf0-723b2a179f9d',1,42,1,1,NULL,NULL,NULL,'1e4d84197e1128f080a571e2a8c3dcdbaa5d5670a58c784f2e943e95d102481e',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:12.306487','2026-03-17 06:58:12.305000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:12.306487',NULL,NULL,NULL,NULL,NULL,NULL,0),(69,'f22372a2-a564-421d-8e0a-a5553071e740',1,42,1,1,NULL,NULL,NULL,'68f7de146c3ce12e5ebe82a60bf7277e9d622240508dce923e6219be86628581',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:58:30.889045','2026-03-17 06:58:30.887000',NULL,NULL,NULL,1,0,'2026-03-16 22:58:30.889045',NULL,NULL,NULL,NULL,NULL,NULL,0),(70,'fbedc517-f035-4224-a8bb-8f13839285b4',1,42,1,1,NULL,NULL,NULL,'804e18ee16c4e652e3cf0bdd0f36445b52359a6e45e9bfa1931d51f14c606c00',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 22:59:43.851763','2026-03-17 06:59:43.850000',NULL,NULL,NULL,1,0,'2026-03-16 22:59:43.851763',NULL,NULL,NULL,NULL,NULL,NULL,0),(71,'44e4f97b-5ace-4279-aedd-eeffe8c37bd1',1,42,1,1,NULL,NULL,NULL,'366a33456c208d33b00f848b5182d9dc77fb699f729c8684711e46ca99335ff8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:12:02.595586','2026-03-17 07:12:02.595000',NULL,NULL,NULL,1,0,'2026-03-16 23:12:02.595586',NULL,NULL,NULL,NULL,NULL,NULL,0),(72,'b93fa42b-428b-42d3-b256-43fd2750e343',1,42,1,1,NULL,NULL,NULL,'92edc1447539a63f2882d1e34b7fc909b82ebff0f900587e57391ac24b54c572',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:35:42.036490','2026-03-17 07:35:42.035000',NULL,NULL,NULL,1,0,'2026-03-16 23:35:42.036490',NULL,NULL,NULL,NULL,NULL,NULL,0),(73,'66c87673-862c-441f-9a5a-317ff725f5ac',1,42,1,1,NULL,NULL,NULL,'befa220ec4bdeac6412aa243c8b736af6c71e1eaf2665aadf18d9cce594dec50',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:37:33.276373','2026-03-17 07:37:33.274000',NULL,NULL,NULL,1,0,'2026-03-16 23:37:33.276373',NULL,NULL,NULL,NULL,NULL,NULL,0),(74,'8d938f96-45d2-40ef-a25f-06b545ca0188',1,42,1,1,NULL,NULL,NULL,'51df221db516bad738304aa5ed695fd5bdec441ab2280f4dcbb8a80054988fd4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36','2026-03-16 23:50:53.630289','2026-03-17 07:50:53.629000',NULL,NULL,NULL,1,0,'2026-03-16 23:50:53.630289',NULL,NULL,NULL,NULL,NULL,NULL,0),(78,'3b817e39-233c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4ODc3MDIsImV4cCI6MTc3MzkxNjUwMn0.0SJm2FT5mgk0cEtaF752tWHd2UMHPFOHcOjlCFqXmdI',NULL,'::1','curl/8.13.0','2026-03-18 23:35:02.854844','2026-03-19 23:35:02.854844',NULL,NULL,NULL,1,0,'2026-03-18 23:35:02.854844',NULL,NULL,NULL,NULL,NULL,NULL,0),(79,'61576bee-09d5-42df-88ef-d509585ed06c',1,42,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3MjAsImV4cCI6MTc3MzkyMjUyMH0.wy0lwa6mw4LgT2050PzSyFKlB4sk9TCBTtA0IDuTpP4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:15:20.257667','2026-03-20 01:15:20.252000',NULL,NULL,NULL,1,0,'2026-03-19 01:15:20.257667','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(80,'daa7e12b-fc80-4bc7-ab55-683fec51173c',1,42,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM3NjAsImV4cCI6MTc3MzkyMjU2MH0.h0jR45ip_ANARg6gQgl587t9wEDtIqBEjtvFgqAS8I8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 01:16:00.352448','2026-03-20 01:16:00.351000',NULL,NULL,NULL,1,0,'2026-03-19 01:16:00.352448','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(81,'99baf4e6-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4NzMsImV4cCI6MTc3MzkyMjY3M30.mdBPnnBO5Auwj-h1-ro0ndF47WgmakRY_WrOWwQFiFI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:17:53.891454','2026-03-20 01:17:53.891454',NULL,NULL,NULL,1,0,'2026-03-19 01:17:53.891454',NULL,NULL,NULL,NULL,NULL,NULL,0),(82,'a407badb-234a-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTM4OTEsImV4cCI6MTc3MzkyMjY5MX0.hAw7Wh2zCpSxRDBE_FX5Vk6Sk8ABR7-tJD59kCwTBfU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:18:11.171812','2026-03-20 01:18:11.171812',NULL,NULL,NULL,1,0,'2026-03-19 01:18:11.171812',NULL,NULL,NULL,NULL,NULL,NULL,0),(83,'2253416f-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxMDMsImV4cCI6MTc3MzkyMjkwM30.MuE2l9617U93NCrowzGR_-Eu6AEh7PIMuqguX6dH4s4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:21:43.059699','2026-03-20 01:21:43.059699',NULL,NULL,NULL,1,0,'2026-03-19 01:21:43.059699',NULL,NULL,NULL,NULL,NULL,NULL,0),(84,'3a87ba86-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQxNDMsImV4cCI6MTc3MzkyMjk0M30.m9CR0MQDPQB_Xj0u1NWgzlRFKc6I-yLwJVs82EgBgcM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:22:23.668904','2026-03-20 01:22:23.668904',NULL,NULL,NULL,1,0,'2026-03-19 01:22:23.668904',NULL,NULL,NULL,NULL,NULL,NULL,0),(85,'8bd193cd-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQyODAsImV4cCI6MTc3MzkyMzA4MH0.uzCjkX4jCPYFtlRJATxdx4qKlG64HL1bR2VueJLaw6Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:24:40.048329','2026-03-20 01:24:40.048329',NULL,NULL,NULL,1,0,'2026-03-19 01:24:40.048329',NULL,NULL,NULL,NULL,NULL,NULL,0),(86,'ddf05a6e-234b-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ0MTcsImV4cCI6MTc3MzkyMzIxN30.YyqewlducVMkzvA3K31Wu2YWD5219J1h8vrDw7gXksg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:26:57.823193','2026-03-20 01:26:57.823193',NULL,NULL,NULL,1,0,'2026-03-19 01:26:57.823193',NULL,NULL,NULL,NULL,NULL,NULL,0),(87,'b7e93564-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ3ODMsImV4cCI6MTc3Mzg5ODM4M30.MvVHy2_1mE7CYYvoRlQJF0-47KoWZd4QgD7qSM1CoMU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:33:03.519678','2026-03-20 01:33:03.519678',NULL,NULL,NULL,1,0,'2026-03-19 01:33:03.519678',NULL,NULL,NULL,NULL,NULL,NULL,0),(88,'f623921c-234c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTQ4ODcsImV4cCI6MTc3Mzg5ODQ4N30.ny-59Ux4z6Qumy1tcWgNHMiTi1oTisnZANrc-w4_wQU',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:34:47.920900','2026-03-20 01:34:47.920900',NULL,NULL,NULL,1,0,'2026-03-19 01:34:47.920900',NULL,NULL,NULL,NULL,NULL,NULL,0),(89,'807c65ef-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1NDksImV4cCI6MTc3Mzg5OTE0OX0.j9KbSZ9aKspBoblfo6m8IL54hdxPG2AZzXFNneUH6NM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:45:49.525350','2026-03-20 01:45:49.525350',NULL,NULL,NULL,1,0,'2026-03-19 01:45:49.525350',NULL,NULL,NULL,NULL,NULL,NULL,0),(90,'9713279e-234e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTU1ODcsImV4cCI6MTc3Mzg5OTE4N30.3uRLQ3w__cnPLEx2DZ4wU0JKCn-flXbSIc1RjMNdabA',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 01:46:27.423224','2026-03-20 01:46:27.423224',NULL,NULL,NULL,1,0,'2026-03-19 01:46:27.423224',NULL,NULL,NULL,NULL,NULL,NULL,0),(91,'f4823728-2350-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTY2MDMsImV4cCI6MTc3MzkwMDIwM30.ROXuwACgFYKfhhnKbIrWPxbTDZ-8qykclCAEr5s-s-I',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:03:23.172639','2026-03-20 02:03:23.172639',NULL,NULL,NULL,1,0,'2026-03-19 02:03:23.172639',NULL,NULL,NULL,NULL,NULL,NULL,0),(92,'05e86b18-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTgzNTAsImV4cCI6MTc3MzkwMTk1MH0.5e_Jo-MJrXheKXJ76zPbmBKwyUtXZoymHZBdGoMKib0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:32:30.350621','2026-03-20 02:32:30.350621',NULL,NULL,NULL,1,0,'2026-03-19 02:32:30.350621',NULL,NULL,NULL,NULL,NULL,NULL,0),(93,'6bbc96e5-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg1MjEsImV4cCI6MTc3MzkwMjEyMX0.AXOatB6alSgWn9s7ouThQiSD6RSWsi7sKg7CRU_qqLM',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:35:21.190987','2026-03-20 02:35:21.190987',NULL,NULL,NULL,1,0,'2026-03-19 02:35:21.190987',NULL,NULL,NULL,NULL,NULL,NULL,0),(94,'d6dfd7e6-2355-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTg3MDAsImV4cCI6MTc3MzkwMjMwMH0.M_eq_NnB1GD2Yz6guy_d92JXJBuLQ9mxybPFQ9HEnaE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:38:20.938238','2026-03-20 02:38:20.938238',NULL,NULL,NULL,1,0,'2026-03-19 02:38:20.938238',NULL,NULL,NULL,NULL,NULL,NULL,0),(95,'8e718d15-2356-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTkwMDgsImV4cCI6MTc3MzkwMjYwOH0.x5w-LQQT0tf7t2Kf8rMNc6Dat-XDaMQTW-oZzsXft2Q',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:43:28.916202','2026-03-20 02:43:28.916202',NULL,NULL,NULL,1,0,'2026-03-19 02:43:28.916202',NULL,NULL,NULL,NULL,NULL,NULL,0),(96,'bbd4c3c5-2357-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk1MTQsImV4cCI6MTc3MzkwMzExNH0.V_8jJqkHOxZ4b2ERbwbSsIGQtybGC3ro09ZFlpEMw28',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:51:54.560610','2026-03-20 02:51:54.560610',NULL,NULL,NULL,1,0,'2026-03-19 02:51:54.560610',NULL,NULL,NULL,NULL,NULL,NULL,0),(97,'c67d7bbf-2358-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM4OTk5NjEsImV4cCI6MTc3MzkwMzU2MX0.ZoY3A7wDnBVhHwrJV3yEbo4mcNLGNo3kOdd2bEgkbqE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 02:59:21.940270','2026-03-20 02:59:21.940270',NULL,NULL,NULL,1,0,'2026-03-19 02:59:21.940270',NULL,NULL,NULL,NULL,NULL,NULL,0),(98,'fa983a96-2359-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDA0NzgsImV4cCI6MTc3MzkwNDA3OH0.ClzU14UooBL1tuYmPX2ja7E0mdCp-xFf3fHMycauJx0',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:07:58.853802','2026-03-20 03:07:58.853802',NULL,NULL,NULL,1,0,'2026-03-19 03:07:58.853802',NULL,NULL,NULL,NULL,NULL,NULL,0),(99,'eef123e8-235c-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDE3NDcsImV4cCI6MTc3MzkwNTM0N30.83IYHRGpQcuZstgyVBXzPv3cjglWBa74sfaHZmI_XCg',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:29:07.794022','2026-03-20 03:29:07.794022',NULL,NULL,NULL,1,0,'2026-03-19 03:29:07.794022',NULL,NULL,NULL,NULL,NULL,NULL,0),(100,'092c6d95-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyMjEsImV4cCI6MTc3MzkwNTgyMX0.HnfUJAYvDHJ4B35si8QCph0UIjEFFex6pKyaenTHtk4',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:01.300062','2026-03-20 03:37:01.300062',NULL,NULL,NULL,1,0,'2026-03-19 03:37:01.300062',NULL,NULL,NULL,NULL,NULL,NULL,0),(101,'22b406fb-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIyNjQsImV4cCI6MTc3MzkwNTg2NH0.Fm7uXm1ddAZlVLoZGC82zECvOyGvHCGcHwggPzFEopQ',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:37:44.131764','2026-03-20 03:37:44.131764',NULL,NULL,NULL,1,0,'2026-03-19 03:37:44.131764',NULL,NULL,NULL,NULL,NULL,NULL,0),(102,'52c7c313-235e-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDIzNDQsImV4cCI6MTc3MzkwNTk0NH0.7hZPPoxhOuV3X_8pfOFsCUTAxlgi4ZUyTS0Kru4WwnI',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:39:04.791734','2026-03-20 03:39:04.791734',NULL,NULL,NULL,1,0,'2026-03-19 03:39:04.791734',NULL,NULL,NULL,NULL,NULL,NULL,0),(103,'c557739f-2360-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDMzOTUsImV4cCI6MTc3MzkwNjk5NX0.Pi-i7G43HaRH3m-1lxERRKpu6aw541AxtatGoG3ZA5s',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 03:56:35.987141','2026-03-20 03:56:35.987141',NULL,NULL,NULL,1,0,'2026-03-19 03:56:35.987141',NULL,NULL,NULL,NULL,NULL,NULL,0),(104,'2be94184-2364-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDQ4NTYsImV4cCI6MTc3MzkwODQ1Nn0.mOE3hSflaxGaiGw6I_vf2sBz6cMtXneSvulADYcnEQE',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 04:20:56.560475','2026-03-20 04:20:56.560475',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.560475',NULL,NULL,NULL,NULL,NULL,NULL,0),(105,'3546ebdb-b7a4-4b7b-8cf4-0f0926be1893',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 04:20:56.967102','2026-03-20 04:20:56.963000',NULL,NULL,NULL,1,0,'2026-03-19 04:20:56.967102','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(106,'b141994e-236d-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MDg5NDUsImV4cCI6MTc3MzkxMjU0NX0.21n99e5T9nLpiU2J4FbQdmAesm6NM2iCmTyu8Rmmosk',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:29:05.746978','2026-03-20 05:29:05.746978',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.746978',NULL,NULL,NULL,NULL,NULL,NULL,0),(107,'d3d57e7a-81f4-4022-a178-d6a327f2042d',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:29:05.753761','2026-03-20 05:29:05.753000',NULL,NULL,NULL,1,0,'2026-03-19 05:29:05.753761','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(108,'3a9d926a-2370-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTAwMzUsImV4cCI6MTc3MzkxMzYzNX0.ee1i2TSJqxBwdjTdo_FM4ILdH7MrNOXhG8iyoMA6hZ8',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 05:47:15.191052','2026-03-20 05:47:15.191052',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.191052',NULL,NULL,NULL,NULL,NULL,NULL,0),(109,'5ca0b438-93dd-49ed-81f4-53e07203fad2',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 05:47:15.261044','2026-03-20 05:47:15.258000',NULL,NULL,NULL,1,0,'2026-03-19 05:47:15.261044','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(110,'ad463124-2378-11f1-80c9-c8d3ff00effc',1,42,1,1,1,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzM5MTM2NjMsImV4cCI6MTc3MzkxNzI2M30.3-pM_a8yKIW76voMl3BkpDeizUQMTEOHRzmf7-p7dow',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-19 06:47:43.530219','2026-03-20 06:47:43.530219',NULL,NULL,NULL,1,0,'2026-03-19 06:47:43.530219',NULL,NULL,NULL,NULL,NULL,NULL,0),(111,'620be80c-7487-4cec-871a-b0ea17a477b1',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-19 06:47:44.034757','2026-03-20 06:47:44.033000',NULL,NULL,NULL,1,0,'2026-03-19 06:47:44.034757','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(112,'13514605-ebe8-4ed3-93c4-a5942984ab24',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 20:17:17.490857','2026-03-22 20:17:17.485000',NULL,NULL,NULL,1,0,'2026-03-21 20:17:17.490857','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(113,'06c11a3b-00ab-4628-a059-30b80acc4b6a',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:01:18.523492','2026-03-22 22:01:18.522000',NULL,NULL,NULL,1,0,'2026-03-21 22:01:18.523492','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(114,'afcdcf54-12a6-454f-831e-c14d7e8c49f4',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:05:47.816819','2026-03-22 22:05:47.816000',NULL,NULL,NULL,1,0,'2026-03-21 22:05:47.816819','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(115,'bd411ee8-da90-4c78-a039-94d228ee38db',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:13:12.723586','2026-03-22 22:13:12.723000',NULL,NULL,NULL,1,0,'2026-03-21 22:13:12.723586','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(116,'8ea3f884-6c59-4347-a118-2cc4b464bc1e',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 22:54:48.899185','2026-03-22 22:54:48.898000',NULL,NULL,NULL,1,0,'2026-03-21 22:54:48.899185','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(117,'e1fcd390-f520-4af0-b824-fe3cd59b568f',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:04:04.214475','2026-03-22 23:04:04.213000',NULL,NULL,NULL,1,0,'2026-03-21 23:04:04.214475','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(118,'ddec17c8-f5c5-4f7e-94a2-e24b9cc5d1da',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:14:30.340244','2026-03-22 23:14:30.339000',NULL,NULL,NULL,1,0,'2026-03-21 23:14:30.340244','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(119,'4fe9d288-a188-4ec5-b886-f16e5c99b790',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-21 23:23:43.049903','2026-03-22 23:23:43.049000',NULL,NULL,NULL,1,0,'2026-03-21 23:23:43.049903','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(120,'adae467e-2596-11f1-a946-c8d3ff00effc',1,NULL,1,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlkX3VuaWRhZGUiOjEsImlkX2xvY2FsIjoxLCJpZF9wZXJmaWwiOjQyLCJpYXQiOjE3NzQxNDY0NTEsImV4cCI6MTc3NDE1MDA1MX0.jVi8IwgN8AUaycoN2TVByxcjihHGFPIoI46jwNFRJ84',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa','2026-03-21 23:27:31.439796','2026-03-22 23:27:31.439796',NULL,NULL,NULL,1,0,'2026-03-21 23:27:31.439796','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(121,'6e7353db-138d-414b-98c7-9346f55e0e3c',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:43:54.485114','2026-03-23 02:43:54.482000',NULL,NULL,NULL,1,0,'2026-03-22 02:43:54.485114','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(122,'ebc0c4fa-4fc9-4e57-af2a-68bd5de385da',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 02:49:03.520101','2026-03-23 02:49:03.519000',NULL,NULL,NULL,1,0,'2026-03-22 02:49:03.520101','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(123,'70e80883-546e-464b-97ce-2160554c3c1d',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 03:52:41.778381','2026-03-23 03:52:41.777000',NULL,NULL,NULL,1,0,'2026-03-22 03:52:41.778381','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(124,'6a218f0e-e202-43f6-95e0-4bdf4bb6ea02',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:11:57.906932','2026-03-23 04:11:57.905000',NULL,NULL,NULL,1,0,'2026-03-22 04:11:57.906932','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(125,'ea928a15-a02a-47f9-adda-b529bf48e3df',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:16:33.133245','2026-03-23 04:16:33.132000',NULL,NULL,NULL,1,0,'2026-03-22 04:16:33.133245','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(126,'eba31484-53d7-4a4e-8eaa-86607cf6cfcf',1,42,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:30:41.073134','2026-03-23 04:30:41.071000',NULL,NULL,NULL,1,0,'2026-03-22 04:30:41.073134','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(127,'df4cde48-0460-4ccc-97af-ba51bb287af3',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 04:40:31.295705','2026-03-23 04:40:31.289000',NULL,NULL,NULL,1,0,'2026-03-22 04:40:31.295705','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(128,'177ef741-afb6-47d7-b80d-afac77f3c6da',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:44.622548','2026-03-23 06:04:44.621000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:44.622548','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(129,'e96d7631-c52a-4232-8bfe-658cdfd0b47c',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:04:49.730618','2026-03-23 06:04:49.729000',NULL,NULL,NULL,1,0,'2026-03-22 06:04:49.730618','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(130,'98d999be-4860-4d92-a08d-91a9f4610205',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:05:00.794544','2026-03-23 06:05:00.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:05:00.794544','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(131,'60e1d88a-9976-4403-9dbf-4e2e3facbc83',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:09:04.274769','2026-03-23 06:09:04.274000',NULL,NULL,NULL,1,0,'2026-03-22 06:09:04.274769','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(132,'0b71a86c-920e-42a7-a039-e153dab2b7ef',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:13:51.431374','2026-03-23 06:13:51.429000',NULL,NULL,NULL,1,0,'2026-03-22 06:13:51.431374','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(133,'3c4c04d6-cbf9-41e9-9a55-6ea4f0d8090c',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:17:24.499182','2026-03-23 06:17:24.498000',NULL,NULL,NULL,1,0,'2026-03-22 06:17:24.499182','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(134,'b549a0d5-2167-43cd-abbc-9704480db180',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:23:02.413532','2026-03-23 06:23:02.412000',NULL,NULL,NULL,1,0,'2026-03-22 06:23:02.413532','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(135,'587f75e2-7122-4071-b1e7-086ecc768c27',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:26:28.794172','2026-03-23 06:26:28.793000',NULL,NULL,NULL,1,0,'2026-03-22 06:26:28.794172','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(136,'5624e91f-94b0-4035-8c4b-0beccb9b0754',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:35:30.127910','2026-03-23 06:35:30.126000',NULL,NULL,NULL,1,0,'2026-03-22 06:35:30.127910','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(137,'0895d3e2-b153-42b2-938e-ba644c36c2b1',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:39:34.545146','2026-03-23 06:39:34.544000',NULL,NULL,NULL,1,0,'2026-03-22 06:39:34.545146','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(138,'5b0da3d3-3876-44a1-bd88-77de1381ff63',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:13.728007','2026-03-23 06:40:13.727000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:13.728007','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(139,'f7846d0d-71d7-48e9-bd8a-3dafce434b05',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:40:43.223912','2026-03-23 06:40:43.222000',NULL,NULL,NULL,1,0,'2026-03-22 06:40:43.223912','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(140,'81f092a7-eab5-4212-8477-772efa2e69fb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:42:23.117742','2026-03-23 06:42:23.117000',NULL,NULL,NULL,1,0,'2026-03-22 06:42:23.117742','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(141,'341a7157-16d4-4831-b0ef-02999e6a59f7',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:45:06.717408','2026-03-23 06:45:06.716000',NULL,NULL,NULL,1,0,'2026-03-22 06:45:06.717408','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(142,'f708b04a-5895-4666-95bc-3c837568b656',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:46:34.114181','2026-03-23 06:46:34.113000',NULL,NULL,NULL,1,0,'2026-03-22 06:46:34.114181','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(143,'97bb320d-b926-405f-9511-de9fca557dcb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:47:26.474349','2026-03-23 06:47:26.473000',NULL,NULL,NULL,1,0,'2026-03-22 06:47:26.474349','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(144,'805fc296-b0cc-4721-9607-1363f44d6004',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 06:59:15.847959','2026-03-23 06:59:15.847000',NULL,NULL,NULL,1,0,'2026-03-22 06:59:15.847959','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(145,'c60554d8-ba64-4501-8712-80a3576ba3db',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 07:01:54.979601','2026-03-23 07:01:54.978000',NULL,NULL,NULL,1,0,'2026-03-22 07:01:54.979601','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(146,'9a82f5fe-a060-4eae-90a3-57bd11797d01',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:25:47.577442','2026-03-23 21:25:47.573000',NULL,NULL,NULL,1,0,'2026-03-22 21:25:47.577442','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(147,'8ab13198-84f8-4972-a056-8ed814e63f02',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:13.182556','2026-03-23 21:28:13.181000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:13.182556','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(148,'1d71bee1-2a64-43f1-91e6-9c5ca15937a3',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:28:39.428636','2026-03-23 21:28:39.427000',NULL,NULL,NULL,1,0,'2026-03-22 21:28:39.428636','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(149,'7df3b3bf-c66b-4919-96b8-e9eef49925e9',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:32:00.570805','2026-03-23 21:32:00.569000',NULL,NULL,NULL,1,0,'2026-03-22 21:32:00.570805','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(150,'3e73b0fc-af6e-4728-8527-2f3bd64ab1ed',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:39:15.813284','2026-03-23 21:39:15.812000',NULL,NULL,NULL,1,0,'2026-03-22 21:39:15.813284','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(151,'79c3e4c4-b508-4c6f-83ce-a473b87e8428',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:45:48.782773','2026-03-23 21:45:48.781000',NULL,NULL,NULL,1,0,'2026-03-22 21:45:48.782773','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(152,'a6ea1d4b-641e-47df-9ad6-cf9bbdb2f6c7',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:17.715143','2026-03-23 21:49:17.714000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:17.715143','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(153,'d915a7d1-5cc4-4ff8-b070-27a5a0560e36',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 21:49:55.392969','2026-03-23 21:49:55.392000',NULL,NULL,NULL,1,0,'2026-03-22 21:49:55.392969','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(154,'e80db09a-bcc6-4033-b2ce-7ae55fdc3dcb',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 22:20:33.586502','2026-03-23 22:20:33.585000',NULL,NULL,NULL,1,0,'2026-03-22 22:20:33.586502','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(155,'675d5849-40a7-4e6c-8b89-f14e0ae768c1',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:38:42.688728','2026-03-23 23:38:42.687000',NULL,NULL,NULL,1,0,'2026-03-22 23:38:42.688728','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(156,'f3138709-167c-45f6-835d-932b72bbddfe',1,NULL,1,1,NULL,NULL,NULL,'',NULL,'::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-22 23:45:06.336952','2026-03-23 23:45:06.336000',NULL,NULL,NULL,1,0,'2026-03-22 23:45:06.336952','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(157,'7e18ae9a-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODcxMywiZXhwIjoxNzc0MjY3NTEzfQ.zQFtQuD31qWpVdsj3KguN-hRcSIpiMOO3FKgZ68ZWn8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4NzEzLCJleHAiOjE3NzQ4NDM1MTN9.PEgnCIuGOemPccGXIGErsHvAKHTuiPHjDFDBZ95-cRI','::1','curl/8.13.0','2026-03-23 01:05:13.390164','2026-03-23 09:05:13.390164',NULL,NULL,NULL,1,0,'2026-03-23 01:05:13.390164','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(158,'a35bfe4e-266d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzODc3NSwiZXhwIjoxNzc0MjY3NTc1fQ.ye1vxGPaYoSB-o-uOSOMxLlYrwZNc5X0FFWIO8pVc7A','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM4Nzc1LCJleHAiOjE3NzQ4NDM1NzV9.rHlN4YGO1BxOMJiTOmcy1qBqX_c7LLDcgTD2hO3Sr8E','::1','curl/8.13.0','2026-03-23 01:06:15.920040','2026-03-23 09:06:15.920040',NULL,NULL,NULL,1,0,'2026-03-23 01:06:15.920040','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(159,'722f3588-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTEyMiwiZXhwIjoxNzc0MjY3OTIyfQ.pbWMN-E9-AHD6Oc__mPO0gqmC8kywgE-LP5ToHE_aR8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTU5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MTIyLCJleHAiOjE3NzQ4NDM5MjJ9.Lg2LVmr1443qYme60M5qAznnUfsSENGTqjtNkHyZ0Rk','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:12:02.914950','2026-03-23 09:12:02.914950',NULL,NULL,NULL,1,0,'2026-03-23 01:12:02.914950','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(160,'eb03520a-266e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTMyNSwiZXhwIjoxNzc0MjY4MTI1fQ.fIH7btEBY6Ti5FDOBBVs7FSpeuEuGWe8OnYu4_pABxY','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5MzI1LCJleHAiOjE3NzQ4NDQxMjV9.pai6e1MZT77UMCIdXGVKY08J2ZBHT0DXfryJtpFeKFQ','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:15:25.631562','2026-03-23 09:15:25.631562',NULL,NULL,NULL,1,0,'2026-03-23 01:15:25.631562','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(161,'f09fdef1-266f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDIzOTc2NCwiZXhwIjoxNzc0MjY4NTY0fQ.SfNI0O7awW6Ye2cMRPjKvnVKQtUbiFVzcTYt3P9hh68','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjM5NzY0LCJleHAiOjE3NzQ4NDQ1NjR9.jSJvtNFaHetjaQNvFyoP35A4L3fT9zJQr6VE9gzsSYQ','::1','curl/8.13.0','2026-03-23 01:22:44.542861','2026-03-23 09:22:44.542861',NULL,NULL,NULL,1,0,'2026-03-23 01:22:44.542861','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(162,'9e2cb782-2670-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDA1NSwiZXhwIjoxNzc0MjY4ODU1fQ.EQkp_RbQTz5JNetCzXGuPtePgMi6YBzLFLvBcMLd1CA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMDU1LCJleHAiOjE3NzQ4NDQ4NTV9.nA0LEUxpGJfOoCXDVRUf5HRikOg_efjwZUSU9LnpBKk','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:27:35.711845','2026-03-23 09:27:35.711845',NULL,NULL,NULL,1,0,'2026-03-23 01:27:35.711845','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(163,'63be6edf-2671-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDM4NywiZXhwIjoxNzc0MjY5MTg3fQ.rzrJlgwh2mNY1St8Zmn3wrHe6KV0nQ5IG9Y9CjQzdK8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTYzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwMzg3LCJleHAiOjE3NzQ4NDUxODd9.oq6HtvdAxhxFZJ8u0TVRCltB9Eb5Q88qiC_jjNj4mv8','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:33:07.177919','2026-03-23 09:33:07.177919',NULL,NULL,NULL,1,0,'2026-03-23 01:33:07.177919','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(164,'7b63f6a7-2672-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MDg1NiwiZXhwIjoxNzc0MjY5NjU2fQ.ViSakqbkCeUU1-26dIUuxjOSTvzDedl7surfbQT_cRU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQwODU2LCJleHAiOjE3NzQ4NDU2NTZ9.cEfQOrn_rCurOFHf2YdrJ1hmnlgB8IizDZ7uIpYUL34','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:40:56.347102','2026-03-23 09:40:56.347102',NULL,NULL,NULL,1,0,'2026-03-23 01:40:56.347102','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(165,'c2146fcf-2673-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTQwNCwiZXhwIjoxNzc0MjcwMjA0fQ.FN0GBkcd-zkJ8ClO3A5dZauNfpLabTyhyCcQvCxokBI','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxNDA0LCJleHAiOjE3NzQ4NDYyMDR9.da-7BjN_FgYFbmXhBg9X9BMAUyBTBL9ft9hr_eTKHBE','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 01:50:04.440784','2026-03-23 09:50:04.440784',NULL,NULL,NULL,1,0,'2026-03-23 01:50:04.440784','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(166,'b1f01862-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgwNiwiZXhwIjoxNzc0MjcwNjA2fQ.hU38lfZ8evt5SEOEr3ziFcLe6-pFohZcIKLg-6OANEg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODA2LCJleHAiOjE3NzQ4NDY2MDZ9.H4GfHLsGDDZXFoZmpxN17tM8_1dheoWlvi3F_9sKor0','::1','curl/8.13.0','2026-03-23 01:56:46.855745','2026-03-23 09:56:46.855745',NULL,NULL,NULL,1,0,'2026-03-23 01:56:46.855745','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(167,'c397b513-2674-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0MTgzNiwiZXhwIjoxNzc0MjcwNjM2fQ.GQpSHeDryN0R-sVB0BNIBOD8oSrO7l8gmc6Dq7J_KLA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQxODM2LCJleHAiOjE3NzQ4NDY2MzZ9.QqyeA-9EDGMTVPTy7UIxGBSLVzo2zmJVhz5cRjaEkjU','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 01:57:16.475605','2026-03-23 09:57:16.475605',NULL,NULL,NULL,1,0,'2026-03-23 01:57:16.475605','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(168,'aa0c06a9-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDM3MCwiZXhwIjoxNzc0MjczMTcwfQ.hsy2tOyUjXBb0_wCwy14rQxbuaRe1p-AlBm7q_tb7X0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0MzcwLCJleHAiOjE3NzQ4NDkxNzB9.7SEhzQlreNPgNqLLEelgfWN-Cz3OV5TutGspPdoAKX8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:39:30.597075','2026-03-23 10:39:30.597075',NULL,NULL,NULL,1,0,'2026-03-23 02:39:30.597075','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(169,'f32d241f-267a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDQ5MywiZXhwIjoxNzc0MjczMjkzfQ.VSd7dB0Yhk_dkH3kbI7GTSGS39A1qm71NIxIHyFkkOQ','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTY5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0NDkzLCJleHAiOjE3NzQ4NDkyOTN9.kNrd88JYngvvSzCre_t-Cx5YFNDHotzYW5Dbx4IA8tM','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 02:41:33.288162','2026-03-23 10:41:33.288162',NULL,NULL,NULL,1,0,'2026-03-23 02:41:33.288162','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(170,'66070192-267b-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NDY4NSwiZXhwIjoxNzc0MjczNDg1fQ.IvxtCGSQFQZRGzEqsYqyPu7ZL83KghvVQnx9OcJaZF0','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ0Njg1LCJleHAiOjE3NzQ4NDk0ODV9.3IJLj7mcBkynNyQac6VrJpOuphAJjOPSzK3mhFoRFL0','::1','curl/8.13.0','2026-03-23 02:44:45.976122','2026-03-23 10:44:45.976122',NULL,NULL,NULL,1,0,'2026-03-23 02:44:45.976122','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(171,'02e7d533-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjIzNywiZXhwIjoxNzc0Mjc1MDM3fQ.S0Uuk2f4zVuP3B2BAHnNpdoIK0jvwa4BbE7I2q9nnc8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2MjM3LCJleHAiOjE3NzQ4NTEwMzd9.DbfRdeOQQU39sc-HPpq1VHVHv-2Zrg0bJF5-6hODm8c','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:10:37.664407','2026-03-23 11:10:37.664407',NULL,NULL,NULL,1,0,'2026-03-23 03:10:37.664407','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(172,'af0ec837-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjUyNiwiZXhwIjoxNzc0Mjc1MzI2fQ.6hBlKH7km9yh2Es3KbmtCGLzrfYaQsDnCN-CZTK1mQg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTcyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NTI2LCJleHAiOjE3NzQ4NTEzMjZ9.yVNH57p6eSdeOeWG9y_RN5KKMrxCrh1TOjEtmVypJrw','::1','curl/8.13.0','2026-03-23 03:15:26.487803','2026-03-23 11:15:26.487803',NULL,NULL,NULL,1,0,'2026-03-23 03:15:26.487803','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(173,'ddbbb9f0-267f-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NjYwNCwiZXhwIjoxNzc0Mjc1NDA0fQ.qsmcGzLB2lDp2tOJCP7OtMSyLt1p7q0NEb7szGCj4ok','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTczLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ2NjA0LCJleHAiOjE3NzQ4NTE0MDR9.WSocl8pTCUhLe13UGMHr70wtEkvuZSvT8rX-C7VxQ7U','::1','curl/8.13.0','2026-03-23 03:16:44.796282','2026-03-23 11:16:44.796282',NULL,NULL,NULL,1,0,'2026-03-23 03:16:44.796282','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(174,'b1710f4f-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzM4OSwiZXhwIjoxNzc0Mjc2MTg5fQ.NeEcIvLAxRBfz2fcsqDSwgmOcGBS4Xz1LQuy8WLHqyU','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3Mzg5LCJleHAiOjE3NzQ4NTIxODl9.r8ar95BS2-LugMF5D2e5w4des3okyg5SiUQSuOEEyFI','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:29:49.480812','2026-03-23 11:29:49.480812',NULL,NULL,NULL,1,0,'2026-03-23 03:29:49.480812','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(175,'e494ca28-2681-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0NzQ3NSwiZXhwIjoxNzc0Mjc2Mjc1fQ.9-a1KvN1m03NDBfBuhnN8WF9HvnN6fWBNcfmfUS4D1s','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ3NDc1LCJleHAiOjE3NzQ4NTIyNzV9.m_yTjYwCJ1aATo5yQLrxQWOClIjQ8psBXoKlRHDlHSo','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 03:31:15.278808','2026-03-23 11:31:15.278808',NULL,NULL,NULL,1,0,'2026-03-23 03:31:15.278808','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(176,'3dbe90c4-2684-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0ODQ4NCwiZXhwIjoxNzc0Mjc3Mjg0fQ.npQSnFL5sktJ8gg35WhW6E6WDRtNdWacpoiyHrf0gik','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ4NDg0LCJleHAiOjE3NzQ4NTMyODR9.9oUdrcuI-kkcglrMd8xIsfm4oYawHg_jG3WDZ5u3PKo','::1','curl/8.13.0','2026-03-23 03:48:03.863168','2026-03-23 11:48:03.863168',NULL,NULL,NULL,1,0,'2026-03-23 03:48:03.863168','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(177,'0ce3cae6-2686-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI0OTI2MCwiZXhwIjoxNzc0Mjc4MDYwfQ.5vIQyGQbNNX9PE2iEJkYNN7-Q-tr-DEVGLcPV7rs0Ag','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjQ5MjYwLCJleHAiOjE3NzQ4NTQwNjB9.Z98aDEVJWNl64eaXa_ne7fmOMDj4129galMEblEy01s','::ffff:127.0.0.1','curl/8.13.0','2026-03-23 04:01:00.892296','2026-03-23 12:01:00.892296',NULL,NULL,NULL,1,0,'2026-03-23 04:01:00.892296','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(178,'dcc0f3b2-2697-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1NjkxMSwiZXhwIjoxNzc0Mjg1NzExfQ.GpqmMl-mQxT_CNAR3qw3JdE2sBfpAHpNK1WFD6rVkGo','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU2OTExLCJleHAiOjE3NzQ4NjE3MTF9.4xY1Olj6XpKv6uUaRM3-p5lPYcaQ_ko76Q9_w00uxSo','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:08:31.074212','2026-03-23 14:08:31.074212',NULL,NULL,NULL,1,0,'2026-03-23 06:08:31.074212','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(179,'66641617-2698-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1NzE0MSwiZXhwIjoxNzc0Mjg1OTQxfQ.0w5QIP-lw3-HxDBj7A49SfHFfG1AIFUt-PDmgNdZg7Q','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTc5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU3MTQxLCJleHAiOjE3NzQ4NjE5NDF9.5CpxOhTiD0QM6UctOa-vN2zzriOe8rl93q0V1dpbOVY','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:12:21.991364','2026-03-23 14:12:21.991364',NULL,NULL,NULL,1,0,'2026-03-23 06:12:21.991364','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(180,'18695c13-269a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1Nzg3MCwiZXhwIjoxNzc0Mjg2NjcwfQ.8h-wmmYtN-q_lOTpAEtWcbdKnZ8vsGoUBQRrJ2bnxWo','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU3ODcwLCJleHAiOjE3NzQ4NjI2NzB9.B3pINOYoTJYPT4RZh6nWH6xC3prK-E7o9Vj76RnVueQ','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:24:30.157213','2026-03-23 14:24:30.157213',NULL,NULL,NULL,1,0,'2026-03-23 06:24:30.157213','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(181,'ec9c0445-269a-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODIyNiwiZXhwIjoxNzc0Mjg3MDI2fQ.R2CeGVxty9I1TYG0v6kiI94nv0Vd--NmCLvek_NYrKA','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4MjI2LCJleHAiOjE3NzQ4NjMwMjZ9.2Z0WQ2IdpBm_uvntDrrrEzPpWqmJPBwqdPjJ0eLrwbk','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:30:26.165769','2026-03-23 14:30:26.165769',NULL,NULL,NULL,1,0,'2026-03-23 06:30:26.165769','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(182,'0678ab59-269b-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODI2OSwiZXhwIjoxNzc0Mjg3MDY5fQ.Ks8hZ6aWTJF7fUNfi5W-oGqmgfOLcsh6QnkEiShHFWw','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4MjY5LCJleHAiOjE3NzQ4NjMwNjl9.P4HaHgYbHVrQ3lrCYbHaMFNGaXIo9u2GxdZN4_394Ng','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:31:09.555281','2026-03-23 14:31:09.555281',NULL,NULL,NULL,1,0,'2026-03-23 06:31:09.555281','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(183,'2d5a3526-269c-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1ODc2NCwiZXhwIjoxNzc0Mjg3NTY0fQ.XFqhDx9sInxxWFUAX38dxcsL2bNT_wgohR10LIbdkL4','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTgzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU4NzY0LCJleHAiOjE3NzQ4NjM1NjR9.FPDb3w6gNXDkPvuYWXKrTEi6p3RbPkYUReMD4eYR9l0','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:39:24.283425','2026-03-23 14:39:24.283425',NULL,NULL,NULL,1,0,'2026-03-23 06:39:24.283425','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(184,'0b2d7821-269d-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1OTEzNiwiZXhwIjoxNzc0Mjg3OTM2fQ.oZWEXAdfRd69gJ1noOxS2R5uhujSc_OyIAGjExiOsFY','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU5MTM2LCJleHAiOjE3NzQ4NjM5MzZ9.GAmYEV4unE0Fu0eXPS1od5ddTpMwWnBx2IDoxg8a7d8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:45:36.444444','2026-03-23 14:45:36.444444',NULL,NULL,NULL,1,0,'2026-03-23 06:45:36.444444','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(185,'3f879c2d-269e-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI1OTY1MywiZXhwIjoxNzc0Mjg4NDUzfQ.20O8eVzhuJVFjE6CGWgfQafWzs4imowuozIrfkBkph8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjU5NjUzLCJleHAiOjE3NzQ4NjQ0NTN9.dOElfz0zt76ggDHRV8IqIBvpCsyhP81QxXE6yBwPwxw','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 06:54:13.773460','2026-03-23 14:54:13.773460',NULL,NULL,NULL,1,0,'2026-03-23 06:54:13.773460','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(186,'88277981-26a0-11f1-b11b-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDI2MDYzNCwiZXhwIjoxNzc0Mjg5NDM0fQ.-PWUFhFztgBpRwxpp8ZCuS1-53c3JgJ5dVtFi9jXVY8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0MjYwNjM0LCJleHAiOjE3NzQ4NjU0MzR9.ePrT-7CilP2o1XrQDtGrqVwkbKkNfolwLMcKeyQ2ecc','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-23 07:10:34.610551','2026-03-23 15:10:34.610551',NULL,NULL,NULL,1,0,'2026-03-23 07:10:34.610551','2026-03-25 04:22:57.898436',NULL,NULL,NULL,NULL,NULL,0),(187,'e6325ea2-29bc-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjY3MiwiZXhwIjoxNzc0NjMxNDcyfQ.u4VNlLj8Tb9bBIXPROZ-1AQR96f-Pj5ecR86GG8jips','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg3LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyNjcyLCJleHAiOjE3NzUyMDc0NzJ9.pSY_DpNwWAj7TOykkGCXfQcITgEwJav2mOt6sfVaxAM','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:11:11.784551','2026-03-27 14:11:11.784551',NULL,NULL,NULL,1,0,'2026-03-27 06:11:11.784551','2026-03-27 06:11:12.664721',NULL,NULL,NULL,NULL,NULL,0),(188,'effb4edd-29bc-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjY4OCwiZXhwIjoxNzc0NjMxNDg4fQ.RMejGTgaIP5SfQRVmtmejN0mL1gF_FFRDjqQ3pp_i1o','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg4LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyNjg4LCJleHAiOjE3NzUyMDc0ODh9._6gMdvHrGxwSYZV3HFqgtQa9tUUKE-smqOS0al5Usds','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:11:28.200977','2026-03-27 14:11:28.200977',NULL,NULL,NULL,1,0,'2026-03-27 06:11:28.200977','2026-03-27 06:11:28.403067',NULL,NULL,NULL,NULL,NULL,0),(189,'3b21d869-29bd-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwMjgxNCwiZXhwIjoxNzc0NjMxNjE0fQ.B538eolAJC-daw8sY63FhQKcA9KShhiE54m-ceMjttw','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTg5LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjAyODE0LCJleHAiOjE3NzUyMDc2MTR9.OhAz2URzoXhIVKaxZ-KckmIz0pzTABKp5huUaS4tC4A','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:13:34.282593','2026-03-27 14:13:34.282593',NULL,NULL,NULL,1,0,'2026-03-27 06:13:34.282593','2026-03-27 06:13:34.289312',NULL,NULL,NULL,NULL,NULL,0),(190,'3f4c47c9-29c1-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwNDUzOSwiZXhwIjoxNzc0NjMzMzM5fQ.5NIlu6Eyz0_2Z8tv6I8JqTcqIPbIf-TgMG9uaOTu-Oc','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkwLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjA0NTM5LCJleHAiOjE3NzUyMDkzMzl9.bC9zB_t8LNOh6S9RT7nB4ERsofwAeGYgajCK84OHP3E','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:42:19.258494','2026-03-27 14:42:19.258494',NULL,NULL,NULL,1,0,'2026-03-27 06:42:19.258494','2026-03-27 06:42:19.266749',NULL,NULL,NULL,NULL,NULL,0),(191,'19807146-29c2-11f1-8452-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwNDkwNSwiZXhwIjoxNzc0NjMzNzA1fQ.4jlFylEnVv6tWdRHnDXVp11-BiNd9szzOjkC2jCZwDg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkxLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjA0OTA1LCJleHAiOjE3NzUyMDk3MDV9.Ub5ogeNw_VGDeOQJcRginP5HiOhRTwB3xEovoQELyzw','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 06:48:25.343710','2026-03-27 14:48:25.343710',NULL,NULL,NULL,1,0,'2026-03-27 06:48:25.343710','2026-03-27 06:48:25.694757',NULL,NULL,NULL,NULL,NULL,0),(192,'e9197677-29c4-11f1-8452-c8d3ff00effc',1,5,4,3,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NDYwNjExMywiZXhwIjoxNzc0NjM0OTEzfQ.b5hizKPOTaYpb5RY0vH6XnO7XW6YWoNg9wMRRaySmEI','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkyLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc0NjA2MTEzLCJleHAiOjE3NzUyMTA5MTN9.9LQa48Y9WPNXH5ij6XIu4M5mJDF4R67vxm2IKEwbTq8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-03-27 07:08:32.628389','2026-03-27 15:08:32.628389',NULL,NULL,NULL,1,0,'2026-03-27 07:08:32.628389','2026-03-27 07:08:42.693896',NULL,NULL,NULL,NULL,NULL,0),(193,'47fe15e9-2e2d-11f1-a638-c8d3ff00effc',1,5,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NTA5MDc0NSwiZXhwIjoxNzc1MTE5NTQ1fQ.BqJTN7IV0hPJcAw-JAUP3Dz2VMIzwwLR3F6ikNm9Wvg','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTkzLCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc1MDkwNzQ1LCJleHAiOjE3NzU2OTU1NDV9.XsA9u5PDbR8Cru6RdIJ0fiqXNvYWSp-jea_xjTv-f2o','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-04-01 21:45:44.076594','2026-04-02 05:45:44.076594',NULL,NULL,NULL,1,0,'2026-04-01 21:45:44.076594','2026-04-01 22:14:47.736607',NULL,NULL,NULL,NULL,NULL,0),(194,'48bf2cf3-2e2d-11f1-a638-c8d3ff00effc',1,NULL,4,1,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTk0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NTA5MDc0NSwiZXhwIjoxNzc1MTE5NTQ1fQ.EjUrpHmzwI_QssiDfkH4zgTjd5PSxgEuvG2H0X6jphM','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTk0LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc1MDkwNzQ1LCJleHAiOjE3NzU2OTU1NDV9.i19shESDNeKlbgRLUadSFANUnQbcza_PUbKpM1jQW5s','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-04-01 21:45:45.408840','2026-04-02 05:45:45.408840',NULL,NULL,NULL,1,0,'2026-04-01 21:45:45.408840','2026-04-01 21:45:45.439658',NULL,NULL,NULL,NULL,NULL,0),(195,'636287df-2e38-11f1-a638-c8d3ff00effc',1,5,4,3,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTk1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NTA5NTUxNCwiZXhwIjoxNzc1MTI0MzE0fQ.jwVQ6ESR8G-XOz7r-38Y1orZfrp7BDK6wgPd1QmFLI8','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTk1LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc1MDk1NTE0LCJleHAiOjE3NzU3MDAzMTR9.kcvRg8Qu63k_S1FVp-D3jbhvVqkA8skity86YPoefG8','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-04-01 23:05:14.564312','2026-04-02 07:05:14.564312',NULL,NULL,NULL,1,0,'2026-04-01 23:05:14.564312','2026-04-01 23:05:23.851464',NULL,NULL,NULL,NULL,NULL,0),(196,'99a6d72e-2e39-11f1-a638-c8d3ff00effc',1,5,4,4,NULL,NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTk2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsImlhdCI6MTc3NTA5NjAzNSwiZXhwIjoxNzc1MTI0ODM1fQ.AggirEbPSsRS1JkfZBdP1aIVsH1idBZErZJh2KixPJQ','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJpZF9zZXNzYW9fdXN1YXJpbyI6MTk2LCJsb2dpbiI6ImV2YW5kcm8uYW5kcmFkZSIsInRpcG8iOiJyZWZyZXNoIiwiaWF0IjoxNzc1MDk2MDM1LCJleHAiOjE3NzU3MDA4MzV9.2souKonBWF4D0ap8vj-PaRTLKZft-G_7bZo5liuSomU','::ffff:127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36','2026-04-01 23:13:55.105587','2026-04-02 07:13:55.105587',NULL,NULL,NULL,1,0,'2026-04-01 23:13:55.105587','2026-04-01 23:14:04.171397',NULL,NULL,NULL,NULL,NULL,0);
 /*!40000 ALTER TABLE `sessao_usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14425,6 +14830,7 @@ CREATE TABLE `setor` (
   `ramal` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `responsavel_id` bigint DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_setor`),
   KEY `fk_setor_unidade` (`id_unidade`),
   CONSTRAINT `fk_setor_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
@@ -14460,6 +14866,7 @@ CREATE TABLE `sigpat_procedimento` (
   `exige_coleta` tinyint(1) DEFAULT '0',
   `criado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sigpat`),
   UNIQUE KEY `uk_sigpat_codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -14492,6 +14899,7 @@ CREATE TABLE `sinais_vitais` (
   `saturacao_o2` int DEFAULT NULL,
   `dor` int DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sinal`),
   KEY `fk_sinais_atendimento` (`id_atendimento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -14520,6 +14928,7 @@ CREATE TABLE `sinan_evento` (
   `evento` varchar(50) NOT NULL,
   `payload_json` json DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sinan_evento`),
   KEY `ix_sinan_evento_sinan` (`id_sinan`),
   KEY `ix_sinan_evento_evt` (`evento`)
@@ -14552,6 +14961,7 @@ CREATE TABLE `sinan_notificacao` (
   `payload_json` json DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sinan`),
   KEY `ix_sinan_ffa` (`id_ffa`),
   KEY `ix_sinan_gpat` (`id_gpat`),
@@ -14585,6 +14995,7 @@ CREATE TABLE `sincronizacao_federada_evento` (
   `sincronizado` tinyint(1) DEFAULT '0',
   `versao_logica` bigint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sync`),
   KEY `idx_sync_pendente` (`sincronizado`,`criado_em`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -14612,6 +15023,7 @@ CREATE TABLE `sistema` (
   `codigo` varchar(50) DEFAULT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_sistema`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -14622,7 +15034,7 @@ CREATE TABLE `sistema` (
 
 LOCK TABLES `sistema` WRITE;
 /*!40000 ALTER TABLE `sistema` DISABLE KEYS */;
-INSERT INTO `sistema` VALUES (1,'operacional','OPE',1,'2026-03-05 06:50:02.459027'),(2,'assistencial','ASI',1,'2026-03-05 06:50:02.471044'),(3,'Hospitalar','HIS',1,'2026-03-07 00:37:53.840236'),(4,'Pronto Atendimento','PA',1,'2026-03-07 00:37:53.840236'),(5,'UPA','UPA',1,'2026-03-07 00:37:53.840236'),(6,'Unidade Básica','UBS',1,'2026-03-07 00:37:53.840236'),(7,'Farmácia','FARMACIA',1,'2026-03-07 00:37:53.840236'),(8,'Administrativo','ADMIN',1,'2026-03-07 00:37:53.840236');
+INSERT INTO `sistema` VALUES (1,'operacional','OPE',1,'2026-03-05 06:50:02.459027',NULL),(2,'assistencial','ASI',1,'2026-03-05 06:50:02.471044',NULL),(3,'Hospitalar','HIS',1,'2026-03-07 00:37:53.840236',NULL),(4,'Pronto Atendimento','PA',1,'2026-03-07 00:37:53.840236',NULL),(5,'UPA','UPA',1,'2026-03-07 00:37:53.840236',NULL),(6,'Unidade Básica','UBS',1,'2026-03-07 00:37:53.840236',NULL),(7,'Farmácia','FARMACIA',1,'2026-03-07 00:37:53.840236',NULL),(8,'Administrativo','ADMIN',1,'2026-03-07 00:37:53.840236',NULL);
 /*!40000 ALTER TABLE `sistema` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14641,6 +15053,7 @@ CREATE TABLE `solicitacao_exame` (
   `status` enum('SOLICITADO','COLETADO','EM_ANALISE','RESULTADO','CANCELADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_medico` bigint DEFAULT NULL,
   `solicitado_em` datetime NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_solicitacao`),
   KEY `id_atendimento` (`id_atendimento`),
   KEY `id_exame` (`id_exame`),
@@ -14671,6 +15084,7 @@ CREATE TABLE `status_timeout` (
   `tempo_max_segundos` int NOT NULL,
   `status_fallback` enum('AGUARDANDO_CHAMADA_MEDICO','AGUARDANDO_RX','AGUARDANDO_MEDICACAO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -14681,7 +15095,7 @@ CREATE TABLE `status_timeout` (
 
 LOCK TABLES `status_timeout` WRITE;
 /*!40000 ALTER TABLE `status_timeout` DISABLE KEYS */;
-INSERT INTO `status_timeout` VALUES ('CHAMANDO_MEDICO',60,'AGUARDANDO_CHAMADA_MEDICO',1),('CHAMANDO_RX',90,'AGUARDANDO_RX',1),('EM_MEDICACAO',1800,'AGUARDANDO_MEDICACAO',1);
+INSERT INTO `status_timeout` VALUES ('CHAMANDO_MEDICO',60,'AGUARDANDO_CHAMADA_MEDICO',1,NULL),('CHAMANDO_RX',90,'AGUARDANDO_RX',1,NULL),('EM_MEDICACAO',1800,'AGUARDANDO_MEDICACAO',1,NULL);
 /*!40000 ALTER TABLE `status_timeout` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14699,6 +15113,7 @@ CREATE TABLE `sus_cid10_competencia` (
   `descricao` varchar(255) DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_cid10c`),
   UNIQUE KEY `uk_cid10c_comp` (`competencia`,`cid10`),
   KEY `ix_cid10c_cid` (`cid10`)
@@ -14731,6 +15146,7 @@ CREATE TABLE `sus_cnes_estabelecimento` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_cnes`),
   UNIQUE KEY `uk_cnes_comp_cnes` (`competencia`,`cnes`),
   KEY `ix_cnes_cnes` (`cnes`)
@@ -14743,7 +15159,7 @@ CREATE TABLE `sus_cnes_estabelecimento` (
 
 LOCK TABLES `sus_cnes_estabelecimento` WRITE;
 /*!40000 ALTER TABLE `sus_cnes_estabelecimento` DISABLE KEYS */;
-INSERT INTO `sus_cnes_estabelecimento` VALUES (1,'202601','1234567','UPA CENTRAL DEMO','GUARULHOS','SP',1,'2026-03-10 23:24:05',NULL);
+INSERT INTO `sus_cnes_estabelecimento` VALUES (1,'202601','1234567','UPA CENTRAL DEMO','GUARULHOS','SP',1,'2026-03-10 23:24:05',NULL,NULL);
 /*!40000 ALTER TABLE `sus_cnes_estabelecimento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14760,6 +15176,7 @@ CREATE TABLE `sus_competencia` (
   `descricao` varchar(120) DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_competencia`),
   UNIQUE KEY `uk_sus_competencia` (`competencia`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -14799,6 +15216,7 @@ CREATE TABLE `sus_sigtap_procedimento` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_sigtap`),
   UNIQUE KEY `uk_sigtap_comp_cod` (`competencia`,`codigo`),
   KEY `ix_sigtap_codigo` (`codigo`),
@@ -14828,6 +15246,7 @@ CREATE TABLE `tabela_tuss` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `valor_honorario` decimal(10,2) DEFAULT NULL,
   `valor_custo_operacional` decimal(10,2) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`codigo_tuss`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -14861,6 +15280,7 @@ CREATE TABLE `tenant_registry` (
   `status` enum('ATIVO','SUSPENSO','MIGRANDO','INATIVO') DEFAULT 'ATIVO',
   `created_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `updated_at` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_tenant`),
   UNIQUE KEY `uk_uuid` (`uuid_tenant`),
   UNIQUE KEY `uk_cnes` (`cnes`),
@@ -14896,6 +15316,7 @@ CREATE TABLE `tipo_local` (
   `categoria_operacional` varchar(40) DEFAULT NULL,
   `descricao_operacional` text,
   `atualizado_em` datetime(6) DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_tipo_local`),
   UNIQUE KEY `uk_tipo_local_codigo` (`codigo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=298 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -14907,7 +15328,7 @@ CREATE TABLE `tipo_local` (
 
 LOCK TABLES `tipo_local` WRITE;
 /*!40000 ALTER TABLE `tipo_local` DISABLE KEYS */;
-INSERT INTO `tipo_local` VALUES (1,'RECEPCAO','Recepção','ATENDIMENTO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(2,'GUICHE','Guichê','ATENDIMENTO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(3,'TRIAGEM','Triagem','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(4,'CONSULTORIO','Consultório','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(5,'EMERGENCIA','Emergência','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(6,'OBSERVACAO','Observação','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(7,'INTERNACAO','Internação','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(8,'MEDICACAO','Sala de Medicação','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(9,'PROCEDIMENTO','Sala de Procedimentos','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(10,'RX','Raio X','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(11,'TOMOGRAFIA','Tomografia','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(12,'ULTRASSOM','Ultrassom','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(13,'ECG','Eletrocardiograma','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(14,'LABORATORIO','Laboratório','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(15,'COLETA','Coleta','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(16,'FARMACIA','Farmácia','APOIO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(17,'ESTOQUE','Estoque','APOIO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(18,'SALA_VERMELHA','Sala Vermelha','EMERGENCIA',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(19,'SALA_AMARELA','Sala Amarela','EMERGENCIA',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(20,'ADMIN','Administrativo','GESTAO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(21,'PAINEL','Painel de chamada','DISPOSITIVO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(22,'TOTEM','Totem de senha','DISPOSITIVO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL),(153,'ACOLHIMENTO','Acolhimento','ATENDIMENTO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(154,'CADASTRO','Cadastro de paciente','ATENDIMENTO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(155,'SALA_ESPERA','Sala de espera','ATENDIMENTO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(156,'CLASSIFICACAO_RISCO','Classificação de risco','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(157,'CONSULTORIO_ENFERMAGEM','Consultório de enfermagem','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(158,'CONSULTORIO_ODONTO','Consultório odontológico','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(159,'PRONTO_ATENDIMENTO','Pronto atendimento','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(160,'SALA_EMERGENCIA','Sala de emergência','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(161,'SALA_VERDE','Sala verde','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(162,'SALA_AZUL','Sala azul','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(163,'OBSERVACAO_ADULTO','Observação adulto','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(164,'OBSERVACAO_PEDIATRICA','Observação pediátrica','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(165,'OBSERVACAO_FEMININA','Observação feminina','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(166,'OBSERVACAO_MASCULINA','Observação masculina','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(167,'ENFERMARIA','Enfermaria','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(168,'LEITO','Leito hospitalar','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(169,'UTI','UTI','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(170,'UTI_PEDIATRICA','UTI pediátrica','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(171,'UTI_NEONATAL','UTI neonatal','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(172,'CURATIVO','Sala de curativo','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(173,'INALACAO','Sala de inalação','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(174,'SUTURA','Sala de sutura','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(175,'RADIOLOGIA','Radiologia','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(176,'RESSONANCIA','Ressonância magnética','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(177,'MAMOGRAFIA','Mamografia','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(178,'TESTE_ERGOMETRICO','Teste ergométrico','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(179,'ECOCARDIOGRAMA','Ecocardiograma','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(180,'ANALISE_CLINICA','Análises clínicas','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(181,'FARMACIA_CLINICA','Farmácia clínica','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(182,'FARMACIA_DISPENSACAO','Dispensação farmacêutica','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(183,'ESTERILIZACAO','Central de esterilização','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(184,'LAVANDERIA','Lavanderia','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(185,'NUTRICAO','Nutrição','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(186,'REGULACAO','Regulação','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(187,'CENTRAL_LEITOS','Central de leitos','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(188,'TRANSFERENCIA','Transferência','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(189,'SAMU_BASE','Base SAMU','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(190,'SAMU_VTR','Viatura SAMU','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(191,'SAMU_REGULACAO','Regulação SAMU','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(192,'FATURAMENTO','Faturamento SUS','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(193,'AUDITORIA','Auditoria','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(194,'DIRETORIA','Diretoria','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(195,'TI','Tecnologia da informação','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(196,'GUICHE_CHAMADA','Guichê de chamada','DISPOSITIVO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL),(281,'GUICHE_ATENDIMENTO','Guichê de atendimento','',NULL,1,'2026-03-16 23:00:48.315711','ATENDIMENTO','Guichê de cadastro ou orientação',NULL),(282,'CONSULTORIO_MEDICO','Consultório médico','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Consultório destinado a atendimento médico',NULL),(283,'SALA_MEDICACAO','Sala de medicação','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Administração de medicamentos',NULL),(284,'SALA_PROCEDIMENTO','Sala de procedimentos','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Procedimentos clínicos diversos',NULL),(285,'SALA_CURATIVO','Sala de curativos','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Curativos e pequenos procedimentos',NULL),(286,'RAIO_X','Raio X','',NULL,1,'2026-03-16 23:00:48.315711','EXAME','Exame radiográfico',NULL),(287,'COLETA_LABORATORIAL','Coleta laboratorial','',NULL,1,'2026-03-16 23:00:48.315711','EXAME','Coleta de material biológico',NULL),(288,'ELETROCARDIOGRAMA','Eletrocardiograma','',NULL,1,'2026-03-16 23:00:48.315711','EXAME','Realização de ECG',NULL),(289,'FARMACIA_ESTOQUE','Estoque farmacêutico','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Armazenamento farmacêutico',NULL),(290,'CENTRAL_ESTERILIZACAO','Central de esterilização','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Processamento de materiais esterilizados',NULL),(291,'ALMOXARIFADO','Almoxarifado','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Estoque geral da unidade',NULL),(292,'ADMINISTRACAO','Administração','',NULL,1,'2026-03-16 23:00:48.315711','GESTAO','Gestão administrativa',NULL),(293,'FATURAMENTO_SUS','Faturamento SUS','',NULL,1,'2026-03-16 23:00:48.315711','GESTAO','Processamento de produção SUS',NULL),(294,'SAMU_VIATURA','Viatura SAMU','',NULL,1,'2026-03-16 23:00:48.315711','SAMU','Unidade móvel de atendimento',NULL),(295,'PAINEL_CHAMADA','Painel de chamada','',NULL,1,'2026-03-16 23:00:48.315711','DISPOSITIVO','Painel de exibição de chamadas',NULL),(296,'TOTEM_SENHA','Totem de senha','',NULL,1,'2026-03-16 23:00:48.315711','DISPOSITIVO','Totem de geração de senhas',NULL),(297,'TI_SUPORTE','Suporte de TI','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Suporte tecnológico da unidade',NULL);
+INSERT INTO `tipo_local` VALUES (1,'RECEPCAO','Recepção','ATENDIMENTO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(2,'GUICHE','Guichê','ATENDIMENTO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(3,'TRIAGEM','Triagem','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(4,'CONSULTORIO','Consultório','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(5,'EMERGENCIA','Emergência','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(6,'OBSERVACAO','Observação','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(7,'INTERNACAO','Internação','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(8,'MEDICACAO','Sala de Medicação','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(9,'PROCEDIMENTO','Sala de Procedimentos','ASSISTENCIAL',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(10,'RX','Raio X','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(11,'TOMOGRAFIA','Tomografia','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(12,'ULTRASSOM','Ultrassom','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(13,'ECG','Eletrocardiograma','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(14,'LABORATORIO','Laboratório','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(15,'COLETA','Coleta','EXAME',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(16,'FARMACIA','Farmácia','APOIO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(17,'ESTOQUE','Estoque','APOIO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(18,'SALA_VERMELHA','Sala Vermelha','EMERGENCIA',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(19,'SALA_AMARELA','Sala Amarela','EMERGENCIA',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(20,'ADMIN','Administrativo','GESTAO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(21,'PAINEL','Painel de chamada','DISPOSITIVO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(22,'TOTEM','Totem de senha','DISPOSITIVO',NULL,1,'2026-03-16 22:30:04.875962',NULL,NULL,NULL,NULL),(153,'ACOLHIMENTO','Acolhimento','ATENDIMENTO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(154,'CADASTRO','Cadastro de paciente','ATENDIMENTO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(155,'SALA_ESPERA','Sala de espera','ATENDIMENTO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(156,'CLASSIFICACAO_RISCO','Classificação de risco','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(157,'CONSULTORIO_ENFERMAGEM','Consultório de enfermagem','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(158,'CONSULTORIO_ODONTO','Consultório odontológico','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(159,'PRONTO_ATENDIMENTO','Pronto atendimento','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(160,'SALA_EMERGENCIA','Sala de emergência','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(161,'SALA_VERDE','Sala verde','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(162,'SALA_AZUL','Sala azul','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(163,'OBSERVACAO_ADULTO','Observação adulto','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(164,'OBSERVACAO_PEDIATRICA','Observação pediátrica','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(165,'OBSERVACAO_FEMININA','Observação feminina','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(166,'OBSERVACAO_MASCULINA','Observação masculina','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(167,'ENFERMARIA','Enfermaria','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(168,'LEITO','Leito hospitalar','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(169,'UTI','UTI','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(170,'UTI_PEDIATRICA','UTI pediátrica','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(171,'UTI_NEONATAL','UTI neonatal','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(172,'CURATIVO','Sala de curativo','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(173,'INALACAO','Sala de inalação','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(174,'SUTURA','Sala de sutura','ASSISTENCIAL',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(175,'RADIOLOGIA','Radiologia','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(176,'RESSONANCIA','Ressonância magnética','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(177,'MAMOGRAFIA','Mamografia','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(178,'TESTE_ERGOMETRICO','Teste ergométrico','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(179,'ECOCARDIOGRAMA','Ecocardiograma','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(180,'ANALISE_CLINICA','Análises clínicas','EXAME',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(181,'FARMACIA_CLINICA','Farmácia clínica','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(182,'FARMACIA_DISPENSACAO','Dispensação farmacêutica','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(183,'ESTERILIZACAO','Central de esterilização','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(184,'LAVANDERIA','Lavanderia','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(185,'NUTRICAO','Nutrição','APOIO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(186,'REGULACAO','Regulação','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(187,'CENTRAL_LEITOS','Central de leitos','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(188,'TRANSFERENCIA','Transferência','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(189,'SAMU_BASE','Base SAMU','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(190,'SAMU_VTR','Viatura SAMU','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(191,'SAMU_REGULACAO','Regulação SAMU','EMERGENCIA',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(192,'FATURAMENTO','Faturamento SUS','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(193,'AUDITORIA','Auditoria','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(194,'DIRETORIA','Diretoria','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(195,'TI','Tecnologia da informação','GESTAO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(196,'GUICHE_CHAMADA','Guichê de chamada','DISPOSITIVO',NULL,1,'2026-03-16 22:41:30.640287',NULL,NULL,NULL,NULL),(281,'GUICHE_ATENDIMENTO','Guichê de atendimento','',NULL,1,'2026-03-16 23:00:48.315711','ATENDIMENTO','Guichê de cadastro ou orientação',NULL,NULL),(282,'CONSULTORIO_MEDICO','Consultório médico','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Consultório destinado a atendimento médico',NULL,NULL),(283,'SALA_MEDICACAO','Sala de medicação','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Administração de medicamentos',NULL,NULL),(284,'SALA_PROCEDIMENTO','Sala de procedimentos','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Procedimentos clínicos diversos',NULL,NULL),(285,'SALA_CURATIVO','Sala de curativos','',NULL,1,'2026-03-16 23:00:48.315711','ASSISTENCIAL','Curativos e pequenos procedimentos',NULL,NULL),(286,'RAIO_X','Raio X','',NULL,1,'2026-03-16 23:00:48.315711','EXAME','Exame radiográfico',NULL,NULL),(287,'COLETA_LABORATORIAL','Coleta laboratorial','',NULL,1,'2026-03-16 23:00:48.315711','EXAME','Coleta de material biológico',NULL,NULL),(288,'ELETROCARDIOGRAMA','Eletrocardiograma','',NULL,1,'2026-03-16 23:00:48.315711','EXAME','Realização de ECG',NULL,NULL),(289,'FARMACIA_ESTOQUE','Estoque farmacêutico','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Armazenamento farmacêutico',NULL,NULL),(290,'CENTRAL_ESTERILIZACAO','Central de esterilização','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Processamento de materiais esterilizados',NULL,NULL),(291,'ALMOXARIFADO','Almoxarifado','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Estoque geral da unidade',NULL,NULL),(292,'ADMINISTRACAO','Administração','',NULL,1,'2026-03-16 23:00:48.315711','GESTAO','Gestão administrativa',NULL,NULL),(293,'FATURAMENTO_SUS','Faturamento SUS','',NULL,1,'2026-03-16 23:00:48.315711','GESTAO','Processamento de produção SUS',NULL,NULL),(294,'SAMU_VIATURA','Viatura SAMU','',NULL,1,'2026-03-16 23:00:48.315711','SAMU','Unidade móvel de atendimento',NULL,NULL),(295,'PAINEL_CHAMADA','Painel de chamada','',NULL,1,'2026-03-16 23:00:48.315711','DISPOSITIVO','Painel de exibição de chamadas',NULL,NULL),(296,'TOTEM_SENHA','Totem de senha','',NULL,1,'2026-03-16 23:00:48.315711','DISPOSITIVO','Totem de geração de senhas',NULL,NULL),(297,'TI_SUPORTE','Suporte de TI','',NULL,1,'2026-03-16 23:00:48.315711','APOIO','Suporte tecnológico da unidade',NULL,NULL);
 /*!40000 ALTER TABLE `tipo_local` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14925,6 +15346,7 @@ CREATE TABLE `tipo_sala` (
   `gera_chamada_painel` tinyint(1) DEFAULT NULL,
   `usa_tts` tinyint(1) DEFAULT NULL,
   `tipo_fila` varchar(50) DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_tipo_sala`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -14935,7 +15357,7 @@ CREATE TABLE `tipo_sala` (
 
 LOCK TABLES `tipo_sala` WRITE;
 /*!40000 ALTER TABLE `tipo_sala` DISABLE KEYS */;
-INSERT INTO `tipo_sala` VALUES (1,'NAO_DEFINIDA','Sala Não Definida',0,0,NULL);
+INSERT INTO `tipo_sala` VALUES (1,'NAO_DEFINIDA','Sala Não Definida',0,0,NULL,NULL);
 /*!40000 ALTER TABLE `tipo_sala` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14953,6 +15375,7 @@ CREATE TABLE `tombstone_evento_assistencial` (
   `estado_cancelado` varchar(60) DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `cancelado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_tombstone`),
   UNIQUE KEY `uk_tombstone_evento` (`id_ffa`,`evento`),
   KEY `idx_tombstone_lookup` (`id_ffa`,`evento`)
@@ -14983,6 +15406,7 @@ CREATE TABLE `totem` (
   `ip` varchar(45) DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_totem`),
   UNIQUE KEY `uk_totem` (`id_unidade`,`codigo`),
   CONSTRAINT `fk_totem_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
@@ -14995,7 +15419,7 @@ CREATE TABLE `totem` (
 
 LOCK TABLES `totem` WRITE;
 /*!40000 ALTER TABLE `totem` DISABLE KEYS */;
-INSERT INTO `totem` VALUES (1,1,'TOTEM_PRINCIPAL_01','Totem Entrada Principal','192.168.1.100',1,'2026-03-09 02:52:10');
+INSERT INTO `totem` VALUES (1,1,'TOTEM_PRINCIPAL_01','Totem Entrada Principal','192.168.1.100',1,'2026-03-09 02:52:10',NULL);
 /*!40000 ALTER TABLE `totem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15013,6 +15437,7 @@ CREATE TABLE `totem_evento` (
   `detalhe` text,
   `ip_acesso` varchar(45) DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_totem_evento`),
   KEY `idx_te_totem` (`id_totem`),
   CONSTRAINT `fk_te_totem` FOREIGN KEY (`id_totem`) REFERENCES `totem` (`id_totem`)
@@ -15025,7 +15450,7 @@ CREATE TABLE `totem_evento` (
 
 LOCK TABLES `totem_evento` WRITE;
 /*!40000 ALTER TABLE `totem_evento` DISABLE KEYS */;
-INSERT INTO `totem_evento` VALUES (1,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:37'),(2,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:39'),(3,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:41'),(4,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:11'),(5,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:27'),(6,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:28'),(7,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:37'),(8,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:38'),(9,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39'),(10,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39'),(11,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:40'),(12,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:41'),(13,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:01'),(14,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:02'),(15,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:03'),(16,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:20'),(17,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:21'),(18,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:22'),(19,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:53:59'),(20,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:55:09'),(21,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:15'),(22,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:29'),(23,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:06:32'),(24,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:07:30'),(25,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:12:15'),(26,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:35:09'),(27,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:41:39'),(28,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 03:00:34'),(29,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:10:27'),(30,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:24:10'),(31,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42'),(32,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42'),(33,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 23:35:46'),(34,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 01:33:12'),(35,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:05:48'),(36,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:05:56'),(37,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:04'),(38,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:15'),(39,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:21');
+INSERT INTO `totem_evento` VALUES (1,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:37',NULL),(2,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:39',NULL),(3,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:37:41',NULL),(4,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:11',NULL),(5,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:27',NULL),(6,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:39:28',NULL),(7,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:37',NULL),(8,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:38',NULL),(9,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39',NULL),(10,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:39',NULL),(11,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:40',NULL),(12,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:42:41',NULL),(13,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:01',NULL),(14,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:02',NULL),(15,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:49:03',NULL),(16,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:20',NULL),(17,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:21',NULL),(18,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:51:22',NULL),(19,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:53:59',NULL),(20,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 01:55:09',NULL),(21,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:15',NULL),(22,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:05:29',NULL),(23,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:06:32',NULL),(24,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:07:30',NULL),(25,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:12:15',NULL),(26,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:35:09',NULL),(27,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 02:41:39',NULL),(28,1,'SENHA_GERADA',NULL,'::ffff:127.0.0.1','2026-03-11 03:00:34',NULL),(29,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:10:27',NULL),(30,1,'SENHA_GERADA',NULL,NULL,'2026-03-15 05:24:10',NULL),(31,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42',NULL),(32,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 22:54:42',NULL),(33,1,'SENHA_GERADA',NULL,NULL,'2026-03-16 23:35:46',NULL),(34,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 01:33:12',NULL),(35,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:05:48',NULL),(36,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:05:56',NULL),(37,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:04',NULL),(38,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:15',NULL),(39,1,'SENHA_GERADA',NULL,NULL,'2026-03-19 02:06:21',NULL);
 /*!40000 ALTER TABLE `totem_evento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15043,6 +15468,7 @@ CREATE TABLE `totem_feedback` (
   `nota` int DEFAULT NULL,
   `comentario` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `data_hora` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_feedback`),
   KEY `fk_totem_feedback_senhas` (`id_senha`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -15075,6 +15501,7 @@ CREATE TABLE `totem_senha_opcao` (
   `ordem` int NOT NULL DEFAULT '1',
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_opcao`),
   UNIQUE KEY `uk_totem_opcao` (`id_painel`,`codigo`),
   KEY `idx_totem_opcao_painel` (`id_painel`),
@@ -15088,7 +15515,7 @@ CREATE TABLE `totem_senha_opcao` (
 
 LOCK TABLES `totem_senha_opcao` WRITE;
 /*!40000 ALTER TABLE `totem_senha_opcao` DISABLE KEYS */;
-INSERT INTO `totem_senha_opcao` VALUES (1,9,'CLINICO','Clínico','ADULTO','CLINICO',NULL,1,1,'2026-02-03 23:59:52'),(2,9,'PEDIATRICO','Pediátrico','PEDIATRICO','PEDIATRICO',NULL,2,1,'2026-02-03 23:59:52'),(3,9,'PRIORITARIO','Prioritário','PRIORITARIO','PRIORITARIO',NULL,3,1,'2026-02-03 23:59:52');
+INSERT INTO `totem_senha_opcao` VALUES (1,9,'CLINICO','Clínico','ADULTO','CLINICO',NULL,1,1,'2026-02-03 23:59:52',NULL),(2,9,'PEDIATRICO','Pediátrico','PEDIATRICO','PEDIATRICO',NULL,2,1,'2026-02-03 23:59:52',NULL),(3,9,'PRIORITARIO','Prioritário','PRIORITARIO','PRIORITARIO',NULL,3,1,'2026-02-03 23:59:52',NULL);
 /*!40000 ALTER TABLE `totem_senha_opcao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15108,6 +15535,7 @@ CREATE TABLE `transporte_ambulancia` (
   `km_saida` int DEFAULT NULL,
   `km_chegada` int DEFAULT NULL,
   `data_hora_acionamento` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_samu_senha` (`id_senha`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -15137,6 +15565,7 @@ CREATE TABLE `transporte_ambulancia_evento` (
   `id_usuario` bigint DEFAULT NULL,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_tae_transporte` (`id_transporte`),
   KEY `idx_tae_sessao` (`id_sessao_usuario`),
@@ -15176,6 +15605,7 @@ CREATE TABLE `triagem` (
   KEY `id_enfermeiro` (`id_enfermeiro`),
   KEY `idx_tri_ent` (`id_entidade`),
   CONSTRAINT `fk_triagem_atendimento` FOREIGN KEY (`id_atendimento`) REFERENCES `atendimento` (`id_atendimento`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_triagem_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `triagem_ibfk_2` FOREIGN KEY (`id_risco`) REFERENCES `classificacao_risco` (`id_risco`),
   CONSTRAINT `triagem_ibfk_3` FOREIGN KEY (`id_enfermeiro`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -15207,6 +15637,7 @@ CREATE TABLE `tv_rotativo` (
   `criado_por` bigint DEFAULT NULL,
   `atualizado_em` datetime DEFAULT NULL,
   `atualizado_por` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_tv_rotativo`),
   UNIQUE KEY `uk_tv_rotativo_nome` (`nome`),
   KEY `fk_tv_rotativo_unidade` (`id_unidade`),
@@ -15239,6 +15670,7 @@ CREATE TABLE `tv_rotativo_tela` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id_tela`),
   UNIQUE KEY `uk_tv_rotativo` (`id_painel`,`ordem`),
   KEY `idx_tv_painel` (`id_painel`),
@@ -15252,7 +15684,7 @@ CREATE TABLE `tv_rotativo_tela` (
 
 LOCK TABLES `tv_rotativo_tela` WRITE;
 /*!40000 ALTER TABLE `tv_rotativo_tela` DISABLE KEYS */;
-INSERT INTO `tv_rotativo_tela` VALUES (1,11,'MEDICO_CLINICO',1,120,1,'2026-02-04 00:03:36',NULL),(2,11,'MEDICACAO',2,120,1,'2026-02-04 00:03:36',NULL),(3,11,'COLETA',3,120,1,'2026-02-04 00:03:36',NULL),(4,11,'MEDICO_CLINICO',4,120,1,'2026-02-04 00:03:36',NULL),(5,11,'RX',5,120,1,'2026-02-04 00:03:36',NULL),(6,11,'TRIAGEM',6,120,1,'2026-02-04 00:03:36',NULL),(7,11,'RECEPCAO',7,120,1,'2026-02-04 00:03:36',NULL),(8,11,'MEDICO_PEDI',8,120,1,'2026-02-04 00:03:36',NULL),(16,11,'MEDICO_CLINICO_SALA3',9,120,1,'2026-02-04 00:03:49','2026-02-04 04:24:21'),(26,249,'MEDICO_CLINICO',1,120,1,'2026-02-04 04:03:41',NULL),(27,249,'MEDICACAO',2,120,1,'2026-02-04 04:03:41',NULL),(28,249,'COLETA',3,120,1,'2026-02-04 04:03:41',NULL),(29,249,'RX',4,120,1,'2026-02-04 04:03:41',NULL);
+INSERT INTO `tv_rotativo_tela` VALUES (1,11,'MEDICO_CLINICO',1,120,1,'2026-02-04 00:03:36',NULL,NULL),(2,11,'MEDICACAO',2,120,1,'2026-02-04 00:03:36',NULL,NULL),(3,11,'COLETA',3,120,1,'2026-02-04 00:03:36',NULL,NULL),(4,11,'MEDICO_CLINICO',4,120,1,'2026-02-04 00:03:36',NULL,NULL),(5,11,'RX',5,120,1,'2026-02-04 00:03:36',NULL,NULL),(6,11,'TRIAGEM',6,120,1,'2026-02-04 00:03:36',NULL,NULL),(7,11,'RECEPCAO',7,120,1,'2026-02-04 00:03:36',NULL,NULL),(8,11,'MEDICO_PEDI',8,120,1,'2026-02-04 00:03:36',NULL,NULL),(16,11,'MEDICO_CLINICO_SALA3',9,120,1,'2026-02-04 00:03:49','2026-02-04 04:24:21',NULL),(26,249,'MEDICO_CLINICO',1,120,1,'2026-02-04 04:03:41',NULL,NULL),(27,249,'MEDICACAO',2,120,1,'2026-02-04 04:03:41',NULL,NULL),(28,249,'COLETA',3,120,1,'2026-02-04 04:03:41',NULL,NULL),(29,249,'RX',4,120,1,'2026-02-04 04:03:41',NULL,NULL);
 /*!40000 ALTER TABLE `tv_rotativo_tela` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15311,6 +15743,8 @@ CREATE TABLE `usuario` (
   `atualizado_em` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `login` (`login`),
+  UNIQUE KEY `id_usuario` (`id_usuario`,`id_entidade`),
+  UNIQUE KEY `id_usuario_2` (`id_usuario`,`id_entidade`),
   KEY `idx_usuario_login` (`login`),
   KEY `fk_usuario_entidade` (`id_entidade`),
   CONSTRAINT `fk_usuario_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
@@ -15341,6 +15775,7 @@ CREATE TABLE `usuario_alocacao` (
   `id_especialidade` bigint DEFAULT NULL,
   `inicio` datetime NOT NULL,
   `fim` datetime DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_alocacao`),
   KEY `fk_usuario_alocacao_usuario` (`id_usuario`),
   KEY `fk_usuario_alocacao_especialidade` (`id_especialidade`),
@@ -15374,12 +15809,15 @@ CREATE TABLE `usuario_contexto` (
   `id_perfil` bigint NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_contexto`),
   KEY `idx_usuario_contexto_usuario` (`id_usuario`),
   KEY `fk_uc_perfil` (`id_perfil`),
   KEY `fk_usuario_contexto_unidade` (`id_unidade`),
+  KEY `fk_usuario_contexto_entidade` (`id_entidade`),
   CONSTRAINT `fk_uc_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
   CONSTRAINT `fk_uc_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_usuario_contexto_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_usuario_contexto_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -15390,7 +15828,7 @@ CREATE TABLE `usuario_contexto` (
 
 LOCK TABLES `usuario_contexto` WRITE;
 /*!40000 ALTER TABLE `usuario_contexto` DISABLE KEYS */;
-INSERT INTO `usuario_contexto` VALUES (2,3,1,1,1,1,1,'2026-03-09 02:32:59.658880'),(3,201,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(4,202,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(5,203,4,1,NULL,4,1,'2026-03-09 02:52:10.838672'),(6,301,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(7,302,4,1,NULL,3,1,'2026-03-09 02:52:10.848236'),(8,303,4,1,NULL,2,1,'2026-03-09 02:52:10.848236'),(9,401,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(10,402,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(11,403,4,1,NULL,1,1,'2026-03-09 02:52:10.859355'),(12,501,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(13,502,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(14,503,7,1,NULL,5,1,'2026-03-09 02:52:10.954388'),(15,5,1,1,1,1,1,'2026-03-09 03:43:17.787827'),(16,4,1,1,1,1,1,'2026-03-09 05:00:02.591093'),(18,1,1,1,1,42,1,'2026-03-18 22:46:14.032359');
+INSERT INTO `usuario_contexto` VALUES (2,3,1,1,1,1,1,'2026-03-09 02:32:59.658880',1),(15,5,1,1,1,1,1,'2026-03-09 03:43:17.787827',1),(16,4,1,1,1,1,1,'2026-03-09 05:00:02.591093',1),(18,1,1,1,1,42,1,'2026-03-18 22:46:14.032359',1);
 /*!40000 ALTER TABLE `usuario_contexto` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15406,6 +15844,7 @@ CREATE TABLE `usuario_historico_senha` (
   `id_usuario` bigint NOT NULL,
   `senha_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_historico`),
   KEY `fk_hist_senha_usuario` (`id_usuario`),
   CONSTRAINT `fk_hist_senha_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
@@ -15434,12 +15873,15 @@ CREATE TABLE `usuario_local` (
   `id_local` bigint NOT NULL,
   `ativo` tinyint DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_local`),
   UNIQUE KEY `uk_usuario_local` (`id_usuario`,`id_local`),
   KEY `idx_ul_usuario` (`id_usuario`),
   KEY `idx_ul_local` (`id_local`),
+  KEY `fk_usuario_local_entidade` (`id_entidade`),
   CONSTRAINT `fk_ul_local` FOREIGN KEY (`id_local`) REFERENCES `local` (`id_local`),
-  CONSTRAINT `fk_ul_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  CONSTRAINT `fk_ul_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_usuario_local_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -15449,7 +15891,7 @@ CREATE TABLE `usuario_local` (
 
 LOCK TABLES `usuario_local` WRITE;
 /*!40000 ALTER TABLE `usuario_local` DISABLE KEYS */;
-INSERT INTO `usuario_local` VALUES (1,1,1,1,'2026-03-17 06:46:39'),(2,2,1,1,'2026-03-17 06:46:39'),(3,3,2,1,'2026-03-17 06:46:39'),(4,4,3,1,'2026-03-17 06:46:39'),(5,5,9,1,'2026-03-17 06:46:39'),(6,6,8,1,'2026-03-17 06:46:39'),(7,7,2,1,'2026-03-17 06:46:39'),(8,8,10,1,'2026-03-17 06:46:39'),(9,9,15,1,'2026-03-17 06:46:39'),(10,10,17,1,'2026-03-17 06:46:39'),(11,11,16,1,'2026-03-17 06:46:39'),(12,12,18,1,'2026-03-17 06:46:39'),(13,13,23,1,'2026-03-17 06:46:39'),(14,14,22,1,'2026-03-17 06:46:39'),(15,15,21,1,'2026-03-17 06:46:39');
+INSERT INTO `usuario_local` VALUES (1,1,1,1,'2026-03-17 06:46:39',1),(2,2,1,1,'2026-03-17 06:46:39',1),(3,3,2,1,'2026-03-17 06:46:39',1),(4,4,3,1,'2026-03-17 06:46:39',1),(5,5,9,1,'2026-03-17 06:46:39',1),(6,6,8,1,'2026-03-17 06:46:39',1),(7,7,2,1,'2026-03-17 06:46:39',1),(8,8,10,1,'2026-03-17 06:46:39',1),(9,9,15,1,'2026-03-17 06:46:39',1),(10,10,17,1,'2026-03-17 06:46:39',1),(11,11,16,1,'2026-03-17 06:46:39',1),(12,12,18,1,'2026-03-17 06:46:39',1),(13,13,23,1,'2026-03-17 06:46:39',1),(14,14,22,1,'2026-03-17 06:46:39',1),(15,15,21,1,'2026-03-17 06:46:39',1);
 /*!40000 ALTER TABLE `usuario_local` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15471,8 +15913,8 @@ CREATE TABLE `usuario_log_acesso` (
   PRIMARY KEY (`id_log`),
   KEY `idx_log_usuario` (`id_usuario`),
   KEY `idx_log_entidade` (`id_entidade`),
-  CONSTRAINT `fk_log_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
-  CONSTRAINT `fk_log_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
+  CONSTRAINT `fk_log_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `fk_usuario_log_acesso_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -15494,14 +15936,17 @@ DROP TABLE IF EXISTS `usuario_perfil`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuario_perfil` (
   `id_usuario` bigint NOT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `id_perfil` bigint NOT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id_usuario`,`id_perfil`),
   KEY `idx_up_perfil` (`id_perfil`),
   KEY `idx_usuario_perfil_usuario` (`id_usuario`),
   KEY `idx_usuario_perfil_perfil` (`id_perfil`),
+  KEY `idx_usuario_perfil_entidade` (`id_entidade`),
   CONSTRAINT `fk_up_perfil` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`) ON DELETE CASCADE,
-  CONSTRAINT `fk_up_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+  CONSTRAINT `fk_up_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
+  CONSTRAINT `fk_usuario_perfil_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -15511,7 +15956,7 @@ CREATE TABLE `usuario_perfil` (
 
 LOCK TABLES `usuario_perfil` WRITE;
 /*!40000 ALTER TABLE `usuario_perfil` DISABLE KEYS */;
-INSERT INTO `usuario_perfil` VALUES (1,1,'2026-03-17 07:02:03.000000'),(1,42,'2026-03-17 00:17:58.039188'),(2,2,'2026-03-17 06:46:39.000000'),(3,3,'2026-03-17 06:46:39.000000'),(4,4,'2026-03-17 06:46:39.000000'),(5,5,'2026-03-17 06:46:39.000000'),(6,6,'2026-03-17 06:46:39.000000'),(7,7,'2026-03-17 06:46:39.000000'),(8,8,'2026-03-17 06:46:39.000000'),(9,9,'2026-03-17 06:46:39.000000'),(10,10,'2026-03-17 06:46:39.000000'),(11,11,'2026-03-17 06:46:39.000000'),(12,12,'2026-03-17 06:46:39.000000'),(13,13,'2026-03-17 06:46:39.000000'),(14,14,'2026-03-17 06:46:39.000000'),(15,15,'2026-03-17 06:46:39.000000');
+INSERT INTO `usuario_perfil` VALUES (1,1,1,'2026-03-17 07:02:03.000000'),(1,1,42,'2026-03-17 00:17:58.039188'),(2,1,2,'2026-03-17 06:46:39.000000'),(3,1,3,'2026-03-17 06:46:39.000000'),(4,1,4,'2026-03-17 06:46:39.000000'),(5,1,5,'2026-03-17 06:46:39.000000'),(6,1,6,'2026-03-17 06:46:39.000000'),(7,1,7,'2026-03-17 06:46:39.000000'),(8,1,8,'2026-03-17 06:46:39.000000'),(9,1,9,'2026-03-17 06:46:39.000000'),(10,1,10,'2026-03-17 06:46:39.000000'),(11,1,11,'2026-03-17 06:46:39.000000'),(12,1,12,'2026-03-17 06:46:39.000000'),(13,1,13,'2026-03-17 06:46:39.000000'),(14,1,14,'2026-03-17 06:46:39.000000'),(15,1,15,'2026-03-17 06:46:39.000000');
 /*!40000 ALTER TABLE `usuario_perfil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15528,6 +15973,7 @@ CREATE TABLE `usuario_profissional_registro` (
   `numero_registro` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `uf_registro` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `especialidade_principal` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario`),
   CONSTRAINT `fk_prof_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -15558,6 +16004,7 @@ CREATE TABLE `usuario_refresh` (
   `revoked` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Token revogado',
   `user_agent` varchar(255) DEFAULT NULL COMMENT 'User agent do dispositivo',
   `ip` varchar(45) DEFAULT NULL COMMENT 'IP de origem',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_refresh`),
   UNIQUE KEY `uk_token_hash` (`token_hash`),
   KEY `idx_usuario` (`id_usuario`),
@@ -15571,7 +16018,7 @@ CREATE TABLE `usuario_refresh` (
 
 LOCK TABLES `usuario_refresh` WRITE;
 /*!40000 ALTER TABLE `usuario_refresh` DISABLE KEYS */;
-INSERT INTO `usuario_refresh` VALUES (1,1,'7558537e0f4678dc571d37461ddd4555bf280e5bcaf43edce1e638398be9be30','2026-02-03 07:47:25','2026-01-04 03:47:25',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(2,1,'038e6bddb719e4a51cc0e1a575a71db374ccfe0ff7483e4f19bd25684540cfa1','2026-02-03 07:47:54','2026-01-04 03:47:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(3,8,'0ed677b9f9c732b6970b679389ec573a7221e265976b7a7fa1e1dbeb472b1072','2026-02-03 07:49:00','2026-01-04 03:49:00',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(4,9,'8181ee9d9b37e8463f84891ac6e1107d2b03a9173600559a3a53c1106f32cde0','2026-02-03 07:49:19','2026-01-04 03:49:19',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(5,9,'6d2b06a8740ca74fdaf5198193eab9493e863f5dd89b5d91173cbd565b78bfe8','2026-02-03 07:49:26','2026-01-04 03:49:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(6,1,'e9368a2fa2cd9c794d113943b69e0ea15379e8ab3f392fd44ce06733683366fc','2026-02-03 07:49:36','2026-01-04 03:49:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(7,1,'3c6d3785a575a5329bbc2cbab2ac77c4e383f378a2c402f606158241a87dca3a','2026-02-03 07:56:23','2026-01-04 03:56:23',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(8,1,'aeeae656c5031a47cc723b57dce6ab2192c79c48da906185e3a997b8a7d38876','2026-02-03 07:56:35','2026-01-04 03:56:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(9,10,'63a9134e1f7c6212363617256966779a99347fa0d48fa5989fa2751c9138720d','2026-02-03 07:56:43','2026-01-04 03:56:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(10,10,'75ecf45da83ef65781bdaf830659747744a4171898481213b1e6927de5bc6452','2026-02-03 07:56:47','2026-01-04 03:56:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(11,1,'3b271a484feac2c3d70edbc30b0d2f0b63a943ec5181cd5f6da2cd2076a5e813','2026-02-03 07:56:54','2026-01-04 03:56:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(12,1,'a72d64a7a3f2fe19fa98374b60c0e2a0048e735e2f3caf39f0212ed89ed6acfa','2026-02-03 08:40:46','2026-01-04 04:40:46',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','192.168.1.98'),(13,1,'d9888ebd86d886a9da4450d9ed1449ce5a0919b0bf6d7a95e434b4c5c9f9654d','2026-02-03 08:55:54','2026-01-04 04:55:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(14,1,'9403ed66083c17ad2c7f184908f86b1a987c5e0a15a268f40e0dd75057246d02','2026-02-03 09:03:02','2026-01-04 05:03:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(15,1,'348ef17cab1bfecbda0958766585249ad583c689828ba3b6d64477b449639ca1','2026-02-03 09:10:33','2026-01-04 05:10:33',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(16,1,'d7b840c8101f2fb18af2b40c4a7f72f2a8e3c92c2cd7deb18ca18dd5e4a16b41','2026-02-03 09:37:58','2026-01-04 05:37:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','192.168.1.83'),(17,1,'52f96f976bee6753fb807d424ba46b1db9f1afc0f70f0b15c64d499020bfc111','2026-02-03 10:09:34','2026-01-04 06:09:34',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(18,1,'ea39406997ed7e387ed802ec4038830190e6f83ae6cca3c0f8059e8ee96e68f2','2026-02-03 10:59:19','2026-01-04 06:59:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(19,1,'311e38f8349d2deac3cfb8821a0135b0fb441def0d9b4f9c900c63d88b3a02fb','2026-02-03 10:59:52','2026-01-04 06:59:52',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(20,1,'dc57186ddcc023147184e19d8c446ef334cd8f8ec56211c0cee30385e9f4c9ce','2026-02-05 03:35:43','2026-01-05 23:35:43',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(21,1,'1d66ce3913a2c1679fdad13bef71dd1dea554b9ca755dea92adc5f71812ec347','2026-02-05 05:39:13','2026-01-06 01:39:13',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(22,1,'03517b7bc56313c2b8c59caf2a80368f2a391343173bbd293e16aab445fc9ac7','2026-02-05 05:39:19','2026-01-06 01:39:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(23,1,'ee256159aebaf39ef214a3283db5044c982e07c3d2e2bf2fd48273b4c7a11609','2026-02-05 06:02:20','2026-01-06 02:02:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(24,1,'a41916d0eff118e627c0f6489d72e7173855b92f53ba287ea897c621744711eb','2026-02-05 07:01:20','2026-01-06 03:01:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(25,1,'f3d363567013537917c9ab2a7aebb0c82c96a72545a74e21be24ced484b0a4e1','2026-02-05 07:45:34','2026-01-06 03:45:34',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(26,1,'8ebe10c569aa8a2976daee030c961d53a6a8c4ddfeb6f768ac855370dbd75f6d','2026-02-05 07:46:19','2026-01-06 03:46:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(27,1,'57217d8839b1be180d4e03495e9748b5e4bb6042cfdfb70fa7da6ca8165e62ca','2026-02-05 07:46:32','2026-01-06 03:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(28,1,'00c1f42e7a7d81001f5a3d952084799f33ca4e444bf35842d4a13e312f921739','2026-02-05 07:46:41','2026-01-06 03:46:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(29,1,'581cc1c545bdae9c748ea4c926319c397ae362a911bdcc23e6813fbbd7d11dd9','2026-02-05 07:47:31','2026-01-06 03:47:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(30,1,'7bf2b7083ecf6fcbcb950453197cc8aee6fc21d2024c6625c58e070f571bb92c','2026-02-05 08:19:14','2026-01-06 04:19:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(31,1,'8f393bd2e02ced0104c43ee67d5bf2b404c4f78b261df515c135bc6f968d3ccc','2026-02-05 09:18:14','2026-01-06 05:18:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(32,1,'f3d8913e6fbc5ddc48905ae9766aca03dfdf0fb890100be507b9c099b305ca29','2026-02-05 10:17:14','2026-01-06 06:17:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(33,9,'d7838e2c89646f13d3553d8f98e8db59d6e3adeac5eff1048d11957d249a1899','2026-02-05 10:17:28','2026-01-06 06:17:28',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(34,9,'be9cbb4df4cf4f0b8d7bd1b4acea368f3afdc20b899913c1cc69a5f33dfadec4','2026-02-05 10:17:34','2026-01-06 06:17:34',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(35,9,'12870eb9471c765edca5e0e4242a279642943420902372d5efb008a33d2bc0bf','2026-02-05 10:17:36','2026-01-06 06:17:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(36,9,'84a4b423e59734a4fab04cf176c58b55ee62397a104635bcc98ff0c1e9498af4','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(37,9,'b6d826e9f9ceb47d498e0dc0b0e362f72e74c8c9f81992631c4020a6aab385ce','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(38,9,'e6d8338ab872c353469dece8096c2f45cff4dd11d5b48c4ca7a6a37f824748aa','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(39,9,'1f379535720b142656c2efb4019ee650716b4f7d9af0678d66ccd573500f6d64','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(40,6,'51cb714ad7807cf99597b91abc9d87902b758b7c52a489a8185e7fca072284b4','2026-02-05 10:17:55','2026-01-06 06:17:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(41,1,'1953f070894b37241bfeafc790a7b54256463a395dbbe2bc8e9d5a2f3e833eb0','2026-02-05 10:18:22','2026-01-06 06:18:22',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(42,1,'40d2e61b2fc0bd21f4f927692c85532f2394c5a53e95780a870c2bf4c013fc3b','2026-02-05 11:01:45','2026-01-06 07:01:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0','127.0.0.1'),(43,1,'8e28a51d2b913801b7aba51d402ddaf8b504702e90737b3417a657e6cba2dcd8','2026-02-09 01:19:28','2026-01-09 21:19:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(44,1,'906142e77b5770025a1b7db289c0409febf339f533b44e8b7335553f9003683c','2026-02-09 01:19:37','2026-01-09 21:19:37',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(45,1,'36995ed65a5c9fcac7d2d6f4da83bdc7ea2c48d94c93c4cbed56c9244479e743','2026-02-09 07:11:48','2026-01-10 03:11:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(46,1,'aedcf9e4bd3536423e13b8f538c19adb6f0fa7eadac665525793d23056347fe8','2026-02-09 08:10:48','2026-01-10 04:10:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(47,1,'feea122448a8853c3db4caed0043690004b3bfbd44283234bef804a23985f5a5','2026-02-09 09:09:48','2026-01-10 05:09:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(48,1,'070ec9d1a5ca9461c3c6c86afd776d08a04af12562d0fc5c96294e35dfffb27b','2026-02-09 10:08:48','2026-01-10 06:08:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(49,1,'72fd90b1591f9410c9e6faf2962598a58609fb1a364b0c6060874318d022e17a','2026-02-09 10:55:28','2026-01-10 06:55:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(50,1,'2084f9fbe0a8b537a657d1fef5446b598da103002343d1b67a20b3b5652930eb','2026-02-11 07:15:54','2026-01-12 03:15:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(51,9,'d507a83024bb63bd4b66cdff812dcb2a55307891c54ae28596ffb8d1b09d47e7','2026-02-11 08:18:22','2026-01-12 04:18:22',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(52,9,'49918ff5e246e93c0404cd17365beda6b6513859bd6ad74d0e91426620483d2a','2026-02-11 08:18:24','2026-01-12 04:18:24',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(53,9,'b462b9fd7c9e6da461c482e3a3e02d7a4864e29b432852ae0c59ecf37d0db111','2026-02-11 08:18:42','2026-01-12 04:18:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(54,9,'1a311de7e4d7ace23cd2179e7d33fbfeeb8d0a48880c330f8c4869b3d38b8b61','2026-02-11 08:18:49','2026-01-12 04:18:49',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(55,9,'38c801f4d0dd814b28eba61007e9f8bc54d494e3196b2b45ece906a1df3e311b','2026-02-11 08:18:55','2026-01-12 04:18:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(56,9,'1426ca475a9665b6c95ec239224ea01061f001407fde70963172b424c35eb61c','2026-02-11 08:19:12','2026-01-12 04:19:12',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(57,9,'bb8b4da62577c423ddef1258c27addb516004c535e534518e321fa1efbc87bfb','2026-02-11 08:19:12','2026-01-12 04:19:12',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(58,9,'37a8e64c61f6b06c521b8ec71c18bb7d2cde585e3ef0ec32ff796a735df87f70','2026-02-11 08:19:13','2026-01-12 04:19:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(59,6,'d1281e617a3732cba039d0e305526cbc7d86d6743b53eae22ae743808b8f3799','2026-02-11 08:19:34','2026-01-12 04:19:34',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(60,6,'e2df6880ff92e59474e535adeef8c0185f2fc9525350696328b1497168cce41d','2026-02-11 08:19:59','2026-01-12 04:19:59',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(61,6,'f1478e7695763643f54639810e75effac10a853dd79209ec4413d9243312cbac','2026-02-11 08:20:11','2026-01-12 04:20:11',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(62,6,'070dd52096fec865b813207ea38176c2b317703119c1d7c63c33e098dc2c79fd','2026-02-11 08:20:11','2026-01-12 04:20:11',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(63,6,'25720c5143280141554fb82ad680f2befad3ca659d2800bfe21b02347483fad6','2026-02-11 08:25:31','2026-01-12 04:25:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(64,6,'7ab9b78b2a186f5504a43ee646ea78a8d1afd6b5a777b312c83d5abbb33cd834','2026-02-11 08:25:40','2026-01-12 04:25:40',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(65,6,'3e3837880892c5a977b2d2d9904e3b17b0f41bbdfbc238eed37dac4468007404','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(66,6,'12fe977e086fd978930cb3f7db01b6a843c6afc9f0edc8e29b6230410724c590','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(67,6,'21ea13efe2335a3fbab2171beb5340ef407d88ece397495c34a83eafc0b01335','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(68,6,'ad6d37a12747acef40db7518bf06d7a3ed05f04e851a2a4907eecbad633b3614','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(69,6,'5d8180fea541cefdcdd7a7bfc5a6f95938119331e8fc989d3b2df6cad071c938','2026-02-11 08:25:42','2026-01-12 04:25:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(70,6,'6cda0c0c3dca930d87a49eab062dfd3de36b65d5af322eb3c9a8dce8fded48a2','2026-02-11 08:25:44','2026-01-12 04:25:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(71,6,'914260c29590383bc32414e4f0505082a9aadb4cada462eb2ae33a1314cda657','2026-02-11 08:25:53','2026-01-12 04:25:53',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(72,6,'c29fccda1724ddeaff7497f7b1806414d252697a3670ec6a35a134e5ad912382','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(73,6,'d1e3e0e7d80c76da1ba4f6094d570419f91e6add7b5a82c881e3b756d58256f4','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(74,6,'10e9039baf6c7c11635560b62f8610de16fbeb793e0e572681c4ba015755ac95','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(75,6,'94574135a85aac1825caab15b79e29caf43a45bff49fdee33f6da0b5e9e9f62b','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(76,6,'0c3bdf6ac5d9b1d8666c1e6e93f29f2b2b447c528b476b43b1737026432f55e9','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(77,6,'ca58bb6979d2db73325727fa66497d126551e90a9290d3f1047d94f0e6ce2ff9','2026-02-11 08:25:56','2026-01-12 04:25:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(78,6,'6f77471aa30e9ab7548d0d21590e2b8fc6ed6e810174b03f9595adc21ababf89','2026-02-11 08:26:01','2026-01-12 04:26:01',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(79,6,'762b0bb8cd9473c517af47679b1a07c2de403d19e09df8dad0710161e9a8d067','2026-02-11 08:26:02','2026-01-12 04:26:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(80,6,'bf4ce66a148916e36b5c6e6342dec2dfe43aac1ecad07ae6529d8b6bbc4ad143','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(81,6,'d34e00218427322962b7b8aee6fb56feef0763fe3c8212176eb707eee4b51f43','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(82,6,'f79b08173346ed0805a920de28131c574196f093d588deadec242f3c7098c67f','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(83,6,'b030c57c7410e16e3c9971bc12c25c952834c841462eff2d988f93b6433d72c6','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(84,6,'e6ce897ffd2057164509970b1a455c3da6f9922ab683f6ab71a80462ee33ffb4','2026-02-11 08:26:08','2026-01-12 04:26:08',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1'),(85,6,'2bd06e019559ac33011f5a600eb17101a388c9dc9c7ca3d6ac387ff6b03fbb72','2026-02-11 08:26:14','2026-01-12 04:26:14',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1'),(86,6,'ce5c36f6c9d998b54e5ceee3f98452be94a99ee2d73c24e2ea7672c3c03fc6a7','2026-02-11 08:26:15','2026-01-12 04:26:15',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1'),(87,6,'7095f7786748fe10920f29771ede16c8a6680e4b2a46bbd80c9824555b928aaf','2026-02-11 08:29:03','2026-01-12 04:29:03',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1'),(88,6,'57464255823e39f8dedcf796c3081b2fb94d2731d1f927d82480494f9208279e','2026-02-11 08:29:12','2026-01-12 04:29:12',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1'),(89,6,'2fabb92c67247b5d43f4db2af5b3d81aace895413ba1e3eb491384e973809f8b','2026-02-11 08:29:14','2026-01-12 04:29:14',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1'),(90,6,'4dd5e00ed82c9f2c81d3a61ae2f358cfcdf4764e8703bbd011f09b6bf0275eda','2026-02-11 08:30:08','2026-01-12 04:30:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(91,6,'fc1c20001b687df734b6768ee7e56b8534f0ad07f9860593dcebb2c92606bf1c','2026-02-11 08:30:10','2026-01-12 04:30:10',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(92,6,'f62b31214b4347c532f3675134d1152e1abcaf440ce216f42dcaa62d348e0c28','2026-02-11 08:30:38','2026-01-12 04:30:38',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(93,6,'15c3dc358ffbdcfe57b97c19f81f43dcf969a458547aa0a27311690988fed43a','2026-02-11 09:11:12','2026-01-12 05:11:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(94,6,'d12881cae2a46e8465bb4b8ec184a21cdbdd1eff517e83122eb5db5dcec798f8','2026-02-11 09:11:14','2026-01-12 05:11:14',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(95,5,'91cdec337f63b6e3be867efa8138ea4a639f5c278b643dfe3476f44669fca388','2026-02-11 09:11:28','2026-01-12 05:11:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(96,5,'324a00e210e6fd1382220309a5de756b59111e07ede519cc03a8bfed334aea4d','2026-02-11 09:11:29','2026-01-12 05:11:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(97,5,'9fdf1d8c7293933af277437a7b48b89722a73eaeffa6b46de3f1cf1832ca268c','2026-02-11 09:11:29','2026-01-12 05:11:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(98,5,'88efd5f097dd322e882a2a4099ea10462ad78e3cbed34f802268f6356e5f2dc3','2026-02-11 09:11:29','2026-01-12 05:11:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(99,5,'e52817159d23f6695aa015eb400ad4803f3508e263a7820a6c4f0309e9a19707','2026-02-11 09:11:35','2026-01-12 05:11:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(100,5,'8512d0481b97a13a55e7f8b4dd147a76360bb1590cd013d39ce06feea3fe5009','2026-02-11 09:11:35','2026-01-12 05:11:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(101,5,'51660744b4d70608b39b37f1cb415d498bc7638ed51711bf6f440bc683610d48','2026-02-11 09:11:35','2026-01-12 05:11:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(102,5,'73c343fc65c46782603988bbef554ce59c400342fc28fd1c1281902ffcf8d2ac','2026-02-11 09:11:39','2026-01-12 05:11:39',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(103,5,'a87b84b6d930191c1a1f402e18ce251ed0bf768f280b2334c824cd9597de7eca','2026-02-11 09:11:39','2026-01-12 05:11:39',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(104,5,'0ef31550675f02a1efa8c65661f4994b2b79c36c4b19fe77f42d747db37f28e8','2026-02-11 09:11:41','2026-01-12 05:11:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(105,5,'b9982783dd3e603787155bfb153f044023ebbaa1ea0deb1e02c00550c0ad4474','2026-02-11 09:11:41','2026-01-12 05:11:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(106,5,'8e5b3285d3b359a854404b1d5aed305f59d6ee795be2a2bf2a11aaa7d40bb153','2026-02-11 09:11:41','2026-01-12 05:11:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(107,5,'ac5827a41a266652be828c03eb6e8093c87869cfaf1296838badc1aa178416ff','2026-02-11 09:11:44','2026-01-12 05:11:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(108,5,'176ccfc22dd5034ca0f152f9a57c90d844f71122e7f14b76eef2b412dadb17e0','2026-02-11 09:11:45','2026-01-12 05:11:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(109,5,'afa87680b3f99d6420a782fc884145085b2fb63c2f78d14422184e4d87c058f0','2026-02-11 09:11:45','2026-01-12 05:11:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(110,5,'25051f2af500d1e6ffcc3fa0c55be4af8f7b2841dc3c1eacec49722105502e99','2026-02-11 09:11:45','2026-01-12 05:11:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(111,8,'69453c39bfcdf86bfd8e8d7de906a42eaa2cd3dbb4e2c72e4586ec22b26a4dd8','2026-02-11 09:12:02','2026-01-12 05:12:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(112,8,'0b583d4a490cb824a008c890c6f0965e559f64b2930af88352ae824200373539','2026-02-11 09:12:03','2026-01-12 05:12:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(113,8,'3f363635cf4af260a9b05428701335a2d2a69d53cb44dc97f4a1c0bcb98339f1','2026-02-11 09:12:13','2026-01-12 05:12:13',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(114,8,'3c422ef5eac5457adb9fbb86876cb7d214fccd42937e9fbc676094a3012fb1a2','2026-02-11 09:12:15','2026-01-12 05:12:15',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(115,8,'e34f3f340dad669262172749be9f943ad5ff7cf3cd8655097b93ada7cdaa402d','2026-02-11 09:12:24','2026-01-12 05:12:24',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(116,6,'d947462c7c6d2e13f53de694ceb9aef1fba103f0c0fe8f213bc010ced8719c18','2026-02-11 09:15:40','2026-01-12 05:15:40',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(117,6,'d01885bdfa50af6d665f1d49228fe83aa617216c085c8a2ae0ca6452d0fcfe30','2026-02-11 09:31:36','2026-01-12 05:31:36',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(118,6,'019f196fb8664a16f8c1ec8a7e67a8a87fb69b2da025fb7195ed953151fd8a78','2026-02-11 09:31:37','2026-01-12 05:31:37',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(119,6,'f8611b3f8d1432787af0cae33a923c9a8072a22adae68686d82bf074ccdc726b','2026-02-11 09:31:37','2026-01-12 05:31:37',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(120,6,'25ca807f66df4cd6f296fe68597b9c83a000fdccd5e566bb0e4a6b855b7d757c','2026-02-11 09:31:40','2026-01-12 05:31:40',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(121,2,'6368d62430fd7b96cc4d897cb4543c9f29bb95eb1b7714310a0aacd151fa09f8','2026-02-17 09:49:30','2026-01-18 05:49:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(122,2,'e03afcbb24745af9aa08d771f609dc99b6f960d30c5b0a4d005833660aaf1164','2026-02-17 09:49:51','2026-01-18 05:49:51',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(123,2,'9abe2b53f875daed265c8b1c5cf3038dd102555fa56f42e6e7b19271cc9c6e58','2026-02-17 09:49:54','2026-01-18 05:49:54',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(124,2,'7085f83fbdaf2eede109d8a7e516b3208fbeb1dafba89db5b1c42355586441ac','2026-02-17 09:52:05','2026-01-18 05:52:05',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(125,2,'ce083803948344c42b02d58c6e079eb7ea1105c2f1bdd08e9cf4b0fcf7176363','2026-02-17 09:52:06','2026-01-18 05:52:06',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(126,2,'359be9e79355674f676f31721fad7321ff36a25535a0dda91e169c51ac1e4e77','2026-02-17 09:52:07','2026-01-18 05:52:07',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(127,2,'cd1b3598d836023249164b4a67b4381049ada6a5862e10d62aca68be3558b889','2026-02-17 09:56:16','2026-01-18 05:56:16',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(128,2,'9b346fb80b5715879509e323fbf50fee3954de615086a7e6c4d30e6bcfe65c40','2026-02-17 09:56:17','2026-01-18 05:56:17',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(129,2,'aa9575472660784c10976134112faaef50971ed42109f7ee3deae9ecf8562c55','2026-02-17 09:56:18','2026-01-18 05:56:18',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(130,2,'42c1b4b6021a427d7d1f12130f83587cb304d62b6c2a55fc7d7fcbafe09a2df1','2026-02-17 09:56:21','2026-01-18 05:56:21',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(131,2,'3ecfe4fa17d3bf57ecd14d148d56e2631db68c7246335e413a01abb91205a338','2026-02-17 09:56:22','2026-01-18 05:56:22',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(132,2,'78042a1c483a227c751f1438f06aaa421fa03e2887c52c8222cc12844d231aa6','2026-02-17 09:56:38','2026-01-18 05:56:38',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(133,2,'8d9d893c127fef03da1556f5483b1a4037edc268e76de6f17126c58f2534fc90','2026-02-17 09:58:48','2026-01-18 05:58:48',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(134,2,'7633e743bd2cc4c92d85e024dc67e2cf41a59eef821c336efb2b1b3d23036137','2026-02-17 09:58:49','2026-01-18 05:58:49',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(135,2,'fe5710ced0240337130292f1d2902a7f1815aed23ab80d2b365244f8d55f1a96','2026-02-17 09:58:49','2026-01-18 05:58:49',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(136,2,'f54ea515d9bc10272d1d96b4e7e6cb37009a0c37da7855b2cd5c021341fbd6fa','2026-02-17 09:58:51','2026-01-18 05:58:51',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(137,2,'f85176f6c4bac73c7d131e31fef07aa25a3d1ecf224ba62ed131ee1a46667b6c','2026-02-17 09:59:01','2026-01-18 05:59:01',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(138,2,'5b454d2acd48856d734d3a00007694015c33faf4c8fb51e6bfe3a7580561ad5c','2026-02-17 10:01:15','2026-01-18 06:01:15',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(139,2,'697d0f7d56b9060c4836dcf5e91cdbf83825b2785ef25ee6fd090bf08b0f88a3','2026-02-17 10:01:16','2026-01-18 06:01:16',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(140,2,'d28dd772110d95f5c1122fbe492a4849bfdc96a9b5402a979b8105276b40df9c','2026-02-17 10:01:16','2026-01-18 06:01:16',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(141,2,'2ba1669fad7086cbb8450f84b9e17887781ce0d31c61822656eb4cf8cf19adfb','2026-02-17 10:01:17','2026-01-18 06:01:17',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(142,2,'b5fea72d3e8160f2f7f5cc72b38b8ed175219a9b6a41acb14851a9e65a61d810','2026-02-17 10:01:18','2026-01-18 06:01:18',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(143,2,'f31ea5ab67b6ccf1b5491b9341737d1d6af538ddcc53c1cbe602b3850be1ea3e','2026-02-17 10:01:26','2026-01-18 06:01:26',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(144,2,'eac87987348814886a7aac97918d78c2b34a7a4f818e64a10edbbb6023a5062e','2026-02-17 10:01:35','2026-01-18 06:01:35',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1'),(145,2,'f8964696351c457e761e0bfd6522826e3f15f312474f6e0ea62b8612584d5ce8','2026-02-17 10:02:49','2026-01-18 06:02:49',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(146,2,'62f3cce0688999009b9d03251b65d0b34b3deed1e84b29072ceb1d7136028886','2026-02-17 10:03:02','2026-01-18 06:03:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(147,2,'b54b9ac3d72558f2252238e4b11edbdf8a7766668a4bdc8057a1e36c507cffe3','2026-02-17 10:03:03','2026-01-18 06:03:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(148,2,'499ee0f9a7a0a249d857fa96efc19057911ede6071712650151d3e30bf939a7f','2026-02-17 10:16:54','2026-01-18 06:16:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(149,2,'cb814b888a86717a346fe34cbb79b3dc38ef8f0083e3f1941ed573d1593efcb5','2026-02-17 10:16:54','2026-01-18 06:16:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(150,2,'906b9561986891560b8d4eaf3305673f5f1cbda6794b0ee38be705834ffe6d81','2026-02-17 10:16:55','2026-01-18 06:16:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(151,2,'d2ed1392dc84fda9b62c5316751c9c2a88dedd6327d83c74dbbc162e912cd4b2','2026-02-17 10:21:46','2026-01-18 06:21:46',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(152,2,'a4b48910390d5bea3f2cb3bc71c770dd56a9e58fc69985e265c338fb450a9d02','2026-02-19 09:45:16','2026-01-20 05:45:16',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(153,2,'37a32d9b86d6afb0a5692890310885a3e32a5c2065babe914dbdd801e58ded3a','2026-02-19 09:45:18','2026-01-20 05:45:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(154,2,'a113965758de45e57ebe1355a59db0ab9150ffc898217d8540e1db38620fadb3','2026-02-19 09:45:19','2026-01-20 05:45:19',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(155,2,'45c9ce3160c3ff0c7c7b25aa4aabc1de7161f84253ba77efeb562f89c1a13d1e','2026-02-19 09:45:19','2026-01-20 05:45:19',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(156,2,'7fc9e059e6b43cd40a6a0959e441ec2b83f81e4dcd27a757cfd3a48c5a11aa8a','2026-02-19 09:45:20','2026-01-20 05:45:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(157,2,'e54b4c49a7159462a75974639cebaaf35cd23804f96bb2d57477bcdd6ceb9a0e','2026-02-19 09:46:14','2026-01-20 05:46:14',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(158,2,'d5124f4e60954c2e5a4f1d82a764328ed93bb62ecf5ab7beb480b8f422d96b3c','2026-02-19 09:46:18','2026-01-20 05:46:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(159,2,'9b59e1cb03c23a9093ef317b1d2248e0ddca8246549e2e73feac5ac49297c3df','2026-02-19 09:55:04','2026-01-20 05:55:04',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(160,2,'2a7f802829e3fdcb6437ba2228a1614562f4a32ca8de5deef440377c80f201f0','2026-02-19 09:57:07','2026-01-20 05:57:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(161,2,'cb264c27157c0820b241e25c1a1560fdd0d72842074589000ae4756340a4cdf2','2026-02-19 09:57:08','2026-01-20 05:57:08',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(162,2,'6260c13ec2ef95e01c8e285f89c5f602edcaac9e807e6ae6530debd4a7951009','2026-02-19 09:57:08','2026-01-20 05:57:08',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(163,2,'3540b7120674443e63bb623ba571c7e00bd8d578154629c5f0d9a054342b6ee7','2026-02-19 09:57:09','2026-01-20 05:57:09',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(164,2,'aad2b9552f1b85f33cb0d5f7677f418b997606ae1962474909e0cd8a660de381','2026-02-19 09:57:27','2026-01-20 05:57:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(165,2,'67ced5f69f6785e44ddc4ababa9b6a8f29df785ebbe809486a3a1c57d4a721ca','2026-02-19 09:57:38','2026-01-20 05:57:38',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(166,2,'3956f7f6d9bcbefac8cad3cb437559f6c4fb41e59ec5e54e4d7d9ea3ef5cf73c','2026-02-19 09:58:36','2026-01-20 05:58:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(167,2,'2bece4e92041e671592d22ae0c6a82527d00dd0d6ee794d54dccfca9a469ddc5','2026-02-19 09:58:36','2026-01-20 05:58:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(168,2,'1f8a79d1c65faa493860c7ba95e51a8ba7492158a627c1640ae0f527ff603764','2026-02-19 09:58:36','2026-01-20 05:58:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(169,2,'59aab0e60a9f536661c2750e37b258da87b0abf4478a935899c40a7036f1df6c','2026-02-19 09:58:39','2026-01-20 05:58:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(170,2,'7cf3d0e34fed0f50e9bcfa1856a0aa94969c3a272869660875d9cdf868b33d4c','2026-02-19 09:58:39','2026-01-20 05:58:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(171,2,'3b8c05257cbaa07a28c8bdde47b6a144e743c1cdfd59cadc7377409a04980f3b','2026-02-19 09:58:44','2026-01-20 05:58:44',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(172,2,'17ef8eba37d96a560550ba6418a107bcf2916cc08f50ff181230b45b9df3c7de','2026-02-19 09:58:45','2026-01-20 05:58:45',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(173,2,'6a55c7ba48ad7dfd08824195da011948112c4ce93f855c3275112251961cc6a5','2026-02-19 09:58:45','2026-01-20 05:58:45',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(174,2,'657b968be9c49fa2c40a9b1aba7da5578df9079cab0d775dbd60467d08f84dad','2026-02-19 10:10:52','2026-01-20 06:10:52',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(175,2,'0de66d99991420a5e4b5ede1ff85944d03af30e2fccde5d9819758e323ad27b1','2026-02-19 10:11:08','2026-01-20 06:11:08',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(176,2,'0dc6d9b1fe4a38a103743abe87fa7475fbe88f7fa49c6ab38971c2c416c11d31','2026-02-19 10:14:29','2026-01-20 06:14:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(177,2,'eb87e1e59026a5b946d99d336470e1437fd82d3085d068b24dc9f60d2e56a016','2026-02-19 10:14:31','2026-01-20 06:14:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(178,2,'1cbe3ff5f6f8d40eeb7e3359108154b285d2781532e774f31ec79bec7dd6acf7','2026-02-19 10:14:58','2026-01-20 06:14:58',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(179,2,'51810c71741f8b8e373db566aacd788f70c22f090ddc6f1fbedab39928f70086','2026-02-19 10:15:00','2026-01-20 06:15:00',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(180,2,'ae5ab725df29265ab6022fcb3401d4aa1f367b4305eec6ba29d38cadda91691f','2026-02-19 10:16:25','2026-01-20 06:16:25',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(181,2,'fc3187ecc9e4f9ff653bb54837a961f60b1037e8ec79da2b3fdfb31e48827355','2026-02-19 10:16:26','2026-01-20 06:16:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(182,2,'5667f955acd512c0e5c79f6610282d43329a4a8e7d49ac455b7f72f60927b2bc','2026-02-19 10:16:26','2026-01-20 06:16:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(183,2,'0029f8082fc51d9d35dec1da810b8e4a35babce618d3adfc82c5812bcf037e59','2026-02-19 10:16:27','2026-01-20 06:16:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(184,2,'058ad6fd27cd017f3bba793e11e045cf40cd0c560e6c43efafb71b8776298083','2026-02-19 10:20:25','2026-01-20 06:20:25',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(185,2,'d19e240666ff78e4d4b87035ce5bdef26b2d0a5b33b2a71a615d7c55d7572407','2026-02-19 10:20:25','2026-01-20 06:20:25',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(186,2,'aee66802956240db2d95f7f6c098ecb2d1e6e9cb550e2aa72a0283fecfd48fbc','2026-02-19 10:20:49','2026-01-20 06:20:49',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(187,2,'eb326964921447925c22907c58887ef89226ca6a7f400e0348bc1795440ac30a','2026-02-19 10:21:04','2026-01-20 06:21:04',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(188,2,'87f9cc7410ebd959929f8ef5201488bd9b60fc72bd965cec9a0056734baa9a52','2026-02-19 10:21:27','2026-01-20 06:21:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(189,2,'12e7bd0d5afa3df43a2f4ebbe413633bde03984d10b2af68bf9af7e40b7ad98b','2026-02-19 10:21:37','2026-01-20 06:21:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(190,2,'0780bbcc32fe153832d47eb885c24d9fbe47738f73b8a219356b1ebcaf137edd','2026-02-19 10:22:02','2026-01-20 06:22:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(191,2,'9e70ca05b76c8f1582e15e4907fc91c44075eb68c72074ba2a0e1c56a8f46406','2026-02-19 10:23:37','2026-01-20 06:23:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(192,2,'bcccf2b311afc78fb5d573b2b36d8f677a5132e80a367e78a5dd3548e731e4fb','2026-02-19 10:23:57','2026-01-20 06:23:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(193,2,'28025db5072b714e59bc3a2b56e0be609a1fec43caceb2890c9f2a3c819c10f2','2026-02-19 10:29:12','2026-01-20 06:29:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(194,2,'46a2eb7b3135599eb468abbd57694dd0f758483d4b7fd1820e3ddeca865f7275','2026-02-19 10:29:13','2026-01-20 06:29:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(195,2,'0d2caf878cfed5bf8b65c21b8e27623341af9b5bf48491091216b03ec6f7de07','2026-02-19 10:31:18','2026-01-20 06:31:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(196,2,'4cec22ae6269fc3e61ce4a0b93efd5bdfd618fc8310b064f39638daeb1c6a2fe','2026-02-19 10:31:20','2026-01-20 06:31:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(197,2,'cd290b3bfad4deb73cf0c2666178d33b5b780145957417e24260f293be3923f0','2026-02-19 10:31:21','2026-01-20 06:31:21',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(198,2,'136423ec8dd4cb198a702a215c0e1b4bd155a06371bda59bbc4d4608affd28cc','2026-02-19 10:31:29','2026-01-20 06:31:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(199,2,'65f29ff22d8e95113a8e11018ac02fe4d5ec4e4ca0beb855c6491e4f00454f1f','2026-02-19 10:31:30','2026-01-20 06:31:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(200,2,'b59a37bf04f3c691e26ba5ff1d0678046884f24a482db0bd3fb8b7c97b4c3922','2026-02-19 10:31:30','2026-01-20 06:31:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(201,2,'d4df4852206200f8327b4167878fc88ace3db9894a1ebd9372d2121b47b21e20','2026-02-19 10:31:41','2026-01-20 06:31:41',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(202,2,'4da690da83a173133e9161bbc72f771715143ef8688eccd9f34975de94ff06fc','2026-02-19 10:31:43','2026-01-20 06:31:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(203,2,'fba2fd13f57e35ae51b1f77df61e9bb9778cd265a19ebe2865f63de84a12e975','2026-02-19 10:31:44','2026-01-20 06:31:44',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(204,2,'58e7cede61bf62128476e2c84e75730b7b0a877f74168812dd184e6895b35d1b','2026-02-19 10:35:17','2026-01-20 06:35:17',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(205,2,'dac52dd22b042155bc3b05cab1f8e6be9517e24009b9c944fb85b0e8153d9908','2026-02-19 10:35:20','2026-01-20 06:35:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(206,2,'0a7a5a70781b33be827df61a4f8a032038d671c3f0f14adb0e571991d0b45dcc','2026-02-19 10:35:21','2026-01-20 06:35:21',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(207,2,'246d8c56aafa537fe6f931c977e33070baa75a37e72d55a76767c40d2a9c82ea','2026-02-19 10:35:21','2026-01-20 06:35:21',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(208,2,'32db5f567491a6fdc93afe67e8427941facee75fbc20aafd283bc3a9fd16f0d7','2026-02-19 10:35:21','2026-01-20 06:35:21',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(209,2,'36f9d1e45bb3f4d930d61222ea1f04d5ee6af7b3ed8e8fbfc6fc02ea4ac46133','2026-02-19 10:35:30','2026-01-20 06:35:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(210,2,'bcfaa4bba056958f95bf88b1477869d3c97aa2af82177cc49a6e597199463224','2026-02-19 10:35:32','2026-01-20 06:35:32',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(211,2,'282454dcc807e29fb041a79c3813ef29cd467c02106fc1c66887d38fc744d9dc','2026-02-19 10:35:36','2026-01-20 06:35:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(212,2,'1dc03c233fd16b0a70afe113826f9b95910017dbe3269b3cf8ade14388f9726b','2026-02-19 10:40:08','2026-01-20 06:40:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(213,2,'92fa568c6e5ccfe7fd4dd2807f218310232569d4eb5bb1aee0a5b7ff5ee85f7f','2026-02-19 10:40:08','2026-01-20 06:40:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(214,2,'13d0bd31eea4e2c9e1f0437abc3f27aa5aa74d34a674f894898170aeab32d8e0','2026-02-19 10:40:08','2026-01-20 06:40:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(215,2,'677551e3008ed0c24b7df270b4af594b0d7f64b40aac61e18ddb8c34746e464a','2026-02-19 10:40:17','2026-01-20 06:40:17',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(216,2,'35ca5c4a22b84ceaecb8ae13ba9339df83573fea4bba104a5e6c187df882e696','2026-02-19 10:40:19','2026-01-20 06:40:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(217,2,'3addd2b4d36996317d0dc5140a6d1e13e55cf00a043928b886cfe4cc98623d7c','2026-02-19 10:40:46','2026-01-20 06:40:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(218,2,'adaa7b0c66dba030faf34d33518bf779ee03c39674527ba1be56b5ce34504aa1','2026-02-19 10:40:47','2026-01-20 06:40:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(219,2,'a80f7f1f96ddb94e4af23dbc682689fa8054abf632a81a211b632d3a14cb6145','2026-02-19 10:40:55','2026-01-20 06:40:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(220,2,'b4903d24f9f5e2ad5f6aee366c201929f3308428248208f007ffac3aed250c78','2026-02-19 10:40:56','2026-01-20 06:40:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(221,2,'4152c8c19be5200db0c117b680dd177121fe0e618a4e36a7a3de1f37bbe9e036','2026-02-19 10:40:56','2026-01-20 06:40:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(222,2,'fce0d15ea859acacc78a2c0885a6488996bfa5f7a244b595001776161e4fd2b0','2026-02-19 10:40:56','2026-01-20 06:40:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(223,2,'ba0906289859d1fe3c13a4ef6cfba6bfc3cc5b3e9c3a1b51fe7a5e68eb50cdcd','2026-02-19 10:41:07','2026-01-20 06:41:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(224,2,'43f4dbf46f5b9aa3b87807b911d2a00a8e7f34ce3d534a2724365bc5e7ec2479','2026-02-19 10:41:10','2026-01-20 06:41:10',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(225,2,'58360af9c4d1755012d8f8c93cf7390610932bb0d808047a756622e384f1c314','2026-02-19 10:41:14','2026-01-20 06:41:14',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(226,2,'662b4205a79f5e0e182912d07318336dacbd48570c05c458095b2c409cb77d6b','2026-02-19 10:41:29','2026-01-20 06:41:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(227,2,'5593c897b5c6a57ee91fc8356d5decabd7fcaeda6072b61c279c8e55fc4a320a','2026-02-19 10:41:30','2026-01-20 06:41:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(228,2,'70c71a2a80af22c47ce032d781b54ab7abbe72d2c15cbb81bf4c01aad0fe041d','2026-02-19 10:41:30','2026-01-20 06:41:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(229,2,'858fe27f2f6b2e42619a6f6d2c929c2aa3d4159b8c180ac2203dcae93996da9e','2026-02-19 10:41:37','2026-01-20 06:41:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(230,2,'402d3d280b1d8bdc4910053dcfc79a75f9730fb4d51067289b651d92e40b686a','2026-02-19 10:41:43','2026-01-20 06:41:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(231,2,'0dc638b82e3f0335781874fe867b43de8a1fef71f7092891e798812a7e4895b5','2026-02-19 10:41:45','2026-01-20 06:41:45',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(232,2,'e26376847d0ab4c0161ead9f02ad3b8baeaf1616f2b8f54efc01191604c180a7','2026-02-19 10:41:46','2026-01-20 06:41:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(233,2,'6a0d1959b06d35074052f6930b3e331722c633a6f5e5c3444b25410f6b1f4c27','2026-02-19 10:41:47','2026-01-20 06:41:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(234,2,'9d497c31bc4eec2a037e409f0dcd2b5c3f70e59c5e5c097b659e3934f81a78a0','2026-02-19 10:41:47','2026-01-20 06:41:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(235,2,'ecd107d9ff405cfbb883bed16b4315ca375aadec470e913a5f472abb93bda8fa','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(236,2,'451454265690ccaae02a8cad2a893d8dc1077fd9ce111eaeb87ca01cb167029e','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(237,2,'05a6aa46c31ab616b694172ad4d7b7137fa21d4c476deaf9eb42fd820e537666','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(238,2,'f7a80fed0149c5998ca36bfd09ff29054dcc744f266a216759c0f4961635ff6b','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(239,2,'4816f3699389816f7021b2e27dc290f55a01c461d74377a56556cf0cbb7e0dad','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(240,2,'f511b65a536e7ecc256b5429aaf67eb743f434b0be1576979339c762818d09dd','2026-02-19 10:41:51','2026-01-20 06:41:51',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(241,2,'aa1c6d8cf47a8c2cf6ca0bbe1324248b69221274b71aae6da6988fe1bcb13d2f','2026-02-19 10:42:02','2026-01-20 06:42:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(242,2,'15d1b8b2cbb2e9cea9215266a6d94dffa9e4f5773544e4ee967212a720525ce2','2026-02-19 10:42:05','2026-01-20 06:42:05',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1'),(243,2,'78a7f3f5801afe8a177920241cae68b972fb66bb2a348d508e01d42cd70d646a','2026-02-19 10:42:44','2026-01-20 06:42:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(244,2,'a416cf5ae7fb338f24b330ac59eadae92d59780bd959df0937102ba0613c81f0','2026-02-19 10:46:18','2026-01-20 06:46:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(245,2,'7574d71bfa61bcb92fbff4459554a8708f20b646740b7a8c108e093df85b938e','2026-02-19 10:46:18','2026-01-20 06:46:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(246,2,'6f31c069a5f6ea858e14fdb34332225a4437a503e1b9c8f7bc4a5f3ef4318a9b','2026-02-19 10:46:18','2026-01-20 06:46:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(247,2,'970951462d4d9267a963698a260e58056f37169719d0367f089d30ede15dafb2','2026-02-19 10:46:28','2026-01-20 06:46:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(248,2,'ddc927dfaee9546e5f33a2676cd7418a039c11e044ef3ca71bb443fe60111e39','2026-02-19 10:46:32','2026-01-20 06:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(249,2,'9c4de3ab09de81a2857e5107084e391316329d98085b48cb9f7dca9ae95f3939','2026-02-19 10:46:32','2026-01-20 06:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(250,2,'2655008e1dc52f6933f7a2f4adca69a72b00da10baa33b1b72527e96919501ab','2026-02-19 10:46:32','2026-01-20 06:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(251,2,'8a2feac352f89ee8905e13f26d2e10e061e512f2c85682ff0d0d80f60ddb5b27','2026-02-19 10:48:35','2026-01-20 06:48:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(252,2,'958f509fd564506c39d4b126f08b2d66eaa9f0a1e54348a14aa4e1c357271527','2026-02-19 10:48:37','2026-01-20 06:48:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(253,2,'51cb9c1db4e84be15ac39dd7254adccc2bbbfcefca7ac1674f16b36eb6b1bc11','2026-02-19 10:48:43','2026-01-20 06:48:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(254,2,'678614a595bee34019be4b1fac596c95bfeec906700795bf03f870ee75a65b99','2026-02-19 10:48:46','2026-01-20 06:48:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(255,2,'fa409e27c795721df2b5837e807a689df742a8b7ad9064acde65ea376af2e2a8','2026-02-19 10:48:47','2026-01-20 06:48:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(256,2,'b5b3abfb650f246cbf34c47fa76a270b08474c84655424aac8a5b381427c2bb3','2026-02-19 10:48:51','2026-01-20 06:48:51',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(257,2,'90b15c644f90f474ca982f90d4453b958bc2180eb69d94690c78e5aed878f7dc','2026-02-19 10:48:52','2026-01-20 06:48:52',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(258,2,'515181143f0bbac33a401604ba3fbee14e44c19b87515b50b67d19e512f9af9c','2026-02-19 10:48:53','2026-01-20 06:48:53',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(259,2,'801901a59ec4178b9035d52f10a7e360b637908fe67183d2b0beeac0b320eb84','2026-02-19 10:48:53','2026-01-20 06:48:53',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(260,2,'78ffae89a1324ee8796ed7ccf9e45ab8f071ad4fab026423f3c6e9baff37d2b2','2026-02-19 10:48:54','2026-01-20 06:48:54',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(261,2,'3762d92ac07d8f891a8652be81bac06517c546c2cba451e2727f993940bf3acd','2026-02-19 10:48:54','2026-01-20 06:48:54',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(262,2,'0ac6d64976fb6da64263b025a8241c356872949e34ac5709f55fefa485813af1','2026-02-19 10:48:54','2026-01-20 06:48:54',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(263,2,'5c1e50bfd507deb891489ef4c06f78c5921e5069e31e1e9a410d6f5ae7a0b779','2026-02-19 10:48:54','2026-01-20 06:48:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(264,2,'18b9368c26fcd00322b938cb06a1dc7bb01ff196c77f3f554e1fffffe3efe263','2026-02-19 10:48:55','2026-01-20 06:48:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(265,2,'fb5fff63d5eabe313044eba7a9c0ea0dd92ec418ef683261c424fca32af7717d','2026-02-19 10:48:55','2026-01-20 06:48:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(266,2,'30a29807f3d77d5ad69650ec0d011aa98a498d185be5f0ddc6163c4e816f3c21','2026-02-19 10:48:55','2026-01-20 06:48:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(267,2,'ddd04295f4f5b1de86d439c72ae5e67aa28c9e393ad630a3dd30894c02dc9865','2026-02-19 10:49:10','2026-01-20 06:49:10',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(268,2,'1d7cad92ce841374999b0c9f2a1b023bbf53a0c608772b69821a7a08100d296f','2026-02-19 10:49:12','2026-01-20 06:49:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(269,2,'fd337eb7cdd67b27d5a4732b32e88a381500a3b4c62f600ae70e01665c3b898d','2026-02-19 11:00:18','2026-01-20 07:00:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(270,2,'f447e2127f897187b36206fcc057a4cee1dbc915442d29a0774e7e7428b75d6d','2026-02-19 11:00:20','2026-01-20 07:00:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(271,2,'4da196ee30a1378065e866b05901f41c691bbc0a6f6e7cc185b945112cad11a6','2026-02-19 11:01:52','2026-01-20 07:01:52',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(272,2,'6f577ae499ccd223980d8e91356404ebe577261552aee10bd1c3857c255a3766','2026-02-19 11:01:53','2026-01-20 07:01:53',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(273,2,'81defdb5b7d7d533e36f259c6f8fd3258d81b1b7d942454f8d4f3681dfeb56b2','2026-02-19 11:01:55','2026-01-20 07:01:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(274,2,'b8d865c28ea82810f15d3bca45765885c4d46a4ff4014186d51cf36b5bef304c','2026-02-19 11:01:55','2026-01-20 07:01:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(275,2,'2290ca59071510ef78bffafc44a5edd5bd0467e7f519df5a68c5745cc5def17e','2026-02-19 11:01:55','2026-01-20 07:01:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(276,2,'4262d01fc6e3dd0807e747ab65c2034d1866701ccad4edaab4db0bb0ec611a91','2026-02-19 11:02:09','2026-01-20 07:02:09',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(277,2,'74539220cd02d493e42ef2e98b58c83239337efe12e68ff67b7a50e5a1599062','2026-02-19 11:02:12','2026-01-20 07:02:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(278,2,'35f68ac2bffdae38c51aafbb028d90c0568025fd40df767d30279fdb26649857','2026-02-19 11:02:16','2026-01-20 07:02:16',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(279,2,'f8246ecf3cab5528526c75d67d998a7410130670190b6d012dc59c14c3462f97','2026-02-19 11:02:20','2026-01-20 07:02:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(280,2,'a5c79a87355018d27099404acb8537c8d0adee57bc5debb5d19a4fae095a888e','2026-02-19 11:06:44','2026-01-20 07:06:44',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(281,2,'0490d37c760c1f93f63a6d12242a587f7130693642e5fde972afec21f6bffa20','2026-02-19 11:09:07','2026-01-20 07:09:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(282,2,'25501a113f65cf3a150efb1fab4fb48fcb493a19f6ca343843474eb1826c1bbc','2026-02-19 11:09:08','2026-01-20 07:09:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1'),(283,2,'aab966f2eef41f34481bdad0d22779e39c1e28d1cc1072fdb682302e8c3c5002','2026-02-23 05:16:03','2026-01-24 01:16:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(284,2,'6287808509c19b89eeeeb630604686c529beecf0e9a08456543b5200736d6c18','2026-02-23 05:16:03','2026-01-24 01:16:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(285,2,'a24b9a6be393bf65301a014e7ccf8db3d3f660f3fa64ee26755a3f718cc2201a','2026-02-23 05:16:03','2026-01-24 01:16:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(286,2,'90b5cf4bd69a2cafcaeacff1b0e19141a80d7f3050036d43c97d3e91dd580c35','2026-02-23 05:16:15','2026-01-24 01:16:15',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(287,2,'0a4e22bce52aa2e95d1a66607f8907306abcf36e83c771b94b1b45d4ad855062','2026-02-23 05:16:16','2026-01-24 01:16:16',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(288,2,'6bb01960c9f274a7f409dd992840990ec1c516739b8c2461d5e0b3af4213dfd2','2026-02-23 08:03:42','2026-01-24 04:03:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(289,2,'784d0e003c78162d26c7dc4e215d94a7b93ebb55b91c5c4a8671440f1237e8fa','2026-02-23 08:03:42','2026-01-24 04:03:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(290,2,'f3c86357ecfe91f2e1f00430882e204328dc1f92a702a36aa7fde08a9897a412','2026-02-23 08:03:42','2026-01-24 04:03:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(291,2,'217aa0f2adc426341655415ae37c7b23312a4ee7f04e4e326fcaef9b02fb3714','2026-02-23 08:03:53','2026-01-24 04:03:53',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(292,2,'7f92b98cb7d91b72bee1b053492d275a07942f19f97de4d95d038594ef151397','2026-02-23 08:14:19','2026-01-24 04:14:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(293,2,'e032489a41dde53b0acfb380e327ab6fd60c0f637064da1dad52003a607dedba','2026-02-23 08:14:19','2026-01-24 04:14:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(294,2,'a654f8084f18b008de2a16340fd224489fa75df49ba5d39a24b1a9845faf8ab5','2026-02-23 08:14:19','2026-01-24 04:14:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(295,2,'cbf089a6592a721c4589a212f495d71a43954d87c257360cdbe3009c3f104d28','2026-02-23 08:14:48','2026-01-24 04:14:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(296,2,'24ca911aec3f8f82a04124d778df8fbe57e13e8a9614bf90f4ef190f9e547213','2026-02-23 08:14:50','2026-01-24 04:14:50',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(297,2,'f6dd1dbc12aee6d3a04b946dbc48d1e6d3d1728e641366d923068332a1a72588','2026-02-23 08:28:36','2026-01-24 04:28:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(298,2,'206aad7be354be91706724e11f9afd960567d6bf17effbfa755765bb16c15608','2026-02-23 08:28:36','2026-01-24 04:28:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(299,2,'3177bd2f6eed3e08c9e2669a5895dc3d4e2b3d9772faa1c509a5d89ceaa0f66e','2026-02-23 08:28:36','2026-01-24 04:28:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(300,2,'9d84c74de72c1c18c75b27ff7bdb882770d7e188cc27605ee0879e0a47b3897e','2026-02-23 08:28:55','2026-01-24 04:28:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(301,2,'bb6f1657beec1a70b01ff87b7e429b3e5b7be83fcf1b85a1080ff0c9ef3774a4','2026-02-23 10:17:18','2026-01-24 06:17:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(302,2,'6d56f86fc874978890041875d724f4fc449184ac7d61b034116b701ba05badc1','2026-02-23 10:17:18','2026-01-24 06:17:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(303,2,'193d6e8f3bdbb7b9f8fc2f8e50d48b867a960740af52f6a0b6d6d90f1c0f789b','2026-02-23 10:17:18','2026-01-24 06:17:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(304,2,'8b149f5433535d8e6be3bf4d6cf7a59c24da637fe44857b2c163392d827b2506','2026-02-23 10:17:27','2026-01-24 06:17:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(305,2,'8e03b74fdd5d5e19715b8630c3575454956023837ebe8bdaad23418ad52dc818','2026-02-23 10:17:28','2026-01-24 06:17:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(306,2,'3c6993e44ee49fcdb90af282fb9594ccdf13006e85fb034ac1ad53d00777cf7f','2026-02-23 10:17:58','2026-01-24 06:17:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(307,2,'f7d4f33f56a3da337b9f8ecc7f95a91a1c36d4e577a7964ca5daabdc94f8925c','2026-02-23 10:17:58','2026-01-24 06:17:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(308,2,'b380b0216a90c6ef06466bd8c7f616c8c6fa4b2ec0180ad99896ae28cacc8518','2026-02-23 10:17:58','2026-01-24 06:17:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(309,2,'d324fd9826b9000e8c291e620067f86cd137488077e70f17735e3e0206733596','2026-02-23 10:18:06','2026-01-24 06:18:06',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(310,2,'7242ce4546ec0e8314e1b8b0aeb8e728a1dfa1957d4c2b5d777446ed0a8ea212','2026-02-23 10:18:08','2026-01-24 06:18:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(311,2,'55909c4f5c55089022400e89c8a66cdd3464e77b99600b2b6d58b1cff52139bb','2026-02-23 10:23:48','2026-01-24 06:23:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(312,2,'94b5af9c1cb20fbd882545f5d8c21ef58ac98eb163ae48b888cf65275a158ac1','2026-02-23 10:24:02','2026-01-24 06:24:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(313,2,'3f6a15616731f168638f7ba4c6cb8a9b0ffd828de17074175e4d9836abfa3a4d','2026-02-23 10:26:07','2026-01-24 06:26:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(314,2,'c8b73a7f7c277240b442b9e476b69405fe079b622748f8c920fee3a023a43f57','2026-02-23 10:26:09','2026-01-24 06:26:09',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(315,2,'53066d2c592e95c16388e28a8351638573c184bae3f129878fa96a8987149827','2026-02-23 10:26:29','2026-01-24 06:26:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(316,2,'02ec24b1cb7268c939b1c1c9eb6f134d1c97f14d14845fc119be07caa1dd8691','2026-02-23 10:27:10','2026-01-24 06:27:10',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(317,2,'4437225b207b8da218e9dfa105b76e1117a4d3c6a15fa14e78456403f8e40d4e','2026-02-23 10:34:20','2026-01-24 06:34:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(318,2,'9804dd126e7a624b87d299685138dfd92ebf14104815efddbc82181380ddb054','2026-02-23 10:34:20','2026-01-24 06:34:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(319,2,'e48a05d35d2e694635bb972860218faf84d4714e57c319143c38e339f204df2f','2026-02-23 10:34:20','2026-01-24 06:34:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(320,2,'eb26c8a8fbfe9a5e886dc53ef93fe5baa0eef221ba668dcde6c0c7679f80d3fa','2026-02-23 10:34:34','2026-01-24 06:34:34',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(321,2,'fec41786fde5ee7f09dbaa7f4128b0392a9eb6401d5ddf000ed9431c88715d34','2026-02-23 10:34:36','2026-01-24 06:34:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(322,2,'307ae4394a2f72fd81c47b9a507d3ceb825034cd8e502f74ea7ea39be23b77e0','2026-02-23 10:34:37','2026-01-24 06:34:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(323,2,'787c00ef155e5a4d068cfe4a2e5bb3b340dc609fc74a06ae370f8358123d76c0','2026-02-23 10:34:46','2026-01-24 06:34:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(324,2,'4a5260a8b49a64a22378c3ae1fbced5076e2928009a296da06092a9bac6b8cf4','2026-02-23 10:35:17','2026-01-24 06:35:17',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(325,2,'5b447c0f27cd497fedad664e7ad14c5e5017043a16ea86a6fc25bf2f41eb2519','2026-02-23 10:35:18','2026-01-24 06:35:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(326,2,'2d959210c89c419b965458af5592f187d9630b5468234c18fc22085c145571dd','2026-02-23 10:35:18','2026-01-24 06:35:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(327,2,'57a8016dd2e8dc28417a3d07969dda010e1b38a50d2a307b3f480630579a501a','2026-02-23 10:37:44','2026-01-24 06:37:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(328,2,'005bccfe783e762ef43825c054c14089daf52ce2e49ac8208b519b2f4b489b9f','2026-02-23 10:37:44','2026-01-24 06:37:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(329,2,'36fbaa72a9947fb272a1be597094bb7e21ec4063c574c2a1720bd69f216f0464','2026-02-23 10:37:44','2026-01-24 06:37:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(330,2,'fdd1c03dd95c4f979a39c9aa3b94362ea4ee189566ab2689d21a1017bc996cb1','2026-02-23 10:37:55','2026-01-24 06:37:55',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(331,2,'e7c85686ff710de5b7f210d30b6ba282805f6407928e05ffcda6a7dcad14ec72','2026-02-23 10:37:57','2026-01-24 06:37:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(332,2,'9849e66adbd13b76215f07c3a1c531e4d1a98362c5cedcc181124b5c814c67c6','2026-02-23 10:39:07','2026-01-24 06:39:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(333,2,'36c01e995c6fed0fbd449b5ec72da86e8c4f5a0da6058dee1dfc88149f41006e','2026-02-23 10:39:11','2026-01-24 06:39:11',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(334,2,'60349705a3ed005a37f68bb99087b13fe4ca1af46f9d7724df8171eab3ba2461','2026-02-23 10:39:29','2026-01-24 06:39:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(335,2,'3cf858640e6bc0caed5b682dde791e2ae4d68ad5e062773ef41f6f2bf36ae551','2026-02-23 10:39:29','2026-01-24 06:39:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(336,2,'5aa1c0ff4877c368cc989b8c504ee7340204a24f6f94a2f3f3251a10669a2475','2026-02-23 10:39:30','2026-01-24 06:39:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(337,2,'099f22a72d55f3a7af69cdaad8bbd38230d7c8da6b62831416fdcc59d5bfefe4','2026-02-23 10:39:35','2026-01-24 06:39:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(338,2,'f19247de589a591fa7032d28c86e8a44a32a9f245b2f5b2f7bdac2d06061e5f2','2026-02-23 10:39:39','2026-01-24 06:39:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(339,2,'1c5d5c6db888e3cf8a569ede1e5c00025b7a822cd218fe3a03703801c3301c8a','2026-02-23 10:40:41','2026-01-24 06:40:41',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(340,2,'12d9f59aadc2992988c2568ff92a31cfe3eaab216fa94cd57683c017a6a7666b','2026-02-23 10:40:42','2026-01-24 06:40:42',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(341,2,'6b621f4966bb676e5fabcd095ee7ca9186777a1e55ecab74cd57f1afd37736af','2026-02-23 10:42:13','2026-01-24 06:42:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(342,2,'3e8d69c90457b56125ec9d6864aade7a964690a5393c0e82819580938a6ec5f3','2026-02-23 10:42:56','2026-01-24 06:42:56',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(343,2,'9f989ba878404d217661178179f2a9ce6cb786c00814ab5dd94054812b3a1a09','2026-02-23 10:42:57','2026-01-24 06:42:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(344,2,'61850d796f81397fefcf9fb34d635c4bbafe44836109f1185def8692630661c1','2026-02-23 10:42:57','2026-01-24 06:42:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(345,2,'2eab1548f8441cdff66f4f6259003f00e919e64761b8b2bc7fecb7c1cf2a1254','2026-02-23 10:48:35','2026-01-24 06:48:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(346,2,'db605f6006b5ff32739684d38002ac43847616604bdea13fb21ba89cb48efec9','2026-02-23 10:48:37','2026-01-24 06:48:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(347,2,'9790cd6e4f72d48f87b4aa134aa5b52b7b87496ec2850a2d23a4dccfd9a611dd','2026-02-23 10:49:35','2026-01-24 06:49:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(348,2,'a22fb6d5561ec76c0daa75516056a1f2b042d2ddc3e4d790d8d4bc71e8f334ac','2026-02-23 10:50:04','2026-01-24 06:50:04',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(349,2,'b30a788fcc71004e44f55cd327d35b5f9e153a3e1a6701fb5ee0575f943209a4','2026-02-23 10:50:38','2026-01-24 06:50:38',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(350,2,'9e20d346beef513edeac61728bfd2f86faedde304b53164f567f162684f16e0f','2026-02-23 10:51:24','2026-01-24 06:51:24',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(351,2,'f13f7f10210c54eb459b11fb308926c690904d17e21f7d41bab1cb8d878b35a3','2026-02-23 11:01:13','2026-01-24 07:01:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(352,2,'f186aef3d3764ede8932983e3e72998412239419dc00849fd9490720b3304c4f','2026-02-23 11:01:14','2026-01-24 07:01:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(353,2,'7f1a8fb7a57cc3f24be4b166c76df16e6529371cde00d9b2b54eee52abd5b2bd','2026-02-23 11:03:30','2026-01-24 07:03:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(354,2,'2036cf8ef86595fac3809a0e096a367b37d1a6bbbb2e377888f7a5aac715ae23','2026-02-25 05:24:18','2026-01-26 01:24:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(355,2,'cbc3f3991c594adf6ff478ec590d549d8c1eac2fce0a0ff18be688ffadb0cfc3','2026-02-25 05:24:18','2026-01-26 01:24:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(356,2,'9a97a909534824108a07942004b0efa5d7d3b72df69b0916586e2c1f31de1e76','2026-02-25 05:24:18','2026-01-26 01:24:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(357,2,'2fcd5f6f4a850378844e00b62d3d19187ef999eebfb2da1b981d4d13d41af94d','2026-02-25 05:24:26','2026-01-26 01:24:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(358,2,'49947e620f546bed4e7ce3b7bb4c7c9dfc715a847c29b67cb0996defd048292e','2026-02-25 05:24:28','2026-01-26 01:24:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(359,2,'ef776c069aad347902b692bf41d2d8256ed20aaf25c43c0fc1c7177cd92ef3ba','2026-02-25 05:24:30','2026-01-26 01:24:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(360,2,'c3009304b3e13bc570b0a6319bbd62aab089403e2f1a649408721c5e8b78ce31','2026-02-25 05:24:30','2026-01-26 01:24:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(361,2,'00804f65131a5ccc1fcc0fe341151e8231d48b920ce4da89ae3f1afcd9292054','2026-02-25 05:24:30','2026-01-26 01:24:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(362,2,'6af5703c342ec8c741de840de271408dad486f14122f54abdebee7570511da44','2026-02-25 05:24:38','2026-01-26 01:24:38',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(363,2,'039010105b69316d147d63a2a99158e6479b7545c686368ffb100c358eba5db5','2026-02-25 05:24:39','2026-01-26 01:24:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(364,2,'906f0b4502f8b69e32d12e8d611e8cd95d91079ae2526037e5188f898dd2fde5','2026-02-25 05:26:18','2026-01-26 01:26:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(365,2,'23fd73951e5650907a640bde333d760464dcaab57ebd37c12be22ee2d07f85ad','2026-02-25 05:47:17','2026-01-26 01:47:17',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(366,2,'a17258e9b1ea8eac6d0fef6ff95a9e4a83ceda1b4e7373057f3a1ef8f5920690','2026-02-25 05:47:17','2026-01-26 01:47:17',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(367,2,'facab3b0a8365046a64e23fa24c8a18adcb4d7edbeb0c0fabe19a3908f515d14','2026-02-25 05:47:17','2026-01-26 01:47:17',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(368,2,'cc7a283975529a1eec4aa18de3f2f5c7239f7febf6152849cc98030c945d4f4f','2026-02-25 05:47:24','2026-01-26 01:47:24',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(369,2,'5447a91c7fc1b4012c14d7b4da0f658fbb76515576df3fdd2a8dcc3bbdc655e4','2026-02-25 05:49:02','2026-01-26 01:49:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(370,2,'c67c66a4fc8700a552bcbd5d69d2b6a9220552c3ae8b5cf612d9760ff04ff4d5','2026-02-25 05:49:02','2026-01-26 01:49:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(371,2,'4773b6245ac0af17de4d1bc55df1bb281c6e10d2c6116208e88ba193a57527ec','2026-02-25 05:49:02','2026-01-26 01:49:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(372,5,'4108116cc31c749c0adacfec0f8faa5863e63c93b127a71ca026f63769c2412b','2026-02-27 03:41:46','2026-01-27 23:41:46',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(373,5,'c3f9b3f834176fe93c022d9a8890806bb5894f2ebb3f3a4bf16e71fcb24ce3be','2026-02-27 03:41:48','2026-01-27 23:41:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(374,5,'5a500c59e55f634c4414e57b98cf6284ad2b96c330229e6aa9cff209fd4223cf','2026-02-27 03:41:52','2026-01-27 23:41:52',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(375,5,'cb3d314cac04e7efa82143215f568a10383dead70026950035374c77a8befda2','2026-02-27 03:55:31','2026-01-27 23:55:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(376,5,'6d5335401319bda08be3ad6b3886828c0d94b792b20aef21b24352891be6cffc','2026-02-27 03:55:38','2026-01-27 23:55:38',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(377,5,'a6e44316b741e10d89bb81bd946e344fc87ec79d78c6bc4ef7f7427c0522a1f1','2026-02-27 04:09:26','2026-01-28 00:09:26',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(378,5,'f8550d65cbbc28bb92e9dd86f0582be9fb434e76b64344bc842afb29a55dae1c','2026-02-27 10:00:07','2026-01-28 06:00:07',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(379,5,'6584f71a4e4a23f3c300bd025206218e9d202579291cf86898babe785ec8bca8','2026-02-27 10:00:07','2026-01-28 06:00:07',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(380,5,'a351907323b54b49b690f49a14bd573c54fdc5e53263a63aad7974eba4bb2e42','2026-02-27 10:00:07','2026-01-28 06:00:07',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(381,5,'3b75532b62603424db8a94415b795ab66ca54af87259eed758b450437f014ef2','2026-02-27 10:00:12','2026-01-28 06:00:12',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(382,5,'315f40fa77e70080cc94aa47495d9e45e6ebff8e19fec75058f330ce82654491','2026-02-27 10:00:19','2026-01-28 06:00:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(383,5,'26913e57a3b665bcb5f5c98e0ebd408ad52ec5c63e5f1c94ec52884abac8bb5f','2026-02-27 10:01:39','2026-01-28 06:01:39',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(384,5,'04ec95cd8d797960f09ddba75f5528ea2931be2195a6d73dadb5ada3679617fc','2026-02-27 10:01:40','2026-01-28 06:01:40',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(385,5,'058bb689bafb8e2c667d0ff7faf6d6e0e730043272110bcbec230c3fe239edcd','2026-02-27 10:16:38','2026-01-28 06:16:38',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(386,5,'068b3dcedd7889eb224f0d31b3b26794154cb6b5515248a42d212f7c40854e07','2026-02-27 10:16:44','2026-01-28 06:16:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(387,5,'5eb365dbc347bf0576d91561d586ff620cf00d7f9490f42dd0f293f4726790ad','2026-02-27 10:16:50','2026-01-28 06:16:50',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(388,5,'a2ef7be35c7ca05b4aaf8ed9b65c39fc4d18438613b65d3175650d966e014bfb','2026-02-27 10:17:57','2026-01-28 06:17:57',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(389,5,'f2442077768c5d1db63b74f3836c77435aa38805e2cc0cd661c5cd215ca16ad7','2026-02-27 10:17:57','2026-01-28 06:17:57',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(390,5,'91e42f736dc69abaa53f52b7377803c5c284256c905729c9a066ca9813e33cd2','2026-02-27 10:18:00','2026-01-28 06:18:00',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(391,5,'6fbb0903b7d84e11bafc9ac6a1bc7a8afcd7da4c813df663daea21b35b78185a','2026-02-27 10:18:00','2026-01-28 06:18:00',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(392,5,'6b993f0a82c3949e92ac7c093ecd0486af9b9ad394184c46df6a9a2cd01fe4d0','2026-02-27 10:18:00','2026-01-28 06:18:00',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1'),(393,5,'c40b3f97ec23c78f9ddede566991ee1e330657e59b7d94cf9d2ae0aa537d7f82','2026-02-27 10:18:35','2026-01-28 06:18:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(394,5,'a5e36b8f79af678f69bfc2e922c76a76755ef1fc30559f139078f546c2b82fbe','2026-02-27 10:18:36','2026-01-28 06:18:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1'),(395,5,'21e9b9084da9fcae721c634e7e5a8fc1355b5ba0acea93fce72ecefdf03de76f','2026-02-27 10:18:36','2026-01-28 06:18:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1');
+INSERT INTO `usuario_refresh` VALUES (1,1,'7558537e0f4678dc571d37461ddd4555bf280e5bcaf43edce1e638398be9be30','2026-02-03 07:47:25','2026-01-04 03:47:25',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(2,1,'038e6bddb719e4a51cc0e1a575a71db374ccfe0ff7483e4f19bd25684540cfa1','2026-02-03 07:47:54','2026-01-04 03:47:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(3,8,'0ed677b9f9c732b6970b679389ec573a7221e265976b7a7fa1e1dbeb472b1072','2026-02-03 07:49:00','2026-01-04 03:49:00',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(4,9,'8181ee9d9b37e8463f84891ac6e1107d2b03a9173600559a3a53c1106f32cde0','2026-02-03 07:49:19','2026-01-04 03:49:19',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(5,9,'6d2b06a8740ca74fdaf5198193eab9493e863f5dd89b5d91173cbd565b78bfe8','2026-02-03 07:49:26','2026-01-04 03:49:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(6,1,'e9368a2fa2cd9c794d113943b69e0ea15379e8ab3f392fd44ce06733683366fc','2026-02-03 07:49:36','2026-01-04 03:49:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(7,1,'3c6d3785a575a5329bbc2cbab2ac77c4e383f378a2c402f606158241a87dca3a','2026-02-03 07:56:23','2026-01-04 03:56:23',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(8,1,'aeeae656c5031a47cc723b57dce6ab2192c79c48da906185e3a997b8a7d38876','2026-02-03 07:56:35','2026-01-04 03:56:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(9,10,'63a9134e1f7c6212363617256966779a99347fa0d48fa5989fa2751c9138720d','2026-02-03 07:56:43','2026-01-04 03:56:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(10,10,'75ecf45da83ef65781bdaf830659747744a4171898481213b1e6927de5bc6452','2026-02-03 07:56:47','2026-01-04 03:56:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(11,1,'3b271a484feac2c3d70edbc30b0d2f0b63a943ec5181cd5f6da2cd2076a5e813','2026-02-03 07:56:54','2026-01-04 03:56:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(12,1,'a72d64a7a3f2fe19fa98374b60c0e2a0048e735e2f3caf39f0212ed89ed6acfa','2026-02-03 08:40:46','2026-01-04 04:40:46',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','192.168.1.98',1),(13,1,'d9888ebd86d886a9da4450d9ed1449ce5a0919b0bf6d7a95e434b4c5c9f9654d','2026-02-03 08:55:54','2026-01-04 04:55:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(14,1,'9403ed66083c17ad2c7f184908f86b1a987c5e0a15a268f40e0dd75057246d02','2026-02-03 09:03:02','2026-01-04 05:03:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(15,1,'348ef17cab1bfecbda0958766585249ad583c689828ba3b6d64477b449639ca1','2026-02-03 09:10:33','2026-01-04 05:10:33',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(16,1,'d7b840c8101f2fb18af2b40c4a7f72f2a8e3c92c2cd7deb18ca18dd5e4a16b41','2026-02-03 09:37:58','2026-01-04 05:37:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','192.168.1.83',1),(17,1,'52f96f976bee6753fb807d424ba46b1db9f1afc0f70f0b15c64d499020bfc111','2026-02-03 10:09:34','2026-01-04 06:09:34',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(18,1,'ea39406997ed7e387ed802ec4038830190e6f83ae6cca3c0f8059e8ee96e68f2','2026-02-03 10:59:19','2026-01-04 06:59:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(19,1,'311e38f8349d2deac3cfb8821a0135b0fb441def0d9b4f9c900c63d88b3a02fb','2026-02-03 10:59:52','2026-01-04 06:59:52',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(20,1,'dc57186ddcc023147184e19d8c446ef334cd8f8ec56211c0cee30385e9f4c9ce','2026-02-05 03:35:43','2026-01-05 23:35:43',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(21,1,'1d66ce3913a2c1679fdad13bef71dd1dea554b9ca755dea92adc5f71812ec347','2026-02-05 05:39:13','2026-01-06 01:39:13',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(22,1,'03517b7bc56313c2b8c59caf2a80368f2a391343173bbd293e16aab445fc9ac7','2026-02-05 05:39:19','2026-01-06 01:39:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(23,1,'ee256159aebaf39ef214a3283db5044c982e07c3d2e2bf2fd48273b4c7a11609','2026-02-05 06:02:20','2026-01-06 02:02:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(24,1,'a41916d0eff118e627c0f6489d72e7173855b92f53ba287ea897c621744711eb','2026-02-05 07:01:20','2026-01-06 03:01:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(25,1,'f3d363567013537917c9ab2a7aebb0c82c96a72545a74e21be24ced484b0a4e1','2026-02-05 07:45:34','2026-01-06 03:45:34',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(26,1,'8ebe10c569aa8a2976daee030c961d53a6a8c4ddfeb6f768ac855370dbd75f6d','2026-02-05 07:46:19','2026-01-06 03:46:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(27,1,'57217d8839b1be180d4e03495e9748b5e4bb6042cfdfb70fa7da6ca8165e62ca','2026-02-05 07:46:32','2026-01-06 03:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(28,1,'00c1f42e7a7d81001f5a3d952084799f33ca4e444bf35842d4a13e312f921739','2026-02-05 07:46:41','2026-01-06 03:46:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(29,1,'581cc1c545bdae9c748ea4c926319c397ae362a911bdcc23e6813fbbd7d11dd9','2026-02-05 07:47:31','2026-01-06 03:47:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(30,1,'7bf2b7083ecf6fcbcb950453197cc8aee6fc21d2024c6625c58e070f571bb92c','2026-02-05 08:19:14','2026-01-06 04:19:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(31,1,'8f393bd2e02ced0104c43ee67d5bf2b404c4f78b261df515c135bc6f968d3ccc','2026-02-05 09:18:14','2026-01-06 05:18:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(32,1,'f3d8913e6fbc5ddc48905ae9766aca03dfdf0fb890100be507b9c099b305ca29','2026-02-05 10:17:14','2026-01-06 06:17:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(33,9,'d7838e2c89646f13d3553d8f98e8db59d6e3adeac5eff1048d11957d249a1899','2026-02-05 10:17:28','2026-01-06 06:17:28',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(34,9,'be9cbb4df4cf4f0b8d7bd1b4acea368f3afdc20b899913c1cc69a5f33dfadec4','2026-02-05 10:17:34','2026-01-06 06:17:34',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(35,9,'12870eb9471c765edca5e0e4242a279642943420902372d5efb008a33d2bc0bf','2026-02-05 10:17:36','2026-01-06 06:17:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(36,9,'84a4b423e59734a4fab04cf176c58b55ee62397a104635bcc98ff0c1e9498af4','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(37,9,'b6d826e9f9ceb47d498e0dc0b0e362f72e74c8c9f81992631c4020a6aab385ce','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(38,9,'e6d8338ab872c353469dece8096c2f45cff4dd11d5b48c4ca7a6a37f824748aa','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(39,9,'1f379535720b142656c2efb4019ee650716b4f7d9af0678d66ccd573500f6d64','2026-02-05 10:17:37','2026-01-06 06:17:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(40,6,'51cb714ad7807cf99597b91abc9d87902b758b7c52a489a8185e7fca072284b4','2026-02-05 10:17:55','2026-01-06 06:17:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(41,1,'1953f070894b37241bfeafc790a7b54256463a395dbbe2bc8e9d5a2f3e833eb0','2026-02-05 10:18:22','2026-01-06 06:18:22',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(42,1,'40d2e61b2fc0bd21f4f927692c85532f2394c5a53e95780a870c2bf4c013fc3b','2026-02-05 11:01:45','2026-01-06 07:01:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0','127.0.0.1',1),(43,1,'8e28a51d2b913801b7aba51d402ddaf8b504702e90737b3417a657e6cba2dcd8','2026-02-09 01:19:28','2026-01-09 21:19:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(44,1,'906142e77b5770025a1b7db289c0409febf339f533b44e8b7335553f9003683c','2026-02-09 01:19:37','2026-01-09 21:19:37',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(45,1,'36995ed65a5c9fcac7d2d6f4da83bdc7ea2c48d94c93c4cbed56c9244479e743','2026-02-09 07:11:48','2026-01-10 03:11:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(46,1,'aedcf9e4bd3536423e13b8f538c19adb6f0fa7eadac665525793d23056347fe8','2026-02-09 08:10:48','2026-01-10 04:10:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(47,1,'feea122448a8853c3db4caed0043690004b3bfbd44283234bef804a23985f5a5','2026-02-09 09:09:48','2026-01-10 05:09:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(48,1,'070ec9d1a5ca9461c3c6c86afd776d08a04af12562d0fc5c96294e35dfffb27b','2026-02-09 10:08:48','2026-01-10 06:08:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(49,1,'72fd90b1591f9410c9e6faf2962598a58609fb1a364b0c6060874318d022e17a','2026-02-09 10:55:28','2026-01-10 06:55:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(50,1,'2084f9fbe0a8b537a657d1fef5446b598da103002343d1b67a20b3b5652930eb','2026-02-11 07:15:54','2026-01-12 03:15:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(51,9,'d507a83024bb63bd4b66cdff812dcb2a55307891c54ae28596ffb8d1b09d47e7','2026-02-11 08:18:22','2026-01-12 04:18:22',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(52,9,'49918ff5e246e93c0404cd17365beda6b6513859bd6ad74d0e91426620483d2a','2026-02-11 08:18:24','2026-01-12 04:18:24',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(53,9,'b462b9fd7c9e6da461c482e3a3e02d7a4864e29b432852ae0c59ecf37d0db111','2026-02-11 08:18:42','2026-01-12 04:18:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(54,9,'1a311de7e4d7ace23cd2179e7d33fbfeeb8d0a48880c330f8c4869b3d38b8b61','2026-02-11 08:18:49','2026-01-12 04:18:49',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(55,9,'38c801f4d0dd814b28eba61007e9f8bc54d494e3196b2b45ece906a1df3e311b','2026-02-11 08:18:55','2026-01-12 04:18:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(56,9,'1426ca475a9665b6c95ec239224ea01061f001407fde70963172b424c35eb61c','2026-02-11 08:19:12','2026-01-12 04:19:12',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(57,9,'bb8b4da62577c423ddef1258c27addb516004c535e534518e321fa1efbc87bfb','2026-02-11 08:19:12','2026-01-12 04:19:12',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(58,9,'37a8e64c61f6b06c521b8ec71c18bb7d2cde585e3ef0ec32ff796a735df87f70','2026-02-11 08:19:13','2026-01-12 04:19:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(59,6,'d1281e617a3732cba039d0e305526cbc7d86d6743b53eae22ae743808b8f3799','2026-02-11 08:19:34','2026-01-12 04:19:34',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(60,6,'e2df6880ff92e59474e535adeef8c0185f2fc9525350696328b1497168cce41d','2026-02-11 08:19:59','2026-01-12 04:19:59',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(61,6,'f1478e7695763643f54639810e75effac10a853dd79209ec4413d9243312cbac','2026-02-11 08:20:11','2026-01-12 04:20:11',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(62,6,'070dd52096fec865b813207ea38176c2b317703119c1d7c63c33e098dc2c79fd','2026-02-11 08:20:11','2026-01-12 04:20:11',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(63,6,'25720c5143280141554fb82ad680f2befad3ca659d2800bfe21b02347483fad6','2026-02-11 08:25:31','2026-01-12 04:25:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(64,6,'7ab9b78b2a186f5504a43ee646ea78a8d1afd6b5a777b312c83d5abbb33cd834','2026-02-11 08:25:40','2026-01-12 04:25:40',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(65,6,'3e3837880892c5a977b2d2d9904e3b17b0f41bbdfbc238eed37dac4468007404','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(66,6,'12fe977e086fd978930cb3f7db01b6a843c6afc9f0edc8e29b6230410724c590','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(67,6,'21ea13efe2335a3fbab2171beb5340ef407d88ece397495c34a83eafc0b01335','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(68,6,'ad6d37a12747acef40db7518bf06d7a3ed05f04e851a2a4907eecbad633b3614','2026-02-11 08:25:41','2026-01-12 04:25:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(69,6,'5d8180fea541cefdcdd7a7bfc5a6f95938119331e8fc989d3b2df6cad071c938','2026-02-11 08:25:42','2026-01-12 04:25:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(70,6,'6cda0c0c3dca930d87a49eab062dfd3de36b65d5af322eb3c9a8dce8fded48a2','2026-02-11 08:25:44','2026-01-12 04:25:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(71,6,'914260c29590383bc32414e4f0505082a9aadb4cada462eb2ae33a1314cda657','2026-02-11 08:25:53','2026-01-12 04:25:53',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(72,6,'c29fccda1724ddeaff7497f7b1806414d252697a3670ec6a35a134e5ad912382','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(73,6,'d1e3e0e7d80c76da1ba4f6094d570419f91e6add7b5a82c881e3b756d58256f4','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(74,6,'10e9039baf6c7c11635560b62f8610de16fbeb793e0e572681c4ba015755ac95','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(75,6,'94574135a85aac1825caab15b79e29caf43a45bff49fdee33f6da0b5e9e9f62b','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(76,6,'0c3bdf6ac5d9b1d8666c1e6e93f29f2b2b447c528b476b43b1737026432f55e9','2026-02-11 08:25:54','2026-01-12 04:25:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(77,6,'ca58bb6979d2db73325727fa66497d126551e90a9290d3f1047d94f0e6ce2ff9','2026-02-11 08:25:56','2026-01-12 04:25:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(78,6,'6f77471aa30e9ab7548d0d21590e2b8fc6ed6e810174b03f9595adc21ababf89','2026-02-11 08:26:01','2026-01-12 04:26:01',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(79,6,'762b0bb8cd9473c517af47679b1a07c2de403d19e09df8dad0710161e9a8d067','2026-02-11 08:26:02','2026-01-12 04:26:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(80,6,'bf4ce66a148916e36b5c6e6342dec2dfe43aac1ecad07ae6529d8b6bbc4ad143','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(81,6,'d34e00218427322962b7b8aee6fb56feef0763fe3c8212176eb707eee4b51f43','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(82,6,'f79b08173346ed0805a920de28131c574196f093d588deadec242f3c7098c67f','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(83,6,'b030c57c7410e16e3c9971bc12c25c952834c841462eff2d988f93b6433d72c6','2026-02-11 08:26:03','2026-01-12 04:26:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(84,6,'e6ce897ffd2057164509970b1a455c3da6f9922ab683f6ab71a80462ee33ffb4','2026-02-11 08:26:08','2026-01-12 04:26:08',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1',1),(85,6,'2bd06e019559ac33011f5a600eb17101a388c9dc9c7ca3d6ac387ff6b03fbb72','2026-02-11 08:26:14','2026-01-12 04:26:14',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1',1),(86,6,'ce5c36f6c9d998b54e5ceee3f98452be94a99ee2d73c24e2ea7672c3c03fc6a7','2026-02-11 08:26:15','2026-01-12 04:26:15',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1',1),(87,6,'7095f7786748fe10920f29771ede16c8a6680e4b2a46bbd80c9824555b928aaf','2026-02-11 08:29:03','2026-01-12 04:29:03',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1',1),(88,6,'57464255823e39f8dedcf796c3081b2fb94d2731d1f927d82480494f9208279e','2026-02-11 08:29:12','2026-01-12 04:29:12',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1',1),(89,6,'2fabb92c67247b5d43f4db2af5b3d81aace895413ba1e3eb491384e973809f8b','2026-02-11 08:29:14','2026-01-12 04:29:14',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','::1',1),(90,6,'4dd5e00ed82c9f2c81d3a61ae2f358cfcdf4764e8703bbd011f09b6bf0275eda','2026-02-11 08:30:08','2026-01-12 04:30:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(91,6,'fc1c20001b687df734b6768ee7e56b8534f0ad07f9860593dcebb2c92606bf1c','2026-02-11 08:30:10','2026-01-12 04:30:10',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(92,6,'f62b31214b4347c532f3675134d1152e1abcaf440ce216f42dcaa62d348e0c28','2026-02-11 08:30:38','2026-01-12 04:30:38',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(93,6,'15c3dc358ffbdcfe57b97c19f81f43dcf969a458547aa0a27311690988fed43a','2026-02-11 09:11:12','2026-01-12 05:11:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(94,6,'d12881cae2a46e8465bb4b8ec184a21cdbdd1eff517e83122eb5db5dcec798f8','2026-02-11 09:11:14','2026-01-12 05:11:14',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(95,5,'91cdec337f63b6e3be867efa8138ea4a639f5c278b643dfe3476f44669fca388','2026-02-11 09:11:28','2026-01-12 05:11:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(96,5,'324a00e210e6fd1382220309a5de756b59111e07ede519cc03a8bfed334aea4d','2026-02-11 09:11:29','2026-01-12 05:11:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(97,5,'9fdf1d8c7293933af277437a7b48b89722a73eaeffa6b46de3f1cf1832ca268c','2026-02-11 09:11:29','2026-01-12 05:11:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(98,5,'88efd5f097dd322e882a2a4099ea10462ad78e3cbed34f802268f6356e5f2dc3','2026-02-11 09:11:29','2026-01-12 05:11:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(99,5,'e52817159d23f6695aa015eb400ad4803f3508e263a7820a6c4f0309e9a19707','2026-02-11 09:11:35','2026-01-12 05:11:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(100,5,'8512d0481b97a13a55e7f8b4dd147a76360bb1590cd013d39ce06feea3fe5009','2026-02-11 09:11:35','2026-01-12 05:11:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(101,5,'51660744b4d70608b39b37f1cb415d498bc7638ed51711bf6f440bc683610d48','2026-02-11 09:11:35','2026-01-12 05:11:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(102,5,'73c343fc65c46782603988bbef554ce59c400342fc28fd1c1281902ffcf8d2ac','2026-02-11 09:11:39','2026-01-12 05:11:39',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(103,5,'a87b84b6d930191c1a1f402e18ce251ed0bf768f280b2334c824cd9597de7eca','2026-02-11 09:11:39','2026-01-12 05:11:39',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(104,5,'0ef31550675f02a1efa8c65661f4994b2b79c36c4b19fe77f42d747db37f28e8','2026-02-11 09:11:41','2026-01-12 05:11:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(105,5,'b9982783dd3e603787155bfb153f044023ebbaa1ea0deb1e02c00550c0ad4474','2026-02-11 09:11:41','2026-01-12 05:11:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(106,5,'8e5b3285d3b359a854404b1d5aed305f59d6ee795be2a2bf2a11aaa7d40bb153','2026-02-11 09:11:41','2026-01-12 05:11:41',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(107,5,'ac5827a41a266652be828c03eb6e8093c87869cfaf1296838badc1aa178416ff','2026-02-11 09:11:44','2026-01-12 05:11:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(108,5,'176ccfc22dd5034ca0f152f9a57c90d844f71122e7f14b76eef2b412dadb17e0','2026-02-11 09:11:45','2026-01-12 05:11:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(109,5,'afa87680b3f99d6420a782fc884145085b2fb63c2f78d14422184e4d87c058f0','2026-02-11 09:11:45','2026-01-12 05:11:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(110,5,'25051f2af500d1e6ffcc3fa0c55be4af8f7b2841dc3c1eacec49722105502e99','2026-02-11 09:11:45','2026-01-12 05:11:45',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(111,8,'69453c39bfcdf86bfd8e8d7de906a42eaa2cd3dbb4e2c72e4586ec22b26a4dd8','2026-02-11 09:12:02','2026-01-12 05:12:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(112,8,'0b583d4a490cb824a008c890c6f0965e559f64b2930af88352ae824200373539','2026-02-11 09:12:03','2026-01-12 05:12:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(113,8,'3f363635cf4af260a9b05428701335a2d2a69d53cb44dc97f4a1c0bcb98339f1','2026-02-11 09:12:13','2026-01-12 05:12:13',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(114,8,'3c422ef5eac5457adb9fbb86876cb7d214fccd42937e9fbc676094a3012fb1a2','2026-02-11 09:12:15','2026-01-12 05:12:15',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(115,8,'e34f3f340dad669262172749be9f943ad5ff7cf3cd8655097b93ada7cdaa402d','2026-02-11 09:12:24','2026-01-12 05:12:24',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(116,6,'d947462c7c6d2e13f53de694ceb9aef1fba103f0c0fe8f213bc010ced8719c18','2026-02-11 09:15:40','2026-01-12 05:15:40',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(117,6,'d01885bdfa50af6d665f1d49228fe83aa617216c085c8a2ae0ca6452d0fcfe30','2026-02-11 09:31:36','2026-01-12 05:31:36',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(118,6,'019f196fb8664a16f8c1ec8a7e67a8a87fb69b2da025fb7195ed953151fd8a78','2026-02-11 09:31:37','2026-01-12 05:31:37',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(119,6,'f8611b3f8d1432787af0cae33a923c9a8072a22adae68686d82bf074ccdc726b','2026-02-11 09:31:37','2026-01-12 05:31:37',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(120,6,'25ca807f66df4cd6f296fe68597b9c83a000fdccd5e566bb0e4a6b855b7d757c','2026-02-11 09:31:40','2026-01-12 05:31:40',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(121,2,'6368d62430fd7b96cc4d897cb4543c9f29bb95eb1b7714310a0aacd151fa09f8','2026-02-17 09:49:30','2026-01-18 05:49:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(122,2,'e03afcbb24745af9aa08d771f609dc99b6f960d30c5b0a4d005833660aaf1164','2026-02-17 09:49:51','2026-01-18 05:49:51',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(123,2,'9abe2b53f875daed265c8b1c5cf3038dd102555fa56f42e6e7b19271cc9c6e58','2026-02-17 09:49:54','2026-01-18 05:49:54',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(124,2,'7085f83fbdaf2eede109d8a7e516b3208fbeb1dafba89db5b1c42355586441ac','2026-02-17 09:52:05','2026-01-18 05:52:05',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(125,2,'ce083803948344c42b02d58c6e079eb7ea1105c2f1bdd08e9cf4b0fcf7176363','2026-02-17 09:52:06','2026-01-18 05:52:06',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(126,2,'359be9e79355674f676f31721fad7321ff36a25535a0dda91e169c51ac1e4e77','2026-02-17 09:52:07','2026-01-18 05:52:07',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(127,2,'cd1b3598d836023249164b4a67b4381049ada6a5862e10d62aca68be3558b889','2026-02-17 09:56:16','2026-01-18 05:56:16',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(128,2,'9b346fb80b5715879509e323fbf50fee3954de615086a7e6c4d30e6bcfe65c40','2026-02-17 09:56:17','2026-01-18 05:56:17',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(129,2,'aa9575472660784c10976134112faaef50971ed42109f7ee3deae9ecf8562c55','2026-02-17 09:56:18','2026-01-18 05:56:18',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(130,2,'42c1b4b6021a427d7d1f12130f83587cb304d62b6c2a55fc7d7fcbafe09a2df1','2026-02-17 09:56:21','2026-01-18 05:56:21',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(131,2,'3ecfe4fa17d3bf57ecd14d148d56e2631db68c7246335e413a01abb91205a338','2026-02-17 09:56:22','2026-01-18 05:56:22',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(132,2,'78042a1c483a227c751f1438f06aaa421fa03e2887c52c8222cc12844d231aa6','2026-02-17 09:56:38','2026-01-18 05:56:38',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(133,2,'8d9d893c127fef03da1556f5483b1a4037edc268e76de6f17126c58f2534fc90','2026-02-17 09:58:48','2026-01-18 05:58:48',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(134,2,'7633e743bd2cc4c92d85e024dc67e2cf41a59eef821c336efb2b1b3d23036137','2026-02-17 09:58:49','2026-01-18 05:58:49',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(135,2,'fe5710ced0240337130292f1d2902a7f1815aed23ab80d2b365244f8d55f1a96','2026-02-17 09:58:49','2026-01-18 05:58:49',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(136,2,'f54ea515d9bc10272d1d96b4e7e6cb37009a0c37da7855b2cd5c021341fbd6fa','2026-02-17 09:58:51','2026-01-18 05:58:51',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(137,2,'f85176f6c4bac73c7d131e31fef07aa25a3d1ecf224ba62ed131ee1a46667b6c','2026-02-17 09:59:01','2026-01-18 05:59:01',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(138,2,'5b454d2acd48856d734d3a00007694015c33faf4c8fb51e6bfe3a7580561ad5c','2026-02-17 10:01:15','2026-01-18 06:01:15',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(139,2,'697d0f7d56b9060c4836dcf5e91cdbf83825b2785ef25ee6fd090bf08b0f88a3','2026-02-17 10:01:16','2026-01-18 06:01:16',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(140,2,'d28dd772110d95f5c1122fbe492a4849bfdc96a9b5402a979b8105276b40df9c','2026-02-17 10:01:16','2026-01-18 06:01:16',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(141,2,'2ba1669fad7086cbb8450f84b9e17887781ce0d31c61822656eb4cf8cf19adfb','2026-02-17 10:01:17','2026-01-18 06:01:17',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(142,2,'b5fea72d3e8160f2f7f5cc72b38b8ed175219a9b6a41acb14851a9e65a61d810','2026-02-17 10:01:18','2026-01-18 06:01:18',1,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(143,2,'f31ea5ab67b6ccf1b5491b9341737d1d6af538ddcc53c1cbe602b3850be1ea3e','2026-02-17 10:01:26','2026-01-18 06:01:26',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(144,2,'eac87987348814886a7aac97918d78c2b34a7a4f818e64a10edbbb6023a5062e','2026-02-17 10:01:35','2026-01-18 06:01:35',0,'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36','127.0.0.1',1),(145,2,'f8964696351c457e761e0bfd6522826e3f15f312474f6e0ea62b8612584d5ce8','2026-02-17 10:02:49','2026-01-18 06:02:49',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(146,2,'62f3cce0688999009b9d03251b65d0b34b3deed1e84b29072ceb1d7136028886','2026-02-17 10:03:02','2026-01-18 06:03:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(147,2,'b54b9ac3d72558f2252238e4b11edbdf8a7766668a4bdc8057a1e36c507cffe3','2026-02-17 10:03:03','2026-01-18 06:03:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(148,2,'499ee0f9a7a0a249d857fa96efc19057911ede6071712650151d3e30bf939a7f','2026-02-17 10:16:54','2026-01-18 06:16:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(149,2,'cb814b888a86717a346fe34cbb79b3dc38ef8f0083e3f1941ed573d1593efcb5','2026-02-17 10:16:54','2026-01-18 06:16:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(150,2,'906b9561986891560b8d4eaf3305673f5f1cbda6794b0ee38be705834ffe6d81','2026-02-17 10:16:55','2026-01-18 06:16:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(151,2,'d2ed1392dc84fda9b62c5316751c9c2a88dedd6327d83c74dbbc162e912cd4b2','2026-02-17 10:21:46','2026-01-18 06:21:46',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(152,2,'a4b48910390d5bea3f2cb3bc71c770dd56a9e58fc69985e265c338fb450a9d02','2026-02-19 09:45:16','2026-01-20 05:45:16',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(153,2,'37a32d9b86d6afb0a5692890310885a3e32a5c2065babe914dbdd801e58ded3a','2026-02-19 09:45:18','2026-01-20 05:45:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(154,2,'a113965758de45e57ebe1355a59db0ab9150ffc898217d8540e1db38620fadb3','2026-02-19 09:45:19','2026-01-20 05:45:19',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(155,2,'45c9ce3160c3ff0c7c7b25aa4aabc1de7161f84253ba77efeb562f89c1a13d1e','2026-02-19 09:45:19','2026-01-20 05:45:19',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(156,2,'7fc9e059e6b43cd40a6a0959e441ec2b83f81e4dcd27a757cfd3a48c5a11aa8a','2026-02-19 09:45:20','2026-01-20 05:45:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(157,2,'e54b4c49a7159462a75974639cebaaf35cd23804f96bb2d57477bcdd6ceb9a0e','2026-02-19 09:46:14','2026-01-20 05:46:14',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(158,2,'d5124f4e60954c2e5a4f1d82a764328ed93bb62ecf5ab7beb480b8f422d96b3c','2026-02-19 09:46:18','2026-01-20 05:46:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(159,2,'9b59e1cb03c23a9093ef317b1d2248e0ddca8246549e2e73feac5ac49297c3df','2026-02-19 09:55:04','2026-01-20 05:55:04',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(160,2,'2a7f802829e3fdcb6437ba2228a1614562f4a32ca8de5deef440377c80f201f0','2026-02-19 09:57:07','2026-01-20 05:57:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(161,2,'cb264c27157c0820b241e25c1a1560fdd0d72842074589000ae4756340a4cdf2','2026-02-19 09:57:08','2026-01-20 05:57:08',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(162,2,'6260c13ec2ef95e01c8e285f89c5f602edcaac9e807e6ae6530debd4a7951009','2026-02-19 09:57:08','2026-01-20 05:57:08',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(163,2,'3540b7120674443e63bb623ba571c7e00bd8d578154629c5f0d9a054342b6ee7','2026-02-19 09:57:09','2026-01-20 05:57:09',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(164,2,'aad2b9552f1b85f33cb0d5f7677f418b997606ae1962474909e0cd8a660de381','2026-02-19 09:57:27','2026-01-20 05:57:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(165,2,'67ced5f69f6785e44ddc4ababa9b6a8f29df785ebbe809486a3a1c57d4a721ca','2026-02-19 09:57:38','2026-01-20 05:57:38',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(166,2,'3956f7f6d9bcbefac8cad3cb437559f6c4fb41e59ec5e54e4d7d9ea3ef5cf73c','2026-02-19 09:58:36','2026-01-20 05:58:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(167,2,'2bece4e92041e671592d22ae0c6a82527d00dd0d6ee794d54dccfca9a469ddc5','2026-02-19 09:58:36','2026-01-20 05:58:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(168,2,'1f8a79d1c65faa493860c7ba95e51a8ba7492158a627c1640ae0f527ff603764','2026-02-19 09:58:36','2026-01-20 05:58:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(169,2,'59aab0e60a9f536661c2750e37b258da87b0abf4478a935899c40a7036f1df6c','2026-02-19 09:58:39','2026-01-20 05:58:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(170,2,'7cf3d0e34fed0f50e9bcfa1856a0aa94969c3a272869660875d9cdf868b33d4c','2026-02-19 09:58:39','2026-01-20 05:58:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(171,2,'3b8c05257cbaa07a28c8bdde47b6a144e743c1cdfd59cadc7377409a04980f3b','2026-02-19 09:58:44','2026-01-20 05:58:44',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(172,2,'17ef8eba37d96a560550ba6418a107bcf2916cc08f50ff181230b45b9df3c7de','2026-02-19 09:58:45','2026-01-20 05:58:45',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(173,2,'6a55c7ba48ad7dfd08824195da011948112c4ce93f855c3275112251961cc6a5','2026-02-19 09:58:45','2026-01-20 05:58:45',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(174,2,'657b968be9c49fa2c40a9b1aba7da5578df9079cab0d775dbd60467d08f84dad','2026-02-19 10:10:52','2026-01-20 06:10:52',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(175,2,'0de66d99991420a5e4b5ede1ff85944d03af30e2fccde5d9819758e323ad27b1','2026-02-19 10:11:08','2026-01-20 06:11:08',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(176,2,'0dc6d9b1fe4a38a103743abe87fa7475fbe88f7fa49c6ab38971c2c416c11d31','2026-02-19 10:14:29','2026-01-20 06:14:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(177,2,'eb87e1e59026a5b946d99d336470e1437fd82d3085d068b24dc9f60d2e56a016','2026-02-19 10:14:31','2026-01-20 06:14:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(178,2,'1cbe3ff5f6f8d40eeb7e3359108154b285d2781532e774f31ec79bec7dd6acf7','2026-02-19 10:14:58','2026-01-20 06:14:58',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(179,2,'51810c71741f8b8e373db566aacd788f70c22f090ddc6f1fbedab39928f70086','2026-02-19 10:15:00','2026-01-20 06:15:00',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(180,2,'ae5ab725df29265ab6022fcb3401d4aa1f367b4305eec6ba29d38cadda91691f','2026-02-19 10:16:25','2026-01-20 06:16:25',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(181,2,'fc3187ecc9e4f9ff653bb54837a961f60b1037e8ec79da2b3fdfb31e48827355','2026-02-19 10:16:26','2026-01-20 06:16:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(182,2,'5667f955acd512c0e5c79f6610282d43329a4a8e7d49ac455b7f72f60927b2bc','2026-02-19 10:16:26','2026-01-20 06:16:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(183,2,'0029f8082fc51d9d35dec1da810b8e4a35babce618d3adfc82c5812bcf037e59','2026-02-19 10:16:27','2026-01-20 06:16:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(184,2,'058ad6fd27cd017f3bba793e11e045cf40cd0c560e6c43efafb71b8776298083','2026-02-19 10:20:25','2026-01-20 06:20:25',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(185,2,'d19e240666ff78e4d4b87035ce5bdef26b2d0a5b33b2a71a615d7c55d7572407','2026-02-19 10:20:25','2026-01-20 06:20:25',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(186,2,'aee66802956240db2d95f7f6c098ecb2d1e6e9cb550e2aa72a0283fecfd48fbc','2026-02-19 10:20:49','2026-01-20 06:20:49',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(187,2,'eb326964921447925c22907c58887ef89226ca6a7f400e0348bc1795440ac30a','2026-02-19 10:21:04','2026-01-20 06:21:04',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(188,2,'87f9cc7410ebd959929f8ef5201488bd9b60fc72bd965cec9a0056734baa9a52','2026-02-19 10:21:27','2026-01-20 06:21:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(189,2,'12e7bd0d5afa3df43a2f4ebbe413633bde03984d10b2af68bf9af7e40b7ad98b','2026-02-19 10:21:37','2026-01-20 06:21:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(190,2,'0780bbcc32fe153832d47eb885c24d9fbe47738f73b8a219356b1ebcaf137edd','2026-02-19 10:22:02','2026-01-20 06:22:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(191,2,'9e70ca05b76c8f1582e15e4907fc91c44075eb68c72074ba2a0e1c56a8f46406','2026-02-19 10:23:37','2026-01-20 06:23:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(192,2,'bcccf2b311afc78fb5d573b2b36d8f677a5132e80a367e78a5dd3548e731e4fb','2026-02-19 10:23:57','2026-01-20 06:23:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(193,2,'28025db5072b714e59bc3a2b56e0be609a1fec43caceb2890c9f2a3c819c10f2','2026-02-19 10:29:12','2026-01-20 06:29:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(194,2,'46a2eb7b3135599eb468abbd57694dd0f758483d4b7fd1820e3ddeca865f7275','2026-02-19 10:29:13','2026-01-20 06:29:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(195,2,'0d2caf878cfed5bf8b65c21b8e27623341af9b5bf48491091216b03ec6f7de07','2026-02-19 10:31:18','2026-01-20 06:31:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(196,2,'4cec22ae6269fc3e61ce4a0b93efd5bdfd618fc8310b064f39638daeb1c6a2fe','2026-02-19 10:31:20','2026-01-20 06:31:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(197,2,'cd290b3bfad4deb73cf0c2666178d33b5b780145957417e24260f293be3923f0','2026-02-19 10:31:21','2026-01-20 06:31:21',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(198,2,'136423ec8dd4cb198a702a215c0e1b4bd155a06371bda59bbc4d4608affd28cc','2026-02-19 10:31:29','2026-01-20 06:31:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(199,2,'65f29ff22d8e95113a8e11018ac02fe4d5ec4e4ca0beb855c6491e4f00454f1f','2026-02-19 10:31:30','2026-01-20 06:31:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(200,2,'b59a37bf04f3c691e26ba5ff1d0678046884f24a482db0bd3fb8b7c97b4c3922','2026-02-19 10:31:30','2026-01-20 06:31:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(201,2,'d4df4852206200f8327b4167878fc88ace3db9894a1ebd9372d2121b47b21e20','2026-02-19 10:31:41','2026-01-20 06:31:41',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(202,2,'4da690da83a173133e9161bbc72f771715143ef8688eccd9f34975de94ff06fc','2026-02-19 10:31:43','2026-01-20 06:31:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(203,2,'fba2fd13f57e35ae51b1f77df61e9bb9778cd265a19ebe2865f63de84a12e975','2026-02-19 10:31:44','2026-01-20 06:31:44',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(204,2,'58e7cede61bf62128476e2c84e75730b7b0a877f74168812dd184e6895b35d1b','2026-02-19 10:35:17','2026-01-20 06:35:17',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(205,2,'dac52dd22b042155bc3b05cab1f8e6be9517e24009b9c944fb85b0e8153d9908','2026-02-19 10:35:20','2026-01-20 06:35:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(206,2,'0a7a5a70781b33be827df61a4f8a032038d671c3f0f14adb0e571991d0b45dcc','2026-02-19 10:35:21','2026-01-20 06:35:21',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(207,2,'246d8c56aafa537fe6f931c977e33070baa75a37e72d55a76767c40d2a9c82ea','2026-02-19 10:35:21','2026-01-20 06:35:21',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(208,2,'32db5f567491a6fdc93afe67e8427941facee75fbc20aafd283bc3a9fd16f0d7','2026-02-19 10:35:21','2026-01-20 06:35:21',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(209,2,'36f9d1e45bb3f4d930d61222ea1f04d5ee6af7b3ed8e8fbfc6fc02ea4ac46133','2026-02-19 10:35:30','2026-01-20 06:35:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(210,2,'bcfaa4bba056958f95bf88b1477869d3c97aa2af82177cc49a6e597199463224','2026-02-19 10:35:32','2026-01-20 06:35:32',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(211,2,'282454dcc807e29fb041a79c3813ef29cd467c02106fc1c66887d38fc744d9dc','2026-02-19 10:35:36','2026-01-20 06:35:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(212,2,'1dc03c233fd16b0a70afe113826f9b95910017dbe3269b3cf8ade14388f9726b','2026-02-19 10:40:08','2026-01-20 06:40:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(213,2,'92fa568c6e5ccfe7fd4dd2807f218310232569d4eb5bb1aee0a5b7ff5ee85f7f','2026-02-19 10:40:08','2026-01-20 06:40:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(214,2,'13d0bd31eea4e2c9e1f0437abc3f27aa5aa74d34a674f894898170aeab32d8e0','2026-02-19 10:40:08','2026-01-20 06:40:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(215,2,'677551e3008ed0c24b7df270b4af594b0d7f64b40aac61e18ddb8c34746e464a','2026-02-19 10:40:17','2026-01-20 06:40:17',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(216,2,'35ca5c4a22b84ceaecb8ae13ba9339df83573fea4bba104a5e6c187df882e696','2026-02-19 10:40:19','2026-01-20 06:40:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(217,2,'3addd2b4d36996317d0dc5140a6d1e13e55cf00a043928b886cfe4cc98623d7c','2026-02-19 10:40:46','2026-01-20 06:40:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(218,2,'adaa7b0c66dba030faf34d33518bf779ee03c39674527ba1be56b5ce34504aa1','2026-02-19 10:40:47','2026-01-20 06:40:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(219,2,'a80f7f1f96ddb94e4af23dbc682689fa8054abf632a81a211b632d3a14cb6145','2026-02-19 10:40:55','2026-01-20 06:40:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(220,2,'b4903d24f9f5e2ad5f6aee366c201929f3308428248208f007ffac3aed250c78','2026-02-19 10:40:56','2026-01-20 06:40:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(221,2,'4152c8c19be5200db0c117b680dd177121fe0e618a4e36a7a3de1f37bbe9e036','2026-02-19 10:40:56','2026-01-20 06:40:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(222,2,'fce0d15ea859acacc78a2c0885a6488996bfa5f7a244b595001776161e4fd2b0','2026-02-19 10:40:56','2026-01-20 06:40:56',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(223,2,'ba0906289859d1fe3c13a4ef6cfba6bfc3cc5b3e9c3a1b51fe7a5e68eb50cdcd','2026-02-19 10:41:07','2026-01-20 06:41:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(224,2,'43f4dbf46f5b9aa3b87807b911d2a00a8e7f34ce3d534a2724365bc5e7ec2479','2026-02-19 10:41:10','2026-01-20 06:41:10',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(225,2,'58360af9c4d1755012d8f8c93cf7390610932bb0d808047a756622e384f1c314','2026-02-19 10:41:14','2026-01-20 06:41:14',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(226,2,'662b4205a79f5e0e182912d07318336dacbd48570c05c458095b2c409cb77d6b','2026-02-19 10:41:29','2026-01-20 06:41:29',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(227,2,'5593c897b5c6a57ee91fc8356d5decabd7fcaeda6072b61c279c8e55fc4a320a','2026-02-19 10:41:30','2026-01-20 06:41:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(228,2,'70c71a2a80af22c47ce032d781b54ab7abbe72d2c15cbb81bf4c01aad0fe041d','2026-02-19 10:41:30','2026-01-20 06:41:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(229,2,'858fe27f2f6b2e42619a6f6d2c929c2aa3d4159b8c180ac2203dcae93996da9e','2026-02-19 10:41:37','2026-01-20 06:41:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(230,2,'402d3d280b1d8bdc4910053dcfc79a75f9730fb4d51067289b651d92e40b686a','2026-02-19 10:41:43','2026-01-20 06:41:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(231,2,'0dc638b82e3f0335781874fe867b43de8a1fef71f7092891e798812a7e4895b5','2026-02-19 10:41:45','2026-01-20 06:41:45',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(232,2,'e26376847d0ab4c0161ead9f02ad3b8baeaf1616f2b8f54efc01191604c180a7','2026-02-19 10:41:46','2026-01-20 06:41:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(233,2,'6a0d1959b06d35074052f6930b3e331722c633a6f5e5c3444b25410f6b1f4c27','2026-02-19 10:41:47','2026-01-20 06:41:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(234,2,'9d497c31bc4eec2a037e409f0dcd2b5c3f70e59c5e5c097b659e3934f81a78a0','2026-02-19 10:41:47','2026-01-20 06:41:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(235,2,'ecd107d9ff405cfbb883bed16b4315ca375aadec470e913a5f472abb93bda8fa','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(236,2,'451454265690ccaae02a8cad2a893d8dc1077fd9ce111eaeb87ca01cb167029e','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(237,2,'05a6aa46c31ab616b694172ad4d7b7137fa21d4c476deaf9eb42fd820e537666','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(238,2,'f7a80fed0149c5998ca36bfd09ff29054dcc744f266a216759c0f4961635ff6b','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(239,2,'4816f3699389816f7021b2e27dc290f55a01c461d74377a56556cf0cbb7e0dad','2026-02-19 10:41:48','2026-01-20 06:41:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(240,2,'f511b65a536e7ecc256b5429aaf67eb743f434b0be1576979339c762818d09dd','2026-02-19 10:41:51','2026-01-20 06:41:51',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(241,2,'aa1c6d8cf47a8c2cf6ca0bbe1324248b69221274b71aae6da6988fe1bcb13d2f','2026-02-19 10:42:02','2026-01-20 06:42:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(242,2,'15d1b8b2cbb2e9cea9215266a6d94dffa9e4f5773544e4ee967212a720525ce2','2026-02-19 10:42:05','2026-01-20 06:42:05',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','::1',1),(243,2,'78a7f3f5801afe8a177920241cae68b972fb66bb2a348d508e01d42cd70d646a','2026-02-19 10:42:44','2026-01-20 06:42:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(244,2,'a416cf5ae7fb338f24b330ac59eadae92d59780bd959df0937102ba0613c81f0','2026-02-19 10:46:18','2026-01-20 06:46:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(245,2,'7574d71bfa61bcb92fbff4459554a8708f20b646740b7a8c108e093df85b938e','2026-02-19 10:46:18','2026-01-20 06:46:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(246,2,'6f31c069a5f6ea858e14fdb34332225a4437a503e1b9c8f7bc4a5f3ef4318a9b','2026-02-19 10:46:18','2026-01-20 06:46:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(247,2,'970951462d4d9267a963698a260e58056f37169719d0367f089d30ede15dafb2','2026-02-19 10:46:28','2026-01-20 06:46:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(248,2,'ddc927dfaee9546e5f33a2676cd7418a039c11e044ef3ca71bb443fe60111e39','2026-02-19 10:46:32','2026-01-20 06:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(249,2,'9c4de3ab09de81a2857e5107084e391316329d98085b48cb9f7dca9ae95f3939','2026-02-19 10:46:32','2026-01-20 06:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(250,2,'2655008e1dc52f6933f7a2f4adca69a72b00da10baa33b1b72527e96919501ab','2026-02-19 10:46:32','2026-01-20 06:46:32',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(251,2,'8a2feac352f89ee8905e13f26d2e10e061e512f2c85682ff0d0d80f60ddb5b27','2026-02-19 10:48:35','2026-01-20 06:48:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(252,2,'958f509fd564506c39d4b126f08b2d66eaa9f0a1e54348a14aa4e1c357271527','2026-02-19 10:48:37','2026-01-20 06:48:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(253,2,'51cb9c1db4e84be15ac39dd7254adccc2bbbfcefca7ac1674f16b36eb6b1bc11','2026-02-19 10:48:43','2026-01-20 06:48:43',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(254,2,'678614a595bee34019be4b1fac596c95bfeec906700795bf03f870ee75a65b99','2026-02-19 10:48:46','2026-01-20 06:48:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(255,2,'fa409e27c795721df2b5837e807a689df742a8b7ad9064acde65ea376af2e2a8','2026-02-19 10:48:47','2026-01-20 06:48:47',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(256,2,'b5b3abfb650f246cbf34c47fa76a270b08474c84655424aac8a5b381427c2bb3','2026-02-19 10:48:51','2026-01-20 06:48:51',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(257,2,'90b15c644f90f474ca982f90d4453b958bc2180eb69d94690c78e5aed878f7dc','2026-02-19 10:48:52','2026-01-20 06:48:52',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(258,2,'515181143f0bbac33a401604ba3fbee14e44c19b87515b50b67d19e512f9af9c','2026-02-19 10:48:53','2026-01-20 06:48:53',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(259,2,'801901a59ec4178b9035d52f10a7e360b637908fe67183d2b0beeac0b320eb84','2026-02-19 10:48:53','2026-01-20 06:48:53',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(260,2,'78ffae89a1324ee8796ed7ccf9e45ab8f071ad4fab026423f3c6e9baff37d2b2','2026-02-19 10:48:54','2026-01-20 06:48:54',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(261,2,'3762d92ac07d8f891a8652be81bac06517c546c2cba451e2727f993940bf3acd','2026-02-19 10:48:54','2026-01-20 06:48:54',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(262,2,'0ac6d64976fb6da64263b025a8241c356872949e34ac5709f55fefa485813af1','2026-02-19 10:48:54','2026-01-20 06:48:54',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(263,2,'5c1e50bfd507deb891489ef4c06f78c5921e5069e31e1e9a410d6f5ae7a0b779','2026-02-19 10:48:54','2026-01-20 06:48:54',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(264,2,'18b9368c26fcd00322b938cb06a1dc7bb01ff196c77f3f554e1fffffe3efe263','2026-02-19 10:48:55','2026-01-20 06:48:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(265,2,'fb5fff63d5eabe313044eba7a9c0ea0dd92ec418ef683261c424fca32af7717d','2026-02-19 10:48:55','2026-01-20 06:48:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(266,2,'30a29807f3d77d5ad69650ec0d011aa98a498d185be5f0ddc6163c4e816f3c21','2026-02-19 10:48:55','2026-01-20 06:48:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(267,2,'ddd04295f4f5b1de86d439c72ae5e67aa28c9e393ad630a3dd30894c02dc9865','2026-02-19 10:49:10','2026-01-20 06:49:10',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(268,2,'1d7cad92ce841374999b0c9f2a1b023bbf53a0c608772b69821a7a08100d296f','2026-02-19 10:49:12','2026-01-20 06:49:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(269,2,'fd337eb7cdd67b27d5a4732b32e88a381500a3b4c62f600ae70e01665c3b898d','2026-02-19 11:00:18','2026-01-20 07:00:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(270,2,'f447e2127f897187b36206fcc057a4cee1dbc915442d29a0774e7e7428b75d6d','2026-02-19 11:00:20','2026-01-20 07:00:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(271,2,'4da196ee30a1378065e866b05901f41c691bbc0a6f6e7cc185b945112cad11a6','2026-02-19 11:01:52','2026-01-20 07:01:52',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(272,2,'6f577ae499ccd223980d8e91356404ebe577261552aee10bd1c3857c255a3766','2026-02-19 11:01:53','2026-01-20 07:01:53',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(273,2,'81defdb5b7d7d533e36f259c6f8fd3258d81b1b7d942454f8d4f3681dfeb56b2','2026-02-19 11:01:55','2026-01-20 07:01:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(274,2,'b8d865c28ea82810f15d3bca45765885c4d46a4ff4014186d51cf36b5bef304c','2026-02-19 11:01:55','2026-01-20 07:01:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(275,2,'2290ca59071510ef78bffafc44a5edd5bd0467e7f519df5a68c5745cc5def17e','2026-02-19 11:01:55','2026-01-20 07:01:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(276,2,'4262d01fc6e3dd0807e747ab65c2034d1866701ccad4edaab4db0bb0ec611a91','2026-02-19 11:02:09','2026-01-20 07:02:09',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(277,2,'74539220cd02d493e42ef2e98b58c83239337efe12e68ff67b7a50e5a1599062','2026-02-19 11:02:12','2026-01-20 07:02:12',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(278,2,'35f68ac2bffdae38c51aafbb028d90c0568025fd40df767d30279fdb26649857','2026-02-19 11:02:16','2026-01-20 07:02:16',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(279,2,'f8246ecf3cab5528526c75d67d998a7410130670190b6d012dc59c14c3462f97','2026-02-19 11:02:20','2026-01-20 07:02:20',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(280,2,'a5c79a87355018d27099404acb8537c8d0adee57bc5debb5d19a4fae095a888e','2026-02-19 11:06:44','2026-01-20 07:06:44',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(281,2,'0490d37c760c1f93f63a6d12242a587f7130693642e5fde972afec21f6bffa20','2026-02-19 11:09:07','2026-01-20 07:09:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(282,2,'25501a113f65cf3a150efb1fab4fb48fcb493a19f6ca343843474eb1826c1bbc','2026-02-19 11:09:08','2026-01-20 07:09:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','127.0.0.1',1),(283,2,'aab966f2eef41f34481bdad0d22779e39c1e28d1cc1072fdb682302e8c3c5002','2026-02-23 05:16:03','2026-01-24 01:16:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(284,2,'6287808509c19b89eeeeb630604686c529beecf0e9a08456543b5200736d6c18','2026-02-23 05:16:03','2026-01-24 01:16:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(285,2,'a24b9a6be393bf65301a014e7ccf8db3d3f660f3fa64ee26755a3f718cc2201a','2026-02-23 05:16:03','2026-01-24 01:16:03',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(286,2,'90b5cf4bd69a2cafcaeacff1b0e19141a80d7f3050036d43c97d3e91dd580c35','2026-02-23 05:16:15','2026-01-24 01:16:15',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(287,2,'0a4e22bce52aa2e95d1a66607f8907306abcf36e83c771b94b1b45d4ad855062','2026-02-23 05:16:16','2026-01-24 01:16:16',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(288,2,'6bb01960c9f274a7f409dd992840990ec1c516739b8c2461d5e0b3af4213dfd2','2026-02-23 08:03:42','2026-01-24 04:03:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(289,2,'784d0e003c78162d26c7dc4e215d94a7b93ebb55b91c5c4a8671440f1237e8fa','2026-02-23 08:03:42','2026-01-24 04:03:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(290,2,'f3c86357ecfe91f2e1f00430882e204328dc1f92a702a36aa7fde08a9897a412','2026-02-23 08:03:42','2026-01-24 04:03:42',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(291,2,'217aa0f2adc426341655415ae37c7b23312a4ee7f04e4e326fcaef9b02fb3714','2026-02-23 08:03:53','2026-01-24 04:03:53',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(292,2,'7f92b98cb7d91b72bee1b053492d275a07942f19f97de4d95d038594ef151397','2026-02-23 08:14:19','2026-01-24 04:14:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(293,2,'e032489a41dde53b0acfb380e327ab6fd60c0f637064da1dad52003a607dedba','2026-02-23 08:14:19','2026-01-24 04:14:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(294,2,'a654f8084f18b008de2a16340fd224489fa75df49ba5d39a24b1a9845faf8ab5','2026-02-23 08:14:19','2026-01-24 04:14:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(295,2,'cbf089a6592a721c4589a212f495d71a43954d87c257360cdbe3009c3f104d28','2026-02-23 08:14:48','2026-01-24 04:14:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(296,2,'24ca911aec3f8f82a04124d778df8fbe57e13e8a9614bf90f4ef190f9e547213','2026-02-23 08:14:50','2026-01-24 04:14:50',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(297,2,'f6dd1dbc12aee6d3a04b946dbc48d1e6d3d1728e641366d923068332a1a72588','2026-02-23 08:28:36','2026-01-24 04:28:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(298,2,'206aad7be354be91706724e11f9afd960567d6bf17effbfa755765bb16c15608','2026-02-23 08:28:36','2026-01-24 04:28:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(299,2,'3177bd2f6eed3e08c9e2669a5895dc3d4e2b3d9772faa1c509a5d89ceaa0f66e','2026-02-23 08:28:36','2026-01-24 04:28:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(300,2,'9d84c74de72c1c18c75b27ff7bdb882770d7e188cc27605ee0879e0a47b3897e','2026-02-23 08:28:55','2026-01-24 04:28:55',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(301,2,'bb6f1657beec1a70b01ff87b7e429b3e5b7be83fcf1b85a1080ff0c9ef3774a4','2026-02-23 10:17:18','2026-01-24 06:17:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(302,2,'6d56f86fc874978890041875d724f4fc449184ac7d61b034116b701ba05badc1','2026-02-23 10:17:18','2026-01-24 06:17:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(303,2,'193d6e8f3bdbb7b9f8fc2f8e50d48b867a960740af52f6a0b6d6d90f1c0f789b','2026-02-23 10:17:18','2026-01-24 06:17:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(304,2,'8b149f5433535d8e6be3bf4d6cf7a59c24da637fe44857b2c163392d827b2506','2026-02-23 10:17:27','2026-01-24 06:17:27',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(305,2,'8e03b74fdd5d5e19715b8630c3575454956023837ebe8bdaad23418ad52dc818','2026-02-23 10:17:28','2026-01-24 06:17:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(306,2,'3c6993e44ee49fcdb90af282fb9594ccdf13006e85fb034ac1ad53d00777cf7f','2026-02-23 10:17:58','2026-01-24 06:17:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(307,2,'f7d4f33f56a3da337b9f8ecc7f95a91a1c36d4e577a7964ca5daabdc94f8925c','2026-02-23 10:17:58','2026-01-24 06:17:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(308,2,'b380b0216a90c6ef06466bd8c7f616c8c6fa4b2ec0180ad99896ae28cacc8518','2026-02-23 10:17:58','2026-01-24 06:17:58',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(309,2,'d324fd9826b9000e8c291e620067f86cd137488077e70f17735e3e0206733596','2026-02-23 10:18:06','2026-01-24 06:18:06',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(310,2,'7242ce4546ec0e8314e1b8b0aeb8e728a1dfa1957d4c2b5d777446ed0a8ea212','2026-02-23 10:18:08','2026-01-24 06:18:08',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(311,2,'55909c4f5c55089022400e89c8a66cdd3464e77b99600b2b6d58b1cff52139bb','2026-02-23 10:23:48','2026-01-24 06:23:48',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(312,2,'94b5af9c1cb20fbd882545f5d8c21ef58ac98eb163ae48b888cf65275a158ac1','2026-02-23 10:24:02','2026-01-24 06:24:02',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(313,2,'3f6a15616731f168638f7ba4c6cb8a9b0ffd828de17074175e4d9836abfa3a4d','2026-02-23 10:26:07','2026-01-24 06:26:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(314,2,'c8b73a7f7c277240b442b9e476b69405fe079b622748f8c920fee3a023a43f57','2026-02-23 10:26:09','2026-01-24 06:26:09',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(315,2,'53066d2c592e95c16388e28a8351638573c184bae3f129878fa96a8987149827','2026-02-23 10:26:29','2026-01-24 06:26:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(316,2,'02ec24b1cb7268c939b1c1c9eb6f134d1c97f14d14845fc119be07caa1dd8691','2026-02-23 10:27:10','2026-01-24 06:27:10',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(317,2,'4437225b207b8da218e9dfa105b76e1117a4d3c6a15fa14e78456403f8e40d4e','2026-02-23 10:34:20','2026-01-24 06:34:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(318,2,'9804dd126e7a624b87d299685138dfd92ebf14104815efddbc82181380ddb054','2026-02-23 10:34:20','2026-01-24 06:34:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(319,2,'e48a05d35d2e694635bb972860218faf84d4714e57c319143c38e339f204df2f','2026-02-23 10:34:20','2026-01-24 06:34:20',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(320,2,'eb26c8a8fbfe9a5e886dc53ef93fe5baa0eef221ba668dcde6c0c7679f80d3fa','2026-02-23 10:34:34','2026-01-24 06:34:34',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(321,2,'fec41786fde5ee7f09dbaa7f4128b0392a9eb6401d5ddf000ed9431c88715d34','2026-02-23 10:34:36','2026-01-24 06:34:36',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(322,2,'307ae4394a2f72fd81c47b9a507d3ceb825034cd8e502f74ea7ea39be23b77e0','2026-02-23 10:34:37','2026-01-24 06:34:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(323,2,'787c00ef155e5a4d068cfe4a2e5bb3b340dc609fc74a06ae370f8358123d76c0','2026-02-23 10:34:46','2026-01-24 06:34:46',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(324,2,'4a5260a8b49a64a22378c3ae1fbced5076e2928009a296da06092a9bac6b8cf4','2026-02-23 10:35:17','2026-01-24 06:35:17',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(325,2,'5b447c0f27cd497fedad664e7ad14c5e5017043a16ea86a6fc25bf2f41eb2519','2026-02-23 10:35:18','2026-01-24 06:35:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(326,2,'2d959210c89c419b965458af5592f187d9630b5468234c18fc22085c145571dd','2026-02-23 10:35:18','2026-01-24 06:35:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(327,2,'57a8016dd2e8dc28417a3d07969dda010e1b38a50d2a307b3f480630579a501a','2026-02-23 10:37:44','2026-01-24 06:37:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(328,2,'005bccfe783e762ef43825c054c14089daf52ce2e49ac8208b519b2f4b489b9f','2026-02-23 10:37:44','2026-01-24 06:37:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(329,2,'36fbaa72a9947fb272a1be597094bb7e21ec4063c574c2a1720bd69f216f0464','2026-02-23 10:37:44','2026-01-24 06:37:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(330,2,'fdd1c03dd95c4f979a39c9aa3b94362ea4ee189566ab2689d21a1017bc996cb1','2026-02-23 10:37:55','2026-01-24 06:37:55',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(331,2,'e7c85686ff710de5b7f210d30b6ba282805f6407928e05ffcda6a7dcad14ec72','2026-02-23 10:37:57','2026-01-24 06:37:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(332,2,'9849e66adbd13b76215f07c3a1c531e4d1a98362c5cedcc181124b5c814c67c6','2026-02-23 10:39:07','2026-01-24 06:39:07',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(333,2,'36c01e995c6fed0fbd449b5ec72da86e8c4f5a0da6058dee1dfc88149f41006e','2026-02-23 10:39:11','2026-01-24 06:39:11',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(334,2,'60349705a3ed005a37f68bb99087b13fe4ca1af46f9d7724df8171eab3ba2461','2026-02-23 10:39:29','2026-01-24 06:39:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(335,2,'3cf858640e6bc0caed5b682dde791e2ae4d68ad5e062773ef41f6f2bf36ae551','2026-02-23 10:39:29','2026-01-24 06:39:29',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(336,2,'5aa1c0ff4877c368cc989b8c504ee7340204a24f6f94a2f3f3251a10669a2475','2026-02-23 10:39:30','2026-01-24 06:39:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(337,2,'099f22a72d55f3a7af69cdaad8bbd38230d7c8da6b62831416fdcc59d5bfefe4','2026-02-23 10:39:35','2026-01-24 06:39:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(338,2,'f19247de589a591fa7032d28c86e8a44a32a9f245b2f5b2f7bdac2d06061e5f2','2026-02-23 10:39:39','2026-01-24 06:39:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(339,2,'1c5d5c6db888e3cf8a569ede1e5c00025b7a822cd218fe3a03703801c3301c8a','2026-02-23 10:40:41','2026-01-24 06:40:41',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(340,2,'12d9f59aadc2992988c2568ff92a31cfe3eaab216fa94cd57683c017a6a7666b','2026-02-23 10:40:42','2026-01-24 06:40:42',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(341,2,'6b621f4966bb676e5fabcd095ee7ca9186777a1e55ecab74cd57f1afd37736af','2026-02-23 10:42:13','2026-01-24 06:42:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(342,2,'3e8d69c90457b56125ec9d6864aade7a964690a5393c0e82819580938a6ec5f3','2026-02-23 10:42:56','2026-01-24 06:42:56',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(343,2,'9f989ba878404d217661178179f2a9ce6cb786c00814ab5dd94054812b3a1a09','2026-02-23 10:42:57','2026-01-24 06:42:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(344,2,'61850d796f81397fefcf9fb34d635c4bbafe44836109f1185def8692630661c1','2026-02-23 10:42:57','2026-01-24 06:42:57',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(345,2,'2eab1548f8441cdff66f4f6259003f00e919e64761b8b2bc7fecb7c1cf2a1254','2026-02-23 10:48:35','2026-01-24 06:48:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(346,2,'db605f6006b5ff32739684d38002ac43847616604bdea13fb21ba89cb48efec9','2026-02-23 10:48:37','2026-01-24 06:48:37',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(347,2,'9790cd6e4f72d48f87b4aa134aa5b52b7b87496ec2850a2d23a4dccfd9a611dd','2026-02-23 10:49:35','2026-01-24 06:49:35',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(348,2,'a22fb6d5561ec76c0daa75516056a1f2b042d2ddc3e4d790d8d4bc71e8f334ac','2026-02-23 10:50:04','2026-01-24 06:50:04',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(349,2,'b30a788fcc71004e44f55cd327d35b5f9e153a3e1a6701fb5ee0575f943209a4','2026-02-23 10:50:38','2026-01-24 06:50:38',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(350,2,'9e20d346beef513edeac61728bfd2f86faedde304b53164f567f162684f16e0f','2026-02-23 10:51:24','2026-01-24 06:51:24',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(351,2,'f13f7f10210c54eb459b11fb308926c690904d17e21f7d41bab1cb8d878b35a3','2026-02-23 11:01:13','2026-01-24 07:01:13',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(352,2,'f186aef3d3764ede8932983e3e72998412239419dc00849fd9490720b3304c4f','2026-02-23 11:01:14','2026-01-24 07:01:14',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(353,2,'7f1a8fb7a57cc3f24be4b166c76df16e6529371cde00d9b2b54eee52abd5b2bd','2026-02-23 11:03:30','2026-01-24 07:03:30',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(354,2,'2036cf8ef86595fac3809a0e096a367b37d1a6bbbb2e377888f7a5aac715ae23','2026-02-25 05:24:18','2026-01-26 01:24:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(355,2,'cbc3f3991c594adf6ff478ec590d549d8c1eac2fce0a0ff18be688ffadb0cfc3','2026-02-25 05:24:18','2026-01-26 01:24:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(356,2,'9a97a909534824108a07942004b0efa5d7d3b72df69b0916586e2c1f31de1e76','2026-02-25 05:24:18','2026-01-26 01:24:18',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(357,2,'2fcd5f6f4a850378844e00b62d3d19187ef999eebfb2da1b981d4d13d41af94d','2026-02-25 05:24:26','2026-01-26 01:24:26',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(358,2,'49947e620f546bed4e7ce3b7bb4c7c9dfc715a847c29b67cb0996defd048292e','2026-02-25 05:24:28','2026-01-26 01:24:28',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(359,2,'ef776c069aad347902b692bf41d2d8256ed20aaf25c43c0fc1c7177cd92ef3ba','2026-02-25 05:24:30','2026-01-26 01:24:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(360,2,'c3009304b3e13bc570b0a6319bbd62aab089403e2f1a649408721c5e8b78ce31','2026-02-25 05:24:30','2026-01-26 01:24:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(361,2,'00804f65131a5ccc1fcc0fe341151e8231d48b920ce4da89ae3f1afcd9292054','2026-02-25 05:24:30','2026-01-26 01:24:30',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(362,2,'6af5703c342ec8c741de840de271408dad486f14122f54abdebee7570511da44','2026-02-25 05:24:38','2026-01-26 01:24:38',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(363,2,'039010105b69316d147d63a2a99158e6479b7545c686368ffb100c358eba5db5','2026-02-25 05:24:39','2026-01-26 01:24:39',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(364,2,'906f0b4502f8b69e32d12e8d611e8cd95d91079ae2526037e5188f898dd2fde5','2026-02-25 05:26:18','2026-01-26 01:26:18',0,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(365,2,'23fd73951e5650907a640bde333d760464dcaab57ebd37c12be22ee2d07f85ad','2026-02-25 05:47:17','2026-01-26 01:47:17',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(366,2,'a17258e9b1ea8eac6d0fef6ff95a9e4a83ceda1b4e7373057f3a1ef8f5920690','2026-02-25 05:47:17','2026-01-26 01:47:17',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(367,2,'facab3b0a8365046a64e23fa24c8a18adcb4d7edbeb0c0fabe19a3908f515d14','2026-02-25 05:47:17','2026-01-26 01:47:17',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(368,2,'cc7a283975529a1eec4aa18de3f2f5c7239f7febf6152849cc98030c945d4f4f','2026-02-25 05:47:24','2026-01-26 01:47:24',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(369,2,'5447a91c7fc1b4012c14d7b4da0f658fbb76515576df3fdd2a8dcc3bbdc655e4','2026-02-25 05:49:02','2026-01-26 01:49:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(370,2,'c67c66a4fc8700a552bcbd5d69d2b6a9220552c3ae8b5cf612d9760ff04ff4d5','2026-02-25 05:49:02','2026-01-26 01:49:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(371,2,'4773b6245ac0af17de4d1bc55df1bb281c6e10d2c6116208e88ba193a57527ec','2026-02-25 05:49:02','2026-01-26 01:49:02',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(372,5,'4108116cc31c749c0adacfec0f8faa5863e63c93b127a71ca026f63769c2412b','2026-02-27 03:41:46','2026-01-27 23:41:46',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(373,5,'c3f9b3f834176fe93c022d9a8890806bb5894f2ebb3f3a4bf16e71fcb24ce3be','2026-02-27 03:41:48','2026-01-27 23:41:48',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(374,5,'5a500c59e55f634c4414e57b98cf6284ad2b96c330229e6aa9cff209fd4223cf','2026-02-27 03:41:52','2026-01-27 23:41:52',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(375,5,'cb3d314cac04e7efa82143215f568a10383dead70026950035374c77a8befda2','2026-02-27 03:55:31','2026-01-27 23:55:31',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(376,5,'6d5335401319bda08be3ad6b3886828c0d94b792b20aef21b24352891be6cffc','2026-02-27 03:55:38','2026-01-27 23:55:38',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(377,5,'a6e44316b741e10d89bb81bd946e344fc87ec79d78c6bc4ef7f7427c0522a1f1','2026-02-27 04:09:26','2026-01-28 00:09:26',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(378,5,'f8550d65cbbc28bb92e9dd86f0582be9fb434e76b64344bc842afb29a55dae1c','2026-02-27 10:00:07','2026-01-28 06:00:07',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(379,5,'6584f71a4e4a23f3c300bd025206218e9d202579291cf86898babe785ec8bca8','2026-02-27 10:00:07','2026-01-28 06:00:07',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(380,5,'a351907323b54b49b690f49a14bd573c54fdc5e53263a63aad7974eba4bb2e42','2026-02-27 10:00:07','2026-01-28 06:00:07',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(381,5,'3b75532b62603424db8a94415b795ab66ca54af87259eed758b450437f014ef2','2026-02-27 10:00:12','2026-01-28 06:00:12',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(382,5,'315f40fa77e70080cc94aa47495d9e45e6ebff8e19fec75058f330ce82654491','2026-02-27 10:00:19','2026-01-28 06:00:19',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(383,5,'26913e57a3b665bcb5f5c98e0ebd408ad52ec5c63e5f1c94ec52884abac8bb5f','2026-02-27 10:01:39','2026-01-28 06:01:39',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(384,5,'04ec95cd8d797960f09ddba75f5528ea2931be2195a6d73dadb5ada3679617fc','2026-02-27 10:01:40','2026-01-28 06:01:40',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(385,5,'058bb689bafb8e2c667d0ff7faf6d6e0e730043272110bcbec230c3fe239edcd','2026-02-27 10:16:38','2026-01-28 06:16:38',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(386,5,'068b3dcedd7889eb224f0d31b3b26794154cb6b5515248a42d212f7c40854e07','2026-02-27 10:16:44','2026-01-28 06:16:44',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(387,5,'5eb365dbc347bf0576d91561d586ff620cf00d7f9490f42dd0f293f4726790ad','2026-02-27 10:16:50','2026-01-28 06:16:50',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(388,5,'a2ef7be35c7ca05b4aaf8ed9b65c39fc4d18438613b65d3175650d966e014bfb','2026-02-27 10:17:57','2026-01-28 06:17:57',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(389,5,'f2442077768c5d1db63b74f3836c77435aa38805e2cc0cd661c5cd215ca16ad7','2026-02-27 10:17:57','2026-01-28 06:17:57',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(390,5,'91e42f736dc69abaa53f52b7377803c5c284256c905729c9a066ca9813e33cd2','2026-02-27 10:18:00','2026-01-28 06:18:00',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(391,5,'6fbb0903b7d84e11bafc9ac6a1bc7a8afcd7da4c813df663daea21b35b78185a','2026-02-27 10:18:00','2026-01-28 06:18:00',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(392,5,'6b993f0a82c3949e92ac7c093ecd0486af9b9ad394184c46df6a9a2cd01fe4d0','2026-02-27 10:18:00','2026-01-28 06:18:00',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','127.0.0.1',1),(393,5,'c40b3f97ec23c78f9ddede566991ee1e330657e59b7d94cf9d2ae0aa537d7f82','2026-02-27 10:18:35','2026-01-28 06:18:35',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(394,5,'a5e36b8f79af678f69bfc2e922c76a76755ef1fc30559f139078f546c2b82fbe','2026-02-27 10:18:36','2026-01-28 06:18:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1),(395,5,'21e9b9084da9fcae721c634e7e5a8fc1355b5ba0acea93fce72ecefdf03de76f','2026-02-27 10:18:36','2026-01-28 06:18:36',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36','::1',1);
 /*!40000 ALTER TABLE `usuario_refresh` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15589,6 +16036,7 @@ CREATE TABLE `usuario_refresh_token` (
   `expira_em` datetime NOT NULL,
   `revogado` tinyint(1) DEFAULT '0',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_token`),
   UNIQUE KEY `uk_refresh_token` (`token`),
   KEY `idx_rt_usuario` (`id_usuario`),
@@ -15621,6 +16069,7 @@ CREATE TABLE `usuario_reset_senha` (
   `usado_em` datetime DEFAULT NULL,
   `ip_solicitacao` varchar(45) DEFAULT NULL,
   `user_agent` varchar(255) DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_reset`),
   KEY `ix_urs_usuario` (`id_usuario`),
   KEY `ix_urs_expira` (`expira_em`),
@@ -15651,10 +16100,13 @@ CREATE TABLE `usuario_sala` (
   `id_sala` bigint unsigned NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_sala`),
   UNIQUE KEY `uk_usuario_sala` (`id_usuario`,`id_sala`),
   KEY `idx_usuario` (`id_usuario`),
   KEY `idx_sala` (`id_sala`),
+  KEY `fk_usuario_sala_entidade` (`id_entidade`),
+  CONSTRAINT `fk_usuario_sala_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_usuario_sala_sala` FOREIGN KEY (`id_sala`) REFERENCES `sala` (`id_sala`),
   CONSTRAINT `fk_usuario_sala_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -15666,7 +16118,7 @@ CREATE TABLE `usuario_sala` (
 
 LOCK TABLES `usuario_sala` WRITE;
 /*!40000 ALTER TABLE `usuario_sala` DISABLE KEYS */;
-INSERT INTO `usuario_sala` VALUES (1,4,1,1,'2026-03-23 04:57:04'),(2,14,1,1,'2026-03-23 04:57:04'),(3,13,1,1,'2026-03-23 04:57:04'),(4,5,1,1,'2026-03-23 04:57:04'),(5,1,1,1,'2026-03-23 04:57:04'),(6,11,1,1,'2026-03-23 04:57:04'),(7,3,1,1,'2026-03-23 04:57:04'),(8,6,1,1,'2026-03-23 04:57:04'),(9,10,1,1,'2026-03-23 04:57:04'),(10,9,1,1,'2026-03-23 04:57:04'),(11,2,1,1,'2026-03-23 04:57:04'),(12,8,1,1,'2026-03-23 04:57:04'),(13,12,1,1,'2026-03-23 04:57:04'),(14,7,1,1,'2026-03-23 04:57:04'),(15,15,1,1,'2026-03-23 04:57:04');
+INSERT INTO `usuario_sala` VALUES (1,4,1,1,'2026-03-23 04:57:04',1),(2,14,1,1,'2026-03-23 04:57:04',1),(3,13,1,1,'2026-03-23 04:57:04',1),(4,5,1,1,'2026-03-23 04:57:04',1),(5,1,1,1,'2026-03-23 04:57:04',1),(6,11,1,1,'2026-03-23 04:57:04',1),(7,3,1,1,'2026-03-23 04:57:04',1),(8,6,1,1,'2026-03-23 04:57:04',1),(9,10,1,1,'2026-03-23 04:57:04',1),(10,9,1,1,'2026-03-23 04:57:04',1),(11,2,1,1,'2026-03-23 04:57:04',1),(12,8,1,1,'2026-03-23 04:57:04',1),(13,12,1,1,'2026-03-23 04:57:04',1),(14,7,1,1,'2026-03-23 04:57:04',1),(15,15,1,1,'2026-03-23 04:57:04',1);
 /*!40000 ALTER TABLE `usuario_sala` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15686,6 +16138,7 @@ CREATE TABLE `usuario_senha_historico` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_sessao_usuario` bigint DEFAULT NULL,
   `id_usuario_executor` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_senha_hist`),
   KEY `idx_ush_usuario_data` (`id_usuario`,`criado_em`),
   KEY `idx_ush_motivo` (`motivo`,`criado_em`),
@@ -15721,6 +16174,7 @@ CREATE TABLE `usuario_senha_reset` (
   `id_sessao_usuario_solicitante` bigint DEFAULT NULL,
   `id_usuario_solicitante` bigint DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_senha_reset`),
   UNIQUE KEY `ux_usr_reset_token_hash` (`token_hash`),
   KEY `idx_usr_reset_usuario` (`id_usuario`),
@@ -15754,6 +16208,7 @@ CREATE TABLE `usuario_setor` (
   `id_setor` int NOT NULL,
   `pode_operar` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_setor`),
   UNIQUE KEY `uk_usuario_setor` (`id_usuario`,`id_setor`),
   KEY `idx_us_setor_usuario` (`id_usuario`),
@@ -15784,6 +16239,7 @@ CREATE TABLE `usuario_sistema` (
   `id_perfil` bigint NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_sistema`),
   UNIQUE KEY `uk_usuario_sistema` (`id_usuario`,`id_sistema`),
   KEY `idx_us_usuario` (`id_usuario`),
@@ -15801,7 +16257,7 @@ CREATE TABLE `usuario_sistema` (
 
 LOCK TABLES `usuario_sistema` WRITE;
 /*!40000 ALTER TABLE `usuario_sistema` DISABLE KEYS */;
-INSERT INTO `usuario_sistema` VALUES (1,1,1,42,1,'2026-03-07 03:17:31.335031');
+INSERT INTO `usuario_sistema` VALUES (1,1,1,42,1,'2026-03-07 03:17:31.335031',1);
 /*!40000 ALTER TABLE `usuario_sistema` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -15822,6 +16278,7 @@ CREATE TABLE `usuario_sistema_acl_evento` (
   `origem_dispositivo` varchar(100) DEFAULT NULL,
   `origem_ip` varchar(50) DEFAULT NULL,
   `criado_em` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_acl_evento`),
   KEY `idx_acl_usuario` (`id_usuario`),
   KEY `idx_acl_evento_data` (`criado_em`)
@@ -15850,10 +16307,14 @@ CREATE TABLE `usuario_unidade` (
   `id_unidade` bigint unsigned NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_usuario_unidade`),
   UNIQUE KEY `uk_usuario_unidade` (`id_usuario`,`id_unidade`),
   KEY `fk_uu_usuario` (`id_usuario`),
   KEY `fk_uu_unidade` (`id_unidade`),
+  KEY `idx_usuario_entidade` (`id_usuario`,`id_entidade`),
+  KEY `fk_usuario_unidade_entidade` (`id_entidade`),
+  CONSTRAINT `fk_usuario_unidade_entidade` FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade` (`id_entidade`),
   CONSTRAINT `fk_usuario_unidade_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`),
   CONSTRAINT `fk_uu_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -15888,6 +16349,7 @@ CREATE TABLE `venda` (
   `pago_em` datetime DEFAULT NULL,
   `cancelado_em` datetime DEFAULT NULL,
   `criado_por` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_venda`),
   KEY `idx_venda_status` (`status`,`criado_em`),
   KEY `fk_venda_caixa` (`id_caixa`),
@@ -15922,6 +16384,7 @@ CREATE TABLE `venda_evento` (
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_usuario` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_evento`),
   KEY `idx_ve_venda` (`id_venda`,`criado_em`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -15954,6 +16417,7 @@ CREATE TABLE `venda_item` (
   `valor_unitario` decimal(10,2) NOT NULL,
   `desconto` decimal(10,2) NOT NULL DEFAULT '0.00',
   `total_linha` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_venda_item`),
   KEY `idx_vi_venda` (`id_venda`),
   KEY `idx_vi_farmaco` (`id_farmaco`,`id_lote`),
@@ -15986,6 +16450,7 @@ CREATE TABLE `venda_pagamento` (
   `id_forma_pagamento` int NOT NULL,
   `valor` decimal(10,2) NOT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_venda_pagamento`),
   KEY `idx_vp_venda` (`id_venda`),
   KEY `fk_vp_forma` (`id_forma_pagamento`),
@@ -16016,6 +16481,7 @@ CREATE TABLE `viatura` (
   `prefixo` varchar(30) NOT NULL,
   `tipo` enum('AMBULANCIA_BASICA','AMBULANCIA_AVANCADA','OUTRO') NOT NULL DEFAULT 'OUTRO',
   `ativo` tinyint(1) DEFAULT '1',
+  `id_entidade` bigint unsigned NOT NULL,
   PRIMARY KEY (`id_viatura`),
   UNIQUE KEY `uk_viatura` (`id_unidade`,`prefixo`),
   CONSTRAINT `fk_viatura_unidade` FOREIGN KEY (`id_unidade`) REFERENCES `unidade` (`id_unidade`)
@@ -16043,7 +16509,7 @@ CREATE TABLE `workflow_ffa_evento` (
   `id_ffa` bigint NOT NULL,
   `origem` varchar(20) NOT NULL,
   `entidade` varchar(50) DEFAULT NULL,
-  `id_entidade` bigint DEFAULT NULL,
+  `id_entidade` bigint unsigned NOT NULL,
   `tipo_evento` varchar(60) NOT NULL,
   `detalhe` text,
   `id_sessao_usuario` bigint DEFAULT NULL,
@@ -16883,81 +17349,77 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_contexto_get`(
-    IN p_id_sessao BIGINT,
-    OUT p_resultado JSON,
-    OUT p_sucesso BOOLEAN,
-    OUT p_mensagem TEXT
+    IN p_id_sessao_usuario BIGINT UNSIGNED
 )
-proc: BEGIN
+BEGIN
+    DECLARE v_id_usuario  BIGINT UNSIGNED;
+    DECLARE v_id_entidade BIGINT UNSIGNED;
 
-    DECLARE v_id_usuario BIGINT;
+    -- 1. VALIDAR SESSÃO
+    SELECT su.id_usuario, su.id_entidade
+    INTO v_id_usuario, v_id_entidade
+    FROM sessao_usuario su
+    WHERE su.id_sessao_usuario = p_id_sessao_usuario
+    LIMIT 1;
 
-    SET p_sucesso = FALSE;
-
-    SELECT id_usuario
-    INTO v_id_usuario
-    FROM sessao_usuario
-    WHERE id_sessao_usuario = p_id_sessao
-      AND ativo = 1
-      AND expira_em > NOW();
-
-    IF v_id_usuario IS NULL THEN
-        SET p_mensagem = 'SESSAO_INVALIDA';
-        LEAVE proc;
+    IF v_id_usuario IS NULL OR v_id_entidade IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SESSAO_INVALIDA_OU_SEM_TENANT';
     END IF;
 
-    SET p_resultado = JSON_OBJECT(
+    -- 2. UNIDADES
+    SELECT DISTINCT
+        uu.id_unidade,
+        un.nome AS nome_unidade
+    FROM usuario_unidade uu
+    INNER JOIN unidade un
+        ON un.id_unidade  = uu.id_unidade
+       AND un.id_entidade = uu.id_entidade
+    WHERE uu.id_usuario  = v_id_usuario
+      AND uu.id_entidade = v_id_entidade
+    ORDER BY un.nome;
 
-        'unidades', (
-            SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                'id_unidade', u.id_unidade,
-                'nome', u.nome
-            ))
-            FROM usuario_unidade uu
-            JOIN unidade u ON u.id_unidade = uu.id_unidade
-            WHERE uu.id_usuario = v_id_usuario AND uu.ativo = 1
-        ),
+    -- 3. PERFIS
+    SELECT DISTINCT
+        up.id_perfil,
+        p.nome AS nome_perfil,
+        up.id_unidade
+    FROM usuario_perfil up
+    INNER JOIN perfil p
+        ON p.id_perfil   = up.id_perfil
+       AND p.id_entidade = up.id_entidade
+    INNER JOIN usuario_unidade uu
+        ON uu.id_unidade  = up.id_unidade
+       AND uu.id_usuario  = up.id_usuario
+       AND uu.id_entidade = up.id_entidade
+    WHERE up.id_usuario  = v_id_usuario
+      AND up.id_entidade = v_id_entidade
+    ORDER BY p.nome;
 
-        'locais', (
-            SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                'id_local', lo.id_local,
-                'nome', lo.nome
-            ))
-            FROM usuario_local ulo
-            JOIN local lo ON lo.id_local = ulo.id_local
-            WHERE ulo.id_usuario = v_id_usuario AND ulo.ativo = 1
-        ),
+    -- 4. LOCAIS
+    SELECT DISTINCT
+        ul.id_local AS id_sala,
+        l.nome      AS nome_sala,
+        ul.id_unidade
+    FROM usuario_local ul
+    INNER JOIN local l
+        ON l.id_local     = ul.id_local
+       AND l.id_entidade  = ul.id_entidade
+    INNER JOIN usuario_unidade uu
+        ON uu.id_unidade  = ul.id_unidade
+       AND uu.id_usuario  = ul.id_usuario
+       AND uu.id_entidade = ul.id_entidade
+    WHERE ul.id_usuario  = v_id_usuario
+      AND ul.id_entidade = v_id_entidade
+    ORDER BY l.nome;
 
-        'perfis', (
-            SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                'id_perfil', p.id_perfil,
-                'nome', p.nome
-            ))
-            FROM usuario_perfil up
-            JOIN perfil p ON p.id_perfil = up.id_perfil
-            WHERE up.id_usuario = v_id_usuario AND up.ativo = 1
-        ),
-
-        'salas', (
-            SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                'id_sala', s.id_sala,
-                'nome', s.nome_exibicao,
-                'id_local', s.id_local,
-                'id_tipo_sala', s.id_tipo_sala,
-                'exibir_painel', s.exibir_painel,
-                'gerar_tts', s.gerar_tts
-            ))
-            FROM usuario_sala us
-            JOIN sala s ON s.id_sala = us.id_sala
-            WHERE us.id_usuario = v_id_usuario
-              AND us.ativo = 1
-              AND s.ativa = 1
-        )
-
-    );
-
-    SET p_sucesso = TRUE;
-    SET p_mensagem = 'OK';
+    -- 5. CONTEXTO ATUAL
+    SELECT
+        su.id_unidade AS id_unidade_atual,
+        su.id_local   AS id_sala_atual
+    FROM sessao_usuario su
+    WHERE su.id_sessao_usuario = p_id_sessao_usuario
+      AND su.id_entidade = v_id_entidade
+    LIMIT 1;
 
 END ;;
 DELIMITER ;
@@ -16976,133 +17438,113 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auth_contexto_set`(
-    IN p_id_sessao BIGINT,
-    IN p_id_unidade BIGINT,
-    IN p_id_local BIGINT,
-    IN p_id_perfil BIGINT,
-    IN p_id_sala BIGINT,
-
-    OUT p_resultado JSON,
-    OUT p_sucesso BOOLEAN,
-    OUT p_mensagem TEXT
+    IN p_id_sessao_usuario BIGINT UNSIGNED,
+    IN p_id_unidade        BIGINT UNSIGNED,
+    IN p_id_perfil         BIGINT UNSIGNED,
+    IN p_id_local          BIGINT UNSIGNED
 )
-proc: BEGIN
+BEGIN
+    DECLARE v_id_usuario   BIGINT UNSIGNED;
+    DECLARE v_id_entidade  BIGINT UNSIGNED;
+    DECLARE v_exists       INT;
 
-    DECLARE v_id_usuario BIGINT;
-    DECLARE v_count INT;
+    -- 1. VALIDAR SESSÃO + TENANT
+    SELECT su.id_usuario, su.id_entidade
+    INTO v_id_usuario, v_id_entidade
+    FROM sessao_usuario su
+    WHERE su.id_sessao_usuario = p_id_sessao_usuario
+    LIMIT 1;
 
-    SET p_sucesso = FALSE;
-
-    -- ==========================================
-    -- VALIDAR SESSÃO
-    -- ==========================================
-    SELECT id_usuario
-    INTO v_id_usuario
-    FROM sessao_usuario
-    WHERE id_sessao_usuario = p_id_sessao
-      AND ativo = 1
-      AND expira_em > NOW();
-
-    IF v_id_usuario IS NULL THEN
-        SET p_mensagem = 'SESSAO_INVALIDA';
-        LEAVE proc;
+    IF v_id_usuario IS NULL OR v_id_entidade IS NULL THEN
+        SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'SESSAO_INVALIDA';
     END IF;
 
-    -- ==========================================
-    -- VALIDAR UNIDADE
-    -- ==========================================
-    SELECT COUNT(*) INTO v_count
-    FROM usuario_unidade
-    WHERE id_usuario = v_id_usuario
-      AND id_unidade = p_id_unidade
-      AND ativo = 1;
+    -- 2. VALIDAR UNIDADE
+    SELECT COUNT(*) INTO v_exists
+    FROM usuario_unidade uu
+    WHERE uu.id_usuario  = v_id_usuario
+      AND uu.id_unidade  = p_id_unidade
+      AND uu.id_entidade = v_id_entidade;
 
-    IF v_count = 0 THEN
-        SET p_mensagem = 'UNIDADE_INVALIDA';
-        LEAVE proc;
+    IF v_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'USUARIO_NAO_VINCULADO_UNIDADE';
     END IF;
 
-    -- ==========================================
-    -- VALIDAR LOCAL
-    -- ==========================================
-    IF p_id_local IS NOT NULL THEN
-        SELECT COUNT(*) INTO v_count
-        FROM usuario_local
-        WHERE id_usuario = v_id_usuario
-          AND id_local = p_id_local
-          AND ativo = 1;
+    -- 3. VALIDAR PERFIL
+    SELECT COUNT(*) INTO v_exists
+    FROM usuario_perfil up
+    WHERE up.id_usuario  = v_id_usuario
+      AND up.id_perfil   = p_id_perfil
+      AND up.id_unidade  = p_id_unidade
+      AND up.id_entidade = v_id_entidade;
 
-        IF v_count = 0 THEN
-            SET p_mensagem = 'LOCAL_INVALIDO';
-            LEAVE proc;
-        END IF;
+    IF v_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'PERFIL_INVALIDO_PARA_UNIDADE';
     END IF;
 
-    -- ==========================================
-    -- VALIDAR PERFIL
-    -- ==========================================
-    SELECT COUNT(*) INTO v_count
-    FROM usuario_perfil
-    WHERE id_usuario = v_id_usuario
-      AND id_perfil = p_id_perfil
-      AND ativo = 1;
+    -- 4. VALIDAR LOCAL
+    SELECT COUNT(*) INTO v_exists
+    FROM usuario_local ul
+    WHERE ul.id_usuario  = v_id_usuario
+      AND ul.id_local    = p_id_local
+      AND ul.id_unidade  = p_id_unidade
+      AND ul.id_entidade = v_id_entidade;
 
-    IF v_count = 0 THEN
-        SET p_mensagem = 'PERFIL_INVALIDO';
-        LEAVE proc;
+    IF v_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'LOCAL_INVALIDO_PARA_UNIDADE';
     END IF;
 
-    -- ==========================================
-    -- VALIDAR SALA
-    -- ==========================================
-    SELECT COUNT(*) INTO v_count
-    FROM usuario_sala
-    WHERE id_usuario = v_id_usuario
-      AND id_sala = p_id_sala
-      AND ativo = 1;
-
-    IF v_count = 0 THEN
-        SET p_mensagem = 'SALA_INVALIDA';
-        LEAVE proc;
-    END IF;
-
-    -- ==========================================
-    -- VALIDAR COERÊNCIA SALA x LOCAL
-    -- ==========================================
-    SELECT COUNT(*) INTO v_count
-    FROM sala
-    WHERE id_sala = p_id_sala
-      AND id_local = p_id_local;
-
-    IF v_count = 0 THEN
-        SET p_mensagem = 'SALA_NAO_PERTENCE_AO_LOCAL';
-        LEAVE proc;
-    END IF;
-
-    -- ==========================================
-    -- UPDATE SESSÃO
-    -- ==========================================
+    -- 5. ATUALIZAR CONTEXTO DA SESSÃO
     UPDATE sessao_usuario
     SET id_unidade = p_id_unidade,
-        id_local = p_id_local,
-        id_perfil = p_id_perfil,
-        id_sala = p_id_sala,
-        contexto_definido_em = NOW(6)
-    WHERE id_sessao_usuario = p_id_sessao;
+        id_local   = p_id_local,
+        atualizado_em = NOW(6)
+    WHERE id_sessao_usuario = p_id_sessao_usuario
+      AND id_entidade = v_id_entidade;
 
-    -- ==========================================
-    -- RESULTADO
-    -- ==========================================
-    SET p_resultado = JSON_OBJECT(
-        'contexto_definido', TRUE,
-        'id_unidade', p_id_unidade,
-        'id_local', p_id_local,
-        'id_perfil', p_id_perfil,
-        'id_sala', p_id_sala
+    -- 6. PERSISTIR CONTEXTO (SNAPSHOT)
+    INSERT INTO usuario_contexto (
+        id_usuario,
+        id_entidade,
+        id_unidade,
+        id_perfil,
+        id_local,
+        criado_em
+    ) VALUES (
+        v_id_usuario,
+        v_id_entidade,
+        p_id_unidade,
+        p_id_perfil,
+        p_id_local,
+        NOW(6)
     );
 
-    SET p_sucesso = TRUE;
-    SET p_mensagem = 'OK';
+    -- 7. AUDITORIA ATIVA (GANCHO PADRÃO)
+    INSERT INTO auditoria_evento (
+        id_sessao_usuario,
+        tipo_evento,
+        entidade,
+        entidade_id,
+        payload,
+        criado_em
+    ) VALUES (
+        p_id_sessao_usuario,
+        'CONTEXT_SET',
+        'sessao_usuario',
+        p_id_sessao_usuario,
+        JSON_OBJECT(
+            'id_usuario', v_id_usuario,
+            'id_entidade', v_id_entidade,
+            'id_unidade', p_id_unidade,
+            'id_perfil', p_id_perfil,
+            'id_local', p_id_local
+        ),
+        NOW(6)
+    );
 
 END ;;
 DELIMITER ;
@@ -17240,6 +17682,58 @@ proc: BEGIN
     SET p_sucesso = TRUE;
     SET p_mensagem = 'MENU_OK';
 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_backfill_entidade` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_backfill_entidade`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_table VARCHAR(255);
+
+    DECLARE cur CURSOR FOR
+        SELECT TABLE_NAME
+        FROM information_schema.COLUMNS
+        WHERE COLUMN_NAME = 'id_entidade'
+          AND TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME <> 'usuario'; -- usuario já é fonte
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO v_table;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET @sql = CONCAT(
+            'UPDATE `', v_table, '` t ',
+            'JOIN usuario u ON u.id_usuario = t.id_usuario ',
+            'SET t.id_entidade = u.id_entidade ',
+            'WHERE t.id_entidade IS NULL;'
+        );
+
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+    END LOOP;
+
+    CLOSE cur;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -21321,6 +21815,55 @@ BEGIN
     INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)
     VALUES (p_id_senha, p_id_sessao_usuario, 'SENHA_FINALIZADA', NOW());
 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_fix_columns_entidade` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_fix_columns_entidade`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_table VARCHAR(255);
+
+    DECLARE cur CURSOR FOR
+        SELECT TABLE_NAME
+        FROM information_schema.COLUMNS
+        WHERE COLUMN_NAME = 'id_entidade'
+          AND TABLE_SCHEMA = DATABASE();
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO v_table;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET @sql = CONCAT(
+            'ALTER TABLE `', v_table,
+            '` MODIFY `id_entidade` BIGINT UNSIGNED NOT NULL;'
+        );
+
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+    END LOOP;
+
+    CLOSE cur;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -29741,6 +30284,57 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_recreate_fk_entidade` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_recreate_fk_entidade`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_table VARCHAR(255);
+
+    DECLARE cur CURSOR FOR
+        SELECT DISTINCT TABLE_NAME
+        FROM information_schema.COLUMNS
+        WHERE COLUMN_NAME = 'id_entidade'
+          AND TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME <> 'saas_entidade';
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO v_table;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET @sql = CONCAT(
+            'ALTER TABLE `', v_table,
+            '` ADD CONSTRAINT `fk_', v_table, '_entidade` ',
+            'FOREIGN KEY (`id_entidade`) REFERENCES `saas_entidade`(`id_entidade`);'
+        );
+
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+    END LOOP;
+
+    CLOSE cur;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_registrar_evento` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -31751,6 +32345,88 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_tenant_enforce_not_null` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_tenant_enforce_not_null`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_table VARCHAR(255);
+    DECLARE v_nulls BIGINT DEFAULT 0;
+    DECLARE v_is_pk INT DEFAULT 0;
+
+    DECLARE cur CURSOR FOR
+        SELECT DISTINCT TABLE_NAME
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND COLUMN_NAME = 'id_entidade';
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    loop_tables: LOOP
+        FETCH cur INTO v_table;
+        IF done THEN 
+            LEAVE loop_tables; 
+        END IF;
+
+        -- ==========================================
+        -- CONTAR NULLS (FORMA CORRETA)
+        -- ==========================================
+        SET @sql_check = CONCAT(
+            'SELECT COUNT(*) INTO @v_nulls FROM `', v_table, '` WHERE id_entidade IS NULL'
+        );
+
+        PREPARE stmt FROM @sql_check;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+
+        SET v_nulls = IFNULL(@v_nulls, 0);
+
+        -- ==========================================
+        -- VERIFICAR SE FAZ PARTE DA PK
+        -- ==========================================
+        SELECT COUNT(*)
+        INTO v_is_pk
+        FROM information_schema.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = v_table
+          AND COLUMN_NAME = 'id_entidade'
+          AND CONSTRAINT_NAME = 'PRIMARY';
+
+        -- ==========================================
+        -- APLICAR NOT NULL SOMENTE SE SEGURO
+        -- ==========================================
+        IF v_nulls = 0 THEN
+
+            SET @sql = CONCAT(
+                'ALTER TABLE `', v_table,
+                '` MODIFY id_entidade BIGINT UNSIGNED NOT NULL;'
+            );
+
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+        END IF;
+
+    END LOOP;
+
+    CLOSE cur;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_timeout_ffa` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -33086,4 +33762,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-27  6:35:04
+-- Dump completed on 2026-04-02  5:00:18

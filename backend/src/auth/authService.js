@@ -171,6 +171,12 @@ class AuthService {
             try {
                 // Gera um token aleatório para a sessão
                 const tokenJwt = require('crypto').randomBytes(32).toString('hex');
+                // Busca entidade do usuário (multi-tenant obrigatório)
+                const [[uEnt]] = await conn.query(
+                    "SELECT id_entidade FROM usuario WHERE id_usuario = ?",
+                    [user.id_usuario]
+                );
+                const id_entidade = uEnt?.id_entidade || null;
                 
                 [loginResult] = await conn.query(
                     "CALL sp_auth_criar_sessao(?, ?, ?, ?, ?, ?)",
@@ -189,12 +195,17 @@ class AuthService {
                 // Usa token_jwt porque token_runtime pode não existir
                 const tokenJwt = require('crypto').randomBytes(32).toString('hex');
                 const expira = new Date(Date.now() + 8 * 60 * 60 * 1000); // 8 horas
+                const [[uEnt]] = await conn.query(
+                    "SELECT id_entidade FROM usuario WHERE id_usuario = ?",
+                    [user.id_usuario]
+                );
+                const id_entidade = uEnt?.id_entidade || null;
                 
                 await conn.query(
                     `INSERT INTO sessao_usuario 
-                     (id_usuario, id_sistema, id_unidade, id_local_operacional, id_perfil, token_jwt, iniciado_em, expira_em, ativo)
-                     VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, 1)`,
-                    [user.id_usuario, id_sistema, id_unidade, id_local_operacional, id_perfil, tokenJwt, expira]
+                     (id_usuario, id_entidade, id_sistema, id_unidade, id_local, id_perfil, token_jwt, iniciado_em, expira_em, ativo)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, NOW(6), ?, 1)`,
+                    [user.id_usuario, id_entidade, id_sistema, id_unidade, id_local_operacional, id_perfil, tokenJwt, expira]
                 );
             }
 

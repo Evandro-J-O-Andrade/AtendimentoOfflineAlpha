@@ -6,7 +6,8 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
-  const [contextos, setContextos] = useState([]);
+  const [contexto, setContextoState] = useState(null); // {unidades, perfis, salas/locais, especialidades, contextoAtual}
+  const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [session, setSession] = useState(null);
@@ -14,27 +15,28 @@ export const AuthProvider = ({ children }) => {
   // Login
   const login = async (loginData) => {
     try {
-      // Envia login e senha (não usuario)
       const response = await api.post("/auth/login", {
         login: loginData.login || loginData.usuario,
-        senha: loginData.senha
+        senha: loginData.senha,
       });
-      
+
       const data = response.data;
 
-      if (data.sucesso) {
-        const { token, refreshToken, usuario: user, contextos: ctx, sessao } = data;
-        setAccessToken(token);
-        localStorage.setItem("refreshToken", refreshToken);
-        setUsuario(user);
-        setContextos(ctx || []);
-        setSession(sessao);
-        setIsAuthenticated(true);
-        // Retorna os contextos também para quem chamou
-        return { sucesso: true, contextos: ctx || [], temContexto: (ctx || []).length > 1 };
+      if (!data?.sucesso) {
+        return { sucesso: false, mensagem: data?.mensagem || "Erro no login" };
       }
 
-      return { sucesso: false, mensagem: data.mensagem || "Erro no login" };
+      const { token, refreshToken, usuario: user, sessao } = data;
+      setAccessToken(token);
+      localStorage.setItem("refreshToken", refreshToken);
+      setUsuario(user);
+      setSession(sessao);
+      setIsAuthenticated(true);
+
+      // Carrega contexto depois do login (menu só após contexto definido)
+      await carregarContexto();
+
+      return { sucesso: true };
     } catch (err) {
       console.error("Erro login:", err);
       return { sucesso: false, mensagem: err.response?.data?.mensagem || "Erro interno" };
@@ -44,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   // Logout
   const logout = () => {
     setUsuario(null);
-    setContextos([]);
+    setContextoState(null);
     setSession(null);
     setAccessToken(null);
     setIsAuthenticated(false);
@@ -77,15 +79,7 @@ export const AuthProvider = ({ children }) => {
           console.warn("Erro ao buscar dados do usuário:", e);
         }
         
-        // Busca contextos
-        try {
-          const contextosResponse = await api.get("/auth/meus-contextos");
-          if (contextosResponse.data.contextos) {
-            setContextos(contextosResponse.data.contextos);
-          }
-        } catch (e) {
-          console.warn("Erro ao buscar contextos:", e);
-        }
+        await carregarContexto();
         
         setIsAuthenticated(true);
       } else {
@@ -100,10 +94,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Buscar contexto/disponíveis
+  // Busca contexto (unidades, perfis, salas, contextoAtual) via SPs novas
   const getContexto = useCallback(async () => {
     try {
-      const response = await api.get("/contexto");
-      return response.data.resultado;
+      // Rota real montada em app.js: /api/contexto
+      const { data } = await api.get("/contexto");
+      // backend responde {sucesso, resultado:{unidades, locais, perfis, salas, especialidades}}
+      if (data?.resultado) return data.resultado;
+      return data;
     } catch (err) {
       console.error("Erro getContexto:", err);
       throw err;
@@ -113,27 +111,66 @@ export const AuthProvider = ({ children }) => {
   // Definir contexto selecionado
   const setContexto = useCallback(async (contextoData) => {
     try {
-      const response = await api.post("/contexto", contextoData);
-      
-      if (response.data.sucesso) {
-        // Atualiza a sessão com os dados do resultado
-        const resultado = response.data.resultado || {};
-        setSession({
-          id_sessao_usuario: session?.id_sessao_usuario,
-          id_unidade: resultado.id_unidade,
-          id_local_operacional: resultado.id_local_operacional,
-          id_perfil: resultado.id_perfil,
-          id_sala: resultado.id_sala,
-          contexto_definido: true
-        });
-        return response.data;
+      // contextoData esperado: { id_unidade, id_perfil, id_local }
+      const { data } = await api.post("/contexto", contextoData);
+
+      if (!data?.sucesso) {
+        throw new Error(data?.mensagem || data?.erro || "Erro ao definir contexto");
       }
-      throw new Error(response.data.mensagem || response.data.erro || "Erro ao definir contexto");
+
+      // Atualiza sessão local com o que foi enviado
+      setSession((prev) => ({
+        ...(prev || {}),
+        id_unidade: contextoData.id_unidade,
+        id_local: contextoData.id_local || contextoData.id_sala || null,
+        id_perfil: contextoData.id_perfil,
+        contexto_definido: true,
+      }));
+
+      // Recarrega contexto após set
+      await carregarContexto();
+      await carregarMenu(true);
+      return data;
     } catch (err) {
       console.error("Erro setContexto:", err);
       throw err;
     }
-  }, [session]);
+  }, []);
+
+  const carregarMenu = useCallback(async (force = false) => {
+    try {
+      const ctxAtual = contexto?.contextoAtual;
+      if (!force && (!ctxAtual || !ctxAtual.id_unidade || !ctxAtual.id_local_operacional || !ctxAtual.id_perfil)) {
+        setMenu([]);
+        return;
+      }
+      const { data } = await api.get("/auth/menu");
+      if (data?.sucesso) {
+        setMenu(data.resultado?.modulos || []);
+      } else {
+        setMenu([]);
+      }
+    } catch (e) {
+      console.warn("Não foi possível carregar menu:", e?.message);
+      setMenu([]);
+    }
+  }, []);
+
+  const carregarContexto = useCallback(async () => {
+    try {
+      const resultado = await getContexto();
+      // Normaliza nomes conforme backend
+      setContextoState({
+        unidades: resultado?.unidades || [],
+        perfis: resultado?.perfis || [],
+        salas: resultado?.salas || resultado?.locais || [],
+        especialidades: resultado?.especialidades || [],
+        contextoAtual: resultado?.contextoAtual || null,
+      });
+    } catch (e) {
+      console.warn("Não foi possível carregar contexto:", e?.message);
+    }
+  }, [getContexto]);
 
   // Inicializa ao montar
   useEffect(() => {
@@ -144,7 +181,8 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         usuario,
-        contextos,
+        contexto,
+        menu,
         loading,
         isAuthenticated,
         session,

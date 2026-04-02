@@ -26,6 +26,7 @@ proc: BEGIN
 
     DECLARE v_id_usuario BIGINT;
     DECLARE v_hash VARCHAR(255);
+    DECLARE v_id_entidade BIGINT;
     DECLARE v_ativo TINYINT;
     DECLARE v_id_sessao BIGINT;
 
@@ -58,8 +59,8 @@ proc: BEGIN
         END IF;
 
         -- Busca usuário pelo login
-        SELECT u.id_usuario, u.senha_hash, u.ativo
-        INTO v_id_usuario, v_hash, v_ativo
+        SELECT u.id_usuario, u.senha_hash, u.ativo, u.id_entidade
+        INTO v_id_usuario, v_hash, v_ativo, v_id_entidade
         FROM usuario u
         WHERE u.login = v_login
         LIMIT 1;
@@ -139,9 +140,9 @@ proc: BEGIN
 
         -- Cria sessão
         INSERT INTO sessao_usuario (
-            id_usuario, id_unidade, id_local, id_perfil, criado_em
+            id_usuario, id_entidade, id_unidade, id_local, id_perfil, criado_em
         ) VALUES (
-            v_id_usuario, v_id_unidade, v_id_local, v_id_perfil, NOW(6)
+            v_id_usuario, v_id_entidade, v_id_unidade, v_id_local, v_id_perfil, NOW(6)
         );
 
         SET v_id_sessao = LAST_INSERT_ID();

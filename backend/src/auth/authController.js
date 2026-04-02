@@ -39,7 +39,7 @@ class AuthController {
             
             // 1. Validar usuário e senha manualmente (bcrypt está no Node)
             const [userRows] = await conn.execute(
-                "SELECT id_usuario, login, senha_hash, ativo FROM usuario WHERE login = ? LIMIT 1", 
+                "SELECT id_usuario, login, senha_hash, ativo, id_entidade FROM usuario WHERE login = ? LIMIT 1", 
                 [userLogin]
             );
 
@@ -55,8 +55,8 @@ class AuthController {
             const senhaValida = await bcrypt.compare(senha, user.senha_hash);
             if (!senhaValida) {
                 await conn.execute(
-                    "INSERT INTO login_tentativa (id_usuario, login, ip_origem, dispositivo_origem, sucesso, metadata, criado_em) VALUES (?, ?, ?, ?, 0, ?, NOW(6))",
-                    [user.id_usuario, userLogin, ip, userAgent.substring(0, 100), JSON.stringify({ motivo: 'senha_invalida' })]
+                    "INSERT INTO login_tentativa (id_usuario, id_entidade, login, ip_origem, dispositivo_origem, sucesso, metadata, criado_em) VALUES (?, ?, ?, ?, ?, 0, ?, NOW(6))",
+                    [user.id_usuario, user.id_entidade, userLogin, ip, userAgent.substring(0, 100), JSON.stringify({ motivo: 'senha_invalida' })]
                 );
                 return res.json({ sucesso: false, erro: "SENHA_INVALIDA", mensagem: "Senha incorreta" });
             }
@@ -65,13 +65,15 @@ class AuthController {
             const jwtToken = jwt.sign({ 
                 id_usuario: user.id_usuario, 
                 id_sessao_usuario: 0, // Será atualizado após criar sessão
-                login: user.login
+                login: user.login,
+                id_entidade: user.id_entidade
             }, SECRET, { expiresIn: EXPIRES_IN });
 
             const refreshToken = jwt.sign({ 
                 id_usuario: user.id_usuario, 
                 id_sessao_usuario: 0,
                 login: user.login,
+                id_entidade: user.id_entidade,
                 tipo: 'refresh'
             }, SECRET, { expiresIn: '7d' });
 
@@ -79,31 +81,34 @@ class AuthController {
             // Inserir registro na tabela sessao_usuario
             // Usar unidade padrão (id_unidade = 1) para permitir login
             const [sessaoResult] = await conn.execute(
-                `INSERT INTO sessao_usuario (uuid_sessao, id_usuario, id_sistema, id_perfil, id_unidade, id_local, token_jwt, refresh_token, ip_origem, user_agent, iniciado_em, expira_em, ativo) 
-                 VALUES (UUID(), ?, 4, NULL, 1, NULL, ?, ?, ?, ?, NOW(6), DATE_ADD(NOW(6), INTERVAL 8 HOUR), 1)`,
-                [user.id_usuario, jwtToken, refreshToken, ip, userAgent.substring(0, 255)]
+                `INSERT INTO sessao_usuario 
+                 (uuid_sessao, id_usuario, id_entidade, id_sistema, id_perfil, id_unidade, id_local, token_jwt, refresh_token, ip_origem, user_agent, iniciado_em, expira_em, ativo) 
+                 VALUES (UUID(), ?, ?, 4, NULL, 1, NULL, ?, ?, ?, ?, NOW(6), DATE_ADD(NOW(6), INTERVAL 8 HOUR), 1)`,
+                [user.id_usuario, user.id_entidade, jwtToken, refreshToken, ip, userAgent.substring(0, 255)]
             );
             
             const id_sessao_usuario = sessaoResult.insertId;
             
             // Registrar tentativa de login bem-sucedida
             await conn.execute(
-                `INSERT INTO login_tentativa (id_usuario, login, ip_origem, dispositivo_origem, sucesso, metadata, criado_em) 
-                 VALUES (?, ?, ?, ?, 1, ?, NOW(6))`,
-                [user.id_usuario, userLogin, ip, userAgent.substring(0, 100), JSON.stringify({ status: 'sucesso' })]
+                `INSERT INTO login_tentativa (id_usuario, id_entidade, login, ip_origem, dispositivo_origem, sucesso, metadata, criado_em) 
+                 VALUES (?, ?, ?, ?, ?, 1, ?, NOW(6))`,
+                [user.id_usuario, user.id_entidade, userLogin, ip, userAgent.substring(0, 100), JSON.stringify({ status: 'sucesso' })]
             );
 
             // 3. Atualizar token com id_sessao_usuario correto
             const jwtTokenFinal = jwt.sign({ 
                 id_usuario: user.id_usuario, 
                 id_sessao_usuario: id_sessao_usuario,
-                login: user.login
+                login: user.login,
+                id_entidade: user.id_entidade
             }, SECRET, { expiresIn: EXPIRES_IN });
 
             const refreshTokenFinal = jwt.sign({ 
                 id_usuario: user.id_usuario, 
                 id_sessao_usuario: id_sessao_usuario,
                 login: user.login,
+                id_entidade: user.id_entidade,
                 tipo: 'refresh'
             }, SECRET, { expiresIn: '7d' });
 
@@ -325,8 +330,16 @@ class AuthController {
     static async getMenu(req, res) {
         const id_sessao = req.user?.id_sessao_usuario;
         try {
-            const resultado = await executeSPMaster("GET", "AUTH.MENU", id_sessao);
-            return res.json({ sucesso: true, resultado: resultado.resultado });
+            // sp_auth_menu_get(p_id_sessao, OUT p_resultado, OUT p_sucesso, OUT p_mensagem)
+            const sql = `CALL sp_auth_menu_get(?, @p_resultado, @p_sucesso, @p_mensagem);
+                         SELECT @p_resultado AS resultado, @p_sucesso AS sucesso, @p_mensagem AS mensagem;`;
+            const [rows] = await pool.query(sql, [id_sessao]);
+            const out = rows?.[1]?.[0] || {};
+
+            const sucesso = out.sucesso === 1 || out.sucesso === true || out.sucesso === '1';
+            const resultado = out.resultado ? JSON.parse(out.resultado) : {};
+
+            return res.json({ sucesso, resultado, mensagem: out.mensagem });
         } catch (err) {
             return res.status(500).json({ sucesso: false, erro: "ERRO_INTERNO" });
         }

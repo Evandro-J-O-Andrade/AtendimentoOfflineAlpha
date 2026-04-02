@@ -74,9 +74,9 @@ async function authenticate(credentials) {
         // Inserir sessão
         await connection.execute(
             `INSERT INTO sessao_usuario 
-             (id_sessao_usuario, id_usuario, id_sistema, id_unidade, id_local_operacional, token_runtime, ip_origem, agente_usuario, expira_em, ativo, criado_em)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())`,
-            [id_sessao, usuario.id_usuario, id_sistema || null, id_unidade || null, id_local_operacional || null, null, ip_acesso || null, user_agent || null, expira]
+             (id_sessao_usuario, id_usuario, id_entidade, id_sistema, id_unidade, id_local, token_runtime, ip_origem, agente_usuario, expira_em, ativo, criado_em)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(6))`,
+            [id_sessao, usuario.id_usuario, usuario.id_entidade, id_sistema || null, id_unidade || null, id_local_operacional || null, null, ip_acesso || null, user_agent || null, expira]
         );
 
         // 5. Criar token JWT

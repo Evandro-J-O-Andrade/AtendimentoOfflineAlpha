@@ -12,11 +12,11 @@ export default function SelecionarContexto() {
 
   const [unidades, setUnidades] = useState([]);
   const [perfis, setPerfis] = useState([]);
-  const [locais, setLocais] = useState([]);
+  const [salas, setSalas] = useState([]);
 
   const [idUnidade, setIdUnidade] = useState("");
   const [idPerfil, setIdPerfil] = useState("");
-  const [idLocal, setIdLocal] = useState("");
+  const [idSala, setIdSala] = useState("");
 
   useEffect(() => {
     async function loadDados() {
@@ -32,16 +32,16 @@ export default function SelecionarContexto() {
         setUnidades(data.unidades || []);
         setPerfis(data.perfis || []);
 
-        const listaLocais = data.locais || [];
-        if (!listaLocais.some((l) => l.id_local === 0)) {
-          listaLocais.unshift({ id_local: 0, nome: "NÃO DEFINIDO" });
+        const listaSalas = data.salas || [];
+        if (!listaSalas.some((s) => s.id_sala === 0)) {
+          listaSalas.unshift({ id_sala: 0, nome: "NÃO DEFINIDA" });
         }
-        setLocais(listaLocais);
+        setSalas(listaSalas);
 
-        // seleciona defaults se houver
+        // defaults
         if (data.unidades?.length) setIdUnidade(String(data.unidades[0].id_unidade));
         if (data.perfis?.length) setIdPerfil(String(data.perfis[0].id_perfil));
-        if (listaLocais.length) setIdLocal(String(listaLocais[0].id_local));
+        if (listaSalas.length) setIdSala(String(listaSalas[0].id_sala));
       } catch (err) {
         console.error(err);
         setErro("Falha ao carregar dados do contexto.");
@@ -63,8 +63,8 @@ export default function SelecionarContexto() {
       const result = await setContexto({
         id_unidade: parseInt(idUnidade, 10),
         id_perfil: parseInt(idPerfil, 10),
-        id_local: idLocal === "0" ? null : parseInt(idLocal, 10),
-        id_sala: null, // não usado aqui
+        id_local: null,
+        id_sala: idSala === "0" ? null : parseInt(idSala, 10),
       });
 
       if (result?.sucesso) {
@@ -85,13 +85,13 @@ export default function SelecionarContexto() {
     <div className="contexto-wrapper">
       <div className="contexto-logos">
         <img src="/assets/img/prefeitura.png" alt="Prefeitura" onError={(e)=>e.target.style.display='none'} />
-        <img src="/assets/img/sistema.png" alt="Sistema" onError={(e)=>e.target.style.display='none'} />
+        <img src="/assets/img/sistemaalpha.png" alt="Sistema Alpha" onError={(e)=>e.target.style.display='none'} />
       </div>
 
       <div className="contexto-box">
         <header className="contexto-header">
-          <h1>Selecionar Contexto</h1>
-          <p>Escolha a Unidade, Guichê/Local e Perfil para continuar.</p>
+          <h1>Bem-vindo à Unidade Guido Guida</h1>
+          <p>Escolha onde vai atuar: selecione Unidade, Especialidade e Sala.</p>
         </header>
 
         {erro && <div className="contexto-error">{erro}</div>}
@@ -107,19 +107,19 @@ export default function SelecionarContexto() {
           </label>
 
           <label>
-            Guichê / Local
-            <select value={idLocal} onChange={(e) => setIdLocal(e.target.value)} required>
-              {locais.map((l) => (
-                <option key={l.id_local} value={l.id_local}>{l.nome}</option>
+            Especialidade
+            <select value={idPerfil} onChange={(e) => setIdPerfil(e.target.value)} required>
+              {perfis.map((p) => (
+                <option key={p.id_perfil} value={p.id_perfil}>{p.nome}</option>
               ))}
             </select>
           </label>
 
           <label>
-            Perfil
-            <select value={idPerfil} onChange={(e) => setIdPerfil(e.target.value)} required>
-              {perfis.map((p) => (
-                <option key={p.id_perfil} value={p.id_perfil}>{p.nome}</option>
+            Sala
+            <select value={idSala} onChange={(e) => setIdSala(e.target.value)} required>
+              {salas.map((s) => (
+                <option key={s.id_sala} value={s.id_sala}>{s.nome}</option>
               ))}
             </select>
           </label>

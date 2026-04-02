@@ -598,13 +598,18 @@ class LoginContextService {
             const [[perfil]] = await conn.execute(
                 `SELECT id_perfil, nome as perfil_nome FROM perfil WHERE ativo = 1 ORDER BY id_perfil ASC LIMIT 1`
             );
+            const [[ent]] = await conn.execute(
+                `SELECT id_entidade FROM usuario WHERE id_usuario = ? LIMIT 1`,
+                [id_usuario]
+            );
+            const id_entidade = ent?.id_entidade || null;
 
             if (unidade && local && perfil) {
                 // Cria o contexto
                 await conn.execute(
-                    `INSERT INTO usuario_contexto (id_usuario, id_sistema, id_unidade, id_local_operacional, id_perfil, ativo)
-                     VALUES (?, 1, ?, ?, ?, 1)`,
-                    [id_usuario, unidade.id_unidade, local.id_local_operacional, perfil.id_perfil]
+                    `INSERT INTO usuario_contexto (id_usuario, id_entidade, id_sistema, id_unidade, id_local_operacional, id_perfil, ativo)
+                     VALUES (?, ?, 1, ?, ?, ?, 1)`,
+                    [id_usuario, id_entidade, unidade.id_unidade, local.id_local_operacional, perfil.id_perfil]
                 );
 
                 const novoContexto = {
@@ -649,14 +654,20 @@ class LoginContextService {
         const token_runtime = crypto.randomBytes(32).toString("hex");
         const horas = parseInt(EXPIRES_IN, 10) || 8;
         const expira_em = new Date(Date.now() + horas * 60 * 60 * 1000);
+        const [[uEnt]] = await conn.execute(
+            "SELECT id_entidade FROM usuario WHERE id_usuario = ?",
+            [id_usuario]
+        );
+        const id_entidade = uEnt?.id_entidade || null;
 
         // Inserir sessão diretamente (sem usar SP)
         const [result] = await conn.execute(
             `INSERT INTO sessao_usuario 
-            (id_usuario, id_sistema, id_unidade, id_local_operacional, id_perfil, token_jwt, ip_origem, user_agent, iniciado_em, expira_em, ativo)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 1)`,
+            (id_usuario, id_entidade, id_sistema, id_unidade, id_local, id_perfil, token_jwt, ip_origem, user_agent, iniciado_em, expira_em, ativo)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(6), ?, 1)`,
             [
                 id_usuario,
+                id_entidade,
                 contexto.id_sistema || 1,
                 contexto.id_unidade || null,
                 contexto.id_local_operacional || null,
