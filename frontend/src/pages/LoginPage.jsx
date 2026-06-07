@@ -1,11 +1,14 @@
 import React, { useState } from "react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../apps/operacional/auth/AuthProvider";
+import { getPortalBranding } from "../apps/portal/services/branding";
 import "./login.css";
 
 export default function LoginPage() {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
+  const brand = getPortalBranding();
   const [loginInput, setLogin] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -21,9 +24,7 @@ export default function LoginPage() {
         return;
       }
       
-      // SEMPRE redireciona para seleção de contexto após login
-      // O usuário precisa escolher: unidade, guichê e perfil
-      navigate("/contexto");
+      navigate("/portal");
       
     } catch (err) {
       console.error(err);
@@ -35,34 +36,26 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      {/* Header com imagens - esquerda e direita */}
       <div className="login-header">
-        <div className="login-header-left">
-          <img 
-            src="/assets/img/prefeitura.png" 
-            alt="Prefeitura" 
-            className="login-logo-left"
-            onError={(e) => {e.target.style.display = 'none'}}
-          />
+        <div className="login-brand-mark">
+          {brand.logoUrl ? (
+            <img src={brand.logoUrl} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+          ) : (
+            <span>NW</span>
+          )}
         </div>
-        <div className="login-header-right">
-          <img 
-            src="/assets/img/sistema.png" 
-            alt="Sistema" 
-            className="login-logo-right"
-            onError={(e) => {e.target.style.display = 'none'}}
-          />
+        <div>
+          <strong>{brand.organizationName}</strong>
+          <small>{brand.companyName}</small>
         </div>
       </div>
       
-      {/* Título principal */}
-      <h1 className="login-titulo">Pronto Atendimento Alpha</h1>
-      <p className="login-subtitulo">Unidade Guido Guida</p>
+      <h1 className="login-titulo">{brand.productName}</h1>
+      <p className="login-subtitulo">Acesso corporativo</p>
       
-      {/* Container de login */}
       <div className="login-container">
         <form onSubmit={handleLogin} className="login-form">
-          <h2>Login</h2>
+          <h2>Entrar</h2>
 
           {error && <div className="error">{error}</div>}
 
@@ -88,23 +81,24 @@ export default function LoginPage() {
               <span
                 className="senha-toggle"
                 onClick={() => setMostrarSenha(!mostrarSenha)}
+                role="button"
+                tabIndex={0}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setMostrarSenha(!mostrarSenha);
+                }}
               >
-                {mostrarSenha ? "🔒" : "👁"}
+                {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
               </span>
             </div>
           </div>
 
-          <button type="submit">Entrar</button>
+          <button type="submit">
+            <LogIn size={18} />
+            Entrar
+          </button>
         </form>
       </div>
-      
-      {/* Imagem de fundo */}
-      <img 
-        src="/assets/img/logoSemFundo.png" 
-        alt="" 
-        className="login-bg"
-        onError={(e) => {e.target.style.display = 'none'}}
-      />
     </div>
   );
 }

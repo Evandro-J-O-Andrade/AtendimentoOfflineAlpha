@@ -10,6 +10,7 @@ const contextoRoutes = require("./routes/contextoRoutes");
 const painelRoutes = require("./routes/painelRoutes");
 const ledgerRoutes = require("./ledger/ledgerRoutes");
 const permissaoRoutes = require("./routes/permissaoRoutes");
+const portalRoutes = require("./routes/portalRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const spRoutes = require("./routes/spRoutes");
 
@@ -27,6 +28,7 @@ app.use("/api/farmacia", farmaciaRoutes);
 app.use("/api/contexto", contextoRoutes);
 app.use("/api/painel", painelRoutes);
 app.use("/api/permissoes", permissaoRoutes);
+app.use("/api/portal", portalRoutes);
 app.use("/api", ledgerRoutes);
 app.use("/api", sessionRoutes);
 app.use("/api", spRoutes);

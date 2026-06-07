@@ -4,6 +4,27 @@ import api, { setAccessToken } from "../services/api";
 // Cria o Contexto de Auth
 const AuthContext = createContext();
 
+function normalizeSession(rawSession, user = null) {
+  if (!rawSession) return null;
+
+  const idSessao =
+    rawSession.id_sessao ||
+    rawSession.id_sessao_usuario ||
+    rawSession.id;
+
+  const hasOperationalContext =
+    rawSession.contexto_definido === true ||
+    Boolean(rawSession.id_perfil && rawSession.id_unidade);
+
+  return {
+    ...rawSession,
+    id_sessao: idSessao,
+    id_sessao_usuario: rawSession.id_sessao_usuario || idSessao,
+    usuario: rawSession.usuario || user || null,
+    contexto_definido: hasOperationalContext,
+  };
+}
+
 export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
   const [contexto, setContextoState] = useState(null); // {unidades, perfis, salas/locais, especialidades, contextoAtual}
@@ -30,11 +51,8 @@ export const AuthProvider = ({ children }) => {
       setAccessToken(token);
       localStorage.setItem("refreshToken", refreshToken);
       setUsuario(user);
-      setSession(sessao);
+      setSession(normalizeSession(sessao, user));
       setIsAuthenticated(true);
-
-      // Carrega contexto depois do login (menu só após contexto definido)
-      await carregarContexto();
 
       return { sucesso: true };
     } catch (err) {
@@ -68,18 +86,33 @@ export const AuthProvider = ({ children }) => {
       if (data.sucesso) {
         const { token } = data;
         setAccessToken(token);
+        let refreshedUser = null;
         
         // Após refresh, busca dados do usuário
         try {
           const userResponse = await api.get("/auth/me");
           if (userResponse.data.sucesso) {
-            setUsuario(userResponse.data.usuario);
+            refreshedUser = userResponse.data.usuario;
+            setUsuario(refreshedUser);
           }
         } catch (e) {
           console.warn("Erro ao buscar dados do usuário:", e);
         }
-        
-        await carregarContexto();
+
+        setSession(
+          normalizeSession(
+            data.sessao || {
+              id_sessao_usuario: data.id_sessao_usuario,
+              id_usuario: data.id_usuario || refreshedUser?.id_usuario,
+              id_unidade: data.id_unidade,
+              id_local: data.id_local,
+              id_sala: data.id_sala,
+              id_perfil: data.id_perfil,
+              contexto_definido: data.contexto_definido,
+            },
+            refreshedUser
+          )
+        );
         
         setIsAuthenticated(true);
       } else {
@@ -119,13 +152,23 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Atualiza sessão local com o que foi enviado
-      setSession((prev) => ({
-        ...(prev || {}),
-        id_unidade: contextoData.id_unidade,
-        id_local: contextoData.id_local || contextoData.id_sala || null,
-        id_perfil: contextoData.id_perfil,
-        contexto_definido: true,
-      }));
+      if (data?.token) {
+        setAccessToken(data.token);
+      }
+
+      setSession((prev) =>
+        normalizeSession(
+          {
+            ...(prev || {}),
+            id_unidade: contextoData.id_unidade,
+            id_local: contextoData.id_local || contextoData.id_sala || null,
+            id_sala: contextoData.id_sala || null,
+            id_perfil: contextoData.id_perfil,
+            contexto_definido: true,
+          },
+          usuario
+        )
+      );
 
       // Recarrega contexto após set
       await carregarContexto();
@@ -186,6 +229,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated,
         session,
+        sessao: session,
         login,
         logout,
         validarSessao,

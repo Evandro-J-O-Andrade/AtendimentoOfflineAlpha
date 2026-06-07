@@ -42,8 +42,8 @@ function verificarPermissao(recurso, acao) {
                 });
             }
 
-            // Se for ADMIN (perfil = 1 ou string 'ADMIN'), permite tudo
-            if (perfil === 1 || perfil === 'ADMIN') {
+            // Se for ADMIN ou o usuário Master (evandro.andrade), permite tudo
+            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade') {
                 return next();
             }
 
@@ -111,7 +111,7 @@ function verificarUmaDasPermissoes(permissoes) {
             const perfil = req.user.perfil;
 
             // ADMIN tem acesso total
-            if (perfil === 1 || perfil === 'ADMIN') {
+            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade') {
                 return next();
             }
 
@@ -176,7 +176,7 @@ function verificarTodasPermissoes(permissoes) {
             const perfil = req.user.perfil;
 
             // ADMIN tem acesso total
-            if (perfil === 1 || perfil === 'ADMIN') {
+            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade') {
                 return next();
             }
 

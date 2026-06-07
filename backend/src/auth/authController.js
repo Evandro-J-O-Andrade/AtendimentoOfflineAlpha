@@ -388,7 +388,7 @@ class AuthController {
             try {
                 conn = await pool.getConnection();
                 const [rows] = await conn.execute(
-                    "SELECT id_sessao_usuario, ativo, expira_em, id_unidade, id_local, id_perfil FROM sessao_usuario WHERE id_sessao_usuario = ?",
+                    "SELECT id_sessao_usuario, id_usuario, ativo, expira_em, id_unidade, id_local, id_perfil, id_sala FROM sessao_usuario WHERE id_sessao_usuario = ?",
                     [decoded.id_sessao_usuario]
                 );
                 if (!rows.length || rows[0].ativo !== 1) return res.json({ sucesso: false, erro: "SESSAO_INATIVA" });
@@ -401,7 +401,21 @@ class AuthController {
                     id_local_operacional: sessao.id_local,
                     id_perfil: sessao.id_perfil
                 }, SECRET, { expiresIn: EXPIRES_IN });
-                return res.json({ sucesso: true, token: newToken, id_sessao_usuario: decoded.id_sessao_usuario });
+                return res.json({
+                    sucesso: true,
+                    token: newToken,
+                    id_sessao_usuario: decoded.id_sessao_usuario,
+                    sessao: {
+                        id_sessao: decoded.id_sessao_usuario,
+                        id_sessao_usuario: decoded.id_sessao_usuario,
+                        id_usuario: sessao.id_usuario || decoded.id_usuario,
+                        id_unidade: sessao.id_unidade,
+                        id_local: sessao.id_local,
+                        id_sala: sessao.id_sala,
+                        id_perfil: sessao.id_perfil,
+                        contexto_definido: Boolean(sessao.id_perfil && sessao.id_unidade)
+                    }
+                });
             } finally {
                 if (conn) conn.release();
             }
