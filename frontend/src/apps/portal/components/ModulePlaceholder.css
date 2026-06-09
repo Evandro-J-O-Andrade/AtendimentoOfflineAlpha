@@ -1,0 +1,110 @@
+.pt-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pt-space-6);
+}
+
+.pt-placeholder__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pt-space-2);
+  align-self: flex-start;
+  padding: 8px 12px;
+  border-radius: var(--pt-radius-md);
+  border: 1px solid var(--pt-border);
+  background: var(--pt-surface);
+  color: var(--pt-text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pt-placeholder__back:hover {
+  background: var(--pt-hover);
+  color: var(--pt-text);
+  border-color: var(--pt-border);
+}
+
+.pt-placeholder__hero {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pt-space-4);
+}
+
+.pt-placeholder__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: var(--pt-radius-lg);
+  background: var(--pt-accent-violet-bg);
+  color: var(--pt-accent-violet);
+}
+
+.pt-placeholder__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--pt-space-3);
+}
+
+.pt-placeholder__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.pt-placeholder__badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--pt-accent-amber-bg);
+  color: var(--pt-accent-amber);
+}
+
+.pt-placeholder__desc {
+  margin: var(--pt-space-2) 0 0;
+  font-size: 15px;
+  color: var(--pt-text-muted);
+  max-width: 680px;
+}
+
+.pt-placeholder__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--pt-space-4);
+}
+
+.pt-placeholder__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pt-space-2);
+  padding: var(--pt-space-5);
+}
+
+.pt-placeholder__section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--pt-radius-md);
+  background: var(--pt-surface-2);
+  color: var(--pt-primary);
+}
+
+.pt-placeholder__section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pt-placeholder__section-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--pt-text-muted);
+}

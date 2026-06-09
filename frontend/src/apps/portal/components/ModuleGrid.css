@@ -1,0 +1,14 @@
+.pt-module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--pt-space-5);
+}
+
+.pt-module-grid__empty {
+  padding: var(--pt-space-7) var(--pt-space-5);
+  text-align: center;
+  color: var(--pt-text-muted);
+  background: var(--pt-surface);
+  border: 1px dashed var(--pt-border);
+  border-radius: var(--pt-radius-lg);
+}

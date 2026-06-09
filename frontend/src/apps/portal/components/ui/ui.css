@@ -1,0 +1,77 @@
+/* Design system reutilizável do Portal — primitivos de UI */
+
+.pt-card {
+  background: var(--pt-surface);
+  border: 1px solid var(--pt-border);
+  border-radius: var(--pt-radius-lg);
+  box-shadow: var(--pt-shadow-sm);
+}
+
+.pt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pt-space-1);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.pt-badge--success {
+  color: var(--pt-accent-green);
+  background: var(--pt-accent-green-bg);
+}
+
+.pt-badge--muted {
+  color: var(--pt-text-muted);
+  background: var(--pt-surface-2);
+  border-color: var(--pt-border);
+}
+
+.pt-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.pt-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--pt-radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--pt-text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s ease, color 0.15s ease;
+  padding: 0;
+}
+
+.pt-icon-button:hover {
+  background: var(--pt-hover);
+  color: var(--pt-text);
+  border-color: transparent;
+}
+
+.pt-icon-button__badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--pt-accent-rose);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

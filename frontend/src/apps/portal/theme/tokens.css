@@ -1,0 +1,86 @@
+/* =========================================================================
+   Portal Corporativo — Design Tokens
+   Sistema de design reutilizável e escopado ao Portal (.portal-root).
+   Preparado para dark mode via [data-portal-theme="dark"].
+   ========================================================================= */
+
+.portal-root {
+  /* Tipografia */
+  --pt-font-sans: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Espaçamento (layout amplo) */
+  --pt-space-1: 4px;
+  --pt-space-2: 8px;
+  --pt-space-3: 12px;
+  --pt-space-4: 16px;
+  --pt-space-5: 24px;
+  --pt-space-6: 32px;
+  --pt-space-7: 48px;
+
+  /* Raio e sombra */
+  --pt-radius-sm: 8px;
+  --pt-radius-md: 12px;
+  --pt-radius-lg: 16px;
+  --pt-radius-xl: 20px;
+  --pt-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --pt-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --pt-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+
+  /* Cores base — tema claro (default) */
+  --pt-bg: #f4f6fb;
+  --pt-surface: #ffffff;
+  --pt-surface-2: #f8fafc;
+  --pt-border: #e2e8f0;
+  --pt-text: #0f172a;
+  --pt-text-muted: #64748b;
+  --pt-primary: #2563eb;
+  --pt-primary-contrast: #ffffff;
+  --pt-hover: #f1f5f9;
+
+  /* Acentos dos cards (fundo suave + cor do ícone) */
+  --pt-accent-blue: #2563eb;
+  --pt-accent-blue-bg: #e0ecff;
+  --pt-accent-green: #16a34a;
+  --pt-accent-green-bg: #dcfce7;
+  --pt-accent-amber: #d97706;
+  --pt-accent-amber-bg: #fef3c7;
+  --pt-accent-violet: #7c3aed;
+  --pt-accent-violet-bg: #ede9fe;
+  --pt-accent-rose: #e11d48;
+  --pt-accent-rose-bg: #ffe4e6;
+  --pt-accent-cyan: #0891b2;
+  --pt-accent-cyan-bg: #cffafe;
+  --pt-accent-slate: #475569;
+  --pt-accent-slate-bg: #e2e8f0;
+  --pt-accent-indigo: #4f46e5;
+  --pt-accent-indigo-bg: #e0e7ff;
+
+  font-family: var(--pt-font-sans);
+  color: var(--pt-text);
+  background: var(--pt-bg);
+}
+
+.portal-root[data-portal-theme="dark"] {
+  --pt-bg: #0b1120;
+  --pt-surface: #131c31;
+  --pt-surface-2: #0f172a;
+  --pt-border: #243049;
+  --pt-text: #e2e8f0;
+  --pt-text-muted: #94a3b8;
+  --pt-primary: #60a5fa;
+  --pt-primary-contrast: #0b1120;
+  --pt-hover: #1b263f;
+
+  --pt-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --pt-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --pt-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+  --pt-accent-blue-bg: #1e293b;
+  --pt-accent-green-bg: #14271d;
+  --pt-accent-amber-bg: #2b220f;
+  --pt-accent-violet-bg: #221b3a;
+  --pt-accent-rose-bg: #2c1620;
+  --pt-accent-cyan-bg: #0c2530;
+  --pt-accent-slate-bg: #1e293b;
+  --pt-accent-indigo-bg: #1d2147;
+}

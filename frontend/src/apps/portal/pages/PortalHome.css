@@ -1,0 +1,30 @@
+.pt-home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pt-space-6);
+}
+
+.pt-home__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pt-space-2);
+}
+
+.pt-home__title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.pt-home__subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--pt-text-muted);
+  max-width: 640px;
+}
+
+.pt-home__loading {
+  padding: var(--pt-space-7);
+  text-align: center;
+  color: var(--pt-text-muted);
+}

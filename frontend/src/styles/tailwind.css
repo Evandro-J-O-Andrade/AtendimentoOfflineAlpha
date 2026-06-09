@@ -1,0 +1,152 @@
+/* =========================================================================
+   TailwindCSS v4 — configurado SEM o preflight global para não alterar o CSS
+   das telas existentes do app. Apenas tokens (theme) + utilities são
+   carregados globalmente; um reset escopado é aplicado em .nw-login.
+   ========================================================================= */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* -------------------------------------------------------------------------
+   WHITE LABEL — paleta baseada em CSS Variables.
+   Um futuro TenantProvider pode sobrescrever estas variáveis em runtime
+   (ex.: aplicando-as no elemento raiz por tenant). Nenhum componente deve
+   usar cor "hardcoded": todos consomem estes tokens.
+   ------------------------------------------------------------------------- */
+:root {
+  --primary: #2563eb;          /* azul */
+  --primary-bright: #60a5fa;
+  --secondary: #7c3aed;        /* violeta */
+  --secondary-bright: #a855f7;
+  --accent: #22d3ee;           /* ciano */
+
+  --bg-base: #020617;          /* slate-950 */
+  --bg-elev: #172554;          /* blue-950 */
+
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-strong: rgba(255, 255, 255, 0.08);
+  --surface-border: rgba(255, 255, 255, 0.10);
+
+  --text-strong: #f8fafc;
+  --text-base: #e2e8f0;
+  --text-muted: #94a3b8;
+
+  --glow-primary: rgba(37, 99, 235, 0.45);
+  --glow-secondary: rgba(124, 58, 237, 0.40);
+}
+
+/* Tema claro (acionado pelo ThemeToggle via [data-theme="light"]) */
+.nw-login[data-theme="light"] {
+  --bg-base: #eef2ff;
+  --bg-elev: #dbeafe;
+
+  --surface: rgba(15, 23, 42, 0.04);
+  --surface-strong: rgba(15, 23, 42, 0.06);
+  --surface-border: rgba(15, 23, 42, 0.10);
+
+  --text-strong: #0f172a;
+  --text-base: #1e293b;
+  --text-muted: #475569;
+
+  --glow-primary: rgba(37, 99, 235, 0.25);
+  --glow-secondary: rgba(124, 58, 237, 0.20);
+}
+
+/* Mapeia os tokens white-label para os tokens de tema do Tailwind,
+   habilitando utilitários como bg-primary, from-secondary, text-accent. */
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-bright: var(--primary-bright);
+  --color-secondary: var(--secondary);
+  --color-secondary-bright: var(--secondary-bright);
+  --color-accent: var(--accent);
+  --color-bg-base: var(--bg-base);
+  --color-bg-elev: var(--bg-elev);
+}
+
+/* -------------------------------------------------------------------------
+   Reset escopado (substitui o preflight apenas dentro do login premium).
+   ------------------------------------------------------------------------- */
+.nw-login,
+.nw-login *,
+.nw-login *::before,
+.nw-login *::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: var(--surface-border);
+}
+
+.nw-login {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.nw-login h1,
+.nw-login h2,
+.nw-login h3,
+.nw-login p {
+  margin: 0;
+}
+
+.nw-login button {
+  appearance: none;
+  background-color: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.nw-login input {
+  font: inherit;
+  background-color: transparent;
+  outline: none;
+}
+
+.nw-login input::placeholder {
+  color: var(--text-muted);
+}
+
+.nw-login a {
+  text-decoration: none;
+}
+
+/* -------------------------------------------------------------------------
+   Animações suaves do hero (float / pulse / rotação lenta).
+   ------------------------------------------------------------------------- */
+@keyframes nw-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+@keyframes nw-pulse-soft {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes nw-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes nw-drift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(14px, -10px); }
+  100% { transform: translate(0, 0); }
+}
+
+.nw-anim-float { animation: nw-float 9s ease-in-out infinite; }
+.nw-anim-pulse { animation: nw-pulse-soft 6s ease-in-out infinite; }
+.nw-anim-spin { animation: nw-spin-slow 60s linear infinite; transform-origin: center; }
+.nw-anim-drift { animation: nw-drift 14s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nw-anim-float,
+  .nw-anim-pulse,
+  .nw-anim-spin,
+  .nw-anim-drift {
+    animation: none;
+  }
+}

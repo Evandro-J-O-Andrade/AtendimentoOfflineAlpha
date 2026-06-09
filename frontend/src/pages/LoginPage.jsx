@@ -21,9 +21,10 @@ export default function LoginPage() {
         return;
       }
       
-      // SEMPRE redireciona para seleção de contexto após login
-      // O usuário precisa escolher: unidade, guichê e perfil
-      navigate("/contexto");
+      // Após o login, o usuário vai para o Portal Corporativo.
+      // O contexto operacional (unidade, guichê, perfil) só é solicitado
+      // ao entrar em um módulo operacional, não mais no login.
+      navigate("/portal");
       
     } catch (err) {
       console.error(err);

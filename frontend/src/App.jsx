@@ -6,7 +6,8 @@ import { AuthProvider, useAuth } from "./apps/operacional/auth/AuthProvider";
 const AppOperacional = React.lazy(() => import("./apps/operacional/AppOperacional"));
 const AppPainel = React.lazy(() => import("./apps/painel/AppPainel"));
 const AppTotem = React.lazy(() => import("./apps/totem/AppTotem"));
-const LoginPage = React.lazy(() => import("./pages/LoginPage"));
+const AppPortal = React.lazy(() => import("./apps/portal/AppPortal"));
+const LoginPage = React.lazy(() => import("./apps/login/LoginPage"));
 const SelecionarContexto = React.lazy(() => import("./apps/operacional/pages/contexto/SelecionarContexto"));
 
 // Rota privada baseada em autenticação
@@ -28,6 +29,16 @@ export default function App() {
           <Routes>
             {/* Rota de login */}
             <Route path="/login" element={<LoginPage />} />
+
+            {/* Portal Corporativo — tela inicial após autenticação */}
+            <Route
+              path="/portal/*"
+              element={
+                <PrivateRoute>
+                  <AppPortal />
+                </PrivateRoute>
+              }
+            />
 
             {/* Rota de seleção de contexto */}
             <Route 

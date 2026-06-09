@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../auth/AuthProvider";
 import "./SelecionarContexto.css";
 
 export default function SelecionarContexto() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { getContexto, setContexto } = useAuth();
+
+  // Módulo de destino após definir o contexto (vindo do Portal Corporativo).
+  const redirectTo = location.state?.redirect || "/operacional";
 
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -68,7 +72,7 @@ export default function SelecionarContexto() {
       });
 
       if (result?.sucesso) {
-        navigate("/operacional");
+        navigate(redirectTo);
       } else {
         setErro(result?.mensagem || "Erro ao validar contexto.");
       }
