@@ -1,4 +1,4 @@
-import api from "../../operacional/services/api";
+import { api } from "@/apps/operacional/services/api";
 import type { PortalModule } from "../types";
 
 interface PortalModulesResponse {

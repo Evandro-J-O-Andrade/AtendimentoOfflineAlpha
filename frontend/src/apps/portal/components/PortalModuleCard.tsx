@@ -1,3 +1,4 @@
+import { PortalModuleAccent, PortalModuleStatus } from "../types";
 import {
   ArrowRight,
   BarChart3,
@@ -13,8 +14,24 @@ import {
   Newspaper,
   Pill,
   Warehouse,
+  Building2,
+  Users,
+  ShoppingCart,
+  Truck,
+  BookOpen,
+  MessageSquare,
+  BarChart,
+  Settings,
+  Calendar,
+  HeartPulse,
+  Stethoscope,
+  UserRound,
+  Package,
+  Receipt,
+  Wrench,
+  Map,
+  TestTube,
 } from "lucide-react";
-import type { PortalModule } from "../types";
 
 const iconMap: Record<string, LucideIcon> = {
   BarChart3,
@@ -26,6 +43,23 @@ const iconMap: Record<string, LucideIcon> = {
   Newspaper,
   Pill,
   Warehouse,
+  Building2,
+  Users,
+  ShoppingCart,
+  Truck,
+  BookOpen,
+  MessageSquare,
+  BarChart,
+  Settings,
+  Calendar,
+  HeartPulse,
+  Stethoscope,
+  UserRound,
+  Package,
+  Receipt,
+  Wrench,
+  Map,
+  TestTube,
 };
 
 interface PortalModuleCardProps {

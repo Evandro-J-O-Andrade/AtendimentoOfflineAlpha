@@ -23,7 +23,7 @@ const { v4: uuidv4 } = require("uuid");
  * @param {Object} sessionContext - Contexto da sessão (req.user)
  * @returns {Promise<Object>} Resultado da operação
  */
-async function dispatchKernel(payload, sessionContext) {
+async function dispatchKernel(payload, sessionContext, existingConnection = null) {
     const {
         acao,
         contexto = "DEFAULT",
@@ -34,10 +34,10 @@ async function dispatchKernel(payload, sessionContext) {
         throw new Error("ACAO_OBRIGATORIA");
     }
 
-    const connection = await pool.getConnection();
+    const connection = existingConnection || await pool.getConnection();
 
     try {
-        await connection.beginTransaction();
+        if (!existingConnection) await connection.beginTransaction();
 
         const id_sessao = sessionContext.id_sessao_usuario;
         const id_usuario = sessionContext.id_usuario;
@@ -51,8 +51,8 @@ async function dispatchKernel(payload, sessionContext) {
         const transaction_id = uuidv4();
 
         // Log inicial no ledger
-        await connection.execute(
-            `INSERT INTO runtime_execution_queue 
+        await connection.query(
+            `INSERT INTO runtime_execution_queue  
              (id, id_sessao, id_usuario, id_perfil, acao, contexto, payload, status, criado_em)
              VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDENTE', NOW())`,
             [transaction_id, id_sessao, id_usuario, id_perfil, acao, contexto, payloadJson]
@@ -60,7 +60,7 @@ async function dispatchKernel(payload, sessionContext) {
 
         // Chamar procedure do kernel
         const [results] = await connection.query(
-            `CALL sp_dispatcher_kernel(?, ?, ?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
+            `CALL sp_master_dispatcher(?, ?, ?, ?, ?, ?, ?, @resultado, @sucesso, @mensagem)`,
             [id_sessao, id_usuario, id_perfil, acao, contexto, payloadJson, transaction_id]
         );
 
@@ -76,7 +76,7 @@ async function dispatchKernel(payload, sessionContext) {
             [status, transaction_id]
         );
 
-        await connection.commit();
+        if (!existingConnection) await connection.commit();
 
         // Formatar resposta
         return {
@@ -87,14 +87,14 @@ async function dispatchKernel(payload, sessionContext) {
         };
 
     } catch (error) {
-        await connection.rollback();
+        if (!existingConnection) await connection.rollback();
         
         // Log de erro
         console.error("[dispatcher_gateway] Erro:", error.message);
         
         throw error;
     } finally {
-        connection.release();
+        if (!existingConnection) connection.release();
     }
 }
 
@@ -116,7 +116,7 @@ async function dispatchKernelBatch(acoes, sessionContext) {
         await connection.beginTransaction();
 
         for (const acao of acoes) {
-            const resultado = await dispatchKernel(acao, sessionContext);
+            const resultado = await dispatchKernel(acao, sessionContext, connection);
             resultados.push(resultado);
         }
 

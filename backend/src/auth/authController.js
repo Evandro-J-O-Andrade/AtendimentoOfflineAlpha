@@ -118,17 +118,37 @@ class AuthController {
                 [jwtTokenFinal, refreshTokenFinal, id_sessao_usuario]
             );
 
-            return res.json({ 
-                sucesso: true, 
-                sessao: { 
-                    id_sessao_usuario, 
-                    id_usuario: user.id_usuario,
-                    contexto_definido: false // Fluxo canônico: login não define contexto
-                }, 
-                usuario: { id_usuario: user.id_usuario, login: user.login },
-                token: jwtTokenFinal,
-                refreshToken: refreshTokenFinal
-            });
+            // Buscar dados da entidade para branding white-label
+            let entidadeData = null;
+            try {
+                const [[entidade]] = await conn.query(
+                    "SELECT id_entidade, nome_fantasia, razao_social, logo_url, cor_primaria, cor_secundaria FROM entidade WHERE id_entidade = ?",
+                    [user.id_entidade]
+                );
+                entidadeData = entidade;
+            } catch (entErr) {
+                console.warn("Erro ao buscar entidade:", entErr.message);
+            }
+
+// Definir refresh token como HttpOnly Cookie
+             res.cookie('refreshToken', refreshTokenFinal, {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === 'production',
+               sameSite: 'strict',
+               maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+             });
+
+             return res.json({ 
+                 sucesso: true, 
+                 sessao: { 
+                     id_sessao_usuario, 
+                     id_usuario: user.id_usuario,
+                     contexto_definido: false
+                 }, 
+                 usuario: { id_usuario: user.id_usuario, login: user.login },
+                 entidade: entidadeData,
+                 token: jwtTokenFinal
+             });
 
         } catch (err) {
             console.error("Erro no fluxo de login:", err);
@@ -380,7 +400,7 @@ class AuthController {
     }
 
     static async refreshToken(req, res) {
-        const { refreshToken: token } = req.body;
+        const token = req.cookies?.refreshToken;
         if (!token) return res.json({ sucesso: false, erro: "REFRESH_TOKEN_OBRIGATORIO" });
         try {
             const decoded = jwt.verify(token, SECRET);

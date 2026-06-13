@@ -1,6 +1,7 @@
 export interface TenantBranding {
   id_entidade: number | null;
   productName: string;
+  companyName: string;
   logoUrl: string | null;
   theme: {
     primary: string;
@@ -11,7 +12,8 @@ export interface TenantBranding {
 
 const DEFAULT_BRANDING: TenantBranding = {
   id_entidade: null,
-  productName: 'New Wave Sistemas Digitais',
+  productName: 'New Wave Enterprise',
+  companyName: 'New Wave Sistemas Digitais',
   logoUrl: null,
   theme: {
     primary: '#4f46e5', // indigo-600
@@ -36,6 +38,7 @@ export const getPortalBranding = (): TenantBranding => {
     return {
       id_entidade: tenant.id_entidade || null,
       productName: tenant.nome_fantasia || tenant.razao_social || DEFAULT_BRANDING.productName,
+      companyName: tenant.nome_fantasia || tenant.razao_social || DEFAULT_BRANDING.companyName,
       logoUrl: tenant.logo_url || null,
       theme: {
         primary: tenant.cor_primaria || DEFAULT_BRANDING.theme.primary,

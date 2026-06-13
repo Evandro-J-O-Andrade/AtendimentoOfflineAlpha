@@ -1,7 +1,7 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import PortalLayout from '../layouts/PortalLayout';
-import PortalHome from '../pages/PortalHome';
+import PortalHome from '../pages/PortalHomePage';
 
 /**
  * Definição das rotas do novo Portal Corporativo.

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { usePortalModules } from "../hooks/usePortalModules";
 
 interface PortalModuleGateProps {
@@ -9,6 +9,7 @@ interface PortalModuleGateProps {
 
 export function PortalModuleGate({ moduleId, children }: PortalModuleGateProps) {
   const { modules, loading } = usePortalModules();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -18,10 +19,22 @@ export function PortalModuleGate({ moduleId, children }: PortalModuleGateProps) 
     );
   }
 
-  const allowed = modules.some((module) => module.id === moduleId);
+  const module = modules.find((m) => m.id === moduleId);
 
-  if (!allowed) {
+  if (!module) {
     return <Navigate to="/portal" replace />;
+  }
+
+  const requiresContext = module.requiresContext;
+
+  if (requiresContext) {
+    return (
+      <Navigate
+        to="/contexto"
+        state={{ from: { pathname: location.pathname } }}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;

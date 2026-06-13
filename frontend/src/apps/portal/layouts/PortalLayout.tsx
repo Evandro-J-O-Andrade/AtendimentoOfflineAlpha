@@ -3,17 +3,12 @@ import { Outlet } from 'react-router-dom';
 import { useTenant } from '@/context/TenantProvider';
 import { Search, Bell, User, LayoutGrid, HelpCircle } from 'lucide-react';
 
-/**
- * Layout Oficial do Portal Corporativo
- * Seguindo referências de design do Microsoft 365 e Notion.
- */
 const PortalLayout: React.FC = () => {
   const { brand } = useTenant();
   const currentYear = new Date().getFullYear();
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header Estilo Glassmorphism */}
       <header className="portal-header">
         <div className="portal-brand">
           <div className="portal-brand-logo bg-brand-primary">
@@ -29,7 +24,6 @@ const PortalLayout: React.FC = () => {
           </div>
         </div>
 
-        {/* Busca Global (Estilo Microsoft 365) */}
         <div className="hidden md:flex flex-1 max-w-2xl mx-12">
           <div className="relative w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -59,14 +53,12 @@ const PortalLayout: React.FC = () => {
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
       <main className="flex-1 overflow-y-auto">
         <div className="portal-page">
           <Outlet />
         </div>
       </main>
 
-      {/* Rodapé Institucional (Compliance) */}
       <footer className="p-8 border-t border-slate-100 dark:border-slate-900 text-center md:flex md:justify-between md:items-center">
         <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
           &copy; {currentYear} {brand.productName} • Desenvolvido por <span className="text-brand-primary font-bold">New Wave Sistemas Digitais</span>
