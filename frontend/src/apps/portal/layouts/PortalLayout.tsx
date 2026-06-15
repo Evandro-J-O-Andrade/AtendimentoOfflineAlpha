@@ -8,7 +8,7 @@ import '../portal.css';
 
 const PortalLayout: React.FC = () => {
   const { brand } = useTenant();
-  const currentYear = new Date().getFullYear();
+  const { runtime } = useRuntime();
 
   return (
     <div className="portal-app min-h-screen flex flex-col">
@@ -61,17 +61,8 @@ const PortalLayout: React.FC = () => {
           <Outlet />
         </div>
       </main>
-
-      <footer className="p-8 border-t border-slate-100 dark:border-slate-900 text-center md:flex md:justify-between md:items-center">
-        <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
-          &copy; {currentYear} {brand.productName} • Desenvolvido por <span className="text-brand-primary font-bold">New Wave Sistemas Digitais</span>
-        </p>
-        <div className="flex gap-6 mt-4 md:mt-0 justify-center">
-          <a href="#" className="text-xs text-slate-400 hover:text-brand-primary transition-colors">Privacidade</a>
-          <a href="#" className="text-xs text-slate-400 hover:text-brand-primary transition-colors">Termos</a>
-          <a href="#" className="text-xs text-slate-400 hover:text-brand-primary transition-colors">Suporte</a>
-        </div>
-      </footer>
+      
+      <Footer versao={runtime?.versao || "1.0.0"} />
     </div>
   );
 };
