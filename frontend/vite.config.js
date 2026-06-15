@@ -22,7 +22,7 @@ export default defineConfig({
       '@/routes': fileURLToPath(new URL('./routes', import.meta.url)),
       '@/stores': fileURLToPath(new URL('./stores', import.meta.url)),
       '@/assets': fileURLToPath(new URL('./assets', import.meta.url)),
-      '@/themes': fileURLToPath(new URL('./themes', import.meta.url)),
+      '@/themes': fileURLToPath(new URL('./src/themes', import.meta.url)),
       '@/config': fileURLToPath(new URL('./config', import.meta.url)),
       '@/constants': fileURLToPath(new URL('./constants', import.meta.url))
     }

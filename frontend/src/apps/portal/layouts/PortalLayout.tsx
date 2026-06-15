@@ -1,8 +1,10 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { useTenant } from '@/app/providers/TenantProvider';
+import { useRuntime } from '@/app/providers/RuntimeContext';
 import { Search, Bell, User, LayoutGrid, HelpCircle } from 'lucide-react';
-import './portal.css';
+import Footer from '@/shell/Footer';
+import '../portal.css';
 
 const PortalLayout: React.FC = () => {
   const { brand } = useTenant();

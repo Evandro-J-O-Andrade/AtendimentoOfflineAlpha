@@ -4,6 +4,12 @@ export interface Runtime {
   id_local_operacional: number | null;
   id_perfil: number | null;
   contexto_selecionado: boolean;
+  versao?: string;
+  entidade?: { id: number; nome: string } | null;
+  sistema?: { id: number; nome: string; codigo: string } | null;
+  unidade?: { id: number; nome: string } | null;
+  local?: { id: number; nome: string } | null;
+  sessao?: { id: number; codigo: string } | null;
 }
 
 export interface RuntimeContextType {
@@ -14,6 +20,8 @@ export interface RuntimeContextType {
 export interface TenantConfig {
   name: string;
   logo: string;
+  logoUrl?: string;
+  productName?: string;
   primaryColor: string;
   theme: 'light' | 'dark';
 }

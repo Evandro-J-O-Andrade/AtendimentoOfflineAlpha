@@ -9,6 +9,7 @@ export const defaultRuntime: Runtime = {
   id_local_operacional: null,
   id_perfil: null,
   contexto_selecionado: false,
+  versao: "1.0.0",
 };
 
 export const RuntimeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

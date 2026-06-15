@@ -1,6 +1,5 @@
 import { useState, FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import "./Login.css";
 
 interface LoginFormProps {
   loading: boolean;
@@ -19,21 +18,23 @@ export default function LoginForm({ loading, error, onSubmit }: LoginFormProps) 
   };
 
   return (
-    <div className="login-page">
+    <div className="flex h-screen w-full">
       {/* Lado da Imagem */}
-      <div className="image-side"></div>
+      <div className="w-3/5 bg-[url('/assets/img/nwlogin.png')] bg-center bg-cover bg-no-repeat" />
 
       {/* Lado do Formulário */}
-      <div className="form-side">
-        <div className="form-wrapper">
-          <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>Entrar</h1>
-          <p style={{ color: '#888', marginBottom: '40px' }}>Insira seus dados para acessar.</p>
+      <div className="w-2/5 flex flex-col justify-center pl-16 bg-white">
+        <div className="w-72">
+          <h1 className="text-2xl font-bold mb-1">Entrar</h1>
+          <p className="text-slate-400 text-sm mb-10">Insira seus dados para acessar o sistema.</p>
 
-          <div className="input-group">
-            <label className="input-label">Usuário</label>
+          <div className="mb-5">
+            <label className="block text-[9px] font-bold text-slate-300 uppercase tracking-wider mb-1">
+              Usuário
+            </label>
             <input
               type="text"
-              className="input-field"
+              className="w-full border-none border-b border-slate-200 py-[6px] text-sm outline-none text-slate-800"
               placeholder="Digite seu usuário"
               value={usuario}
               onChange={(e) => setUsuario(e.target.value)}
@@ -41,12 +42,14 @@ export default function LoginForm({ loading, error, onSubmit }: LoginFormProps) 
             />
           </div>
 
-          <div className="input-group">
-            <label className="input-label">Senha</label>
-            <div style={{ position: 'relative' }}>
+          <div className="mb-5">
+            <label className="block text-[9px] font-bold text-slate-300 uppercase tracking-wider mb-1">
+              Senha
+            </label>
+            <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                className="input-field"
+                className="w-full border-none border-b border-slate-200 py-[6px] text-sm outline-none text-slate-800"
                 placeholder="••••••••"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
@@ -56,16 +59,7 @@ export default function LoginForm({ loading, error, onSubmit }: LoginFormProps) 
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: '#A0A0A0',
-                  cursor: 'pointer'
-                }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 cursor-pointer"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -73,36 +67,27 @@ export default function LoginForm({ loading, error, onSubmit }: LoginFormProps) 
           </div>
 
           {error && (
-            <div style={{
-              padding: '8px',
-              marginBottom: '15px',
-              fontSize: '12px',
-              color: '#dc2626',
-              backgroundColor: '#fef2f2'
-            }}>
+            <div className="px-2 mb-4 text-xs text-red-600 bg-red-50">
               {error}
             </div>
           )}
 
-          <button className="login-btn" disabled={loading}>
+          <button 
+            className="w-full bg-brand-primary text-white border-none py-2.5 text-xs font-bold cursor-pointer mt-2.5 hover:bg-brand-primary/90 transition-colors" 
+            disabled={loading}
+          >
             {loading ? "Entrando..." : "ACESSAR"}
           </button>
 
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <a href="#" style={{ fontSize: '11px', color: '#B0B0B0', textDecoration: 'none' }}>Esqueceu sua senha?</a>
+          <div className="mt-5">
+            <a href="#" className="text-[10px] text-slate-300 no-underline">
+              Esqueceu sua senha?
+            </a>
           </div>
         </div>
 
         {/* Rodapé fixo na parte inferior */}
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          fontSize: '9px',
-          color: '#D0D0D0',
-          letterSpacing: '2px',
-          textAlign: 'center',
-          width: '100%'
-        }}>
+        <div className="absolute bottom-8 left-16 text-[8px] text-slate-300 tracking-wider">
           © 2026 NEW WAVE SYSTEM - TODOS OS DIREITOS RESERVADOS
         </div>
       </div>
