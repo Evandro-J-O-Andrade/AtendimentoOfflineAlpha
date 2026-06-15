@@ -1,6 +1,6 @@
 import React from 'react';
 import DynamicSidebar from '@/components/layout/DynamicSidebar';
-import { useAuth } from '@/apps/operacional/auth/AuthProvider';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 /**
  * Manutencao - Página de teste

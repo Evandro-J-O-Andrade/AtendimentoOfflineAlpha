@@ -1,5 +1,5 @@
 import { FC, useState, FormEvent } from "react";
-import { useAuth } from "@/apps/operacional/auth/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import DynamicSidebar from "@/components/layout/DynamicSidebar";
 import PatientQueue from "@/apps/operacional/components/PatientQueue";
 import spApi from "@/api/spApi";

@@ -1,14 +1,15 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useTenant } from '@/context/TenantProvider';
+import { useTenant } from '@/app/providers/TenantProvider';
 import { Search, Bell, User, LayoutGrid, HelpCircle } from 'lucide-react';
+import './portal.css';
 
 const PortalLayout: React.FC = () => {
   const { brand } = useTenant();
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="portal-app min-h-screen flex flex-col">
       <header className="portal-header">
         <div className="portal-brand">
           <div className="portal-brand-logo bg-brand-primary">

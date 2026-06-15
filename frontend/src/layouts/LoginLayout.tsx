@@ -2,52 +2,48 @@ import LoginForm from "@/components/auth/LoginForm";
 
 /**
  * LoginLayout - New Wave Enterprise
- * Layout profissional com imagem nwlogin à esquerda.
+ * Layout com imagem de fundo e formulário em overlay lateral
+ * Dark mode elegante
  */
 export default function LoginLayout() {
   return (
-    <div className="min-h-screen flex bg-slate-950">
+    <div className="min-h-screen relative">
+      {/* Imagem de fundo full screen */}
+      <img
+        src="/assets/img/nwlogin.png"
+        alt="New Wave Enterprise"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
 
-      {/* ESQUERDA */}
-      <div className="hidden lg:flex lg:w-1/2 relative">
+      {/* Overlay escuro gradiente */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/40 lg:to-transparent" />
 
-        <img
-          src="/assets/img/nwlogin.png"
-          alt="New Wave Enterprise"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-transparent" />
-
-        <div className="relative z-10 flex flex-col justify-end p-16 text-white">
-
-          <span className="text-cyan-400 uppercase tracking-[4px] font-semibold">
+      {/* Conteúdo */}
+      <div className="relative z-10 min-h-screen flex">
+        {/* Texto lateral esquerdo (desktop) */}
+        <div className="hidden lg:flex lg:w-1/2 flex-col justify-center p-16 xl:p-24 text-white">
+          <span className="text-cyan-400 uppercase tracking-[4px] font-semibold text-sm">
             New Wave Enterprise
           </span>
-
-          <h1 className="text-6xl font-black mt-4 leading-tight">
+          <h1 className="text-5xl xl:text-6xl font-black mt-4 leading-tight">
             Enterprise
             <br />
             SaaS Platform
           </h1>
-
           <p className="mt-6 text-xl text-slate-300 max-w-xl">
             Plataforma corporativa para gestão,
             analytics, automação, operação
             e inteligência empresarial.
           </p>
-
         </div>
 
+        {/* Formulário à direita */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center lg:justify-end p-8">
+          <div className="w-full max-w-md lg:pr-16 xl:pr-24">
+            <LoginForm />
+          </div>
+        </div>
       </div>
-
-      {/* DIREITA */}
-      <div className="flex-1 flex items-center justify-center bg-slate-950">
-
-        <LoginForm />
-
-      </div>
-
     </div>
   );
 }

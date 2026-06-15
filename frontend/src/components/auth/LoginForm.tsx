@@ -1,23 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, LogIn } from "lucide-react";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function LoginForm() {
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Mock de login - navegar direto para portal
-    setTimeout(() => {
+    setError("");
+
+    try {
+      const result = await login({ login: usuario, senha });
+      if (result.sucesso) {
+        navigate("/portal");
+      } else {
+        setError(result.mensagem || "Usuário ou senha inválidos");
+      }
+    } catch (err: any) {
+      setError(err.message || "Erro ao conectar ao servidor");
+    } finally {
       setLoading(false);
-      navigate("/portal");
-    }, 500);
+    }
   };
 
   return (
@@ -91,6 +102,12 @@ export default function LoginForm() {
             <LogIn size={18} />
             {loading ? "Entrando..." : "Entrar"}
           </button>
+
+          {error && (
+            <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
         </form>
 

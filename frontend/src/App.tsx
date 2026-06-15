@@ -1,11 +1,11 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/apps/operacional/auth/AuthProvider";
+import { AuthProvider, useAuth } from "@/app/providers/AuthProvider";
 import { TenantProvider } from "@/app/providers/TenantProvider";
 import { RuntimeProvider } from "@/app/providers/RuntimeContext";
 
-const LoginPage = React.lazy(() => import("@/pages/auth/LoginPage"));
-const PortalRoutes = React.lazy(() => import("@/pages/portal/PortalRoutes"));
+const LoginPage = React.lazy(() => import("@/apps/portal/pages/login/LoginPage"));
+const PortalRoutes = React.lazy(() => import("@/apps/portal/routes/PortalRoutes"));
 const ContextSelectionPage = React.lazy(() => import("@/apps/contexto/pages/ContextSelectionPage"));
 const AppOperacional = React.lazy(() => import("@/features/atendimento/AppOperacional"));
 const AppPainel = React.lazy(() => import("@/apps/painel/AppPainel"));

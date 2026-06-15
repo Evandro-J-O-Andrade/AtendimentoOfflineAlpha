@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from "react";
-import { useAuth } from "@/apps/operacional/auth/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useRuntime } from "@/app/providers/RuntimeContext";
 import DynamicSidebar from "@/components/layout/DynamicSidebar";
 import spApi from "@/api/spApi";

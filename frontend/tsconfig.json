@@ -25,9 +25,15 @@
       "@/components/*": ["./src/components/*"],
       "@/services/*": ["./src/services/*"],
       "@/hooks/*": ["./src/hooks/*"],
-      "@/types/*": ["./src/types/*"]
+      "@/types/*": ["./src/types/*"],
+      "@/shell/*": ["./shell/*"],
+      "@/providers/*": ["./providers/*"],
+      "@/stores/*": ["./stores/*"],
+      "@/routes/*": ["./routes/*"],
+      "@/assets/*": ["./assets/*"],
+      "@/themes/*": ["./themes/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "shell/**/*"],
   "exclude": ["node_modules", "dist"]
 }

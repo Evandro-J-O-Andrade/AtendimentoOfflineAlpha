@@ -1,5 +1,6 @@
 const pool = require("../config/database");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { SECRET, EXPIRES_IN } = require("../config/jwt");
 const { registrarEventoAuditoria } = require("../services/auditoria_service");
@@ -13,9 +14,10 @@ class AuthController {
         let conn;
         try {
             conn = await pool.getConnection();
-            const [rows] = await conn.execute("SELECT id_usuario, login, ativo FROM usuario WHERE login = ? LIMIT 1", [user]);
+            const [rows] = await conn.execute("SELECT id_usuario, id_pessoa, login, ativo, id_entidade FROM usuario WHERE login = ? LIMIT 1", [user]);
             if (!rows.length) return res.json({ sucesso: false, existe: false });
-            return res.json({ sucesso: true, existe: true, usuario: { id_usuario: rows[0].id_usuario, login: rows[0].login, ativo: !!rows[0].ativo } });
+            const u = rows[0];
+            return res.json({ sucesso: true, existe: true, usuario: { id_usuario: u.id_usuario, id_pessoa: u.id_pessoa, login: u.login, ativo: !!u.ativo } });
         } catch (err) {
             return res.status(500).json({ sucesso: false, erro: "ERRO_DE_CONEXAO" });
         } finally {
@@ -37,68 +39,97 @@ class AuthController {
         try {
             conn = await pool.getConnection();
             
-            // 1. Validar usuário e senha manualmente (bcrypt está no Node)
-            const [userRows] = await conn.execute(
-                "SELECT id_usuario, login, senha_hash, ativo, id_entidade FROM usuario WHERE login = ? LIMIT 1", 
-                [userLogin]
-            );
+            // 1. Obter detalhes do usuário via SP_MASTER_DISPATCHER
+            const spUserResult = await executeSPMaster("AUTH", "USER.GET_DETAILS", null, { p_login: userLogin });
 
-            if (!userRows.length) {
+            if (!spUserResult.sucesso || !spUserResult.resultado || !spUserResult.resultado.user) {
+                // Registrar tentativa de login falha se usuário não encontrado pela SP
+                await executeSPMaster("AUTH", "LOG_LOGIN_ATTEMPT", null, {
+                    p_id_usuario: null,
+                    p_id_entidade: null,
+                    p_login: userLogin,
+                    p_ip_origem: ip,
+                    p_user_agent: userAgent.substring(0, 100),
+                    p_sucesso: 0,
+                    p_metadata: JSON.stringify({ motivo: 'usuario_nao_encontrado_sp' })
+                });
                 return res.json({ sucesso: false, erro: "USUARIO_NAO_ENCONTRADO", mensagem: "Usuário não encontrado" });
             }
 
-            const user = userRows[0];
+            const user = spUserResult.resultado.user; // Agora contendo id_pessoa
             if (user.ativo !== 1) {
+                await executeSPMaster("AUTH", "LOG_LOGIN_ATTEMPT", null, {
+                    p_id_usuario: user.id_usuario, p_id_entidade: user.id_entidade, p_login: userLogin, p_ip_origem: ip, p_user_agent: userAgent.substring(0, 100), p_sucesso: 0, p_metadata: JSON.stringify({ motivo: 'usuario_inativo' })
+                });
                 return res.json({ sucesso: false, erro: "USUARIO_INATIVO", mensagem: "Usuário inativo" });
             }
-
             const senhaValida = await bcrypt.compare(senha, user.senha_hash);
-            if (!senhaValida) {
-                await conn.execute(
-                    "INSERT INTO login_tentativa (id_usuario, id_entidade, login, ip_origem, dispositivo_origem, sucesso, metadata, criado_em) VALUES (?, ?, ?, ?, ?, 0, ?, NOW(6))",
-                    [user.id_usuario, user.id_entidade, userLogin, ip, userAgent.substring(0, 100), JSON.stringify({ motivo: 'senha_invalida' })]
-                );
+
+            // Fallback para SHA256 e texto plano (compatibilidade com usuários legados como evandro.andrade)
+            let loginValido = senhaValida;
+            if (!loginValido && user.senha_hash) {
+                const sha256 = crypto.createHash("sha256").update(senha).digest("hex");
+                if (user.senha_hash.toLowerCase() === sha256.toLowerCase()) {
+                    loginValido = true;
+                } else if (user.senha_hash === senha) { // Texto plano (apenas para desenvolvimento/usuários específicos)
+                    loginValido = true;
+                }
+            }
+
+            if (!loginValido) {
+                await executeSPMaster("AUTH", "LOG_LOGIN_ATTEMPT", null, {
+                    p_id_usuario: user.id_usuario,
+                    p_id_entidade: user.id_entidade,
+                    p_login: userLogin, p_ip_origem: ip,
+                    p_user_agent: userAgent.substring(0, 100),
+                    p_sucesso: 0, p_metadata: JSON_OBJECT('motivo', 'senha_invalida')
+                });
                 return res.json({ sucesso: false, erro: "SENHA_INVALIDA", mensagem: "Senha incorreta" });
             }
 
             // 2. Criar Tokens Primeiro (precisamos do token_jwt para a sessão)
             const jwtToken = jwt.sign({ 
                 id_usuario: user.id_usuario, 
+                id_pessoa: user.id_pessoa, // Injeção da Entidade Real
                 id_sessao_usuario: 0, // Será atualizado após criar sessão
                 login: user.login,
                 id_entidade: user.id_entidade
             }, SECRET, { expiresIn: EXPIRES_IN });
 
-            const refreshToken = jwt.sign({ 
+            const refreshToken = jwt.sign({
                 id_usuario: user.id_usuario, 
+                id_pessoa: user.id_pessoa,
                 id_sessao_usuario: 0,
                 login: user.login,
                 id_entidade: user.id_entidade,
                 tipo: 'refresh'
             }, SECRET, { expiresIn: '7d' });
 
-            // Criar Sessão diretamente no banco (sem dependência de SP)
-            // Inserir registro na tabela sessao_usuario
-            // Usar unidade padrão (id_unidade = 1) para permitir login
-            const [sessaoResult] = await conn.execute(
-                `INSERT INTO sessao_usuario 
-                 (uuid_sessao, id_usuario, id_entidade, id_sistema, id_perfil, id_unidade, id_local, token_jwt, refresh_token, ip_origem, user_agent, iniciado_em, expira_em, ativo) 
-                 VALUES (UUID(), ?, ?, 4, NULL, 1, NULL, ?, ?, ?, ?, NOW(6), DATE_ADD(NOW(6), INTERVAL 8 HOUR), 1)`,
-                [user.id_usuario, user.id_entidade, jwtToken, refreshToken, ip, userAgent.substring(0, 255)]
-            );
-            
-            const id_sessao_usuario = sessaoResult.insertId;
-            
-            // Registrar tentativa de login bem-sucedida
-            await conn.execute(
-                `INSERT INTO login_tentativa (id_usuario, id_entidade, login, ip_origem, dispositivo_origem, sucesso, metadata, criado_em) 
-                 VALUES (?, ?, ?, ?, ?, 1, ?, NOW(6))`,
-                [user.id_usuario, user.id_entidade, userLogin, ip, userAgent.substring(0, 100), JSON.stringify({ status: 'sucesso' })]
-            );
+            // Criar sessão e registrar tentativa de login bem-sucedida via SP_MASTER_DISPATCHER
+            const spCreateSessionResult = await executeSPMaster("AUTH", "SESSION.CREATE", null, {
+                p_id_usuario: user.id_usuario,
+                p_id_pessoa: user.id_pessoa, // Passa id_pessoa para a SP
+                p_id_entidade: user.id_entidade, // Passa id_entidade para a SP
+                p_jwt_token: jwtToken, // Passa o JWT inicial para a SP
+                p_refresh_token: refreshToken, // Passa o Refresh Token inicial para a SP
+                p_ip_origem: ip,
+                p_user_agent: userAgent.substring(0, 255),
+                p_login: userLogin, // Passa o login para fins de log na SP
+                p_sucesso: 1,
+                p_metadata: JSON_OBJECT('status', 'sucesso')
+            });
 
-            // 3. Atualizar token com id_sessao_usuario correto
+            if (!spCreateSessionResult.sucesso || !spCreateSessionResult.resultado || !spCreateSessionResult.resultado.id_sessao_usuario) {
+                console.error("Erro ao criar sessão via SP:", spCreateSessionResult.mensagem);
+                return res.status(500).json({ sucesso: false, erro: "ERRO_AO_CRIAR_SESSAO", mensagem: spCreateSessionResult.mensagem });
+            }
+
+            const { id_sessao_usuario } = spCreateSessionResult.resultado;
+
+            // Gerar Token Final com ID da Sessão persistida
             const jwtTokenFinal = jwt.sign({ 
                 id_usuario: user.id_usuario, 
+                id_pessoa: user.id_pessoa,
                 id_sessao_usuario: id_sessao_usuario,
                 login: user.login,
                 id_entidade: user.id_entidade
@@ -106,29 +137,40 @@ class AuthController {
 
             const refreshTokenFinal = jwt.sign({ 
                 id_usuario: user.id_usuario, 
+                id_pessoa: user.id_pessoa,
                 id_sessao_usuario: id_sessao_usuario,
                 login: user.login,
                 id_entidade: user.id_entidade,
                 tipo: 'refresh'
             }, SECRET, { expiresIn: '7d' });
 
-            // Atualizar sessão com os tokens corretos
-            await conn.execute(
-                `UPDATE sessao_usuario SET token_jwt = ?, refresh_token = ? WHERE id_sessao_usuario = ?`,
-                [jwtTokenFinal, refreshTokenFinal, id_sessao_usuario]
-            );
+            // Atualizar sessão com os tokens finais via SP_MASTER_DISPATCHER
+            await executeSPMaster("AUTH", "SESSION.UPDATE_TOKENS", null, {
+                p_id_sessao_usuario: id_sessao_usuario,
+                p_jwt_token: jwtTokenFinal,
+                p_refresh_token: refreshTokenFinal
+            });
 
             // Buscar dados da entidade para branding white-label
             let entidadeData = null;
             try {
-                const [[entidade]] = await conn.query(
-                    "SELECT id_entidade, nome_fantasia, razao_social, logo_url, cor_primaria, cor_secundaria FROM entidade WHERE id_entidade = ?",
-                    [user.id_entidade]
-                );
-                entidadeData = entidade;
-            } catch (entErr) {
+                const spEntidadeResult = await executeSPMaster("AUTH", "ENTIDADE.GET_DETAILS", null, { p_id_entidade: user.id_entidade });
+                if (spEntidadeResult.sucesso && spEntidadeResult.resultado && spEntidadeResult.resultado.entidade) {
+                    entidadeData = spEntidadeResult.resultado.entidade;
+                } else {
+                    console.warn("Erro ou entidade não encontrada via SP:", spEntidadeResult.mensagem);
+                }
+                } catch (entErr) {
                 console.warn("Erro ao buscar entidade:", entErr.message);
             }
+
+            // 4. Buscar Sistemas/Aplicações autorizadas para o Portal
+            const spSistemasResult = await executeSPMaster("AUTH", "USER.GET_SISTEMAS", null, {
+                p_id_usuario: user.id_usuario 
+            });
+            
+            const sistemasAutorizados = spSistemasResult.sucesso ? 
+                spSistemasResult.resultado.sistemas : [];
 
 // Definir refresh token como HttpOnly Cookie
              res.cookie('refreshToken', refreshTokenFinal, {
@@ -143,156 +185,72 @@ class AuthController {
                  sessao: { 
                      id_sessao_usuario, 
                      id_usuario: user.id_usuario,
-                     contexto_definido: false
+                     contexto_definido: false // Obriga a passar pelo Modal de Contexto na App
                  }, 
-                 usuario: { id_usuario: user.id_usuario, login: user.login },
+                 usuario: { id_usuario: user.id_usuario, id_pessoa: user.id_pessoa, login: user.login, nome: user.nome_pessoa }, // Adiciona nome da pessoa
                  entidade: entidadeData,
+                 sistemas: sistemasAutorizados, // Lista para o Portal Corporativo
                  token: jwtTokenFinal
              });
 
         } catch (err) {
             console.error("Erro no fluxo de login:", err);
-            return res.status(500).json({ sucesso: false, erro: "ERRO_INTERNO", mensagem: err.message });
+            // Registrar tentativa de login falha se ocorrer um erro inesperado
+            await executeSPMaster("AUTH", "LOG_LOGIN_ATTEMPT", null, {
+                p_id_usuario: null, p_id_entidade: null, p_login: userLogin, p_ip_origem: ip, p_user_agent: userAgent.substring(0, 100), p_sucesso: 0, p_metadata: JSON_OBJECT('motivo', 'erro_interno_sp', 'details', err.message)
+            });
+            return res.status(500).json({ sucesso: false, erro: "ERRO_INTERNO", mensagem: err.message }); // Retorna o erro original para o frontend
         } finally {
-            if (conn) conn.release();
+            if (conn) conn.release(); // Garante que a conexão seja liberada
+        }
+    }
+
+    // Refatorado para usar SP_MASTER_DISPATCHER
+    static async listarContextos(req, res) { // Usado pelo ContextSelectionModal
+        const id_sessao = req.user?.id_sessao_usuario;
+        if (!id_sessao) return res.status(401).json({ sucesso: false, erro: "SESSAO_NAO_ENCONTRADA" });
+
+        try {
+            // Delega a lógica de listagem de contextos para a SP_MASTER_DISPATCHER
+            const spResult = await executeSPMaster("AUTH", "CONTEXTO.LIST_AVAILABLE", id_sessao, {
+                p_id_usuario: req.user.id_usuario,
+                p_login: req.user.login // Para bypass de evandro.andrade na SP
+            });
+
+            if (spResult.sucesso && spResult.resultado) {
+                return res.json({ sucesso: true, ...spResult.resultado });
+            } else {
+                return res.json({ sucesso: false, mensagem: spResult.mensagem || "Erro ao listar contextos." });
+            }
+        } catch (err) {
+            console.error("Erro no dispatcher listarContextos:", err.message);
+            return res.status(500).json({ sucesso: false, erro: "ERRO_INTERNO", mensagem: err.message });
         }
     }
 
     /**
-     * Listar contextos disponíveis
+     * Portal Dispatcher - Entrada Única para o Módulo Portal
+     * Respeita a Ordem Ontológica: Sessão -> Ação -> SP
      */
-    static async listarContextos(req, res) {
+    static async portalDispatcher(req, res) {
+        const { acao, payload } = req.body;
         const id_sessao = req.user?.id_sessao_usuario;
-        if (!id_sessao) return res.status(401).json({ erro: "SESSAO_NAO_ENCONTRADA" });
+        const id_usuario = req.user?.id_usuario;
 
-        let conn;
+        if (!id_sessao) return res.status(401).json({ sucesso: false, erro: "SESSAO_EXIGIDA" });
+
         try {
-            conn = await pool.getConnection();
-            
-            // Buscar ID do usuário pela sessão
-            const [sessoes] = await conn.query(
-                "SELECT id_usuario FROM sessao_usuario WHERE id_sessao_usuario = ? AND ativo = 1 AND expira_em > NOW()",
-                [id_sessao]
-            );
-            
-            if (!sessoes.length) {
-                return res.json({ unidades: [], locais: [], perfis: [], salas: [], especialidades: [] });
-            }
-            
-            const id_usuario = sessoes[0].id_usuario;
-            
-            // Buscar se é admin
-            const [isAdminResult] = await conn.query(
-                "SELECT COUNT(*) as isAdmin FROM usuario_perfil WHERE id_usuario = ? AND id_perfil = 42",
-                [id_usuario]
-            );
-            const isAdmin = isAdminResult[0]?.isAdmin > 0;
-            
-            // Buscar unidades (todas se admin, ou vinculadas)
-            let unidades;
-            if (isAdmin) {
-                const [rows] = await conn.query("SELECT id_unidade, nome FROM unidade WHERE ativo = 1 ORDER BY nome");
-                unidades = rows;
-            } else {
-                const [rows] = await conn.query(
-                    `SELECT u.id_unidade, u.nome 
-                     FROM usuario_unidade uu 
-                     JOIN unidade u ON u.id_unidade = uu.id_unidade 
-                     WHERE uu.id_usuario = ? AND uu.ativo = 1 AND u.ativo = 1`,
-                    [id_usuario]
-                );
-                unidades = rows;
-            }
-            
-            // Buscar locais (setores) com tipo
-            const [locais] = await conn.query(
-                `SELECT l.id_local, l.nome, l.codigo, tl.nome as tipo_nome, tl.categoria 
-                 FROM usuario_local ulo 
-                 JOIN local l ON l.id_local = ulo.id_local 
-                 LEFT JOIN tipo_local tl ON tl.id_tipo_local = l.id_tipo_local
-                 WHERE ulo.id_usuario = ? AND ulo.ativo = 1`,
-                [id_usuario]
-            );
-            
-            // Buscar perfis
-            const [perfis] = await conn.query(
-                `SELECT p.id_perfil, p.nome 
-                 FROM usuario_perfil up 
-                 JOIN perfil p ON p.id_perfil = up.id_perfil 
-                 WHERE up.id_usuario = ?`,
-                [id_usuario]
-            );
-            
-            // Buscar especialidades do usuário
-            let especialidades;
-            if (isAdmin) {
-                const [rows] = await conn.query("SELECT id_especialidade as id, nome FROM especialidade ORDER BY nome");
-                especialidades = rows;
-            } else {
-                // Tenta buscar de medico_especialidade
-                const [rows] = await conn.query(
-                    `SELECT e.id_especialidade as id, e.nome 
-                     FROM medico_especialidade me 
-                     JOIN especialidade e ON e.id_especialidade = me.id_especialidade 
-                     WHERE me.id_usuario = ?
-                     ORDER BY e.nome`,
-                    [id_usuario]
-                );
-                especialidades = rows.length > 0 ? rows : [
-                    { id: 1, nome: "CLINICA GERAL" },
-                    { id: 2, nome: "PEDIATRIA" },
-                    { id: 3, nome: "EMERGENCIA" }
-                ];
-            }
-            
-            // Buscar salas com tipo_sala para agrupamento
-            let salas;
-            if (isAdmin) {
-                const [rows] = await conn.query(
-                    `SELECT s.id_sala, s.nome_exibicao as nome, s.codigo, ts.nome as tipo_nome, ts.codigo as tipo_codigo
-                     FROM sala s
-                     LEFT JOIN tipo_sala ts ON ts.id_tipo_sala = s.id_tipo_sala
-                     WHERE s.ativa = 1
-                     ORDER BY ts.nome, s.nome_exibicao`
-                );
-                // Adicionar NÃO DEFINIDA como primeira opção
-                salas = [{ id_sala: -1, nome: "NÃO DEFINIDA", tipo_nome: "GERAL", tipo_codigo: "NAO_DEFINIDA" }, ...rows];
-            } else {
-                // Salas do usuário via usuario_sala
-                const [rows] = await conn.query(
-                    `SELECT s.id_sala, s.nome_exibicao as nome, s.codigo, ts.nome as tipo_nome, ts.codigo as tipo_codigo
-                     FROM usuario_sala us
-                     JOIN sala s ON s.id_sala = us.id_sala
-                     LEFT JOIN tipo_sala ts ON ts.id_tipo_sala = s.id_tipo_sala
-                     WHERE us.id_usuario = ? AND us.ativo = 1 AND s.ativa = 1
-                     ORDER BY ts.nome, s.nome_exibicao`,
-                    [id_usuario]
-                );
-                // Se não tem sala alocada, mostra opções padrões
-                if (rows.length > 0) {
-                    salas = [{ id_sala: -1, nome: "NÃO DEFINIDA", tipo_nome: "GERAL", tipo_codigo: "NAO_DEFINIDA" }, ...rows];
-                } else {
-                    salas = [
-                        { id_sala: -1, nome: "NÃO DEFINIDA", tipo_nome: "GERAL", tipo_codigo: "NAO_DEFINIDA" },
-                        { id_sala: 1, nome: "CLINICO", tipo_nome: "CONSULTÓRIO", tipo_codigo: "CONSULTORIO" },
-                        { id_sala: 2, nome: "PEDIATRICO", tipo_nome: "CONSULTÓRIO", tipo_codigo: "CONSULTORIO" },
-                        { id_sala: 3, nome: "EMERGENCIA", tipo_nome: "EMERGÊNCIA", tipo_codigo: "EMERGENCIA" }
-                    ];
-                }
-            }
-            
-            return res.json({
-                unidades: unidades || [],
-                locais: locais || [],
-                perfis: perfis || [],
-                salas: salas,
-                especialidades: especialidades || []
-            });
+            // Injeta o contexto de segurança no payload antes de enviar para a SP
+            const fullPayload = {
+                ...payload,
+                p_id_usuario: id_usuario,
+                p_id_saas_entidade: req.user?.id_entidade
+            };
+
+            const resultado = await executeSPMaster("PORTAL", acao, id_sessao, fullPayload);
+            return res.json(resultado);
         } catch (err) {
-            console.error("Erro listarContextos:", err.message);
-            return res.json({ unidades: [], locais: [], perfis: [], salas: [], especialidades: [] });
-        } finally {
-            if (conn) conn.release();
+            return res.status(500).json({ sucesso: false, erro: "ERRO_DISPATCHER_PORTAL", mensagem: err.message });
         }
     }
 
@@ -325,6 +283,7 @@ class AuthController {
                 // Atualizar o JWT token com o contexto AGORA definido
                 const jwtToken = jwt.sign({ 
                     id_usuario: id_usuario, 
+                    id_pessoa: req.user?.id_pessoa,
                     id_sessao_usuario: id_sessao,
                     login: req.user?.login,
                     id_unidade: id_unidade, 
@@ -415,6 +374,7 @@ class AuthController {
                 const sessao = rows[0];
                 const newToken = jwt.sign({ 
                     id_usuario: decoded.id_usuario, 
+                    id_pessoa: decoded.id_pessoa,
                     id_sessao_usuario: decoded.id_sessao_usuario,
                     login: decoded.login,
                     id_unidade: sessao.id_unidade,
@@ -463,116 +423,20 @@ class AuthController {
         try {
             conn = await pool.getConnection();
             
-            // Buscar ID do usuário pela sessão
-            const [sessoes] = await conn.query(
-                "SELECT id_usuario FROM sessao_usuario WHERE id_sessao_usuario = ? AND ativo = 1 AND expira_em > NOW()",
-                [id_sessao]
-            );
-            
-            if (!sessoes.length) {
-                return res.json({ unidades: [], locais: [], perfis: [], salas: [], especialidades: [] });
-            }
-            
-            const id_usuario = sessoes[0].id_usuario;
-            
-            // Buscar se é admin
-            const [isAdminResult] = await conn.query(
-                "SELECT COUNT(*) as isAdmin FROM usuario_perfil WHERE id_usuario = ? AND id_perfil = 42",
-                [id_usuario]
-            );
-            const isAdmin = isAdminResult[0]?.isAdmin > 0;
-            
-            // Buscar unidades
-            let unidades;
-            if (isAdmin) {
-                const [rows] = await conn.query("SELECT id_unidade, nome FROM unidade WHERE ativo = 1 ORDER BY nome");
-                unidades = rows;
-            } else {
-                const [rows] = await conn.query(
-                    `SELECT u.id_unidade, u.nome 
-                     FROM usuario_unidade uu 
-                     JOIN unidade u ON u.id_unidade = uu.id_unidade 
-                     WHERE uu.id_usuario = ? AND uu.ativo = 1 AND u.ativo = 1`,
-                    [id_usuario]
-                );
-                unidades = rows;
-            }
-            
-            // Buscar locais
-            const [locais] = await conn.query(
-                `SELECT lo.id_local, lo.nome 
-                 FROM usuario_local ulo 
-                 JOIN local lo ON lo.id_local = ulo.id_local 
-                 WHERE ulo.id_usuario = ? AND ulo.ativo = 1`,
-                [id_usuario]
-            );
-            
-            // Buscar perfis
-            const [perfis] = await conn.query(
-                `SELECT p.id_perfil, p.nome 
-                 FROM usuario_perfil up 
-                 JOIN perfil p ON p.id_perfil = up.id_perfil 
-                 WHERE up.id_usuario = ?`,
-                [id_usuario]
-            );
-            
-            // Buscar especialidades
-            let especialidades;
-            if (isAdmin) {
-                const [rows] = await conn.query("SELECT id_especialidade as id, nome FROM especialidade ORDER BY nome");
-                especialidades = rows;
-            } else {
-                const [rows] = await conn.query(
-                    `SELECT e.id_especialidade as id, e.nome 
-                     FROM medico_especialidade me 
-                     JOIN especialidade e ON e.id_especialidade = me.id_especialidade 
-                     WHERE me.id_usuario = ?
-                     ORDER BY e.nome`,
-                    [id_usuario]
-                );
-                especialidades = rows.length > 0 ? rows : [
-                    { id: 1, nome: "CLINICA GERAL" },
-                    { id: 2, nome: "PEDIATRIA" },
-                    { id: 3, nome: "EMERGENCIA" }
-                ];
-            }
-            
-            // Buscar salas
-            let salas;
-            if (isAdmin) {
-                const [rows] = await conn.query(
-                    "SELECT id_sala, nome_exibicao as nome FROM sala WHERE ativa = 1 ORDER BY nome_exibicao"
-                );
-                salas = [{ id_sala: -1, nome: "NÃO DEFINIDA" }, ...rows];
-            } else {
-                const [rows] = await conn.query(
-                    `SELECT s.id_sala, s.nome_exibicao as nome 
-                     FROM usuario_alocacao ua 
-                     JOIN sala s ON s.id_sala = ua.id_sala 
-                     WHERE ua.id_usuario = ? AND ua.fim IS NULL AND s.ativa = 1
-                     ORDER BY s.nome_exibicao`,
-                    [id_usuario]
-                );
-                salas = rows.length > 0 
-                    ? [{ id_sala: -1, nome: "NÃO DEFINIDA" }, ...rows]
-                    : [
-                        { id_sala: -1, nome: "NÃO DEFINIDA" },
-                        { id_sala: 1, nome: "CLINICO" },
-                        { id_sala: 2, nome: "PEDIATRICO" },
-                        { id_sala: 3, nome: "EMERGENCIA" }
-                      ];
-            }
-            
-            return res.json({
-                unidades: unidades || [],
-                locais: locais || [],
-                perfis: perfis || [],
-                salas: salas,
-                especialidades: especialidades || []
+            // Delega a lógica de listagem de contextos para a SP_MASTER_DISPATCHER
+            const spResult = await executeSPMaster("AUTH", "CONTEXTO.LIST_USER_CONTEXTS", id_sessao, {
+                p_id_usuario: req.user.id_usuario,
+                p_login: req.user.login // Para bypass de evandro.andrade na SP
             });
+
+            if (spResult.sucesso && spResult.resultado) {
+                return res.json({ sucesso: true, ...spResult.resultado });
+            } else {
+                return res.json({ sucesso: false, mensagem: spResult.mensagem || "Erro ao listar meus contextos." });
+            }
         } catch (err) {
             console.error("Erro meusContextosSP:", err.message);
-            return res.json({ unidades: [], locais: [], perfis: [], salas: [], especialidades: [] });
+            return res.status(500).json({ sucesso: false, erro: "ERRO_INTERNO", mensagem: err.message });
         } finally {
             if (conn) conn.release();
         }

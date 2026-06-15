@@ -25,7 +25,7 @@ function verificarPermissao(recurso, acao) {
         try {
             // O authMiddleware já deve ter populado req.user com o contexto
             if (!req.user || !req.user.id_usuario) {
-                return res.status(401).json({
+                return res.status(401).json({ // 401 para não autenticado
                     error: "USUARIO_NAO_AUTENTICADO",
                     message: "Usuário não autenticado"
                 });
@@ -35,7 +35,7 @@ function verificarPermissao(recurso, acao) {
             // O perfil pode estar em req.user.perfil (string) ou precisamos buscar
             const perfil = req.user.perfil;
             
-            if (!perfil) {
+            if (!perfil && recurso !== 'AUTH') { // AUTH pode ser acessado sem perfil definido
                 return res.status(403).json({
                     error: "PERFIL_NAO_DEFINIDO",
                     message: "Perfil do usuário não definido no contexto"
@@ -43,7 +43,7 @@ function verificarPermissao(recurso, acao) {
             }
 
             // Se for ADMIN ou o usuário Master (evandro.andrade), permite tudo
-            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade') {
+            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade' || req.user.id_perfil === 42) { // id_perfil 42 é o ADMIN
                 return next();
             }
 
@@ -103,7 +103,7 @@ function verificarUmaDasPermissoes(permissoes) {
         try {
             if (!req.user || !req.user.id_usuario) {
                 return res.status(401).json({
-                    error: "USUARIO_NAO_AUTENTICADO",
+                    error: "USUARIO_NAO_AUTENTICADO", // 401 para não autenticado
                     message: "Usuário não autenticado"
                 });
             }
@@ -111,7 +111,7 @@ function verificarUmaDasPermissoes(permissoes) {
             const perfil = req.user.perfil;
 
             // ADMIN tem acesso total
-            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade') {
+            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade' || req.user.id_perfil === 42) {
                 return next();
             }
 
@@ -168,7 +168,7 @@ function verificarTodasPermissoes(permissoes) {
         try {
             if (!req.user || !req.user.id_usuario) {
                 return res.status(401).json({
-                    error: "USUARIO_NAO_AUTENTICADO",
+                    error: "USUARIO_NAO_AUTENTICADO", // 401 para não autenticado
                     message: "Usuário não autenticado"
                 });
             }
@@ -176,7 +176,7 @@ function verificarTodasPermissoes(permissoes) {
             const perfil = req.user.perfil;
 
             // ADMIN tem acesso total
-            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade') {
+            if (perfil === 1 || perfil === 'ADMIN' || req.user.login === 'evandro.andrade' || req.user.id_perfil === 42) {
                 return next();
             }
 

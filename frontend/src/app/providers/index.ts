@@ -1,5 +1,3 @@
-// Re-export providers and types
+export { AuthProvider, useAuth, AuthContext } from './AuthProvider';
 export { RuntimeProvider, useRuntime, defaultRuntime } from './RuntimeContext';
-export type { Runtime, RuntimeContextType } from './types';
-export { TenantProvider, useTenant } from './TenantProvider';
-export type { TenantConfig } from './types';
+export type { Runtime, RuntimeContextType, TenantConfig } from './types';

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/apps/operacional/auth/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useRuntime } from "@/app/providers/RuntimeContext";
 
 interface Unidade {

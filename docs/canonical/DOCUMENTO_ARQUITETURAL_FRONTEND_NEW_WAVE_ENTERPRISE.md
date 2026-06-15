@@ -11,29 +11,24 @@ Banco: MySQL (Fonte da Verdade)
 
 # PRINCÍPIO FUNDAMENTAL
 
-O usuário NÃO escolhe contexto operacional após o login.
+A Identidade é persistente; o Contexto é mutável.
 
-Fluxo correto:
+### Ontologia de Acesso
 
-LOGIN
-↓
-PORTAL CORPORATIVO
-↓
-APLICAÇÃO
-↓
-CONTEXTO OPERACIONAL
+1. **PESSOA**: O ente real no mundo.
+2. **USUARIO**: A credencial digital da Pessoa.
+3. **SESSAO_USUARIO**: O período de atividade (Único por Login).
+4. **CONTEXTO_OPERACIONAL**: O estado atual da operação (Sistema + Unidade + Local).
 
-A identidade é separada do contexto.
+### Fluxo de Navegação (Single Session / Multi-Context)
 
-Identidade:
-- Usuário
-- Tenant
-- Sistemas permitidos
+* **Login**: Cria `SESSAO_USUARIO` 500.
+* **Portal**: `SESSAO` 500 + `SISTEMA` Portal.
+* **Abrir HIS**: `SESSAO` 500 + `SISTEMA` HIS + `UNIDADE` Centro.
+* **Trocar para CRM**: `SESSAO` 500 + `SISTEMA` CRM.
 
-Contexto:
-- Unidade
-- Local Operacional
-- Sala
+### Vantagem de Auditoria
+Toda ação no banco deve registrar o `id_sessao_usuario` e o contexto ativo, permitindo saber exatamente quem era a pessoa, qual usuário usou, em qual sessão global e em qual aplicação/unidade o evento ocorreu.
 
 ---
 

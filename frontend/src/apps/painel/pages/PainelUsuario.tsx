@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/apps/operacional/auth/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useContextSelection } from "@/apps/operacional/context/ContextContext";
 import api from "@/apps/operacional/services/api";
 import "./PainelUsuario.css";

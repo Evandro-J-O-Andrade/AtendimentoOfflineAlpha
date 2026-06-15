@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/apps/operacional/auth/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useContextSelection } from "./ContextContext";
 
 export function requireAuth({ children }: { children: React.ReactNode }) {

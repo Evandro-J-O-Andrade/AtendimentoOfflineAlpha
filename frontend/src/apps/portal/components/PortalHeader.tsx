@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Building2, ChevronDown, LogOut, UserCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../operacional/auth/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { getPortalBranding } from "../services/branding";
 import NotificationWidget from "./NotificationWidget";
 

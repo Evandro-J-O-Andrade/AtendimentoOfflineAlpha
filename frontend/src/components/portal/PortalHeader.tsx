@@ -1,4 +1,4 @@
-import { useAuth } from '@/apps/operacional/auth/AuthProvider';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 interface PortalHeaderProps {
   empresa?: string;

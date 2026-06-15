@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { useAuth } from "@/context/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import api from "@/apps/operacional/services/api";
 import type {
     ContextoState,

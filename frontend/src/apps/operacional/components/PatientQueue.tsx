@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/apps/operacional/auth/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { getFilaTriagem, getFilaEspera } from "@/services/FilaService";
 import "./PatientQueue.css";
 

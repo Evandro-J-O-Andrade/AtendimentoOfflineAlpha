@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,7 +8,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Mapeamento das variáveis CSS injetadas dinamicamente pelo branding.ts
         brand: {
           primary: 'var(--brand-primary)',
           secondary: 'var(--brand-secondary)',
