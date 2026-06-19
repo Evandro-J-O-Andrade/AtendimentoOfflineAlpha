@@ -9,20 +9,53 @@
 
 ---
 
+## Status Arquitetural
+
+**Freeze Arquitetural 2026 ativo.**
+
+A fonte oficial de arquitetura é `docs/canonical/`. Nenhum desenvolvimento de novas telas, APIs, tabelas ou stored procedures deve ser iniciado sem homologação dos documentos canônicos.
+
+Os MDs `docs/canonical/MD1_arquitetura_canonica.md` a `docs/canonical/MD12_evolucao.md` compõem a constituição sintética da plataforma e devem ser tratados como referência de decisão arquitetural.
+
+A arquitetura canônica é:
+
+```text
+Login
+  ↓
+Portal Corporativo
+  ↓
+Aplicação
+  ↓
+Contexto Operacional
+  ↓
+Dashboard
+  ↓
+sp_master_dispatcher_runtime
+  ↓
+sp_master_orquestradora
+  ↓
+sp_executor_*
+  ↓
+Eventos + Auditoria + Estado
+```
+
+---
+
 ## 📋 Sumário
 
 1. [Visão Geral do Sistema](#visão-geral-do-sistema)
-2. [Lei Canônica do Sistema](#lei-canônica-do-sistema)
-3. [Tecnologias Utilizadas](#tecnologias-utilizadas)
-4. [Arquitetura do Sistema](#arquitetura-do-sistema)
-5. [Módulos e Funcionalidades](#módulos-e-funcionalidades)
-6. [Estrutura do Projeto](#estrutura-do-projeto)
-7. [Banco de Dados](#banco-de-dados)
-8. [Instalação e Configuração](#instalação-e-configuração)
-9. [Credenciais de Teste](#credenciais-de-teste)
-10. [Fluxo de Atendimento](#fluxo-de-atendimento)
-11. [Documentação Adicional](#documentação-adicional)
-12. [Roadmap de Implementação](#roadmap-de-implementação)
+2. [Status Arquitetural](#status-arquitetural)
+3. [Lei Canônica do Sistema](#lei-canônica-do-sistema)
+4. [Tecnologias Utilizadas](#tecnologias-utilizadas)
+5. [Arquitetura do Sistema](#arquitetura-do-sistema)
+6. [Módulos e Funcionalidades](#módulos-e-funcionalidades)
+7. [Estrutura do Projeto](#estrutura-do-projeto)
+8. [Banco de Dados](#banco-de-dados)
+9. [Instalação e Configuração](#instalação-e-configuração)
+10. [Credenciais de Teste](#credenciais-de-teste)
+11. [Fluxo de Atendimento](#fluxo-de-atendimento)
+12. [Documentação Adicional](#documentação-adicional)
+13. [Roadmap de Implementação](#roadmap-de-implementação)
 
 ---
 
@@ -518,6 +551,10 @@ O sistema inclui sementes (seeds) com usuários de teste:
 
 | Documento | Descrição |
 |-----------|-----------|
+| [Documentação Canônica](docs/canonical/README_CANONICO.md) | Fonte oficial da arquitetura, freeze e MDs MD1-MD12 |
+| [Plano Diretor da Documentação Canônica](docs/canonical/PLANO_DIRETOR_DA_DOCUMENTACAO_CANONICA.md) | Hierarquia e documentos obrigatórios da plataforma |
+| [MD1 - Arquitetura Canônica](docs/canonical/MD1_arquitetura_canonica.md) | Constituição sintética da arquitetura |
+| [MD9 - Event Store Canônico](docs/canonical/MD9_event_store.md) | Estratégia de convergência para `kernel_event_store` |
 | [MAPA_6_MOTORES_SISTEMA.md](MAPA_6_MOTORES_SISTEMA.md) | Detalhamento dos 6 motores |
 | [ARQUITETURA_SISTEMA_ANALISE.md](ARQUITETURA_SISTEMA_ANALISE.md) | Análise arquitetural completa |
 | [ANALISE_SISTEMA_COMPLETA.md](ANALISE_SISTEMA_COMPLETA.md) | Análise do sistema |

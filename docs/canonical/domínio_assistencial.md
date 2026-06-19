@@ -1,0 +1,3 @@
+SENHA
+FFA
+GPAT

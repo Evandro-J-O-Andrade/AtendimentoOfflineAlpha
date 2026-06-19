@@ -1,0 +1,18 @@
+{
+  "name": "Pronto Atendimento Dr. Guido Guida",
+  "short_name": "Guido Guida",
+  "description": "Sistema de gerenciamento de senhas para Pronto Atendimento",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000080",
+  "theme_color": "#000080",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
