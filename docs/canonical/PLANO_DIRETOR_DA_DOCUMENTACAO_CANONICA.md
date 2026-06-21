@@ -570,7 +570,45 @@ Define:
 
 ---
 
-## 30 - ROADMAP_CANONICO.md
+## 30 - MD-026-Portal-Analytics-Governance.md
+
+Define:
+
+* KPIs globais
+* Uso da plataforma
+* Saúde do ecossistema
+* Custos
+* Apps
+* Tenants
+* Usuários
+* Receita
+* Riscos operacionais
+* Riscos financeiros
+* Riscos regulatórios
+
+---
+
+## 31 - MD-027-Security-Center.md
+
+Define:
+
+* Identity Security
+* Zero Trust
+* Tenant Isolation
+* JWT Enterprise
+* Google Security
+* Webhook Security
+* API Security
+* Frontend Security
+* Database Security
+* Audit Security
+* Proteção contra inspeção do navegador
+* Proteção contra F12
+* Segurança do fluxo de login
+
+---
+
+## 32 - ROADMAP_CANONICO.md
 
 Define:
 

@@ -16,7 +16,7 @@
 - ❄️ Novas tabelas no banco
 - ❌ Novas stored procedures
 
-### Documentos Canônicos (43 documentos)
+### Documentos Canônicos (45 documentos)
 
 | Nº | Documento | Status |
 |----|-----------|--------|
@@ -63,6 +63,8 @@
 | 41 | MD10_fluxo.md | ✅ |
 | 42 | MD11_consistencia.md | ✅ |
 | 43 | MD12_evolucao.md | ✅ |
+| 44 | MD-026-Portal-Analytics-Governance.md | ✅ |
+| 45 | MD-027-Security-Center.md | ✅ |
 
 ---
 

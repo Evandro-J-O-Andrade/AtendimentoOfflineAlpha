@@ -1,8 +1,8 @@
 # 🏥 Plataforma New Wave SaaS - Documentação Canônica
 
-> **Status:** Freeze Arquitetural - 43/43 documentos canônicos consolidados
+> **Status:** Freeze Arquitetural - 45/45 documentos canônicos consolidados
 
-## 📚 Documentos Canônicos (43/43)
+## 📚 Documentos Canônicos (45/45)
 
 | Nº | Documento | Status |
 |----|-----------|--------|
@@ -49,6 +49,8 @@
 | 41 | MD10_fluxo.md | ✅ |
 | 42 | MD11_consistencia.md | ✅ |
 | 43 | MD12_evolucao.md | ✅ |
+| 44 | MD-026-Portal-Analytics-Governance.md | ✅ |
+| 45 | MD-027-Security-Center.md | ✅ |
 
 ## 📁 Estrutura Enterprise
 
