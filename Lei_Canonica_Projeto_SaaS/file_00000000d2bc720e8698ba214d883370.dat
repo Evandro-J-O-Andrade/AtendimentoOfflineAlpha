@@ -1,0 +1,269 @@
+A  Captures/novateladelogin.png
+R  backend/MAPA_FRONEND_SP_INTEGRACAO.md -> MAPA_FRONEND_SP_INTEGRACAO.md
+A  NEW_WAVE_ENTERPRISE_PRODUCT_VISION.md
+M  backend/src/auth/authController.js
+M  backend/src/routes/portalRoutes.js
+A  docs/ESTRUTURA_FRONTEND.md
+D  frontend/src/App.jsx
+A  frontend/src/App.tsx
+D  frontend/src/api/api.js
+D  frontend/src/api/spApi.js
+M  frontend/src/apps/operacional/auth/AuthProvider.jsx
+D  frontend/src/apps/operacional/auth/RuntimeAuthContext.jsx
+A  frontend/src/apps/operacional/context/ContextContext.tsx
+A  frontend/src/apps/operacional/context/ProtectedRoute.tsx
+D  frontend/src/apps/operacional/pages/CoordenadorGlobal.jsx
+D  frontend/src/apps/operacional/pages/Dashboard.jsx
+D  frontend/src/apps/operacional/pages/ExecutorEstoque.jsx
+D  frontend/src/apps/operacional/pages/ExecutorEvolucao.jsx
+D  frontend/src/apps/operacional/pages/ExecutorFaturamento.jsx
+D  frontend/src/apps/operacional/pages/FluxoEstoque.jsx
+D  frontend/src/apps/operacional/pages/Login.jsx
+D  frontend/src/apps/operacional/pages/Painel.jsx
+D  frontend/src/apps/portal/components/ApplicationCard.tsx
+M  frontend/src/apps/portal/components/PortalModuleCard.tsx
+D  frontend/src/apps/portal/components/module.ts
+M  frontend/src/apps/portal/layouts/PortalLayout.tsx
+D  frontend/src/apps/portal/pages/PortalHome.tsx
+M  frontend/src/apps/portal/pages/PortalHomePage.tsx
+A  frontend/src/apps/portal/pages/login/LoginForm.tsx
+A  frontend/src/apps/portal/pages/login/LoginPage.tsx
+D  frontend/src/apps/portal/pages/module.ts
+M  frontend/src/apps/portal/routes/PortalRoutes.tsx
+M  frontend/src/apps/portal/services/branding.ts
+D  frontend/src/apps/portal/types.ts
+D  frontend/src/components/MenuDinamico.jsx
+D  frontend/src/components/Sidebar.jsx
+D  frontend/src/context/ApplicationCard.tsx
+D  frontend/src/context/ContextContext.tsx
+D  frontend/src/context/PortalHome.tsx
+D  frontend/src/context/ProtectedRoute.tsx
+M  frontend/src/context/TenantProvider.tsx
+D  frontend/src/hooks/useApp.js
+D  frontend/src/hooks/useAuth.js
+D  frontend/src/hooks/useFilaRealtime.js
+D  frontend/src/hooks/useMenu.js
+D  frontend/src/main.jsx
+A  frontend/src/main.tsx
+D  frontend/src/module.ts
+D  frontend/src/pages/Dashboard.jsx
+D  frontend/src/pages/LoginPage.jsx
+D  frontend/src/pages/module.ts
+D  frontend/src/router/index.jsx
+D  frontend/src/router/operacionalRoutes.js
+D  frontend/src/services/AssistencialService.js
+D  frontend/src/services/FilaService.js
+D  frontend/src/services/PacienteService.js
+D  frontend/src/services/PermissionService.js
+D  frontend/src/services/UserService.js
+D  frontend/src/services/index.js
+D  frontend/src/services/loginService.js
+D  frontend/src/services/runtimeService.js
+D  frontend/src/services/sessionService.js
+D  frontend/src/services/syncService.js
+---
+
+Count             : 67
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : 
+
+
+apps/
+├── portal/                     # Portal Corporativo (TSX)
+│   ├── pages/login/
+│   │   ├── LoginPage.tsx      # NOVO - TSX
+│   │   └── LoginForm.tsx      # NOVO - TSX
+│   ├── pages/
+│   │   ├── PortalHomePage.tsx # TSX
+│   │   ├── ReservedModulePage.tsx
+│   │   └── ManagementDashboardPage.tsx
+│   ├── layouts/
+│   │   └── PortalLayout.tsx   # TSX
+│   ├── components/
+│   │   ├── PortalModuleCard.tsx # TSX
+│   │   ├── PortalModuleGate.tsx
+│   │   └── ...
+│   ├── routes/
+│   │   └── PortalRoutes.tsx   # TSX
+│   ├── hooks/
+│   ├── services/
+│   │   └── branding.ts
+│   └── types.ts
+├── operacional/                # Módulos operacionais (JSX)
+│   ├── auth/
+│   │   └── AuthProvider.jsx   # Reativo/Context API
+│   ├── context/
+│   │   ├── ContextContext.tsx # NOVO - TSX
+│   │   └── ProtectedRoute.tsx # NOVO - TSX
+│   ├── pages/
+│   │   ├── contexto/SelecionarContexto.jsx
+│   │   ├── recepcao/Recepcao.jsx
+│   │   ├── triagem/Triagem.jsx
+│   │   ├── farmacia/Farmacia.jsx
+│   │   └── ... (15+ setores)
+│   └── services/api.js
+├── painel/
+├── totem/
+└── admin/
+context/
+├── TenantProvider.tsx          # NOVO - TSX
+└── AuthProvider.jsx          # Re-export
+
+
+auth/
+├── authController.js         # Login + JWT + entidade
+├── authService.js
+├── authMiddleware.js
+├── authRoutes.js
+└── permissionMiddleware.js
+routes/
+├── portalRoutes.js           # Módulos do portal
+├── contextoRoutes.js
+├── operacionalRoutes.js
+├── farmaciaRoutes.js
+└── totemRoutes.js
+kernel/
+├── auth/
+├── worker/
+└── dispatcher_gateway.js
+services/
+├── spMasterService.js
+└── ...
+
+2. CLASSIFICAÇÃO DOS ARQUIVOS
+MANTER (Funcional)
+App.tsx - Entry point TSX
+main.tsx - React entry TSX
+apps/portal/pages/login/* - TSX novo
+apps/portal/layouts/PortalLayout.tsx - TSX
+apps/portal/components/PortalModuleCard.tsx - TSX
+apps/portal/routes/PortalRoutes.tsx - TSX
+apps/operacional/auth/AuthProvider.jsx - Core auth
+context/TenantProvider.tsx - Branding white-label
+REAPROVEITAR (Convertido)
+apps/operacional/context/ContextContext.tsx - Nova separação
+apps/operacional/context/ProtectedRoute.tsx - Guards canônicos
+REFATORAR (Requer atenção)
+apps/operacional/pages/*/*.jsx - Setores operacionais (JSX → TSX)
+apps/portal/pages/*.tsx - Sem tipagem correta
+apps/portal/services/branding.ts - Sem companyName no retorno
+Componentes com alias @/ precisam de config tsconfig paths
+AuthProvider.jsx - LocalStorage para token (AI_RULES proíbe)
+LEGADO
+apps/operacional/pages/Login.jsx - Login antigo
+apps/operacional/auth/RuntimeAuthContext.jsx - Removido
+apps/portal/pages/PortalHome.tsx - Removido
+apps/portal/components/ApplicationCard.tsx - Implementação diferente
+router/index.jsx - Removido
+pages/*.jsx - Removidos
+REMOVER (Eliminados)
+dashboard/ vazio
+module.ts vazios
+services/* (frontend) - Removeu 9 arquivos
+hooks/useAuth.js, hooks/useMenu.js - Duplicados
+components/MenuDinamico.jsx, components/Sidebar.jsx - Removidos
+context/ApplicationCard.tsx, context/PortalHome.tsx - Removidos
+3. ARQUITETURA ATUAL
+
+┌─────────────────────────────────────────────┐
+│              FRONTEND (React 18)            │
+├─────────────────────────────────────────────┤
+│ main.tsx → App.tsx                           │
+│     ↓                                        │
+│ TenantProvider → AuthProvider → ContextProvider  │
+│     ↓                                        │
+│ Routes:                                      │
+│   /login → PortalLoginPage (TSX)             │
+│   /portal → PortalRoutes (TSX)              │
+│   /operacional → AppOperacional (JSX)        │
+│   /painel → AppPainel (JSX)               │
+│   /totem → AppTotem (JSX)                 │
+└─────────────────────────────────────────────┘
+            ↓ API (proxy :3001)
+┌─────────────────────────────────────────────┐
+│              BACKEND (Node.js)               │
+├─────────────────────────────────────────────┤
+│ authController.js → JWT + Entidade + Token   │
+│ authMiddleware.js → Validação sessão         │
+│ portalRoutes.js → Módulos + categorias      │
+│ contextoRoutes.js → Unidades + Locais        │
+│ farmaciaRoutes.js, estoqueRoutes.js          │
+└─────────────────────────────────────────────┘
+            ↓ Procedures MySQL
+┌─────────────────────────────────────────────┐
+│             BANCO (MySQL 8.0)              │
+├─────────────────────────────────────────────┤
+│ 122 tabelas, 80+ procedures                 │
+│ sp_auth_login, sp_auth_contexto, etc         │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│              FRONTEND (React 18)            │
+├─────────────────────────────────────────────┤
+│ main.tsx → App.tsx                           │
+│     ↓                                        │
+│ TenantProvider → AuthProvider → ContextProvider  │
+│     ↓                                        │
+│ Routes:                                      │
+│   /login → PortalLoginPage (TSX)             │
+│   /portal → PortalRoutes (TSX)              │
+│   /operacional → AppOperacional (JSX)        │
+│   /painel → AppPainel (JSX)               │
+│   /totem → AppTotem (JSX)                 │
+└─────────────────────────────────────────────┘
+            ↓ API (proxy :3001)
+┌─────────────────────────────────────────────┐
+│              BACKEND (Node.js)               │
+├─────────────────────────────────────────────┤
+│ authController.js → JWT + Entidade + Token   │
+│ authMiddleware.js → Validação sessão         │
+│ portalRoutes.js → Módulos + categorias      │
+│ contextoRoutes.js → Unidades + Locais        │
+│ farmaciaRoutes.js, estoqueRoutes.js          │
+└─────────────────────────────────────────────┘
+            ↓ Procedures MySQL
+┌─────────────────────────────────────────────┐
+│             BANCO (MySQL 8.0)              │
+├─────────────────────────────────────────────┤
+│ 122 tabelas, 80+ procedures                 │
+│ sp_auth_login, sp_auth_contexto, etc         │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│ src/                                       │
+│ ├── main.tsx (único entry)                  │
+│ ├── App.tsx (único router)                  │
+│ ├── index.css (único CSS global)            │
+│ ├── apps/                                  │
+│ │   ├── portal/     → Módulos corporativos  │
+│ │   │   └── pages/login/LoginPage.tsx       │
+│ │   ├── operacional/ → Módulos assistenciais │
+│ │   │   └── auth/AuthProvider.jsx           │
+│ │   └── totem/, painel/                   │
+│ ├── context/                               │
+│ │   ├── TenantProvider.tsx (branding)         │
+│ │   ├── ContextContext.tsx (contexto)       │
+│ │   └── AuthProvider.jsx (re-export)         │
+│ └── services/ (único)                      │
+└─────────────────────────────────────────────┘
+5. DÍVIDA TÉCNICA
+Item	Severidade	Descrição
+AuthProvider.jsx usa localStorage para token	ALTA	AI_RULES proíbe - deveria usar HttpOnly Cookie
+PortalLoginPage não usa SVG inline	MÉDIA	Depende de assets externos
+Componentes Portal sem tipagem TS	MÉDIA	Types separados mas não integrados
+JS to TS migration incompleta	MÉDIA	67 arquivos JSX remanescentes
+Alias @/ sem tsconfig paths	BAIXA	Vite resolve mas TS strict falha
+Rotas contexto não alinhadas	BAIXA	Precisa /contexto para módulos operacionais
+6. RISCOS
+Login não canônico - AuthProvider.jsx persiste token em localStorage (AI_RULES §4)
+Rotas conflituosas - PortalRoutes e AppOperacional com lógicas divergentes
+JSX legado - Migração parcial pode causar inconsistência de tipos
+Branding incompleto - Falta integração com /api/entidade no backend
+Contexto duplicado - AuthProvider.contexto e ContextContext com responsabilidades sobrepostas
+Assets externos - Login depende de /assets/img/* não documentados
+PortalHome.tsx removido - Referência em AppOperacional pode quebrar
+
