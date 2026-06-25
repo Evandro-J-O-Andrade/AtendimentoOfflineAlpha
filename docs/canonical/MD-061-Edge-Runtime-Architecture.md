@@ -140,41 +140,90 @@ Re-auth obrigatório após grace period
 ## Runtime Components
 
 ### Local Cache Engine
-
-```text
-IndexedDB / SQLite (primary)
-Memory cache (hot data)
-Cache strategies:
-  - Cache First (dados estáticos)
-  - Network First (dados dinâmicos)
-  - Stale While Revalidate (dados frequentes)
-```
-
 ### Local Queue Engine
-
-```text
-FIFO queue por prioridade
-Persistente em IndexedDB / SQLite
-Max size configurável
-Priority levels:
-  - CRITICAL: auth, segurança
-  - HIGH: transações, financeiro
-  - MEDIUM: operacional
-  - LOW: analytics, social
-```
-
 ### Local SP Engine
+### Sync Engine Core
+
+---
+
+## Integration with Display Management
+
+### Display Runtime Mode
+Dispositivos kiosk/TV/Totem possuem runtime otimizado:
 
 ```text
-SP subset executável offline
-Validação de regras locais
-Transformação de dados
-Agregações locais
-Filtros e buscas locais
-Formatação e validação
+Always-on mode
+Local cache prioritized  
+Scheduled sync (periodic)
+Minimal UI
+Remote management
 ```
 
-### Sync Engine Core
+### Display Event Consumption
+Displays consomem eventos do Event Store:
+
+```text
+SenhaChamada
+ExameLiberado
+PacientePrioritario
+AlertaCritico
+Notificacao
+```
+
+### Offline Display Behavior
+Quando offline:
+
+```text
+Exibir última atualização
+Mostrar "Desconectado"
+Continuar exibindo filas locais
+Persistir eventos localmente
+Sync automático ao reconectar
+```
+
+---
+
+## SP-First Integration for Offline
+
+### SPs Offline Executáveis
+Stored Procedures que podem executar offline:
+
+```text
+sp_senha_criar
+sp_senha_chamar
+sp_fila_consultar
+sp_paciente_consultar
+sp_dashboard_load
+```
+
+### SPs Online-Only
+Stored Procedures que exigem conexão:
+
+```text
+sp_auth_login
+sp_integration_sync
+sp_ai_request
+sp_media_upload
+```
+
+### SP Wrapper Pattern
+Offline actions seguem:
+
+```text
+User Action
+↓
+Local Validation
+↓
+SP Local Engine
+↓
+Generate Event
+↓
+Add to Queue
+↓
+Optimistic UI Update
+↓
+Background Sync
+```
 
 ```text
 Change detection

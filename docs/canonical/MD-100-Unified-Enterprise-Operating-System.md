@@ -387,34 +387,30 @@ Usuários são responsáveis por:
 
 ## Próximos Ciclos (Pós MD-100)
 
-### Ciclo 1 — Validação (MD-101 a MD-110)
+### Ciclo 1 — Freeze Arquitetural 2.0 (MD-123 a MD-142)
+Formalização conceitual dos blocos emergidos.
 
 ```text
-MD-101 — Arquitetura de Referência
-MD-102 — Ciclo de Vida do MD
-MD-103 — Governança de Documentação
-MD-104 — Política de Deprecation
-MD-105 — Padrões de Código
-MD-106 — Padrões de API
-MD-107 — Padrões de Eventos
-MD-108 — Padrões de Stored Procedures
-MD-109 — Guia de Onboarding (Tenant)
-MD-110 — Guia de Onboarding (Dev)
-```
-
-### Ciclo 2 — Expansão (MD-111 a MD-120)
-
-```text
-MD-111 — IoT & Edge Devices
-MD-112 — Blockchain & Auditabilidade
-MD-113 — Sustainability & Green IT
-MD-114 — Metaverse & Spatial Computing
-MD-115 — AGI Readiness
-MD-116 — Planet Scale Architecture
-MD-117 — Quantum-Safe Cryptography
-MD-118 — Ambient Computing
-MD-119 — Synthetic Data Generation
-MD-120 — Digital Sovereignty
+MD-123 — Portal Canonical Experience
+MD-124 — Context First Architecture
+MD-125 — Enterprise Display Architecture
+MD-126 — Display Authentication Architecture
+MD-127 — Display Management Domain
+MD-128 — Display Profiles and Categories
+MD-129 — Public Communication Panels
+MD-130 — Clinical Panels Architecture
+MD-131 — Management Panels Architecture
+MD-132 — Operational Communication Center
+MD-133 — Speech and TTS Architecture
+MD-134 — Display Event Distribution Engine
+MD-135 — Enterprise Analytics Architecture
+MD-136 — Event Driven Enterprise
+MD-137 — Clinical Audit Architecture
+MD-138 — Immutable Clinical Records
+MD-139 — Clinical Retification and Revocation Model
+MD-140 — Healthcare Operational Flow
+MD-141 — Healthcare Execution Domains
+MD-142 — Unified Enterprise Operating System
 ```
 
 ---

@@ -21,6 +21,132 @@ Definir a arquitetura oficial de identidade, autenticação, autorização e con
 
 ---
 
+## Leis Canônicas Globais Aplicáveis
+
+### LC-001 — Portal é a Entrada Oficial
+```text
+Portal é a entrada oficial da plataforma.
+Fluxo: Login → Portal → Container/App → Contexto Operacional → Dashboard → Operação
+```
+
+### LC-002 — Identity ≠ Operational Context
+```text
+Identity responde: Quem é você?
+Contexto responde: Onde você está operando?
+```
+
+### LC-003 — Toda Operação Depende de Contexto Ativo
+```text
+Session → Context → Authorization → Operation
+```
+
+### LC-004 — JWT não é Fonte da Verdade
+```text
+JWT é mecanismo de transporte.
+Fonte da Verdade: Database + Session Store
+Estratégia: HttpOnly Cookie
+Proibido: localStorage, sessionStorage
+```
+
+### LC-005 — SP First Architecture
+```text
+Frontend → API → Service → Dispatcher → Stored Procedure → Database
+Nunca CRUD direto.
+```
+
+### LC-006 — Tenant First
+```text
+Toda operação executa dentro de tenant.
+Tenant é fronteira máxima de dados.
+```
+
+### LC-007 — LGPD First
+```text
+Toda entidade deve possuir:
+Finalidade, Consentimento, Retenção, Auditoria, Anonimização
+```
+
+### LC-008 — Audit First
+```text
+Toda ação crítica gera evento e auditoria.
+Toda operação é rastreável.
+```
+
+### LC-009 — IA é Transversal
+```text
+AI Core atravessa toda plataforma.
+Portal AI, HIS AI, CRM AI, RH AI, Finance AI, Analytics AI, Workflow AI.
+IA não é módulo isolado.
+```
+
+### LC-010 — Dispatcher Layer é Obrigatório
+```text
+Controller → Application Service → Dispatcher → Stored Procedure → Database
+Dispatcher orquestra, SP executa.
+```
+
+### LC-011 — Dashboard por Domínio
+```text
+HIS: Dashboard Assistencial
+CRM: Dashboard Comercial
+RH: Dashboard Pessoas
+Financeiro: Dashboard Financeiro
+Farmácia: Dashboard Farmacêutico
+Analytics: Dashboard Executivo
+```
+
+### LC-012 — Senha é Núcleo Operacional
+```text
+Senha é o núcleo operacional assistencial.
+Fluxo: Senha → Fila → FFA → Atendimento → Execução → Farmácia → Faturamento
+```
+
+### LC-013 — Application Registry é Obrigatório
+```text
+Nenhum módulo existe sem registro.
+Registro mínimo: ID, Nome, Domínio, Permissões, Rotas, Versão, Owner
+Portal não conhece apps diretamente.
+Sempre via Registry.
+```
+
+### LC-014 — Portal = Hub Corporativo
+```text
+Portal não é dashboard.
+Portal não é intranet.
+Portal é o orquestrador da experiência.
+Portal consolida: Intranet, Chat, AVA, Analytics, Documentos, CRM, HIS, RH
+```
+
+### LC-015 — Intranet é Aplicação
+```text
+Intranet = Aplicação
+Chat = Aplicação
+AVA = Aplicação
+HIS = Aplicação
+CRM = Aplicação
+RH = Aplicação
+Financeiro = Aplicação
+```
+
+### LC-016 — AI Command Center
+```text
+Governando prompts, agentes, custos, tokens, modelos, execuções, treinamentos, knowledge base.
+```
+
+### LC-017 — Cada Domínio Possui Dashboard
+```text
+Todo domínio possui dashboard próprio.
+Dashboard é entrada do domínio.
+```
+
+### LC-018 — Context Architecture Layer
+```text
+Identity Layer → Portal Layer → Application Layer → Operational Context Layer → Domain Dashboard Layer → Operational Layer
+Contexto não acontece antes do Portal.
+```
+
+---
+
 ## Entidades Canônicas
 
 ### User

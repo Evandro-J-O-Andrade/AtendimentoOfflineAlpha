@@ -79,6 +79,50 @@ Operação
 
 ---
 
+## Leis Canônicas Globais Aplicáveis
+
+### LC-001 — Portal é a Entrada Oficial
+```text
+Portal é a entrada oficial da plataforma.
+```
+
+### LC-004 — JWT não é Fonte da Verdade
+```text
+JWT é mecanismo de transporte via HttpOnly Cookie.
+Fonte da Verdade: Database + Session Store.
+Proibido: localStorage, sessionStorage.
+```
+
+### LC-005 — SP First Architecture
+```text
+Frontend → API → Service → Dispatcher → Stored Procedure → Database
+```
+
+### LC-006 — Tenant First
+```text
+Toda operação executa dentro de Tenant → Organização → Unidade → Setor → Local.
+```
+
+### LC-009 — IA é Transversal
+```text
+AI Core atravessa toda plataforma.
+Portal AI, HIS AI, CRM AI, RH AI, Finance AI, Analytics AI, Workflow AI.
+```
+
+### LC-013 — Application Registry é Obrigatório
+```text
+Nenhum módulo existe sem registro.
+Portal → Registry → App → Contexto → Dashboard
+```
+
+### LC-014 — Portal = Hub Corporativo
+```text
+Portal consolida: Intranet, Chat, AVA, Analytics, Documentos, CRM, HIS, RH.
+Portal orquestra, não executa operações.
+```
+
+---
+
 ## Portal
 
 ### Responsabilidades

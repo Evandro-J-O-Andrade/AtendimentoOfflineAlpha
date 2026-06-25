@@ -49,6 +49,59 @@ Portal orquestra experiências.
 
 ---
 
+## Leis Canônicas Globais Aplicáveis
+
+### LC-002 — Identity ≠ Operational Context
+```text
+Login responde: Quem é você?
+Contexto responde: Onde você está operando?
+```
+
+### LC-009 — IA é Transversal
+```text
+AI Core atravessa toda plataforma.
+Portal AI: Assistente Corporativo
+HIS AI: Assistente Clínico
+CRM AI: Assistente Comercial
+RH AI: Assistente de Pessoas
+Finance AI: Assistente Financeiro
+Analytics AI: Assistente Executivo
+Workflow AI: Assistente de Processos
+```
+
+### LC-014 — Portal = Hub Corporativo
+```text
+Portal é o Digital Workplace Enterprise.
+Portal não é dashboard.
+Portal não é intranet.
+Portal é o orquestrador da experiência.
+```
+
+### LC-015 — Intranet é Aplicação
+```text
+Intranet = Aplicação
+Chat = Aplicação
+AVA = Aplicação
+HIS = Aplicação
+CRM = Aplicação
+RH = Aplicação
+Financeiro = Aplicação
+```
+
+### LC-016 — AI Command Center
+```text
+Governando:
+Prompts, Agentes, Custos, Tokens, Modelos, Execuções, Treinamentos, Knowledge Base
+```
+
+### LC-008 — Audit First
+```text
+Toda ação crítica gera evento.
+Login, Logout, MFA, Troca de senha, Revogação, Contexto alterado.
+```
+
+---
+
 ## Posicionamento Arquitetural
 ```text
 IAM

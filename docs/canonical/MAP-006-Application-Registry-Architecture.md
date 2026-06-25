@@ -29,6 +29,29 @@ Except apps externas.
 
 ---
 
+## Leis Canônicas Globais Aplicáveis
+
+### LC-013 — Application Registry é Obrigatório
+```text
+Nenhum módulo existe sem registro.
+Registro mínimo: ID, Nome, Domínio, Permissões, Rotas, Versão, Owner
+Portal não conhece apps diretamente.
+Sempre via Registry.
+```
+
+### LC-001 — Portal é a Entrada Oficial
+```text
+Login → Portal → Registry → App → Contexto → Dashboard → Operação
+```
+
+### LC-002 — Identity ≠ Operational Context
+```text
+Registry consome identidade de IAM.
+Contexto é escolhido após entrar no app.
+```
+
+---
+
 ## Entidades
 
 ### App

@@ -388,10 +388,166 @@ Tenant é ilha.
 Plataforma é oceano.
 
 E a lei é uma só:
-  Nada existe fora do Banco.
-  Nada existe fora do Contexto.
-  Nada existe fora do Evento.
-  Nada existe fora da Lei Canônica.
+   Nada existe fora do Banco.
+   Nada existe fora do Contexto.
+   Nada existe fora do Evento.
+   Nada existe fora da Lei Canônica.
+   Nada existe fora da Pessoa Raiz.
+```
+
+---
+
+## Leis Canônicas Party Identity
+
+### LC-PER-001 — Pessoa é Raiz
+```text
+Pessoa é a entidade raiz da plataforma Midas.
+```
+
+### LC-PER-002 — Papéis são Projeções
+```text
+Identidade pertence à Pessoa, não ao Tenant.
+```
+
+### LC-PER-003 — Multi-Tenant Party
+```text
+Uma Pessoa pode existir em múltiplos Tenants simultaneamente.
+```
+
+### LC-PER-004 — Dados Pertencem ao Tenant
+```text
+Dados assistenciais pertencem ao Tenant onde ocorreram.
+```
+
+### LC-PER-005 — Contexto Define Visibilidade
+```text
+Contexto é o filtro de isolamento de dados.
+```
+
+---
+
+## Leis Canônicas Patient Experience
+
+### LC-PX-010 — Portal Único
+```text
+Pacientes entram pelo Portal Enterprise.
+Nunca diretamente no HIS.
+```
+
+### LC-PX-011 — Acesso Direto
+```text
+1 contexto = dashboard direto.
+
+N contextos = seleção.
+```
+
+---
+
+## Leis Canônicas Platform Resilience
+
+### LC-RES-001 — Operação Contínua
+```text
+Nenhuma falha técnica interrompe o fluxo assistencial.
+```
+
+---
+
+## Leis Canônicas AI Core
+
+### LC-AI-001 — Sugerir, Não Decidir
+```text
+IA sugere. Usuário decide.
+```
+
+---
+
+## Leis Canônicas Database Architecture
+
+### LC-DB-001 — SP como Porta Oficial de Escrita
+```text
+Nenhuma escrita direta em tabelas de negócio.
+Toda operação relevante passa por Stored Procedure.
+```
+
+### LC-DB-002 — Triggers Proibidas para Lógica
+```text
+Triggers são proibidas para lógica de negócio.
+Triggers podem existir somente para:
+- Auditoria técnica
+- Integração database-level
+- Performance (índices, particionamento)
+```
+
+### LC-DB-003 — Eventos vs Triggers
+```text
+Triggers ocultam lógica.
+SPs + Eventos tornam todo fluxo explícito.
+```
+
+### LC-DB-004 — Functions são para Cálculo
+```text
+Functions servem para cálculos.
+Exemplo: idade(), tempo_espera(), score()
+```
+
+### LC-DB-005 — Views são para Leitura
+```text
+Views servem para leitura.
+Exemplo: vw_painel_fila, vw_dashboard_urgencia
+```
+
+### LC-DB-006 — História Não Morre
+```text
+Nenhuma deleção física.
+Cancelamento = novo evento.
+Remoção = status inativo.
+Histórico = fonte da verdade.
+```
+
+### LC-DB-007 — Correção via Evento
+```text
+Correção, não apagar.
+Retificação, não sobrescrever.
+Cancelamento, não DELETE.
+Substituição, não UPDATE.
+```
+
+---
+
+## Leis Canônicas Portal Experience
+
+### LC-PORTAL-001 — Portal como Launcher
+```text
+Portal é launcher de aplicações, não aplicação de negócio.
+```
+
+### LC-PORTAL-002 — Windows-8 Style Layout
+```text
+Portal usa tiles/containers como Windows-8.
+Cada container representa um domínio ou capability.
+```
+
+### LC-PORTAL-003 — Display como Container
+```text
+Dispositivos (TV, Totem, Kiosk, Monitor) são containers gerenciáveis no Portal.
+```
+
+### LC-PORTAL-004 — Live Tiles
+```text
+Containers mostram dados dinâmicos.
+Exemplo: Senhas aguardando, Displays online, KPIs.
+```
+
+### LC-PORTAL-005 — Portal vs App Separation
+```text
+Portal ≠ App. App possui sua própria experiência.
+Portal é entry point. App é operação.
+```
+
+### LC-PORTAL-006 — Portal Foca em Domínios
+```text
+Portal mostra domínios (Assistencial, Estoque, Displays).
+Não mostra funções técnicas (botões).
 ```
 
 ---
