@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_possui_acesso_setor",
+  "type": "PROCEDURE",
+  "startLine": 33274,
+  "endLine": 33288,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_possui_acesso_setor`(\n    IN p_id_usuario BIGINT,\n    IN p_id_setor INT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    SELECT 1\n    FROM usuario_setor\n    WHERE id_usuario = p_id_usuario\n    AND id_setor = p_id_setor\n    AND pode_operar = TRUE\n    LIMIT 1;\n\nEND ;;"
+}

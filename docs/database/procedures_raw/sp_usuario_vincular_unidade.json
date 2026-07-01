@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_vincular_unidade",
+  "type": "PROCEDURE",
+  "startLine": 33620,
+  "endLine": 33638,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_vincular_unidade`(\n    IN p_id_usuario BIGINT,\n    IN p_id_unidade BIGINT\n)\nBEGIN\n    INSERT INTO usuario_unidade (\n        id_usuario,\n        id_unidade,\n        ativo,\n        criado_em\n    ) VALUES (\n        p_id_usuario,\n        p_id_unidade,\n        1,\n        NOW()\n    )\n    ON DUPLICATE KEY UPDATE\n        ativo = 1;\nEND ;;"
+}

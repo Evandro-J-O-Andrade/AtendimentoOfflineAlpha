@@ -1,0 +1,7 @@
+{
+  "name": "sp_executor_assistencial_triagem_finalizar",
+  "type": "PROCEDURE",
+  "startLine": 20071,
+  "endLine": 20102,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_assistencial_triagem_finalizar`(\n    IN p_id_sessao BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_id_ffa BIGINT,\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    INSERT INTO triagem (\n        id_ffa,\n        temperatura,\n        pressao,\n        criado_em\n    ) VALUES (\n        p_id_ffa,\n        JSON_EXTRACT(p_payload, '$.temperatura'),\n        JSON_EXTRACT(p_payload, '$.pressao'),\n        NOW(6)\n    );\n\n    UPDATE ffa\n    SET contexto_fluxo = 'AGUARDANDO_ATENDIMENTO',\n        atualizado_em = NOW(6)\n    WHERE id_ffa = p_id_ffa;\n\n    SELECT JSON_OBJECT(\n        'status','SUCCESS',\n        'estado','AGUARDANDO_ATENDIMENTO'\n    ) AS result;\n\nEND ;;"
+}

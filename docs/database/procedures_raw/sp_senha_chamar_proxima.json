@@ -1,0 +1,7 @@
+{
+  "name": "sp_senha_chamar_proxima",
+  "type": "PROCEDURE",
+  "startLine": 31502,
+  "endLine": 31542,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_senha_chamar_proxima`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_local_operacional BIGINT\n)\n    SQL SECURITY INVOKER\nmain: BEGIN\n\n    DECLARE v_id_senha BIGINT;\n    DECLARE v_id_usuario BIGINT;\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    SELECT id_usuario \n    INTO v_id_usuario\n    FROM sessao_usuario \n    WHERE id_sessao_usuario = p_id_sessao_usuario;\n\n    START TRANSACTION;\n\n    SELECT id \n    INTO v_id_senha \n    FROM senha \n    WHERE status = 'EMITIDA'\n      AND id_local_operacional = p_id_local_operacional\n    ORDER BY prioridade DESC, criada_em ASC\n    LIMIT 1\n    FOR UPDATE;\n\n    IF v_id_senha IS NOT NULL THEN\n        UPDATE senha \n        SET status = 'CHAMANDO',\n            id_usuario_chamada = v_id_usuario,\n            chamada_em = NOW()\n        WHERE id = v_id_senha;\n\n        SELECT * FROM senha WHERE id = v_id_senha;\n    END IF;\n\n    COMMIT;\n\nEND ;;"
+}

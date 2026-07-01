@@ -1,0 +1,7 @@
+{
+  "name": "sp_validar_transicao_fluxo",
+  "type": "PROCEDURE",
+  "startLine": 33654,
+  "endLine": 33677,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_validar_transicao_fluxo`(\n    IN p_fluxo_origem BIGINT,\n    IN p_fluxo_destino BIGINT,\n    IN p_acao VARCHAR(60)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_count INT;\n\n    SELECT COUNT(*)\n    INTO v_count\n    FROM fluxo_transicao_matriz\n    WHERE fluxo_origem = p_fluxo_origem\n      AND fluxo_destino = p_fluxo_destino\n      AND acao_permitida = p_acao\n      AND ativo = TRUE;\n\n    IF v_count = 0 THEN\n        SIGNAL SQLSTATE '45000'\n        SET MESSAGE_TEXT = 'Transicao nao permitida pela matriz deterministica';\n    END IF;\n\nEND ;;"
+}

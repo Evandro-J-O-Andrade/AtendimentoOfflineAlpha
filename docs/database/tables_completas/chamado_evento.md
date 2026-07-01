@@ -1,0 +1,38 @@
+# chamado_evento
+
+Objetivo: (Documentar)
+
+Descricao: (Documentar)
+
+## Colunas
+
+| Coluna | Tipo | Nullable | Default | Funcao |
+|---------|------|----------|---------|--------|
+| id_chamado_evento | bigint | NOT NULL | - | (Documentar) |
+| id_chamado | bigint | NOT NULL | - | (Documentar) |
+| evento | varchar(80) | NOT NULL | - | (Documentar) |
+| detalhe | text | YES | - | (Documentar) |
+| id_usuario | bigint | YES | - | (Documentar) |
+| criado_em | datetime | YES | - | (Documentar) |
+| id_entidade | bigint | NOT NULL | - | (Documentar) |
+
+## Chaves
+
+- Primaria: (Documentar)
+- Estrangeira: id_chamado -> chamado.id_chamado
+- Estrangeira: id_usuario -> usuario.id_usuario
+
+## Indices
+
+- PRIMARY KEY (id_chamado_evento)
+- KEY (id_chamado)
+- KEY (id_usuario)
+
+## Dependencias
+
+- (Documentar)
+
+## Fluxo
+
+- (Documentar)
+

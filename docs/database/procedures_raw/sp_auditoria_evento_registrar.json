@@ -1,0 +1,7 @@
+{
+  "name": "sp_auditoria_evento_registrar",
+  "type": "PROCEDURE",
+  "startLine": 17306,
+  "endLine": 17334,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auditoria_evento_registrar`(\n    IN p_id_sessao_usuario  BIGINT,\n    IN p_entidade           VARCHAR(80),\n    IN p_id_entidade        BIGINT,\n    IN p_acao               VARCHAR(80),\n    IN p_detalhe            TEXT,\n    IN p_id_usuario_exec    BIGINT,     -- opcional (se NULL e houver sessão, será inferido)\n    IN p_tabela             VARCHAR(50),\n    IN p_id_usuario_espelho BIGINT      -- opcional\n)\nBEGIN\n    DECLARE v_id_usuario BIGINT DEFAULT NULL;\n\n    IF p_id_usuario_exec IS NOT NULL THEN\n        SET v_id_usuario = p_id_usuario_exec;\n    ELSEIF p_id_sessao_usuario IS NOT NULL THEN\n        SELECT su.id_usuario\n          INTO v_id_usuario\n          FROM sessao_usuario su\n         WHERE su.id_sessao_usuario = p_id_sessao_usuario\n         LIMIT 1;\n    END IF;\n\n    INSERT INTO auditoria_evento\n        (id_sessao_usuario, entidade, id_entidade, acao, detalhe, id_usuario, tabela, id_usuario_espelho)\n    VALUES\n        (p_id_sessao_usuario, p_entidade, p_id_entidade, p_acao, p_detalhe, v_id_usuario, p_tabela,\n         COALESCE(p_id_usuario_espelho, v_id_usuario));\nEND ;;"
+}

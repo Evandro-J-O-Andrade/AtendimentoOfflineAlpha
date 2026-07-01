@@ -1,0 +1,7 @@
+{
+  "name": "sp_sessao_tem_permissao",
+  "type": "PROCEDURE",
+  "startLine": 32323,
+  "endLine": 32339,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_sessao_tem_permissao`(\n    IN  p_id_sessao_usuario BIGINT,\n    IN  p_permissao         VARCHAR(100),\n    OUT p_ok                TINYINT\n)\nBEGIN\n    DECLARE v_id_usuario BIGINT;\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    SELECT su.id_usuario\n      INTO v_id_usuario\n      FROM sessao_usuario su\n     WHERE su.id_sessao_usuario = p_id_sessao_usuario;\n\n    CALL sp_usuario_tem_permissao(v_id_usuario, p_permissao, p_ok);\nEND ;;"
+}

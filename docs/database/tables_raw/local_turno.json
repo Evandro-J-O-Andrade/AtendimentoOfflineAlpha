@@ -1,0 +1,4 @@
+{
+  "name": "local_turno",
+  "block": "/*!50503 SET character_set_client = utf8mb4 */;\nCREATE TABLE `local_turno` (\n  `id_local_turno` bigint NOT NULL AUTO_INCREMENT,\n  `id_local` bigint NOT NULL,\n  `turno` varchar(40) DEFAULT NULL,\n  `inicio` time DEFAULT NULL,\n  `fim` time DEFAULT NULL,\n  `ativo` tinyint DEFAULT '1',\n  `id_entidade` bigint unsigned NOT NULL,\n  PRIMARY KEY (`id_local_turno`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n/*!40101 SET character_set_client = @saved_cs_client */;\n\n--\n-- Dumping data for table `local_turno`\n--\n\nLOCK TABLES `local_turno` WRITE;\n/*!40000 ALTER TABLE `local_turno` DISABLE KEYS */;\n/*!40000 ALTER TABLE `local_turno` ENABLE KEYS */;\nUNLOCK TABLES;\n\n--\n-- Table structure for table `log_acesso_prontuario`\n--\n\nDROP TABLE IF EXISTS `log_acesso_prontuario`;\n/*!40101 SET @saved_cs_client     = @@character_set_client */;\n/*!50503 SET character_set_client = utf8mb4 */;"
+}

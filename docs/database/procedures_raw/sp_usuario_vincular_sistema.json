@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_vincular_sistema",
+  "type": "PROCEDURE",
+  "startLine": 33582,
+  "endLine": 33604,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_vincular_sistema`(\n    IN p_id_usuario BIGINT,\n    IN p_id_sistema BIGINT,\n    IN p_id_perfil BIGINT\n)\nBEGIN\n    INSERT INTO usuario_sistema (\n        id_usuario,\n        id_sistema,\n        id_perfil,\n        ativo,\n        criado_em\n    ) VALUES (\n        p_id_usuario,\n        p_id_sistema,\n        p_id_perfil,\n        1,\n        NOW()\n    )\n    ON DUPLICATE KEY UPDATE\n        id_perfil = VALUES(id_perfil),\n        ativo = 1;\nEND ;;"
+}

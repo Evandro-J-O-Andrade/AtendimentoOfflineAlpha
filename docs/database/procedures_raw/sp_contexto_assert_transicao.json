@@ -1,0 +1,7 @@
+{
+  "name": "sp_contexto_assert_transicao",
+  "type": "PROCEDURE",
+  "startLine": 18658,
+  "endLine": 18691,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_contexto_assert_transicao`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_estado_origem VARCHAR(50),\n    IN p_estado_destino VARCHAR(50)\n)\nBEGIN\n    DECLARE v_count INT;\n\n    SELECT COUNT(1)\n      INTO v_count\n      FROM sessao_usuario su\n      JOIN usuario_contexto uc\n        ON uc.id_usuario = su.id_usuario\n       AND uc.id_unidade = su.id_unidade\n       AND uc.id_sistema = su.id_sistema\n       AND uc.ativo = 1\n      JOIN fluxo_transicao_matriz ftm\n        ON ftm.perfil_requerido = uc.id_perfil\n       AND ftm.estado_origem = p_estado_origem\n       AND ftm.estado_destino = p_estado_destino\n       AND ftm.ativo = 1\n     WHERE su.id_sessao_usuario = p_id_sessao_usuario\n       AND su.ativa = 1;\n\n    CALL sp_assert_true(\n        v_count > 0,\n        'TRANSICAO_NAO_PERMITIDA',\n        CONCAT('Perfil não pode transicionar de ', \n               p_estado_origem, \n               ' para ', \n               p_estado_destino)\n    );\n\nEND ;;"
+}

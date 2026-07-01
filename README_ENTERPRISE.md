@@ -3,6 +3,8 @@
 > **Status:** README Enterprise Atual
 >
 > Fonte canônica oficial: `docs/canonical/`
+>
+> **IMPORTANTE PARA IAS:** Antes de qualquer tarefa, ler `000-CONSTITUICAO-IA.md` — Constituição das IAs do Projeto (SYSTEM PROMPT permanente)
 
 Este documento substitui a visão antiga de produto HIS/CMDPro como descrição principal da plataforma.
 

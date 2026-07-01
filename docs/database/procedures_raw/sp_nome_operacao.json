@@ -1,0 +1,7 @@
+{
+  "name": "sp_nome_operacao",
+  "type": "PROCEDURE",
+  "startLine": 28074,
+  "endLine": 28108,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_nome_operacao`(\n\n    IN p_id_sessao_usuario BIGINT,\n    IN p_payload JSON,\n\n    OUT p_sucesso BOOLEAN,\n    OUT p_mensagem TEXT,\n    OUT p_resultado JSON\n\n)\nproc: BEGIN\n\n    DECLARE v_id_usuario BIGINT;\n\n    -- validar sessão\n    SELECT id_usuario\n    INTO v_id_usuario\n    FROM sessao_usuario\n    WHERE id_sessao_usuario = p_id_sessao_usuario\n      AND ativo = 1\n    LIMIT 1;\n\n    IF v_id_usuario IS NULL THEN\n        SET p_sucesso = 0;\n        SET p_mensagem = 'Sessao invalida';\n        SET p_resultado = NULL;\n        LEAVE proc;\n    END IF;\n\n    -- exemplo de retorno\n    SET p_sucesso = 1;\n    SET p_mensagem = 'Operacao executada';\n    SET p_resultado = JSON_OBJECT('usuario', v_id_usuario);\n\nEND ;;"
+}

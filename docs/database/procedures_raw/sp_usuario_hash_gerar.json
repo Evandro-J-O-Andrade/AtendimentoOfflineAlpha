@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_hash_gerar",
+  "type": "PROCEDURE",
+  "startLine": 33112,
+  "endLine": 33153,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_hash_gerar`(\n    IN  p_senha VARCHAR(255),\n    IN  p_iter  INT,\n    OUT p_hash_composto VARCHAR(255)\n)\n    SQL SECURITY INVOKER\nproc: BEGIN\n    DECLARE i INT DEFAULT 1;\n    DECLARE v_iter INT;\n    DECLARE v_salt_hex CHAR(32);\n    DECLARE v_hash_hex CHAR(64);\n\n    -- validações\n    IF p_senha IS NULL OR LENGTH(p_senha) = 0 THEN\n        SET p_hash_composto = NULL;\n        LEAVE proc;\n    END IF;\n\n    -- mínimo de iterações (ajustável)\n    SET v_iter = IFNULL(p_iter, 12000);\n    IF v_iter < 12000 THEN\n        SET v_iter = 12000;\n    END IF;\n\n    -- salt 16 bytes -> 32 hex\n    SET v_salt_hex = HEX(RANDOM_BYTES(16));\n    IF v_salt_hex IS NULL OR LENGTH(v_salt_hex) <> 32 THEN\n        -- fallback determinístico em tamanho (UUID sem hífen)\n        SET v_salt_hex = REPLACE(UUID(), '-', '');\n    END IF;\n\n    -- primeiro round\n    SET v_hash_hex = SHA2(CONCAT(UNHEX(v_salt_hex), p_senha), 256);\n\n    -- rounds adicionais\n    WHILE i < v_iter DO\n        SET v_hash_hex = SHA2(CONCAT(UNHEX(v_hash_hex), UNHEX(v_salt_hex), p_senha), 256);\n        SET i = i + 1;\n    END WHILE;\n\n    SET p_hash_composto = CONCAT('SHA256I$', v_iter, '$', v_salt_hex, '$', v_hash_hex);\nEND ;;"
+}

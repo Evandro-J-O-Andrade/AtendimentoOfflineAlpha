@@ -1,0 +1,7 @@
+{
+  "name": "sp_executor_assistencial_runtime",
+  "type": "PROCEDURE",
+  "startLine": 20011,
+  "endLine": 20055,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_assistencial_runtime`(\n    IN p_id_sessao BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_id_referencia BIGINT,\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    IF UPPER(p_acao) = 'TRIAGEM_FINALIZAR' THEN\n\n        UPDATE ffa\n        SET contexto_fluxo = 'AGUARDANDO_ATENDIMENTO',\n            atualizado_em = NOW(6)\n        WHERE id_ffa = p_id_referencia;\n\n    ELSEIF UPPER(p_acao) = 'ATENDIMENTO_INICIAR' THEN\n\n        UPDATE ffa\n        SET contexto_fluxo = 'EM_ATENDIMENTO',\n            atualizado_em = NOW(6)\n        WHERE id_ffa = p_id_referencia;\n\n    ELSEIF UPPER(p_acao) = 'ATENDIMENTO_FINALIZAR' THEN\n\n        UPDATE ffa\n        SET contexto_fluxo = 'ALTA',\n            atualizado_em = NOW(6)\n        WHERE id_ffa = p_id_referencia;\n\n    ELSEIF UPPER(p_acao) = 'REGISTRAR_EVASAO' THEN\n\n        UPDATE ffa\n        SET contexto_fluxo = 'EVASAO',\n            atualizado_em = NOW(6)\n        WHERE id_ffa = p_id_referencia;\n\n    END IF;\n\n    SELECT JSON_OBJECT(\n        'status','SUCCESS',\n        'acao',p_acao\n    ) AS result;\n\nEND ;;"
+}

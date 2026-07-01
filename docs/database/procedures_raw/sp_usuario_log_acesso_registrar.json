@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_log_acesso_registrar",
+  "type": "PROCEDURE",
+  "startLine": 33236,
+  "endLine": 33258,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_log_acesso_registrar`(\n    IN p_id_usuario BIGINT,\n    IN p_id_entidade BIGINT,\n    IN p_ip VARCHAR(45),\n    IN p_user_agent VARCHAR(255),\n    IN p_sucesso TINYINT(1)\n)\nBEGIN\n    INSERT INTO usuario_log_acesso(\n        id_usuario,\n        id_entidade,\n        ip,\n        user_agent,\n        sucesso\n    )\n    VALUES(\n        p_id_usuario,\n        p_id_entidade,\n        p_ip,\n        p_user_agent,\n        p_sucesso\n    );\nEND ;;"
+}

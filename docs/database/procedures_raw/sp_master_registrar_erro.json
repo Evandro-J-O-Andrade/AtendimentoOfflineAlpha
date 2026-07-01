@@ -1,0 +1,7 @@
+{
+  "name": "sp_master_registrar_erro",
+  "type": "PROCEDURE",
+  "startLine": 26569,
+  "endLine": 26619,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_registrar_erro`(\n    IN p_id_sessao BIGINT,\n    IN p_id_erro_catalogo BIGINT,\n    IN p_dominio VARCHAR(50),\n    IN p_acao VARCHAR(100),\n    IN p_mensagem_erro TEXT,\n    IN p_stack_trace JSON,\n    IN p_payload_tentativa JSON,\n    IN p_uuid_transacao CHAR(36)\n)\n    SQL SECURITY INVOKER\nmain: BEGIN\n    DECLARE v_id_erro BIGINT;\n\n    -- 1️⃣ Idempotência: verifica se já existe o registro com esse UUID\n    IF p_uuid_transacao IS NOT NULL THEN\n        SELECT id_erro INTO v_id_erro\n        FROM erro_evento\n        WHERE uuid_transacao = p_uuid_transacao\n        LIMIT 1;\n\n        IF v_id_erro IS NOT NULL THEN\n            -- Já existe, sai sem inserir\n            LEAVE main;\n        END IF;\n    END IF;\n\n    -- 2️⃣ Inserção do evento de erro\n    INSERT INTO erro_evento (\n        id_sessao_usuario,\n        id_erro_catalogo,\n        dominio,\n        acao,\n        mensagem_erro,\n        stack_trace,\n        payload_tentativa,\n        uuid_transacao,\n        criado_em\n    ) VALUES (\n        p_id_sessao,\n        p_id_erro_catalogo,\n        p_dominio,\n        p_acao,\n        p_mensagem_erro,\n        p_stack_trace,\n        p_payload_tentativa,\n        IFNULL(p_uuid_transacao, UUID()),\n        NOW(6)\n    );\n\nEND ;;"
+}

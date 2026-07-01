@@ -1,0 +1,10 @@
+{
+  "generated": "2026-07-01",
+  "type": "event-graph",
+  "description": "Grafos de eventos por domínio",
+  "domain_events": {
+    "HIS": ["senha_", "fila_", "ffa_", "atendimento_"],
+    "Core": ["pessoa_", "usuario_", "sessao_"],
+    "IAM": ["perfil_", "permissao_"]
+  }
+}

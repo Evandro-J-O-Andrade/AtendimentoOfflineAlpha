@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_admin_root_runtime",
+  "type": "PROCEDURE",
+  "startLine": 30968,
+  "endLine": 31024,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_admin_root_runtime`()\nBEGIN\n\n    DECLARE v_login VARCHAR(80) DEFAULT 'evandro.andrade';\n    DECLARE v_senha VARCHAR(255) DEFAULT '@An29070818';\n\n    -- Criar usuário root\n    INSERT IGNORE INTO usuario\n    (\n        login,\n        senha_hash,\n        ativo,\n        criado_em\n    )\n    VALUES\n    (\n        v_login,\n        SHA2(v_senha,256),\n        1,\n        NOW(6)\n    );\n\n    -- Criar perfil root global\n    INSERT IGNORE INTO perfil\n    (\n        nome,\n        ativo,\n        criado_em\n    )\n    VALUES\n    (\n        'ROOT_ADMIN',\n        1,\n        NOW(6)\n    );\n\n    -- Vincular usuário ao perfil root\n    INSERT IGNORE INTO usuario_sistema\n    (\n        id_usuario,\n        id_sistema,\n        id_perfil,\n        ativo,\n        data_vinculo\n    )\n    SELECT\n        u.id_usuario,\n        1,\n        p.id_perfil,\n        1,\n        NOW(6)\n    FROM usuario u\n    CROSS JOIN perfil p\n    WHERE u.login = v_login\n    AND p.nome = 'ROOT_ADMIN';\n\nEND ;;"
+}

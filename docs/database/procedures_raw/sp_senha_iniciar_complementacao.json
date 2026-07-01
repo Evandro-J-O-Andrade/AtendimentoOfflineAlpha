@@ -1,0 +1,7 @@
+{
+  "name": "sp_senha_iniciar_complementacao",
+  "type": "PROCEDURE",
+  "startLine": 31699,
+  "endLine": 31721,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_senha_iniciar_complementacao`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_id_usuario BIGINT;\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    SELECT id_usuario\n    INTO v_id_usuario\n    FROM sessao_usuario\n    WHERE id_sessao_usuario = p_id_sessao_usuario;\n\n    UPDATE senha \n    SET status = 'EM_ATENDIMENTO',\n        id_usuario_operador = v_id_usuario,\n        inicio_atendimento_em = NOW()\n    WHERE id = p_id_senha;\n\nEND ;;"
+}

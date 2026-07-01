@@ -1,0 +1,7 @@
+{
+  "name": "sp_senha_finalizar",
+  "type": "PROCEDURE",
+  "startLine": 31669,
+  "endLine": 31683,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_senha_finalizar`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    UPDATE senha\n    SET status = 'FINALIZADA',\n        finalizada_em = NOW(6)\n    WHERE id = p_id_senha;\n\nEND ;;"
+}

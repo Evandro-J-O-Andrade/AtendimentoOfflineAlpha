@@ -1,0 +1,7 @@
+{
+  "name": "fn_runtime_chain_fingerprint",
+  "type": "FUNCTION",
+  "startLine": 16609,
+  "endLine": 16628,
+  "text": "CREATE DEFINER=`root`@`localhost` FUNCTION `fn_runtime_chain_fingerprint`(\n    p_id_tenant BIGINT,\n    p_id_usuario BIGINT,\n    p_id_sessao BIGINT,\n    p_id_dispositivo BIGINT,\n    p_estado VARCHAR(60)\n) RETURNS char(64) CHARSET utf8mb4\n    DETERMINISTIC\nRETURN SHA2(\n    CONCAT(\n        IFNULL(p_id_tenant,''),\n        '|',\n        IFNULL(p_id_usuario,''),\n        '|',\n        IFNULL(p_id_sessao,''),\n        '|',\n        IFNULL(p_id_dispositivo,''),\n        '|',\n        IFNULL(p_estado,'')\n    ),256) ;;"
+}

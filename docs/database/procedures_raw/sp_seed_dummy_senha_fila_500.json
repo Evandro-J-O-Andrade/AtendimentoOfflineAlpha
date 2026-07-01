@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_dummy_senha_fila_500",
+  "type": "PROCEDURE",
+  "startLine": 31176,
+  "endLine": 31210,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_dummy_senha_fila_500`()\nBEGIN\n\n    DECLARE v_i INT DEFAULT 1;\n\n    START TRANSACTION;\n\n    WHILE v_i <= 500 DO\n\n        INSERT INTO senha\n        (\n            numero,\n            prefixo,\n            status,\n            ativo,\n            criado_em\n        )\n        VALUES\n        (\n            v_i,\n            'TMP',\n            'AGUARDANDO',\n            1,\n            NOW(6)\n        )\n        ON DUPLICATE KEY UPDATE\n            numero = VALUES(numero);\n\n        SET v_i = v_i + 1;\n\n    END WHILE;\n\n    COMMIT;\n\nEND ;;"
+}

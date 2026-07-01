@@ -1,0 +1,7 @@
+{
+  "name": "sp_recepcao_complementar_e_abrir_ffa",
+  "type": "PROCEDURE",
+  "startLine": 29936,
+  "endLine": 29980,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_recepcao_complementar_e_abrir_ffa`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT,\n    IN p_id_paciente BIGINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n    DECLARE v_id_ffa BIGINT;\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    START TRANSACTION;\n\n    INSERT INTO atendimento_ffa (\n        id_paciente,\n        id_sessao_abertura,\n        criado_em\n    )\n    VALUES (\n        p_id_paciente,\n        p_id_sessao_usuario,\n        NOW()\n    );\n\n    SET v_id_ffa = LAST_INSERT_ID();\n\n    UPDATE senha\n    SET id_ffa = v_id_ffa,\n        status = 'CONCLUIDA',\n        finalizada_em = NOW()\n    WHERE id = p_id_senha;\n\n    INSERT INTO atendimento_estado_ativo (\n        id_ffa,\n        estado_atual,\n        atualizado_em\n    )\n    VALUES (\n        v_id_ffa,\n        'AGUARDANDO_TRIAGEM',\n        NOW()\n    );\n\n    COMMIT;\nEND ;;"
+}

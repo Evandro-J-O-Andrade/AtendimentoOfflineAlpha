@@ -1,0 +1,7 @@
+{
+  "name": "sp_senha_emitir",
+  "type": "PROCEDURE",
+  "startLine": 31612,
+  "endLine": 31653,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_senha_emitir`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_tipo_atendimento  VARCHAR(20),\n    IN p_origem            VARCHAR(20)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_id_usuario BIGINT;\n    DECLARE v_id_unidade BIGINT;\n    DECLARE v_id_local   BIGINT;\n\n    -- 1️⃣ Validar sessão (lei do core)\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    -- 2️⃣ Obter contexto\n    SELECT id_usuario, id_unidade, id_local\n    INTO v_id_usuario, v_id_unidade, v_id_local\n    FROM sessao_usuario\n    WHERE id_sessao_usuario = p_id_sessao_usuario;\n\n    -- 3️⃣ Inserir na entidade fundadora\n    INSERT INTO senha (\n        codigo,\n        tipo_atendimento,\n        origem,\n        id_unidade,\n        id_local_operacional,\n        status,\n        criado_em\n    )\n    VALUES (\n        NULL,\n        p_tipo_atendimento,\n        p_origem,\n        v_id_unidade,\n        v_id_local,\n        'AGUARDANDO',\n        NOW(6)\n    );\n\nEND ;;"
+}

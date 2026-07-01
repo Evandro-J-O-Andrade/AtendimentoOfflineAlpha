@@ -1,0 +1,7 @@
+{
+  "name": "sp_ledger_evento_log",
+  "type": "PROCEDURE",
+  "startLine": 23421,
+  "endLine": 23442,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ledger_evento_log`(\n    IN p_uuid_transacao CHAR(36),\n    IN p_id_usuario BIGINT,\n    IN p_id_perfil BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_estado_origem VARCHAR(50),\n    IN p_estado_destino VARCHAR(50),\n    IN p_payload JSON,\n    IN p_status VARCHAR(20),\n    IN p_mensagem VARCHAR(500)\n)\nBEGIN\n    INSERT INTO atendimento_evento_ledger (\n        uuid_transacao, id_usuario, id_perfil, acao,\n        estado_origem, estado_destino, payload,\n        status_evento, mensagem, created_at\n    ) VALUES (\n        p_uuid_transacao, p_id_usuario, p_id_perfil, p_acao,\n        p_estado_origem, p_estado_destino, p_payload,\n        p_status, p_mensagem, NOW(6)\n    );\nEND ;;"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_runtime_escudo_total",
+  "type": "PROCEDURE",
+  "startLine": 30678,
+  "endLine": 30716,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_runtime_escudo_total`(\n    IN p_runtime_device_id VARCHAR(100),\n    IN p_hash_snapshot CHAR(64)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_modo VARCHAR(50);\n\n    SELECT modo_operacao\n    INTO v_modo\n    FROM runtime_estado_sobrevivencia\n    WHERE runtime_device_id = p_runtime_device_id;\n\n    IF v_modo IS NULL THEN\n\n        INSERT INTO runtime_estado_sobrevivencia (\n            runtime_device_id,\n            modo_operacao,\n            hash_snapshot_runtime\n        )\n        VALUES (\n            p_runtime_device_id,\n            'NORMAL',\n            p_hash_snapshot\n        );\n\n    ELSE\n\n        UPDATE runtime_estado_sobrevivencia\n        SET hash_snapshot_runtime = p_hash_snapshot,\n            ultima_sincronizacao = NOW(6)\n        WHERE runtime_device_id = p_runtime_device_id;\n\n    END IF;\n\n    SELECT 'ESCUDO_TOTAL_ATIVO' AS status_escudo;\n\nEND ;;"
+}

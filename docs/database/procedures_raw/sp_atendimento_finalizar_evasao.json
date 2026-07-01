@@ -1,0 +1,7 @@
+{
+  "name": "sp_atendimento_finalizar_evasao",
+  "type": "PROCEDURE",
+  "startLine": 16962,
+  "endLine": 17011,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_atendimento_finalizar_evasao`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_ffa BIGINT,\n    IN p_observacao TEXT\n)\n    SQL SECURITY INVOKER\nmain: BEGIN\n\n    DECLARE v_id_usuario BIGINT;\n\n    DECLARE EXIT HANDLER FOR SQLEXCEPTION\n    BEGIN\n        ROLLBACK;\n        RESIGNAL;\n    END;\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    START TRANSACTION;\n\n    SELECT id_usuario\n    INTO v_id_usuario\n    FROM sessao_usuario\n    WHERE id_sessao_usuario = p_id_sessao_usuario\n    LIMIT 1;\n\n    -- 1. Transiciona workflow\n    CALL sp_atendimento_transicionar(\n        p_id_sessao_usuario,\n        p_id_ffa,\n        'EVASAO',\n        'SISTEMA',\n        p_observacao\n    );\n\n    -- 2. Cancela senha vinculada\n    UPDATE senha\n    SET\n        cancelado = TRUE,\n        cancelado_em = NOW(6),\n        cancelado_por = v_id_usuario,\n        contexto_fluxo = 'FINALIZADO_EVASAO',\n        atualizado_em = NOW(6)\n    WHERE id_ffa = p_id_ffa\n    AND cancelado = FALSE\n    AND executado_em IS NULL;\n\n    COMMIT;\n\nEND ;;"
+}

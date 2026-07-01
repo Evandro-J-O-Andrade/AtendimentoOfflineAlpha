@@ -1,0 +1,7 @@
+{
+  "name": "sp_senha_nao_compareceu",
+  "type": "PROCEDURE",
+  "startLine": 31772,
+  "endLine": 31832,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_senha_nao_compareceu`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT,\n    IN p_observacao TEXT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_id_ffa BIGINT;\n\n    DECLARE EXIT HANDLER FOR SQLEXCEPTION\n    BEGIN\n        ROLLBACK;\n        RESIGNAL;\n    END;\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    START TRANSACTION;\n\n    SELECT id_ffa\n    INTO v_id_ffa\n    FROM senha\n    WHERE id_senha = p_id_senha\n    LIMIT 1;\n\n    UPDATE senha\n    SET\n        nao_compareceu = TRUE,\n        nao_compareceu_em = NOW(6),\n        retorno_utilizado = FALSE,\n        id_fluxo_status = 99,\n        contexto_fluxo = 'AGUARDANDO_RETORNO',\n        atualizado_em = NOW(6)\n    WHERE id_senha = p_id_senha\n    AND nao_compareceu = FALSE;\n\n    IF v_id_ffa IS NOT NULL THEN\n\n        INSERT INTO workflow_ffa_evento\n        (\n            id_ffa,\n            tipo_evento,\n            detalhe,\n            id_sessao_usuario,\n            criado_em\n        )\n        VALUES\n        (\n            v_id_ffa,\n            'CHAMADA_NAO_ATENDIDA',\n            p_observacao,\n            p_id_sessao_usuario,\n            NOW(6)\n        );\n\n    END IF;\n\n    COMMIT;\n\nEND ;;"
+}

@@ -1,0 +1,14 @@
+{
+  "sp_name": "sp_xxx",
+  "type": "DISPATCHER | ORCHESTRATOR | EXECUTOR | GUARD | ROUTER",
+  "signature": {
+    "inputs": ["p_id_sessao_usuario BIGINT"],
+    "outputs": ["p_result JSON"]
+  },
+  "reads": ["table_a", "table_b"],
+  "writes": ["table_c"],
+  "calls": ["sp_other"],
+  "events_generated": ["evento_tabela"],
+  "canonical_reference": "MD-XXX",
+  "status": "EXISTS | MISSING | VIOLATION"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_saas_federado",
+  "type": "PROCEDURE",
+  "startLine": 31375,
+  "endLine": 31393,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_saas_federado`()\nBEGIN\n\n    INSERT INTO saas_entidade\n    (\n        nome,\n        ativo,\n        criado_em\n    )\n    VALUES\n    (\n        'ENTIDADE_TESTE_GLOBAL',\n        1,\n        NOW(6)\n    )\n    ON DUPLICATE KEY UPDATE\n        nome = VALUES(nome);\n\nEND ;;"
+}

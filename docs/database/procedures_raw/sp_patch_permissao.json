@@ -1,0 +1,7 @@
+{
+  "name": "sp_patch_permissao",
+  "type": "PROCEDURE",
+  "startLine": 29206,
+  "endLine": 29243,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_permissao`()\nBEGIN\n    -- Variáveis de controle\n    DECLARE idx_existe INT DEFAULT 0;\n\n    -- Drop seguro do índice\n    SELECT COUNT(*) INTO idx_existe\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'permissao'\n      AND index_name = 'uk_permissao_codigo';\n\n    IF idx_existe > 0 THEN\n        ALTER TABLE permissao DROP INDEX uk_permissao_codigo;\n    END IF;\n\n    -- Adiciona colunas idempotentes\n    IF NOT EXISTS (\n        SELECT * FROM information_schema.COLUMNS \n        WHERE table_name = 'permissao' AND column_name = 'dominio'\n    ) THEN\n        ALTER TABLE permissao ADD COLUMN dominio VARCHAR(40) DEFAULT 'GERAL';\n    END IF;\n\n    IF NOT EXISTS (\n        SELECT * FROM information_schema.COLUMNS \n        WHERE table_name = 'permissao' AND column_name = 'metadata'\n    ) THEN\n        ALTER TABLE permissao ADD COLUMN metadata JSON NULL;\n    END IF;\n\n    -- Criação de índice seguro\n    ALTER TABLE permissao ADD UNIQUE INDEX uk_permissao_codigo (codigo);\n\n    -- Auditoria de patch\n    INSERT INTO auth_audit (acao, recurso, detalhes, criado_em)\n    VALUES ('PATCH_EXECUTADO', 'permissao', JSON_OBJECT('procedimento','sp_patch_permissao','executado_em',NOW()), NOW());\nEND ;;"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_patch_usuario_fk_idx",
+  "type": "PROCEDURE",
+  "startLine": 29259,
+  "endLine": 29287,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_usuario_fk_idx`()\nBEGIN\n    -- FK idempotente\n    IF NOT EXISTS (\n        SELECT 1\n        FROM information_schema.TABLE_CONSTRAINTS\n        WHERE CONSTRAINT_SCHEMA = DATABASE()\n          AND TABLE_NAME = 'usuario'\n          AND CONSTRAINT_NAME = 'fk_usuario_pessoa'\n    ) THEN\n        ALTER TABLE usuario\n        ADD CONSTRAINT fk_usuario_pessoa\n        FOREIGN KEY (id_pessoa)\n        REFERENCES pessoa(id_pessoa)\n        ON DELETE RESTRICT\n        ON UPDATE CASCADE;\n    END IF;\n\n    -- Índice idempotente\n    IF NOT EXISTS (\n        SELECT 1\n        FROM information_schema.statistics\n        WHERE table_schema = DATABASE()\n          AND table_name = 'usuario'\n          AND index_name = 'uk_usuario_login'\n    ) THEN\n        CREATE UNIQUE INDEX uk_usuario_login ON usuario(login);\n    END IF;\nEND ;;"
+}

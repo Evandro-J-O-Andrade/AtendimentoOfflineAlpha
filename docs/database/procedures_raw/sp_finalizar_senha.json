@@ -1,0 +1,7 @@
+{
+  "name": "sp_finalizar_senha",
+  "type": "PROCEDURE",
+  "startLine": 21844,
+  "endLine": 21862,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_senha`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT\n)\nBEGIN\n    -- Finaliza senha\n    UPDATE senha\n    SET status = 'FINALIZADO', finalizado_em = NOW()\n    WHERE id = p_id_senha;\n\n    -- Auditoria\n    INSERT INTO auditoria_evento (id_sessao_usuario, entidade, id_entidade, acao, criado_em)\n    VALUES (p_id_sessao_usuario, 'senha', p_id_senha, 'FINALIZE', NOW());\n\n    -- Evento semântico\n    INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)\n    VALUES (p_id_senha, p_id_sessao_usuario, 'SENHA_FINALIZADA', NOW());\n\nEND ;;"
+}

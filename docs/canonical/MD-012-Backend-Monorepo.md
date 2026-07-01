@@ -300,6 +300,14 @@ Implementações técnicas reutilizáveis.
 Nenhuma regra de negócio aqui.
 ```
 
+#### Horizontal Scaling (MAP-021)
+```text
+Load Balancer (L7) distribui requisições entre instâncias API stateless.
+Cada API lê/escreve estado via runtime_* tables no MySQL.
+Workers consomem runtime_execution_queue independentemente da origem.
+Escala horizontal não requer sync de estado - todos compartilham o mesmo DB.
+```
+
 ### shared/
 
 Código compartilhado entre camadas.

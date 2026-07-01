@@ -298,6 +298,19 @@ Cache nunca é fonte da verdade.
 
 ---
 
+### LEI 22 — APIs são Stateless
+
+```text
+APIs não guardam estado em memória.
+Estado compartilhado reside no Banco.
+Load Balancer distribui requisições entre instâncias.
+Qualquer instância pode atender qualquer requisição.
+Escala horizontal não requer sync de estado.
+Redis é cache, nunca fonte da verdade.
+```
+
+---
+
 ## Matriz de Responsabilidade
 
 | Camada | Decidir | Validar | Executar | Escrever | Exibir |
@@ -448,6 +461,22 @@ N contextos = seleção.
 ### LC-RES-001 — Operação Contínua
 ```text
 Nenhuma falha técnica interrompe o fluxo assistencial.
+```
+
+### LC-RES-002 — APIs Stateless
+```text
+APIs não mantêm estado em memória.
+Load Balancer distribui requisições entre instâncias.
+Qualquer instância pode atender qualquer requisição.
+Escala horizontal não requer replicação de estado.
+```
+
+### LC-RES-003 — Tolerância a Falhas
+```text
+Se uma instância API cair, outra assume imediatamente.
+Se um Worker morrer, job permanece na fila.
+Se o Load Balancer falhar, standby assume.
+Recovery automático via health checks.
 ```
 
 ---

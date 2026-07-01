@@ -1,0 +1,7 @@
+{
+  "name": "sp_chamar_senha",
+  "type": "PROCEDURE",
+  "startLine": 17873,
+  "endLine": 17891,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_chamar_senha`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT\n)\nBEGIN\n    -- Atualiza estado\n    UPDATE senha\n    SET status = 'CHAMADA', chamado_em = NOW()\n    WHERE id = p_id_senha;\n\n    -- Auditoria\n    INSERT INTO auditoria_evento (id_sessao_usuario, entidade, id_entidade, acao, criado_em)\n    VALUES (p_id_sessao_usuario, 'senha', p_id_senha, 'CALL', NOW());\n\n    -- Evento semântico\n    INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)\n    VALUES (p_id_senha, p_id_sessao_usuario, 'SENHA_CHAMADA', NOW());\n\nEND ;;"
+}

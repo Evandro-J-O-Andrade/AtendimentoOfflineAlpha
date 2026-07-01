@@ -1,0 +1,7 @@
+{
+  "name": "sp_executor_assistencial_atendimento_iniciar",
+  "type": "PROCEDURE",
+  "startLine": 19913,
+  "endLine": 19932,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_assistencial_atendimento_iniciar`(\n    IN p_id_sessao BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_id_ffa BIGINT,\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    UPDATE ffa\n    SET contexto_fluxo = 'EM_ATENDIMENTO',\n        atualizado_em = NOW(6)\n    WHERE id_ffa = p_id_ffa;\n\n    SELECT JSON_OBJECT(\n        'status','SUCCESS',\n        'estado','EM_ATENDIMENTO'\n    ) AS result;\n\nEND ;;"
+}

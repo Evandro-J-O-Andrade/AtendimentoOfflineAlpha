@@ -1,0 +1,7 @@
+{
+  "name": "sp_sessao_contexto_get",
+  "type": "PROCEDURE",
+  "startLine": 32211,
+  "endLine": 32230,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_sessao_contexto_get`(\n    IN p_id_sessao_usuario BIGINT\n)\nBEGIN\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    SELECT\n        su.id_sessao_usuario,\n        su.id_usuario,\n        su.id_sistema,\n        su.id_unidade,\n        su.id_local_operacional,\n        su.ip_acesso,\n        su.user_agent,\n        su.iniciado_em,\n        su.expira_em,\n        su.ativo\n    FROM sessao_usuario su\n    WHERE su.id_sessao_usuario = p_id_sessao_usuario;\nEND ;;"
+}

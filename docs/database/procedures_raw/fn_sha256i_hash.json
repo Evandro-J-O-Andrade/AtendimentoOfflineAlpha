@@ -1,0 +1,7 @@
+{
+  "name": "fn_sha256i_hash",
+  "type": "FUNCTION",
+  "startLine": 16644,
+  "endLine": 16679,
+  "text": "CREATE DEFINER=`root`@`localhost` FUNCTION `fn_sha256i_hash`(\n    p_senha     VARCHAR(255),\n    p_salt_hex  CHAR(32),\n    p_iter      INT\n) RETURNS char(64) CHARSET utf8mb4\n    NO SQL\n    DETERMINISTIC\n    SQL SECURITY INVOKER\nBEGIN\n    DECLARE i INT DEFAULT 1;\n    DECLARE v_hash CHAR(64);\n    DECLARE v_salt BINARY(16);\n\n    IF p_senha IS NULL THEN\n        RETURN NULL;\n    END IF;\n\n    IF p_salt_hex IS NULL OR LENGTH(p_salt_hex) <> 32 THEN\n        RETURN NULL;\n    END IF;\n\n    IF p_iter IS NULL OR p_iter < 2000 THEN\n        SET p_iter = 12000;\n    END IF;\n\n    SET v_salt = UNHEX(p_salt_hex);\n\n    SET v_hash = SHA2(CONCAT(v_salt, p_senha), 256);\n\n    WHILE i < p_iter DO\n        SET v_hash = SHA2(CONCAT(UNHEX(v_hash), v_salt, p_senha), 256);\n        SET i = i + 1;\n    END WHILE;\n\n    RETURN v_hash;\nEND ;;"
+}

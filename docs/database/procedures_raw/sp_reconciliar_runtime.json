@@ -1,0 +1,7 @@
+{
+  "name": "sp_reconciliar_runtime",
+  "type": "PROCEDURE",
+  "startLine": 30301,
+  "endLine": 30325,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_reconciliar_runtime`(\n    IN p_uuid_evento CHAR(36),\n    IN p_hash CHAR(64)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_hash CHAR(64);\n\n    SELECT hash_payload\n    INTO v_hash\n    FROM runtime_sync_log\n    WHERE uuid_evento = p_uuid_evento\n    LIMIT 1;\n\n    IF v_hash <> p_hash THEN\n        SIGNAL SQLSTATE '45000'\n        SET MESSAGE_TEXT = 'Inconsistencia deterministica detectada';\n    END IF;\n\n    UPDATE runtime_sync_log\n    SET sincronizado = TRUE\n    WHERE uuid_evento = p_uuid_evento;\n\nEND ;;"
+}

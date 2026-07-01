@@ -1,0 +1,7 @@
+{
+  "name": "fn_decision_fingerprint",
+  "type": "FUNCTION",
+  "startLine": 16574,
+  "endLine": 16593,
+  "text": "CREATE DEFINER=`root`@`localhost` FUNCTION `fn_decision_fingerprint`(\n    p_acao VARCHAR(100),\n    p_id_tenant BIGINT,\n    p_id_usuario BIGINT,\n    p_payload JSON\n) RETURNS char(64) CHARSET utf8mb4\n    DETERMINISTIC\nBEGIN\n    RETURN SHA2(\n        CONCAT(\n            IFNULL(p_acao,''),\n            '|',\n            IFNULL(p_id_tenant,0),\n            '|',\n            IFNULL(p_id_usuario,0),\n            '|',\n            JSON_UNQUOTE(JSON_SORT(IFNULL(p_payload,'{}')))\n        ),\n    256);\nEND ;;"
+}

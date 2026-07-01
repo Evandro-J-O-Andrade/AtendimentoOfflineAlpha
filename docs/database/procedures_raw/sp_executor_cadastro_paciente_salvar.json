@@ -1,0 +1,7 @@
+{
+  "name": "sp_executor_cadastro_paciente_salvar",
+  "type": "PROCEDURE",
+  "startLine": 20258,
+  "endLine": 20302,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_cadastro_paciente_salvar`(\n    IN p_id_sessao BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_id_referencia BIGINT,\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_nome VARCHAR(120);\n    DECLARE v_cpf VARCHAR(20);\n\n    SET v_nome = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.nome'));\n    SET v_cpf  = JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.cpf'));\n\n    IF p_id_referencia IS NULL OR p_id_referencia = 0 THEN\n\n        INSERT INTO paciente (\n            nome,\n            cpf,\n            criado_em\n        ) VALUES (\n            v_nome,\n            v_cpf,\n            NOW(6)\n        );\n\n        SET p_id_referencia = LAST_INSERT_ID();\n\n    ELSE\n\n        UPDATE paciente\n        SET nome = v_nome,\n            cpf = v_cpf,\n            atualizado_em = NOW(6)\n        WHERE id_paciente = p_id_referencia;\n\n    END IF;\n\n    SELECT JSON_OBJECT(\n        'status','SUCCESS',\n        'id_paciente', p_id_referencia\n    ) AS result;\n\nEND ;;"
+}

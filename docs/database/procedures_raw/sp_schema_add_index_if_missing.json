@@ -1,0 +1,7 @@
+{
+  "name": "sp_schema_add_index_if_missing",
+  "type": "PROCEDURE",
+  "startLine": 30927,
+  "endLine": 30952,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_schema_add_index_if_missing`(\n    IN p_table_schema VARCHAR(64),\n    IN p_table_name   VARCHAR(64),\n    IN p_index_name   VARCHAR(64),\n    IN p_index_ddl    TEXT\n)\nmain: BEGIN\n    DECLARE v_cnt INT DEFAULT 0;\n    DECLARE v_sql TEXT;\n\n    SELECT COUNT(*)\n      INTO v_cnt\n      FROM information_schema.STATISTICS s\n     WHERE s.TABLE_SCHEMA = p_table_schema\n       AND s.TABLE_NAME   = p_table_name\n       AND s.INDEX_NAME   = p_index_name;\n\n    IF v_cnt = 0 THEN\n        SET v_sql = CONCAT('ALTER TABLE `', p_table_schema, '`.`', p_table_name, '` ADD ', p_index_ddl);\n        SET @ddl_sql = v_sql;\n        PREPARE stmt FROM @ddl_sql;\n        EXECUTE stmt;\n        DEALLOCATE PREPARE stmt;\n        SET @ddl_sql = NULL;\n    END IF;\nEND ;;"
+}

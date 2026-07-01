@@ -1,0 +1,19 @@
+{
+  "architecture": "FCA/MIDAS Enterprise",
+  "version": "7",
+  "canonicalFrozen": true,
+  "dumpFirst": true,
+  "spFirst": true,
+  "eventDriven": true,
+  "portalFirst": true,
+  "identityRoot": "Pessoa",
+  "databaseSourceOfTruth": true,
+  "documentationSource": "KILO Discovery",
+  "autoSynchronization": true,
+  "deletePolicy": "logical",
+  "auditMode": "immutable",
+  "mdCount": 110,
+  "brCount": 4,
+  "frontCount": 4,
+  "mapCount": 14
+}

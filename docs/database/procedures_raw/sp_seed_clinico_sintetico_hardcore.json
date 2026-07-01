@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_clinico_sintetico_hardcore",
+  "type": "PROCEDURE",
+  "startLine": 31040,
+  "endLine": 31068,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_clinico_sintetico_hardcore`()\nBEGIN\n\n    DECLARE v_i INT DEFAULT 1;\n    DECLARE v_sql TEXT;\n\n    START TRANSACTION;\n\n    WHILE v_i <= 10000 DO\n\n        SET v_sql = CONCAT(\n            'INSERT IGNORE INTO paciente (nome) VALUES (',\n            QUOTE(CONCAT('PACIENTE_CLINICO_SYN_', LPAD(v_i,6,'0'))),\n            ')'\n        );\n\n        SET @stmt = v_sql;\n\n        PREPARE stmt FROM @stmt;\n        EXECUTE stmt;\n        DEALLOCATE PREPARE stmt;\n\n        SET v_i = v_i + 1;\n\n    END WHILE;\n\n    COMMIT;\n\nEND ;;"
+}

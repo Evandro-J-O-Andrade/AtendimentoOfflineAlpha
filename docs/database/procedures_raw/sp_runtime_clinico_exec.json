@@ -1,0 +1,7 @@
+{
+  "name": "sp_runtime_clinico_exec",
+  "type": "PROCEDURE",
+  "startLine": 30502,
+  "endLine": 30528,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_runtime_clinico_exec`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_contexto VARCHAR(60),\n    IN p_recurso VARCHAR(120),\n    IN p_acao VARCHAR(60),\n    IN p_payload JSON\n)\nBEGIN\n\n    INSERT INTO atendimento_evento (\n        id_sessao_usuario,\n        contexto,\n        recurso,\n        acao,\n        payload,\n        criado_em\n    )\n    VALUES (\n        p_id_sessao_usuario,\n        p_contexto,\n        p_recurso,\n        p_acao,\n        p_payload,\n        NOW()\n    );\n\nEND ;;"
+}

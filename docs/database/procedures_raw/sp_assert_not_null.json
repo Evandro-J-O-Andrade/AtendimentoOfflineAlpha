@@ -1,0 +1,7 @@
+{
+  "name": "sp_assert_not_null",
+  "type": "PROCEDURE",
+  "startLine": 16911,
+  "endLine": 16920,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_assert_not_null`(\n    IN p_valor    TEXT,\n    IN p_codigo   VARCHAR(50),\n    IN p_mensagem VARCHAR(4000)\n)\nBEGIN\n    IF p_valor IS NULL THEN\n        CALL sp_raise(IFNULL(p_codigo,'PARAM'), IFNULL(p_mensagem,'Valor obrigatório (NULL).'));\n    END IF;\nEND ;;"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_permissao_validar",
+  "type": "PROCEDURE",
+  "startLine": 29580,
+  "endLine": 29596,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_permissao_validar`(\n    IN p_id_perfil BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_contexto VARCHAR(50),\n    OUT p_tem_permissao BOOLEAN\n)\nBEGIN\n    SET p_tem_permissao = EXISTS (\n        SELECT 1 FROM fluxo_transicao ft\n        JOIN fluxo_status fs_origem ON fs_origem.id_fluxo_status = ft.id_status_origem\n        JOIN fluxo_status fs_destino ON fs_destino.id_fluxo_status = ft.id_status_destino\n        WHERE ft.id_perfil_requerido = p_id_perfil\n          AND ft.ativo = 1\n          AND (fs_origem.codigo LIKE CONCAT(p_contexto, '%') \n               OR fs_destino.codigo LIKE CONCAT(p_contexto, '%'))\n    );\nEND ;;"
+}

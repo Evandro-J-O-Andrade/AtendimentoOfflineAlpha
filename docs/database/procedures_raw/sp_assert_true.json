@@ -1,0 +1,7 @@
+{
+  "name": "sp_assert_true",
+  "type": "PROCEDURE",
+  "startLine": 16936,
+  "endLine": 16946,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_assert_true`(\n    IN p_condicao TINYINT,\n    IN p_codigo   VARCHAR(50),\n    IN p_mensagem VARCHAR(4000)\n)\nBEGIN\n    -- Trata NULL como falso\n    IF IFNULL(p_condicao, 0) = 0 THEN\n        CALL sp_raise(IFNULL(p_codigo,'ASSERT'), IFNULL(p_mensagem,'Falha de asserção.'));\n    END IF;\nEND ;;"
+}

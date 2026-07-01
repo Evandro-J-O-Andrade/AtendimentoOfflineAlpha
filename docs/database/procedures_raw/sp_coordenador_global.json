@@ -1,0 +1,7 @@
+{
+  "name": "sp_coordenador_global",
+  "type": "PROCEDURE",
+  "startLine": 18707,
+  "endLine": 18747,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_coordenador_global`(\n    IN p_uuid_runtime CHAR(36),\n    IN p_id_saas BIGINT,\n    IN p_id_unidade BIGINT,\n    IN p_estado VARCHAR(80),\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_hash CHAR(64);\n\n    SET v_hash = SHA2(IFNULL(JSON_UNQUOTE(p_payload), ''), 256);\n\n    INSERT INTO coordenador_estado_global\n    (\n        uuid_runtime,\n        id_saas_entidade,\n        id_unidade,\n        estado_atual,\n        hash_estado,\n        payload_snapshot,\n        bloqueado\n    )\n    VALUES\n    (\n        p_uuid_runtime,\n        p_id_saas,\n        p_id_unidade,\n        p_estado,\n        v_hash,\n        p_payload,\n        FALSE\n    )\n    ON DUPLICATE KEY UPDATE\n        estado_atual = VALUES(estado_atual),\n        hash_estado = VALUES(hash_estado),\n        payload_snapshot = VALUES(payload_snapshot),\n        atualizado_em = CURRENT_TIMESTAMP(6);\n\nEND ;;"
+}

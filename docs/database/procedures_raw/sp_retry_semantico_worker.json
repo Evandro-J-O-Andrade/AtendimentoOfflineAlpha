@@ -1,0 +1,7 @@
+{
+  "name": "sp_retry_semantico_worker",
+  "type": "PROCEDURE",
+  "startLine": 30451,
+  "endLine": 30486,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_retry_semantico_worker`()\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_id_retry BIGINT;\n    DECLARE v_id_ffa BIGINT;\n    DECLARE v_evento VARCHAR(60);\n\n    SELECT id_retry, id_ffa, evento\n    INTO v_id_retry, v_id_ffa, v_evento\n    FROM retry_semantico_controle\n    WHERE bloqueado = 0\n    AND (proxima_tentativa IS NULL\n         OR proxima_tentativa <= CURRENT_TIMESTAMP(6))\n    AND tentativas < max_tentativas\n    ORDER BY proxima_tentativa ASC\n    LIMIT 1;\n\n    IF v_id_retry IS NULL THEN\n        BEGIN\n        END;\n    ELSE\n\n        /* Aqui você chamaria novamente o executor hardcore */\n\n        UPDATE retry_semantico_controle\n        SET tentativas = tentativas + 1,\n            proxima_tentativa = DATE_ADD(\n                CURRENT_TIMESTAMP(6),\n                INTERVAL POWER(2, tentativas) MINUTE\n            )\n        WHERE id_retry = v_id_retry;\n\n    END IF;\n\nEND ;;"
+}

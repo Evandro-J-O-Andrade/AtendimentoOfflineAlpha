@@ -1,0 +1,7 @@
+{
+  "name": "sp_sequencia_proximo_numero",
+  "type": "PROCEDURE",
+  "startLine": 31990,
+  "endLine": 32007,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_sequencia_proximo_numero`(\n    IN  p_chave   VARCHAR(100),\n    OUT p_numero  BIGINT\n)\nBEGIN\n    /*\n      Tabela protocolo_sequencia:\n        chave VARCHAR(100) PK\n        ultimo_numero BIGINT\n        criado_em / atualizado_em (auto)\n    */\n    INSERT INTO protocolo_sequencia(chave, ultimo_numero)\n    VALUES (p_chave, LAST_INSERT_ID(1))\n    ON DUPLICATE KEY UPDATE\n        ultimo_numero = LAST_INSERT_ID(ultimo_numero + 1);\n\n    SET p_numero = LAST_INSERT_ID();\nEND ;;"
+}

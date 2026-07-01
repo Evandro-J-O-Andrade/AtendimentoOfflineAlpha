@@ -1,0 +1,7 @@
+{
+  "name": "sp_checkpoint_global_validar",
+  "type": "PROCEDURE",
+  "startLine": 17907,
+  "endLine": 17964,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_checkpoint_global_validar`(\n    IN p_id_ffa BIGINT,\n    IN p_estado_snapshot VARCHAR(60),\n    IN p_id_sessao_usuario BIGINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_existente INT DEFAULT 0;\n\n    /* Verifica snapshot atual */\n\n    SELECT COUNT(1)\n    INTO v_existente\n    FROM assistencial_checkpoint_global\n    WHERE id_ffa = p_id_ffa;\n\n    /* Se não existir, cria checkpoint inicial */\n\n    IF v_existente = 0 THEN\n\n        INSERT INTO assistencial_checkpoint_global(\n            id_ffa,\n            estado_snapshot,\n            quorum_valido\n        )\n        VALUES(\n            p_id_ffa,\n            p_estado_snapshot,\n            1\n        );\n\n    ELSE\n\n        UPDATE assistencial_checkpoint_global\n        SET estado_snapshot = p_estado_snapshot,\n            quorum_valido = 1,\n            criado_em = CURRENT_TIMESTAMP(6)\n        WHERE id_ffa = p_id_ffa;\n\n    END IF;\n\n    /* Observabilidade operacional (não bloqueante) */\n\n    INSERT INTO auditoria_evento(\n        id_sessao_usuario,\n        evento,\n        sucesso,\n        descricao\n    )\n    VALUES(\n        p_id_sessao_usuario,\n        'CHECKPOINT_GLOBAL_OK',\n        1,\n        CONCAT('FFA=',p_id_ffa)\n    );\n\nEND ;;"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_finalizar_procedimento_ecg",
+  "type": "PROCEDURE",
+  "startLine": 21657,
+  "endLine": 21664,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_procedimento_ecg`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_fila           BIGINT,\n    IN p_resultado         TEXT\n)\nBEGIN\n    CALL sp_finalizar_procedimento_geral(p_id_sessao_usuario, p_id_fila, p_resultado);\nEND ;;"
+}

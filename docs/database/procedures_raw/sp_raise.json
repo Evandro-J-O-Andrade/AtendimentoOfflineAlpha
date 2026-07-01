@@ -1,0 +1,7 @@
+{
+  "name": "sp_raise",
+  "type": "PROCEDURE",
+  "startLine": 29904,
+  "endLine": 29920,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_raise`(\n    IN p_codigo   VARCHAR(50),\n    IN p_mensagem VARCHAR(4000)\n)\nBEGIN\n    DECLARE v_msg128 VARCHAR(128);\n\n    -- Build message and truncate safely to 128 chars\n    SET v_msg128 = LEFT(\n        CONCAT('[', IFNULL(p_codigo,'ERRO'), '] ', IFNULL(p_mensagem,'Erro')),\n        128\n    );\n\n    SIGNAL SQLSTATE '45000'\n        SET MYSQL_ERRNO  = 1644,\n            MESSAGE_TEXT = v_msg128;\nEND ;;"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_sync_federado_executor",
+  "type": "PROCEDURE",
+  "startLine": 32355,
+  "endLine": 32386,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_sync_federado_executor`()\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_id_ffa BIGINT;\n    DECLARE v_evento VARCHAR(60);\n    DECLARE v_estado_destino VARCHAR(60);\n\n    /* Processa eventos não sincronizados */\n\n    SELECT id_ffa, evento, estado_destino\n    INTO v_id_ffa, v_evento, v_estado_destino\n    FROM sincronizacao_federada_evento\n    WHERE sincronizado = 0\n    ORDER BY criado_em\n    LIMIT 1;\n\n    /* Se não houver evento, encerra execução da procedure */\n    IF v_id_ffa IS NULL THEN\n        BEGIN\n            -- apenas encerra o bloco\n        END;\n    ELSE\n\n        UPDATE sincronizacao_federada_evento\n        SET sincronizado = 1\n        WHERE id_ffa = v_id_ffa\n        AND evento = v_evento;\n\n    END IF;\n\nEND ;;"
+}

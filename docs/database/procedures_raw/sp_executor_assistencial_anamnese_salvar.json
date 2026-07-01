@@ -1,0 +1,7 @@
+{
+  "name": "sp_executor_assistencial_anamnese_salvar",
+  "type": "PROCEDURE",
+  "startLine": 19702,
+  "endLine": 19741,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_assistencial_anamnese_salvar`(\n    IN p_id_sessao BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_id_referencia BIGINT,\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n    DECLARE v_id_usuario BIGINT;\n\n    SELECT id_usuario INTO v_id_usuario \n    FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao LIMIT 1;\n\n    INSERT INTO atendimento_anamnese (\n        id_saas_entidade,\n        id_unidade,\n        id_ffa,\n        id_usuario,\n        id_sessao_usuario,\n        queixa_principal,\n        historico_doenca,\n        antecedentes_pessoais,\n        ip_origem,\n        device_info,\n        criado_em\n    ) VALUES (\n        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_saas_entidade')) AS UNSIGNED),\n        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.id_unidade')) AS UNSIGNED),\n        p_id_referencia,\n        v_id_usuario,\n        p_id_sessao,\n        JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.queixa_principal')),\n        JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.historico_doenca')),\n        JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.antecedentes_pessoais')),\n        JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.ip_origem')),\n        JSON_UNQUOTE(JSON_EXTRACT(p_payload, '$.device_info')),\n        NOW(6)\n    );\n\nEND ;;"
+}

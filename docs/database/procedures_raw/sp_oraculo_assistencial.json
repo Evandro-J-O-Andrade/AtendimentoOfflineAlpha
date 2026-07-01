@@ -1,0 +1,7 @@
+{
+  "name": "sp_oraculo_assistencial",
+  "type": "PROCEDURE",
+  "startLine": 28240,
+  "endLine": 28291,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_oraculo_assistencial`(\n    IN p_runtime_device_id VARCHAR(100),\n    IN p_dominio_fluxo VARCHAR(50),\n    IN p_hash_snapshot CHAR(64),\n    IN p_versao_protocolo BIGINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_modo VARCHAR(50);\n    DECLARE v_status VARCHAR(50);\n\n    SELECT modo_operacao\n    INTO v_modo\n    FROM runtime_estado_sobrevivencia\n    WHERE runtime_device_id = p_runtime_device_id;\n\n    IF v_modo IS NULL THEN\n        SET v_modo = 'NORMAL';\n    END IF;\n\n    IF v_modo = 'BLOQUEIO_SEGURANCA' THEN\n        SET v_status = 'BLOQUEAR';\n\n    ELSEIF p_hash_snapshot IS NULL THEN\n        SET v_status = 'DEGRADAR_MODE';\n\n    ELSE\n        SET v_status = 'PERMITIR';\n    END IF;\n\n    INSERT INTO atendimento_evento_ledger (\n        id_sessao_usuario,\n        dominio_evento,\n        codigo_evento,\n        payload_evento\n    )\n    VALUES (\n        NULL,\n        'ORACULO_ASSISTENCIAL',\n        v_status,\n        JSON_OBJECT(\n            'runtime_device', p_runtime_device_id,\n            'dominio_fluxo', p_dominio_fluxo,\n            'versao_protocolo', p_versao_protocolo,\n            'timestamp', NOW(6)\n        )\n    );\n\n    SELECT v_status AS oraculo_decisao;\n\nEND ;;"
+}

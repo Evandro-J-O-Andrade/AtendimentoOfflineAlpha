@@ -1,0 +1,7 @@
+{
+  "name": "sp_master_ffa_movimentar",
+  "type": "PROCEDURE",
+  "startLine": 25596,
+  "endLine": 25622,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_master_ffa_movimentar`(\n    IN p_id_sessao BIGINT,\n    IN p_id_usuario BIGINT,\n    IN p_id_ffa INT,\n    IN p_novo_status VARCHAR(50),\n    OUT p_resultado JSON\n)\n    SQL SECURITY INVOKER\nproc: BEGIN\n    DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN\n        GET DIAGNOSTICS CONDITION 1 @msg = MESSAGE_TEXT;\n        ROLLBACK;\n        SET p_resultado = JSON_OBJECT('sucesso', FALSE, 'mensagem', @msg);\n    END;\n\n    START TRANSACTION;\n\n    -- Atualiza o workflow (FFA)\n    UPDATE ffa SET status = p_novo_status, atualizado_em = NOW() WHERE id_ffa = p_id_ffa;\n\n    -- Registro no Ledger de Movimentação (Workflow Evento)\n    INSERT INTO workflow_ffa_evento (id_ffa, tipo_evento, detalhe, id_sessao_usuario)\n    VALUES (p_id_ffa, 'STATUS_CHANGE', CONCAT('Status alterado para: ', p_novo_status), p_id_sessao);\n\n    COMMIT;\n    SET p_resultado = JSON_OBJECT('sucesso', TRUE, 'mensagem', 'Fluxo atualizado');\nEND ;;"
+}

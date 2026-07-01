@@ -1,0 +1,7 @@
+{
+  "name": "sp_executor_recepcao_abrir_atendimento",
+  "type": "PROCEDURE",
+  "startLine": 20779,
+  "endLine": 20826,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_executor_recepcao_abrir_atendimento`(\n    IN p_id_sessao BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_id_referencia BIGINT,\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_id_saas BIGINT;\n    DECLARE v_id_unidade BIGINT;\n    DECLARE v_id_usuario BIGINT;\n    DECLARE v_id_paciente BIGINT;\n    DECLARE v_id_ffa BIGINT;\n\n    -- CONTEXTO\n    SELECT id_saas_entidade, id_unidade, id_usuario\n    INTO v_id_saas, v_id_unidade, v_id_usuario\n    FROM sessao_usuario\n    WHERE id_sessao_usuario = p_id_sessao\n    LIMIT 1;\n\n    SET v_id_paciente = JSON_EXTRACT(p_payload, '$.id_paciente');\n\n    -- NEGÓCIO\n    INSERT INTO ffa (\n        id_saas_entidade,\n        id_unidade,\n        id_paciente,\n        contexto_fluxo,\n        criado_em\n    ) VALUES (\n        v_id_saas,\n        v_id_unidade,\n        v_id_paciente,\n        'AGUARDANDO_TRIAGEM',\n        NOW(6)\n    );\n\n    SET v_id_ffa = LAST_INSERT_ID();\n\n    -- RETORNO\n    SELECT JSON_OBJECT(\n        'status','SUCCESS',\n        'id_ffa', v_id_ffa\n    ) AS result;\n\nEND ;;"
+}

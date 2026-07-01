@@ -1,0 +1,7 @@
+{
+  "name": "sp_guardiao_runtime_assert",
+  "type": "PROCEDURE",
+  "startLine": 22666,
+  "endLine": 22691,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_guardiao_runtime_assert`(\n    IN p_id_usuario BIGINT,\n    IN p_contexto VARCHAR(60),\n    IN p_recurso VARCHAR(120)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_ok TINYINT DEFAULT 0;\n\n    SELECT COUNT(1)\n    INTO v_ok\n    FROM guardiao_acl_runtime gac\n    WHERE gac.id_usuario = p_id_usuario\n      AND gac.contexto = p_contexto\n      AND gac.recurso = p_recurso\n      AND gac.permitido = 1;\n\n    IF IFNULL(v_ok,0) = 0 THEN\n        CALL sp_raise(\n            'SEM_PERMISSAO_RUNTIME',\n            CONCAT('Usuario sem permissao para recurso: ', p_contexto, ' | ', p_recurso)\n        );\n    END IF;\n\nEND ;;"
+}

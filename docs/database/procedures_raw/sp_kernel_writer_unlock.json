@@ -1,0 +1,7 @@
+{
+  "name": "sp_kernel_writer_unlock",
+  "type": "PROCEDURE",
+  "startLine": 23193,
+  "endLine": 23199,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_writer_unlock`(\n    IN p_lock_id BIGINT\n)\nBEGIN\n    DELETE FROM runtime_kernel_locks\n    WHERE id = p_lock_id;\nEND ;;"
+}

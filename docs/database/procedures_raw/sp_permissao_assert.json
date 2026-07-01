@@ -1,0 +1,7 @@
+{
+  "name": "sp_permissao_assert",
+  "type": "PROCEDURE",
+  "startLine": 29552,
+  "endLine": 29564,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_permissao_assert`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_permissao         VARCHAR(100)\n)\nBEGIN\n    DECLARE v_ok TINYINT DEFAULT 0;\n\n    CALL sp_sessao_tem_permissao(p_id_sessao_usuario, p_permissao, v_ok);\n\n    IF IFNULL(v_ok, 0) = 0 THEN\n        CALL sp_raise('SEM_PERMISSAO', CONCAT('Permissão necessária: ', p_permissao));\n    END IF;\nEND ;;"
+}

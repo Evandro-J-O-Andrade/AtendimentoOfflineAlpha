@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_runtime_assistencial",
+  "type": "PROCEDURE",
+  "startLine": 31271,
+  "endLine": 31293,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_runtime_assistencial`()\nBEGIN\n\n    INSERT INTO runtime_estado_sobrevivencia\n    (\n        runtime_device_id,\n        modo_operacao,\n        estado_runtime,\n        ultimo_ping,\n        ativo\n    )\n    VALUES\n    (\n        UUID(),\n        'TESTE_CARGA',\n        'ONLINE',\n        NOW(6),\n        1\n    )\n    ON DUPLICATE KEY UPDATE\n        ultimo_ping = NOW(6);\n\nEND ;;"
+}

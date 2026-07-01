@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_refresh_token_revogar",
+  "type": "PROCEDURE",
+  "startLine": 33338,
+  "endLine": 33345,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_refresh_token_revogar`(\n    IN p_token VARCHAR(255)\n)\nBEGIN\n    UPDATE usuario_refresh_token\n       SET revogado = 1\n     WHERE token = p_token;\nEND ;;"
+}

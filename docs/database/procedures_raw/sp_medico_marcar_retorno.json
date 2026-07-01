@@ -1,0 +1,7 @@
+{
+  "name": "sp_medico_marcar_retorno",
+  "type": "PROCEDURE",
+  "startLine": 27973,
+  "endLine": 27987,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_medico_marcar_retorno`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT,\n    IN p_data_limite DATETIME\n)\n    SQL SECURITY INVOKER\nBEGIN\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    UPDATE senha\n    SET retorno_permitido_ate = p_data_limite,\n        retorno_utilizado = 0\n    WHERE id = p_id_senha;\n\nEND ;;"
+}

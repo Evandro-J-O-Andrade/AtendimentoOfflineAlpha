@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_refresh_token_validar",
+  "type": "PROCEDURE",
+  "startLine": 33361,
+  "endLine": 33382,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_refresh_token_validar`(\n    IN p_token VARCHAR(255)\n)\nBEGIN\n    DECLARE v_id_usuario BIGINT;\n\n    SELECT id_usuario\n      INTO v_id_usuario\n      FROM usuario_refresh_token\n     WHERE token = p_token\n       AND revogado = 0\n       AND expira_em > NOW()\n     LIMIT 1;\n\n    CALL sp_assert_not_null(\n        v_id_usuario,\n        'TOKEN_INVALIDO',\n        'Refresh token inválido ou expirado'\n    );\n\n    SELECT v_id_usuario AS id_usuario;\nEND ;;"
+}

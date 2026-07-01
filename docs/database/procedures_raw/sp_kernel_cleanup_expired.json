@@ -1,0 +1,7 @@
+{
+  "name": "sp_kernel_cleanup_expired",
+  "type": "PROCEDURE",
+  "startLine": 22983,
+  "endLine": 23007,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_cleanup_expired`()\n    SQL SECURITY INVOKER\nBEGIN\n    DECLARE v_sessoes_removidas INT DEFAULT 0;\n    DECLARE v_tokens_removidos INT DEFAULT 0;\n    \n    -- Remover sessões expiradas\n    DELETE FROM sessao_usuario WHERE expira_em < NOW();\n    SET v_sessoes_removidas = ROW_COUNT();\n    \n    -- Remover tokens expirados\n    DELETE FROM runtime_api_session_token WHERE expira_em < NOW();\n    SET v_tokens_removidos = ROW_COUNT();\n    \n    -- Limpar filas antigas\n    DELETE FROM runtime_execution_queue \n    WHERE status IN ('CONCLUIDO', 'ERRO') \n    AND atualizado_em < DATE_SUB(NOW(), INTERVAL 7 DAY);\n    \n    SELECT \n        v_sessoes_removidas AS sessoes_removidas,\n        v_tokens_removidos AS tokens_removidos,\n        NOW() AS cleanup_at;\n    \nEND ;;"
+}

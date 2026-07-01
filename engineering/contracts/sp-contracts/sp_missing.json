@@ -1,0 +1,72 @@
+{
+  "sp_missing": [
+    {
+      "name": "sp_senha_emitir",
+      "type": "EXECUTOR",
+      "md_reference": "MD-105",
+      "required_for": "BR-001-001 - FFA cannot exist without senha",
+      "signature": "IN p_id_sessao_usuario BIGINT, IN p_id_unidade BIGINT, IN p_origem VARCHAR(20)",
+      "reads": ["unidade", "sessao_usuario", "senha_sequencia"],
+      "writes": ["senha", "senha_eventos"],
+      "calls": ["sp_fluxo_guardiao_transicao"],
+      "priority": "CRITICAL"
+    },
+    {
+      "name": "sp_sessao_assert",
+      "type": "GUARD",
+      "md_reference": "MD-102",
+      "required_for": "Session validation in all SPs",
+      "signature": "IN p_id_sessao_usuario BIGINT",
+      "reads": ["sessao_usuario"],
+      "writes": [],
+      "calls": [],
+      "priority": "CRITICAL"
+    },
+    {
+      "name": "sp_kernel_ledger_write",
+      "type": "EVENT",
+      "md_reference": "MD-104",
+      "required_for": "BR-004-001 - Canonical event store",
+      "signature": "IN p_uuid_evento CHAR(36), IN p_app VARCHAR(50), IN p_acao VARCHAR(100), ...",
+      "reads": [],
+      "writes": ["kernel_ledger"],
+      "calls": [],
+      "priority": "CRITICAL"
+    },
+    {
+      "name": "sp_ffa_guard_validate",
+      "type": "GUARD",
+      "md_reference": "MD-105",
+      "required_for": "Validate FFA transitions",
+      "signature": "IN p_id_ffa BIGINT, IN p_evento VARCHAR(60), ...",
+      "reads": ["vw_usuario_permissoes", "tombstone_evento_assistencial"],
+      "writes": ["assistencial_evento_hash"],
+      "calls": [],
+      "priority": "HIGH"
+    },
+    {
+      "name": "sp_checkpoint_global_validar",
+      "type": "GUARD",
+      "md_reference": "sp_fluxo_guardiao_transicao",
+      "required_for": "Global invariant validation",
+      "signature": "IN p_id_ffa BIGINT, IN p_evento VARCHAR(60), IN p_id_sessao_usuario BIGINT",
+      "reads": ["kernel_runtime_invariant"],
+      "writes": [],
+      "calls": [],
+      "priority": "MEDIUM"
+    },
+    {
+      "name": "sp_codigo_emitir_interno",
+      "type": "UTILITY",
+      "md_reference": "sp_ffa_gpat_gerar",
+      "required_for": "Codigo generation for GPAT/LAB",
+      "signature": "OUT p_id_codigo BIGINT, OUT p_codigo VARCHAR(60)",
+      "reads": ["codigo_prefixo_config"],
+      "writes": ["codigo_universal"],
+      "calls": [],
+      "priority": "HIGH"
+    }
+  ],
+  "total_missing": 6,
+  "critical_missing": 3
+}

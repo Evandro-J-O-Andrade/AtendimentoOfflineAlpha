@@ -1,0 +1,96 @@
+{
+  "sp_existing": [
+    {
+      "name": "sp_gatekeeper_assistencial",
+      "type": "DISPATCHER",
+      "path": "docs/database/procedures_raw_texts/sp_gatekeeper_assistencial.sql",
+      "reads": ["coordenador_estado_global"],
+      "writes": [],
+      "calls": ["sp_sessao_assert", "sp_orquestrador_assistencial"],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_fluxo_guardiao_transicao",
+      "type": "GUARD",
+      "path": "docs/database/procedures_raw_texts/sp_fluxo_guardiao_transicao.sql",
+      "reads": ["vw_usuario_permissoes", "tombstone_evento_assistencial", "assistencial_evento_hash"],
+      "writes": ["assistencial_evento_hash", "auditoria_evento"],
+      "calls": ["sp_checkpoint_global_validar"],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_fluxo_executor_matriz",
+      "type": "ROUTER",
+      "path": "docs/database/procedures_raw_texts/sp_fluxo_executor_matriz.sql",
+      "reads": ["fluxo_transicao_matriz"],
+      "writes": ["auditoria_evento"],
+      "calls": [],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_ffa_orquestrador_transicao",
+      "type": "ORCHESTRATOR",
+      "path": "docs/database/procedures_raw_texts/sp_ffa_orquestrador_transicao.sql",
+      "reads": [],
+      "writes": ["ffa", "atendimento_evento"],
+      "calls": ["sp_fluxo_guardiao_transicao", "sp_fluxo_executor_matriz"],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_executor_recepcao_abrir_atendimento",
+      "type": "EXECUTOR",
+      "path": "docs/database/procedures_raw_texts/sp_executor_recepcao_abrir_atendimento.sql",
+      "reads": ["sessao_usuario"],
+      "writes": ["ffa"],
+      "calls": [],
+      "status": "REAL_IMPLEMENTED_BUT_VIOLATION"
+    },
+    {
+      "name": "sp_ffa_gpat_gerar",
+      "type": "EXECUTOR",
+      "path": "docs/database/procedures_raw_texts/sp_ffa_gpat_gerar.sql",
+      "reads": ["ffa"],
+      "writes": ["gpat", "codigo_universal"],
+      "calls": ["sp_sessao_assert", "sp_codigo_emitir_interno"],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_fluxo_estoque",
+      "type": "EXECUTOR",
+      "path": "docs/database/procedures_raw_texts/sp_fluxo_estoque.sql",
+      "reads": ["estoque_saldo"],
+      "writes": ["estoque_saldo", "estoque_audit_stream", "estoque_execucao_pipeline"],
+      "calls": [],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_farm_dispensacao_criar",
+      "type": "EXECUTOR",
+      "path": "docs/database/procedures_raw_texts/sp_farm_dispensacao_criar.sql",
+      "reads": ["ffa"],
+      "writes": ["farm_dispensacao"],
+      "calls": ["sp_sessao_assert", "sp_assert_true"],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_farm_dispensacao_registrar",
+      "type": "EXECUTOR",
+      "path": "docs/database/procedures_raw_texts/sp_farm_dispensacao_registrar.sql",
+      "reads": ["farm_receita_controlada", "farm_operacao"],
+      "writes": ["farm_dispensacao", "estoque_movimento"],
+      "calls": ["sp_auditoria_evento_registrar"],
+      "status": "REAL_IMPLEMENTED"
+    },
+    {
+      "name": "sp_farm_reserva_confirmar",
+      "type": "EXECUTOR",
+      "path": "docs/database/procedures_raw_texts/sp_farm_reserva_confirmar.sql",
+      "reads": ["estoque_reserva"],
+      "writes": ["estoque_lote", "estoque_reserva", "farm_dispensacao"],
+      "calls": ["sp_auditoria_evento_registrar"],
+      "status": "REAL_IMPLEMENTED"
+    }
+  ],
+  "total_existing": 10,
+  "total_missing_critical": 6
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_sessao_encerrar",
+  "type": "PROCEDURE",
+  "startLine": 32277,
+  "endLine": 32307,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_sessao_encerrar`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_motivo            VARCHAR(200)\n)\nBEGIN\n    DECLARE v_id_usuario BIGINT;\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    SELECT su.id_usuario\n      INTO v_id_usuario\n      FROM sessao_usuario su\n     WHERE su.id_sessao_usuario = p_id_sessao_usuario;\n\n    UPDATE sessao_usuario\n       SET ativo = 0,\n           encerrado_em = NOW(),\n           token = NULL\n     WHERE id_sessao_usuario = p_id_sessao_usuario;\n\n    CALL sp_auditoria_evento_registrar(\n        p_id_sessao_usuario,\n        'sessao_usuario',\n        p_id_sessao_usuario,\n        'SESSAO_ENCERRADA',\n        CONCAT('Motivo: ', COALESCE(p_motivo,'(n/a)')),\n        v_id_usuario,\n        'sessao_usuario',\n        v_id_usuario\n    );\nEND ;;"
+}

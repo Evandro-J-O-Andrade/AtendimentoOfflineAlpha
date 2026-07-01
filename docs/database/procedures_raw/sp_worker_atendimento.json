@@ -1,0 +1,7 @@
+{
+  "name": "sp_worker_atendimento",
+  "type": "PROCEDURE",
+  "startLine": 33693,
+  "endLine": 33741,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_worker_atendimento`(\n    IN p_id_queue BIGINT,\n    IN p_uuid_execution CHAR(36),\n    IN p_id_tenant BIGINT,\n    IN p_id_usuario BIGINT,\n    IN p_id_perfil BIGINT,\n    IN p_payload JSON,\n    OUT p_resultado JSON,\n    OUT p_sucesso BOOLEAN\n)\nBEGIN\n    DECLARE v_id BIGINT;\n    DECLARE v_acao VARCHAR(50);\n\n    SET v_id = JSON_UNQUOTE(JSON_EXTRACT(p_payload,'$.id_atendimento'));\n    SET v_acao = JSON_UNQUOTE(JSON_EXTRACT(p_payload,'$.acao'));\n\n    IF v_acao = 'INICIAR' THEN\n\n        UPDATE atendimento\n        SET status='EM_ANDAMENTO',\n            updated_at=NOW(6)\n        WHERE id_atendimento=v_id;\n\n        SET p_resultado=JSON_OBJECT('status','INICIADO');\n        SET p_sucesso=TRUE;\n\n    ELSEIF v_acao='TRANSICIONAR' THEN\n\n        UPDATE atendimento\n        SET status=JSON_UNQUOTE(JSON_EXTRACT(p_payload,'$.novo_status')),\n            updated_at=NOW(6)\n        WHERE id_atendimento=v_id;\n\n        SET p_resultado=JSON_OBJECT('status','TRANSICIONADO');\n        SET p_sucesso=TRUE;\n\n    ELSE\n        SET p_resultado=JSON_OBJECT('erro','ACAO_DESCONHECIDA');\n        SET p_sucesso=FALSE;\n    END IF;\n\n    UPDATE runtime_execution_queue\n    SET status=IF(p_sucesso,'CONCLUIDO','FALHOU'),\n        finished_at=NOW(6),\n        result_payload=p_resultado\n    WHERE id_queue=p_id_queue;\n\nEND ;;"
+}

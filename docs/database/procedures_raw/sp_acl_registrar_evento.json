@@ -1,0 +1,7 @@
+{
+  "name": "sp_acl_registrar_evento",
+  "type": "PROCEDURE",
+  "startLine": 16771,
+  "endLine": 16798,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_acl_registrar_evento`(\n    IN p_id_usuario BIGINT,\n    IN p_id_sistema BIGINT,\n    IN p_id_perfil BIGINT,\n    IN p_evento VARCHAR(50),\n    IN p_sucesso TINYINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    INSERT INTO usuario_sistema_acl_evento\n    (\n        id_usuario,\n        id_sistema,\n        id_perfil,\n        evento,\n        sucesso\n    )\n    VALUES\n    (\n        p_id_usuario,\n        p_id_sistema,\n        p_id_perfil,\n        p_evento,\n        p_sucesso\n    );\n\nEND ;;"
+}

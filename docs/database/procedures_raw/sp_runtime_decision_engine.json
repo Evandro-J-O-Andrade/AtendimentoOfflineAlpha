@@ -1,0 +1,7 @@
+{
+  "name": "sp_runtime_decision_engine",
+  "type": "PROCEDURE",
+  "startLine": 30544,
+  "endLine": 30584,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_runtime_decision_engine`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_transicao_solicitada VARCHAR(60),\n    IN p_payload_json JSON\n)\nBEGIN\n    DECLARE v_id_usuario BIGINT;\n    DECLARE v_estado_atual VARCHAR(60);\n    DECLARE v_fingerprint CHAR(64);\n    \n    -- LAYER 1: GATEKEEPER (Rápido/No-Lock)\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n    SELECT id_usuario INTO v_id_usuario FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao_usuario;\n    \n    -- LAYER 2: ORCHESTRATOR (Lógica de Workflow)\n    -- Busca estado atual no Core Imutável\n    SELECT estado_atual INTO v_estado_atual \n    FROM atendimento_estado_ativo \n    WHERE id_ffa = JSON_UNQUOTE(JSON_EXTRACT(p_payload_json, '$.id_ffa'));\n\n    -- LAYER 3: SEMANTIC WORKER (Escrita e Fingerprint)\n    -- Gerar o Fingerprint Determinístico\n    SET v_fingerprint = SHA2(CONCAT(v_id_usuario, v_estado_atual, p_transicao_solicitada, NOW(6)), 256);\n\n    -- Gravação no Ledger (Append-Only)\n    INSERT INTO atendimento_evento_ledger (\n        id_sessao_usuario, \n        evento, \n        estado_de, \n        estado_para, \n        decision_fingerprint,\n        payload\n    ) VALUES (\n        p_id_sessao_usuario, \n        p_transicao_solicitada, \n        v_estado_atual, \n        'ESTADO_DESTINO_RESOLVIDO', -- vindo da matriz\n        v_fingerprint,\n        p_payload_json\n    );\nEND ;;"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_dummy_paciente_500",
+  "type": "PROCEDURE",
+  "startLine": 31130,
+  "endLine": 31160,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_dummy_paciente_500`()\nBEGIN\n\n    DECLARE v_i INT DEFAULT 1;\n\n    START TRANSACTION;\n\n    WHILE v_i <= 500 DO\n\n        INSERT INTO paciente\n        (\n            nome,\n            ativo,\n            criado_em\n        )\n        VALUES\n        (\n            CONCAT('PACIENTE_SEED_', v_i),\n            1,\n            NOW(6)\n        )\n        ON DUPLICATE KEY UPDATE\n        nome = VALUES(nome);\n\n        SET v_i = v_i + 1;\n\n    END WHILE;\n\n    COMMIT;\n\nEND ;;"
+}

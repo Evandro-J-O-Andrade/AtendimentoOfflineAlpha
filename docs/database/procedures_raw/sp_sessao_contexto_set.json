@@ -1,0 +1,7 @@
+{
+  "name": "sp_sessao_contexto_set",
+  "type": "PROCEDURE",
+  "startLine": 32246,
+  "endLine": 32261,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_sessao_contexto_set`(\n    IN p_id_sessao BIGINT,\n    IN p_id_unidade BIGINT,\n    IN p_id_local BIGINT,\n    IN p_id_perfil BIGINT\n)\nBEGIN\n\n    UPDATE sessao_usuario\n    SET \n        id_unidade = p_id_unidade,\n        id_local   = p_id_local,\n        id_perfil  = p_id_perfil\n    WHERE id_sessao_usuario = p_id_sessao;\n\nEND ;;"
+}

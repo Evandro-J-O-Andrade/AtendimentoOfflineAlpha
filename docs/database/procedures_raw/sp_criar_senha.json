@@ -1,0 +1,7 @@
+{
+  "name": "sp_criar_senha",
+  "type": "PROCEDURE",
+  "startLine": 18763,
+  "endLine": 18788,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_criar_senha`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_sistema BIGINT,\n    IN p_id_unidade BIGINT,\n    IN p_id_local BIGINT,\n    IN p_prefixo VARCHAR(10),\n    IN p_numero INT\n)\nBEGIN\n    DECLARE v_id_senha BIGINT;\n\n    -- Insere a senha no core\n    INSERT INTO senha (id_sistema, id_unidade, id_local, prefixo, numero, criado_em)\n    VALUES (p_id_sistema, p_id_unidade, p_id_local, p_prefixo, p_numero, NOW());\n\n    SET v_id_senha = LAST_INSERT_ID();\n\n    -- Auditoria\n    INSERT INTO auditoria_evento (id_sessao_usuario, entidade, id_entidade, acao, criado_em)\n    VALUES (p_id_sessao_usuario, 'senha', v_id_senha, 'CREATE', NOW());\n\n    -- Evento semântico\n    INSERT INTO senha_eventos (id_senha, id_sessao_usuario, evento, criado_em)\n    VALUES (v_id_senha, p_id_sessao_usuario, 'SENHA_CRIADA', NOW());\n\nEND ;;"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_runtime_funcionario_full",
+  "type": "PROCEDURE",
+  "startLine": 31309,
+  "endLine": 31359,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_runtime_funcionario_full`()\nBEGIN\n\n    DECLARE v_i INT DEFAULT 1;\n    DECLARE v_tipo VARCHAR(50);\n\n    START TRANSACTION;\n\n    WHILE v_i <= 500 DO\n\n        CASE (v_i MOD 10)\n            WHEN 0 THEN SET v_tipo = 'MEDICO';\n            WHEN 1 THEN SET v_tipo = 'ENFERMEIRO';\n            WHEN 2 THEN SET v_tipo = 'TECNICO_ENFERMAGEM';\n            WHEN 3 THEN SET v_tipo = 'RECEPCIONISTA';\n            WHEN 4 THEN SET v_tipo = 'FARMACEUTICO';\n            WHEN 5 THEN SET v_tipo = 'ADMINISTRATIVO';\n            WHEN 6 THEN SET v_tipo = 'GESTOR';\n            WHEN 7 THEN SET v_tipo = 'SUPORTE_TI';\n            WHEN 8 THEN SET v_tipo = 'COORDENADOR';\n            ELSE SET v_tipo = 'OUTRO';\n        END CASE;\n\n        INSERT IGNORE INTO funcionario\n        (\n            id_pessoa,\n            tipo_funcionario,\n            cargo,\n            departamento,\n            matricula,\n            ativo,\n            criado_em\n        )\n        VALUES\n        (\n            v_i,\n            v_tipo,\n            CONCAT('CARGO_', v_tipo),\n            CONCAT('DEP_', v_tipo),\n            CONCAT('MAT_', LPAD(v_i,6,'0')),\n            1,\n            NOW(6)\n        );\n\n        SET v_i = v_i + 1;\n\n    END WHILE;\n\n    COMMIT;\n\nEND ;;"
+}

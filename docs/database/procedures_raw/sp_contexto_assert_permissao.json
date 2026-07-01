@@ -1,0 +1,7 @@
+{
+  "name": "sp_contexto_assert_permissao",
+  "type": "PROCEDURE",
+  "startLine": 18612,
+  "endLine": 18642,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_contexto_assert_permissao`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_acao VARCHAR(100),\n    IN p_recurso VARCHAR(100)\n)\nBEGIN\n    DECLARE v_count INT;\n\n    SELECT COUNT(1)\n      INTO v_count\n      FROM sessao_usuario su\n      JOIN usuario_contexto uc\n        ON uc.id_usuario = su.id_usuario\n       AND uc.id_unidade = su.id_unidade\n       AND uc.id_sistema = su.id_sistema\n       AND uc.ativo = 1\n      JOIN perfil_permissao pp\n        ON pp.id_perfil = uc.id_perfil\n       AND pp.acao = p_acao\n       AND pp.recurso = p_recurso\n       AND pp.ativo = 1\n     WHERE su.id_sessao_usuario = p_id_sessao_usuario\n       AND su.ativa = 1;\n\n    CALL sp_assert_true(\n        v_count > 0,\n        'PERMISSAO_NEGADA',\n        CONCAT('Sem permissão para ', p_acao, ' em ', p_recurso)\n    );\n\nEND ;;"
+}

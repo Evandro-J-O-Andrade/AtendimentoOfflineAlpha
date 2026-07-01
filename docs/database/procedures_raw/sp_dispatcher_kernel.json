@@ -1,0 +1,7 @@
+{
+  "name": "sp_dispatcher_kernel",
+  "type": "PROCEDURE",
+  "startLine": 18804,
+  "endLine": 18869,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_dispatcher_kernel`(\n    IN p_id_tenant BIGINT,\n    IN p_id_usuario BIGINT,\n    IN p_id_perfil BIGINT,\n    IN p_id_sessao BIGINT,\n    IN p_worker_type VARCHAR(50),\n    IN p_acao VARCHAR(100),\n    IN p_payload JSON,\n    OUT p_uuid_execution CHAR(36),\n    OUT p_sucesso BOOLEAN,\n    OUT p_mensagem VARCHAR(500)\n)\nBEGIN\n\n    DECLARE v_uuid CHAR(36);\n    DECLARE v_lock BIGINT;\n    DECLARE v_fingerprint CHAR(64);\n\n    SET v_uuid = UUID();\n\n    SET v_fingerprint =\n        fn_decision_fingerprint(\n            p_acao,\n            p_id_tenant,\n            p_id_usuario,\n            p_payload\n        );\n\n    CALL sp_kernel_writer_lock(v_uuid,v_lock);\n\n    INSERT INTO runtime_execution_queue\n    (\n        uuid_transacao,\n        uuid_execution,\n        id_tenant,\n        id_usuario,\n        id_perfil,\n        id_sessao,\n        worker_type,\n        acao,\n        payload,\n        decision_fingerprint,\n        status\n    )\n    VALUES\n    (\n        v_uuid,\n        v_uuid,\n        p_id_tenant,\n        p_id_usuario,\n        p_id_perfil,\n        p_id_sessao,\n        p_worker_type,\n        p_acao,\n        p_payload,\n        v_fingerprint,\n        'PENDENTE'\n    );\n\n    CALL sp_kernel_writer_unlock(v_lock);\n\n    SET p_uuid_execution = v_uuid;\n    SET p_sucesso = TRUE;\n    SET p_mensagem = 'EXEC_ENFILEIRADA';\n\nEND ;;"
+}

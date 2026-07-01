@@ -1,0 +1,3372 @@
+{
+  "generated": "01/07/2026 05:24:37",
+  "all": [
+    {
+      "file": "acompanhante.json",
+      "domain": "Unknown",
+      "name": "acompanhante",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "administracao_medicacao_ordem.json",
+      "domain": "Unknown",
+      "name": "administracao_medicacao_ordem",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "administracao_medicacao.json",
+      "domain": "Unknown",
+      "name": "administracao_medicacao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "agenda_disponibilidade.json",
+      "domain": "Agendamento",
+      "name": "agenda_disponibilidade",
+      "refined_domain": "Agendamento"
+    },
+    {
+      "file": "agendamento.json",
+      "domain": "Agendamento",
+      "name": "agendamento",
+      "refined_domain": "Agendamento"
+    },
+    {
+      "file": "agendamentos_eventos.json",
+      "domain": "Agendamento",
+      "name": "agendamentos_eventos",
+      "refined_domain": "Agendamento"
+    },
+    {
+      "file": "alerta_consumo.json",
+      "domain": "Unknown",
+      "name": "alerta_consumo",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "alerta_destinatario.json",
+      "domain": "Unknown",
+      "name": "alerta_destinatario",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "alerta_regra.json",
+      "domain": "Unknown",
+      "name": "alerta_regra",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "alerta.json",
+      "domain": "Unknown",
+      "name": "alerta",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "almoxarifado_central.json",
+      "domain": "Unknown",
+      "name": "almoxarifado_central",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "anamnese.json",
+      "domain": "Unknown",
+      "name": "anamnese",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "anotacao_enfermagem.json",
+      "domain": "Unknown",
+      "name": "anotacao_enfermagem",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assinatura_digital_documentos.json",
+      "domain": "Unknown",
+      "name": "assinatura_digital_documentos",
+      "refined_domain": "Documents"
+    },
+    {
+      "file": "assinatura_digital_prontuario.json",
+      "domain": "Unknown",
+      "name": "assinatura_digital_prontuario",
+      "refined_domain": "Documents"
+    },
+    {
+      "file": "assistencia_social_atendimento.json",
+      "domain": "Unknown",
+      "name": "assistencia_social_atendimento",
+      "refined_domain": "Social"
+    },
+    {
+      "file": "assistencia_social_evento.json",
+      "domain": "Unknown",
+      "name": "assistencia_social_evento",
+      "refined_domain": "Social"
+    },
+    {
+      "file": "assistencial_checkpoint_global.json",
+      "domain": "Unknown",
+      "name": "assistencial_checkpoint_global",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_circuit_breaker.json",
+      "domain": "Unknown",
+      "name": "assistencial_circuit_breaker",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_evento_hash.json",
+      "domain": "Unknown",
+      "name": "assistencial_evento_hash",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_minipal_metric.json",
+      "domain": "Unknown",
+      "name": "assistencial_minipal_metric",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_quorum_clinico.json",
+      "domain": "Unknown",
+      "name": "assistencial_quorum_clinico",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_raim_metric.json",
+      "domain": "Unknown",
+      "name": "assistencial_raim_metric",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_runtime_federado.json",
+      "domain": "Unknown",
+      "name": "assistencial_runtime_federado",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_runtime_panel.json",
+      "domain": "Unknown",
+      "name": "assistencial_runtime_panel",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_simulacao_futura.json",
+      "domain": "Unknown",
+      "name": "assistencial_simulacao_futura",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_snapshot_runtime.json",
+      "domain": "Unknown",
+      "name": "assistencial_snapshot_runtime",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_telemetria_runtime.json",
+      "domain": "Unknown",
+      "name": "assistencial_telemetria_runtime",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "assistencial_watchdog_fila.json",
+      "domain": "Unknown",
+      "name": "assistencial_watchdog_fila",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "atendimento_anamnese.json",
+      "domain": "HIS",
+      "name": "atendimento_anamnese",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_balanco_hidrico.json",
+      "domain": "HIS",
+      "name": "atendimento_balanco_hidrico",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_checagem.json",
+      "domain": "HIS",
+      "name": "atendimento_checagem",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_desfecho.json",
+      "domain": "HIS",
+      "name": "atendimento_desfecho",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_diagnostico.json",
+      "domain": "HIS",
+      "name": "atendimento_diagnostico",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_escalas_risco.json",
+      "domain": "HIS",
+      "name": "atendimento_escalas_risco",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_estado_ativo.json",
+      "domain": "HIS",
+      "name": "atendimento_estado_ativo",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_evento_ledger.json",
+      "domain": "HIS",
+      "name": "atendimento_evento_ledger",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_evento.json",
+      "domain": "HIS",
+      "name": "atendimento_evento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_evolucao.json",
+      "domain": "HIS",
+      "name": "atendimento_evolucao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_exame_fisico.json",
+      "domain": "HIS",
+      "name": "atendimento_exame_fisico",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_identidade_fluxo.json",
+      "domain": "HIS",
+      "name": "atendimento_identidade_fluxo",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_movimentacao.json",
+      "domain": "HIS",
+      "name": "atendimento_movimentacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_observacao.json",
+      "domain": "HIS",
+      "name": "atendimento_observacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_pedidos_exame.json",
+      "domain": "HIS",
+      "name": "atendimento_pedidos_exame",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_pre_hospitalar.json",
+      "domain": "HIS",
+      "name": "atendimento_pre_hospitalar",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_prescricao.json",
+      "domain": "HIS",
+      "name": "atendimento_prescricao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_profissional.json",
+      "domain": "HIS",
+      "name": "atendimento_profissional",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_recepcao.json",
+      "domain": "HIS",
+      "name": "atendimento_recepcao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_sinais_vitais.json",
+      "domain": "HIS",
+      "name": "atendimento_sinais_vitais",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_sumario_alta.json",
+      "domain": "HIS",
+      "name": "atendimento_sumario_alta",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_transicao_ledger.json",
+      "domain": "HIS",
+      "name": "atendimento_transicao_ledger",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_triagem.json",
+      "domain": "HIS",
+      "name": "atendimento_triagem",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento_vinculo.json",
+      "domain": "HIS",
+      "name": "atendimento_vinculo",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "atendimento.json",
+      "domain": "HIS",
+      "name": "atendimento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "auditoria_acesso.json",
+      "domain": "Unknown",
+      "name": "auditoria_acesso",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_almoxarifado.json",
+      "domain": "Unknown",
+      "name": "auditoria_almoxarifado",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_contexto.json",
+      "domain": "Unknown",
+      "name": "auditoria_contexto",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_erro.json",
+      "domain": "Unknown",
+      "name": "auditoria_erro",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_estoque_sanitario.json",
+      "domain": "Unknown",
+      "name": "auditoria_estoque_sanitario",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_estoque.json",
+      "domain": "Unknown",
+      "name": "auditoria_estoque",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_evento.json",
+      "domain": "Unknown",
+      "name": "auditoria_evento",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_excecoes.json",
+      "domain": "Unknown",
+      "name": "auditoria_excecoes",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_ffa.json",
+      "domain": "Unknown",
+      "name": "auditoria_ffa",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_fila.json",
+      "domain": "Unknown",
+      "name": "auditoria_fila",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_mestre.json",
+      "domain": "Unknown",
+      "name": "auditoria_mestre",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auditoria_visualizacao_prontuario.json",
+      "domain": "Unknown",
+      "name": "auditoria_visualizacao_prontuario",
+      "refined_domain": "Runtime/Auditoria"
+    },
+    {
+      "file": "auth_audit.json",
+      "domain": "Unknown",
+      "name": "auth_audit",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_bloqueio.json",
+      "domain": "Unknown",
+      "name": "auth_bloqueio",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_grupo_permissao.json",
+      "domain": "Unknown",
+      "name": "auth_grupo_permissao",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_grupo_usuario.json",
+      "domain": "Unknown",
+      "name": "auth_grupo_usuario",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_grupo.json",
+      "domain": "Unknown",
+      "name": "auth_grupo",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_log.json",
+      "domain": "Unknown",
+      "name": "auth_log",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_notificacao.json",
+      "domain": "Unknown",
+      "name": "auth_notificacao",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_parametro.json",
+      "domain": "Unknown",
+      "name": "auth_parametro",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_sessao_dispositivo.json",
+      "domain": "Unknown",
+      "name": "auth_sessao_dispositivo",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_sessao.json",
+      "domain": "Unknown",
+      "name": "auth_sessao",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_tentativa_login.json",
+      "domain": "Unknown",
+      "name": "auth_tentativa_login",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "auth_token.json",
+      "domain": "Unknown",
+      "name": "auth_token",
+      "refined_domain": "IAM/Auth"
+    },
+    {
+      "file": "caixa_evento.json",
+      "domain": "Unknown",
+      "name": "caixa_evento",
+      "refined_domain": "Financeiro"
+    },
+    {
+      "file": "caixa.json",
+      "domain": "Unknown",
+      "name": "caixa",
+      "refined_domain": "Financeiro"
+    },
+    {
+      "file": "cat_acidente_trabalho_evento.json",
+      "domain": "Unknown",
+      "name": "cat_acidente_trabalho_evento",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "cat_acidente_trabalho.json",
+      "domain": "Unknown",
+      "name": "cat_acidente_trabalho",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "cat_evento.json",
+      "domain": "Unknown",
+      "name": "cat_evento",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "cat_notificacao.json",
+      "domain": "Unknown",
+      "name": "cat_notificacao",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "cat_regra_item.json",
+      "domain": "Unknown",
+      "name": "cat_regra_item",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "chamado_evento.json",
+      "domain": "SAC",
+      "name": "chamado_evento",
+      "refined_domain": "SAC"
+    },
+    {
+      "file": "chamado_manutencao.json",
+      "domain": "SAC",
+      "name": "chamado_manutencao",
+      "refined_domain": "SAC"
+    },
+    {
+      "file": "chamado.json",
+      "domain": "SAC",
+      "name": "chamado",
+      "refined_domain": "SAC"
+    },
+    {
+      "file": "cidade.json",
+      "domain": "Unknown",
+      "name": "cidade",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "classificacao_risco.json",
+      "domain": "Unknown",
+      "name": "classificacao_risco",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "cliente.json",
+      "domain": "Unknown",
+      "name": "cliente",
+      "refined_domain": "Core/Business"
+    },
+    {
+      "file": "codigo_externo_map.json",
+      "domain": "Unknown",
+      "name": "codigo_externo_map",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "codigo_externo_vinculo.json",
+      "domain": "Unknown",
+      "name": "codigo_externo_vinculo",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "codigo_prefixo_config.json",
+      "domain": "Unknown",
+      "name": "codigo_prefixo_config",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "codigo_prefixo_regra.json",
+      "domain": "Unknown",
+      "name": "codigo_prefixo_regra",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "codigo_universal.json",
+      "domain": "Unknown",
+      "name": "codigo_universal",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "config_leitos.json",
+      "domain": "Unknown",
+      "name": "config_leitos",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "config_locais.json",
+      "domain": "Unknown",
+      "name": "config_locais",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "config_sistema.json",
+      "domain": "Unknown",
+      "name": "config_sistema",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "configuracao.json",
+      "domain": "Unknown",
+      "name": "configuracao",
+      "refined_domain": "Core/Business"
+    },
+    {
+      "file": "conselho_profissional.json",
+      "domain": "Unknown",
+      "name": "conselho_profissional",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "consumo_insumo.json",
+      "domain": "Unknown",
+      "name": "consumo_insumo",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "consumo_limpeza.json",
+      "domain": "Unknown",
+      "name": "consumo_limpeza",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "consumo_manutencao.json",
+      "domain": "Unknown",
+      "name": "consumo_manutencao",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "contexto_atendimento.json",
+      "domain": "Unknown",
+      "name": "contexto_atendimento",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "contrato.json",
+      "domain": "Unknown",
+      "name": "contrato",
+      "refined_domain": "Core/Business"
+    },
+    {
+      "file": "coordenador_estado_global.json",
+      "domain": "Unknown",
+      "name": "coordenador_estado_global",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "dispensacao_medicacao.json",
+      "domain": "Unknown",
+      "name": "dispensacao_medicacao",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "dispositivo_tipo.json",
+      "domain": "Unknown",
+      "name": "dispositivo_tipo",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "dispositivo.json",
+      "domain": "Unknown",
+      "name": "dispositivo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "documento_arquivo.json",
+      "domain": "Unknown",
+      "name": "documento_arquivo",
+      "refined_domain": "Documents"
+    },
+    {
+      "file": "documento_emissao_evento.json",
+      "domain": "Unknown",
+      "name": "documento_emissao_evento",
+      "refined_domain": "Documents"
+    },
+    {
+      "file": "documento_emissao.json",
+      "domain": "Unknown",
+      "name": "documento_emissao",
+      "refined_domain": "Documents"
+    },
+    {
+      "file": "documento_tipo_config.json",
+      "domain": "Unknown",
+      "name": "documento_tipo_config",
+      "refined_domain": "Documents"
+    },
+    {
+      "file": "enfermagem_aprazamento.json",
+      "domain": "Unknown",
+      "name": "enfermagem_aprazamento",
+      "refined_domain": "HIS/Enfermagem"
+    },
+    {
+      "file": "enfermagem_diagnosticos.json",
+      "domain": "Unknown",
+      "name": "enfermagem_diagnosticos",
+      "refined_domain": "HIS/Enfermagem"
+    },
+    {
+      "file": "enfermagem.json",
+      "domain": "Unknown",
+      "name": "enfermagem",
+      "refined_domain": "HIS/Enfermagem"
+    },
+    {
+      "file": "erro_catalogo.json",
+      "domain": "Unknown",
+      "name": "erro_catalogo",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "erro_evento.json",
+      "domain": "Unknown",
+      "name": "erro_evento",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "escala_medica.json",
+      "domain": "Unknown",
+      "name": "escala_medica",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "escala_plantao_atual.json",
+      "domain": "Unknown",
+      "name": "escala_plantao_atual",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "escala_plantao.json",
+      "domain": "Unknown",
+      "name": "escala_plantao",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "escala_profissional.json",
+      "domain": "Unknown",
+      "name": "escala_profissional",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "especialidade.json",
+      "domain": "Unknown",
+      "name": "especialidade",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "estoque_alerta.json",
+      "domain": "Unknown",
+      "name": "estoque_alerta",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_almoxarifado_central.json",
+      "domain": "Unknown",
+      "name": "estoque_almoxarifado_central",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_audit_stream.json",
+      "domain": "Unknown",
+      "name": "estoque_audit_stream",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_conciliacao_atomica.json",
+      "domain": "Unknown",
+      "name": "estoque_conciliacao_atomica",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_conta.json",
+      "domain": "Unknown",
+      "name": "estoque_conta",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_documento_execucao.json",
+      "domain": "Unknown",
+      "name": "estoque_documento_execucao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_evento_confirmacao.json",
+      "domain": "Unknown",
+      "name": "estoque_evento_confirmacao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_execucao_pipeline.json",
+      "domain": "Unknown",
+      "name": "estoque_execucao_pipeline",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_execucao.json",
+      "domain": "Unknown",
+      "name": "estoque_execucao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_fluxo_assistencial.json",
+      "domain": "Unknown",
+      "name": "estoque_fluxo_assistencial",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_inventario_item.json",
+      "domain": "Unknown",
+      "name": "estoque_inventario_item",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_inventario.json",
+      "domain": "Unknown",
+      "name": "estoque_inventario",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_item.json",
+      "domain": "Unknown",
+      "name": "estoque_item",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_ledger.json",
+      "domain": "Unknown",
+      "name": "estoque_ledger",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_local.json",
+      "domain": "Unknown",
+      "name": "estoque_local",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_lote_snapshot.json",
+      "domain": "Unknown",
+      "name": "estoque_lote_snapshot",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_lote.json",
+      "domain": "Unknown",
+      "name": "estoque_lote",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_movimentacao_itens.json",
+      "domain": "Unknown",
+      "name": "estoque_movimentacao_itens",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_movimentacao.json",
+      "domain": "Unknown",
+      "name": "estoque_movimentacao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_movimento_item.json",
+      "domain": "Unknown",
+      "name": "estoque_movimento_item",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_movimento.json",
+      "domain": "Unknown",
+      "name": "estoque_movimento",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_pipeline_estado.json",
+      "domain": "Unknown",
+      "name": "estoque_pipeline_estado",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_produto_codigo_externo.json",
+      "domain": "Unknown",
+      "name": "estoque_produto_codigo_externo",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_produto.json",
+      "domain": "Unknown",
+      "name": "estoque_produto",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_reserva_evento.json",
+      "domain": "Unknown",
+      "name": "estoque_reserva_evento",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_reserva.json",
+      "domain": "Unknown",
+      "name": "estoque_reserva",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_saldo_central.json",
+      "domain": "Unknown",
+      "name": "estoque_saldo_central",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_saldo_master.json",
+      "domain": "Unknown",
+      "name": "estoque_saldo_master",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "estoque_saldo.json",
+      "domain": "Unknown",
+      "name": "estoque_saldo",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "evento_ffa.json",
+      "domain": "Unknown",
+      "name": "evento_ffa",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "evento_geral.json",
+      "domain": "Unknown",
+      "name": "evento_geral",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "evento_limpeza.json",
+      "domain": "Unknown",
+      "name": "evento_limpeza",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "eventos_fluxo.json",
+      "domain": "Unknown",
+      "name": "eventos_fluxo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "evolucao_enfermagem.json",
+      "domain": "Unknown",
+      "name": "evolucao_enfermagem",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "evolucao_medica.json",
+      "domain": "Unknown",
+      "name": "evolucao_medica",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "evolucao_multidisciplinar.json",
+      "domain": "Unknown",
+      "name": "evolucao_multidisciplinar",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "exame_fisico.json",
+      "domain": "Unknown",
+      "name": "exame_fisico",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "exame_historico.json",
+      "domain": "Unknown",
+      "name": "exame_historico",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "exame_pedido_item.json",
+      "domain": "Unknown",
+      "name": "exame_pedido_item",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "exame_pedido.json",
+      "domain": "Unknown",
+      "name": "exame_pedido",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "exame.json",
+      "domain": "Unknown",
+      "name": "exame",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "farm_atendimento_externo.json",
+      "domain": "Unknown",
+      "name": "farm_atendimento_externo",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "farm_convenio_autorizacao.json",
+      "domain": "Unknown",
+      "name": "farm_convenio_autorizacao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "farm_dispensacao_item.json",
+      "domain": "Unknown",
+      "name": "farm_dispensacao_item",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "farm_dispensacao.json",
+      "domain": "Unknown",
+      "name": "farm_dispensacao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "farm_operacao.json",
+      "domain": "Unknown",
+      "name": "farm_operacao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "farm_receita_controlada.json",
+      "domain": "Unknown",
+      "name": "farm_receita_controlada",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "farmacia_atendimento_externo_dispensacao.json",
+      "domain": "Unknown",
+      "name": "farmacia_atendimento_externo_dispensacao",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "farmacia_atendimento_externo_item.json",
+      "domain": "Unknown",
+      "name": "farmacia_atendimento_externo_item",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "farmacia_dispensacao_log.json",
+      "domain": "Unknown",
+      "name": "farmacia_dispensacao_log",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "farmacia_externo_evento.json",
+      "domain": "Unknown",
+      "name": "farmacia_externo_evento",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "farmaco_auditoria_bloqueio.json",
+      "domain": "Unknown",
+      "name": "farmaco_auditoria_bloqueio",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "farmaco_auditoria.json",
+      "domain": "Unknown",
+      "name": "farmaco_auditoria",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "farmaco_movimentacao.json",
+      "domain": "Unknown",
+      "name": "farmaco_movimentacao",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "farmaco_unidade.json",
+      "domain": "Unknown",
+      "name": "farmaco_unidade",
+      "refined_domain": "HIS/Farmacia"
+    },
+    {
+      "file": "faturamento_codigo.json",
+      "domain": "Unknown",
+      "name": "faturamento_codigo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_conta_item.json",
+      "domain": "Unknown",
+      "name": "faturamento_conta_item",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_conta_paciente.json",
+      "domain": "Unknown",
+      "name": "faturamento_conta_paciente",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_conta_seq.json",
+      "domain": "Unknown",
+      "name": "faturamento_conta_seq",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_conta.json",
+      "domain": "Unknown",
+      "name": "faturamento_conta",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_convenio.json",
+      "domain": "Unknown",
+      "name": "faturamento_convenio",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_convenios.json",
+      "domain": "Unknown",
+      "name": "faturamento_convenios",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_evento.json",
+      "domain": "Unknown",
+      "name": "faturamento_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_insumo.json",
+      "domain": "Unknown",
+      "name": "faturamento_insumo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_item.json",
+      "domain": "Unknown",
+      "name": "faturamento_item",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_producao_sus.json",
+      "domain": "Unknown",
+      "name": "faturamento_producao_sus",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_producao.json",
+      "domain": "Unknown",
+      "name": "faturamento_producao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_regras_validacao.json",
+      "domain": "Unknown",
+      "name": "faturamento_regras_validacao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_sigtap.json",
+      "domain": "Unknown",
+      "name": "faturamento_sigtap",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "faturamento_sus_config.json",
+      "domain": "Unknown",
+      "name": "faturamento_sus_config",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ffa_demandas_externas.json",
+      "domain": "HIS",
+      "name": "ffa_demandas_externas",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_diagnostico.json",
+      "domain": "HIS",
+      "name": "ffa_diagnostico",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_estado.json",
+      "domain": "HIS",
+      "name": "ffa_estado",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_estoque_conciliacao.json",
+      "domain": "HIS",
+      "name": "ffa_estoque_conciliacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_evolucao.json",
+      "domain": "HIS",
+      "name": "ffa_evolucao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_extra.json",
+      "domain": "HIS",
+      "name": "ffa_extra",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_historico_status.json",
+      "domain": "HIS",
+      "name": "ffa_historico_status",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_item.json",
+      "domain": "HIS",
+      "name": "ffa_item",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_prioridade.json",
+      "domain": "HIS",
+      "name": "ffa_prioridade",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_procedimento.json",
+      "domain": "HIS",
+      "name": "ffa_procedimento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_sinais_vitais.json",
+      "domain": "HIS",
+      "name": "ffa_sinais_vitais",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa_substatus.json",
+      "domain": "HIS",
+      "name": "ffa_substatus",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "ffa.json",
+      "domain": "HIS",
+      "name": "ffa",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "fila_evento.json",
+      "domain": "HIS",
+      "name": "fila_evento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "fila_operacional_evento.json",
+      "domain": "HIS",
+      "name": "fila_operacional_evento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "fila_operacional.json",
+      "domain": "HIS",
+      "name": "fila_operacional",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "fila_painel_runtime.json",
+      "domain": "HIS",
+      "name": "fila_painel_runtime",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "fila_retorno.json",
+      "domain": "HIS",
+      "name": "fila_retorno",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "fila_senha.json",
+      "domain": "HIS",
+      "name": "fila_senha",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "financeiro_repasse_medico.json",
+      "domain": "Unknown",
+      "name": "financeiro_repasse_medico",
+      "refined_domain": "Financeiro"
+    },
+    {
+      "file": "fluxo_orquestrador_canonico.json",
+      "domain": "Unknown",
+      "name": "fluxo_orquestrador_canonico",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "fluxo_status.json",
+      "domain": "Unknown",
+      "name": "fluxo_status",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "fluxo_transicao_matriz.json",
+      "domain": "Unknown",
+      "name": "fluxo_transicao_matriz",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "fluxo_transicao.json",
+      "domain": "Unknown",
+      "name": "fluxo_transicao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "forma_pagamento.json",
+      "domain": "Unknown",
+      "name": "forma_pagamento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "fornecedor.json",
+      "domain": "Unknown",
+      "name": "fornecedor",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "funcionario_conselho_profissional.json",
+      "domain": "Workforce",
+      "name": "funcionario_conselho_profissional",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "funcionario_especialidade.json",
+      "domain": "Workforce",
+      "name": "funcionario_especialidade",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "funcionario_unidade.json",
+      "domain": "Workforce",
+      "name": "funcionario_unidade",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "funcionario.json",
+      "domain": "Workforce",
+      "name": "funcionario",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "gaso_evento.json",
+      "domain": "Unknown",
+      "name": "gaso_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gaso_solicitacao.json",
+      "domain": "Unknown",
+      "name": "gaso_solicitacao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gasoterapia_consumo_evento.json",
+      "domain": "Unknown",
+      "name": "gasoterapia_consumo_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gasoterapia_consumo.json",
+      "domain": "Unknown",
+      "name": "gasoterapia_consumo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gpat_atendimento.json",
+      "domain": "Unknown",
+      "name": "gpat_atendimento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gpat_dispensacao.json",
+      "domain": "Unknown",
+      "name": "gpat_dispensacao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gpat_evento.json",
+      "domain": "Unknown",
+      "name": "gpat_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gpat_item.json",
+      "domain": "Unknown",
+      "name": "gpat_item",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "gpat.json",
+      "domain": "Unknown",
+      "name": "gpat",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "guardiao_acl_runtime.json",
+      "domain": "Unknown",
+      "name": "guardiao_acl_runtime",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "guardiao_runtime_final.json",
+      "domain": "Unknown",
+      "name": "guardiao_runtime_final",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "hardening_sp_excecao.json",
+      "domain": "Unknown",
+      "name": "hardening_sp_excecao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "hipotese_diagnostica.json",
+      "domain": "Unknown",
+      "name": "hipotese_diagnostica",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "hospital_leitos.json",
+      "domain": "Unknown",
+      "name": "hospital_leitos",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "identificador_global_assistencial.json",
+      "domain": "Unknown",
+      "name": "identificador_global_assistencial",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "integracao_mensageria_externa.json",
+      "domain": "Integration",
+      "name": "integracao_mensageria_externa",
+      "refined_domain": "Integration"
+    },
+    {
+      "file": "interconsulta.json",
+      "domain": "Unknown",
+      "name": "interconsulta",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "intercorrencia.json",
+      "domain": "Unknown",
+      "name": "intercorrencia",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "internacao_braden_avaliacao.json",
+      "domain": "HIS",
+      "name": "internacao_braden_avaliacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_cuidados.json",
+      "domain": "HIS",
+      "name": "internacao_cuidados",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_dietas.json",
+      "domain": "HIS",
+      "name": "internacao_dietas",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_dispositivos.json",
+      "domain": "HIS",
+      "name": "internacao_dispositivos",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_ferida_avaliacao.json",
+      "domain": "HIS",
+      "name": "internacao_ferida_avaliacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_historico.json",
+      "domain": "HIS",
+      "name": "internacao_historico",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_medicacao_administracao.json",
+      "domain": "HIS",
+      "name": "internacao_medicacao_administracao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_movimentacao.json",
+      "domain": "HIS",
+      "name": "internacao_movimentacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_prescricao_item.json",
+      "domain": "HIS",
+      "name": "internacao_prescricao_item",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_prescricao.json",
+      "domain": "HIS",
+      "name": "internacao_prescricao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_registro_enfermagem.json",
+      "domain": "HIS",
+      "name": "internacao_registro_enfermagem",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao_turno_registro.json",
+      "domain": "HIS",
+      "name": "internacao_turno_registro",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "internacao.json",
+      "domain": "HIS",
+      "name": "internacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "kernel_authz_policy.json",
+      "domain": "Unknown",
+      "name": "kernel_authz_policy",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "kernel_identity_trust_chain.json",
+      "domain": "Unknown",
+      "name": "kernel_identity_trust_chain",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "kernel_ledger.json",
+      "domain": "Unknown",
+      "name": "kernel_ledger",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "kernel_runtime_evento.json",
+      "domain": "Unknown",
+      "name": "kernel_runtime_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "kernel_runtime_heartbeat.json",
+      "domain": "Unknown",
+      "name": "kernel_runtime_heartbeat",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "kernel_runtime_single_writer_lock.json",
+      "domain": "Unknown",
+      "name": "kernel_runtime_single_writer_lock",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "kernel_single_writer_lock.json",
+      "domain": "Unknown",
+      "name": "kernel_single_writer_lock",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "lab_amostra.json",
+      "domain": "Unknown",
+      "name": "lab_amostra",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "lab_evento.json",
+      "domain": "Unknown",
+      "name": "lab_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "lab_pedido.json",
+      "domain": "Unknown",
+      "name": "lab_pedido",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "lab_protocolo_interno.json",
+      "domain": "Unknown",
+      "name": "lab_protocolo_interno",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "lab_resultado.json",
+      "domain": "Unknown",
+      "name": "lab_resultado",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "laboratorio_protocolo_evento.json",
+      "domain": "Unknown",
+      "name": "laboratorio_protocolo_evento",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "laboratorio_protocolo.json",
+      "domain": "Unknown",
+      "name": "laboratorio_protocolo",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "ledger_evento_sincronizacao_local.json",
+      "domain": "Unknown",
+      "name": "ledger_evento_sincronizacao_local",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ledger_evento_sincronizacao.json",
+      "domain": "Unknown",
+      "name": "ledger_evento_sincronizacao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ledger_global_sincronismo.json",
+      "domain": "Unknown",
+      "name": "ledger_global_sincronismo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "leito.json",
+      "domain": "Unknown",
+      "name": "leito",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "local_capacidade.json",
+      "domain": "Unknown",
+      "name": "local_capacidade",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "local_dispositivo.json",
+      "domain": "Unknown",
+      "name": "local_dispositivo",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "local_fila.json",
+      "domain": "Unknown",
+      "name": "local_fila",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "local_runtime.json",
+      "domain": "Unknown",
+      "name": "local_runtime",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "local_turno.json",
+      "domain": "Unknown",
+      "name": "local_turno",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "local.json",
+      "domain": "Unknown",
+      "name": "local",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "log_acesso_prontuario.json",
+      "domain": "Unknown",
+      "name": "log_acesso_prontuario",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "log_auditoria.json",
+      "domain": "Unknown",
+      "name": "log_auditoria",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "log_leitura_prontuario.json",
+      "domain": "Unknown",
+      "name": "log_leitura_prontuario",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "login_tentativa.json",
+      "domain": "Unknown",
+      "name": "login_tentativa",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "logradouro.json",
+      "domain": "Unknown",
+      "name": "logradouro",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "manutencao_execucao.json",
+      "domain": "Unknown",
+      "name": "manutencao_execucao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "md_arquivo_fonte_evento.json",
+      "domain": "Unknown",
+      "name": "md_arquivo_fonte_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "md_arquivo_fonte.json",
+      "domain": "Unknown",
+      "name": "md_arquivo_fonte",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "md_cid10.json",
+      "domain": "Unknown",
+      "name": "md_cid10",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "md_cnes_estabelecimento.json",
+      "domain": "Unknown",
+      "name": "md_cnes_estabelecimento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "md_competencia.json",
+      "domain": "Unknown",
+      "name": "md_competencia",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "md_sigpat_medicamento.json",
+      "domain": "Unknown",
+      "name": "md_sigpat_medicamento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "md_sigtap_procedimento.json",
+      "domain": "Unknown",
+      "name": "md_sigtap_procedimento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "medicacao_reavaliacao.json",
+      "domain": "Unknown",
+      "name": "medicacao_reavaliacao",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "medico_especialidade.json",
+      "domain": "Unknown",
+      "name": "medico_especialidade",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "medico.json",
+      "domain": "Unknown",
+      "name": "medico",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "notificacao_epidemiologica_evento.json",
+      "domain": "Unknown",
+      "name": "notificacao_epidemiologica_evento",
+      "refined_domain": "Epidemiologia"
+    },
+    {
+      "file": "notificacao_epidemiologica.json",
+      "domain": "Unknown",
+      "name": "notificacao_epidemiologica",
+      "refined_domain": "Epidemiologia"
+    },
+    {
+      "file": "notificacao_violencia_evento.json",
+      "domain": "Unknown",
+      "name": "notificacao_violencia_evento",
+      "refined_domain": "Epidemiologia"
+    },
+    {
+      "file": "notificacao_violencia.json",
+      "domain": "Unknown",
+      "name": "notificacao_violencia",
+      "refined_domain": "Epidemiologia"
+    },
+    {
+      "file": "nucleo_governanca_assistencial.json",
+      "domain": "Unknown",
+      "name": "nucleo_governanca_assistencial",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "obito_evento.json",
+      "domain": "Unknown",
+      "name": "obito_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "obito.json",
+      "domain": "Unknown",
+      "name": "obito",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "observacoes_eventos.json",
+      "domain": "Unknown",
+      "name": "observacoes_eventos",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "operacao_idempotencia.json",
+      "domain": "Unknown",
+      "name": "operacao_idempotencia",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ordem_assistencial_aprazamento.json",
+      "domain": "Unknown",
+      "name": "ordem_assistencial_aprazamento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ordem_assistencial_execucao.json",
+      "domain": "Unknown",
+      "name": "ordem_assistencial_execucao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ordem_assistencial_item.json",
+      "domain": "Unknown",
+      "name": "ordem_assistencial_item",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ordem_assistencial.json",
+      "domain": "Unknown",
+      "name": "ordem_assistencial",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "ordem_tipo_documento_config.json",
+      "domain": "Unknown",
+      "name": "ordem_tipo_documento_config",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "paciente_alertas.json",
+      "domain": "Unknown",
+      "name": "paciente_alertas",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "paciente_canonico.json",
+      "domain": "Unknown",
+      "name": "paciente_canonico",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "paciente_cns_evento.json",
+      "domain": "Unknown",
+      "name": "paciente_cns_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "paciente_cns.json",
+      "domain": "Unknown",
+      "name": "paciente_cns",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "paciente.json",
+      "domain": "Unknown",
+      "name": "paciente",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "painel_alertas_tempo.json",
+      "domain": "Unknown",
+      "name": "painel_alertas_tempo",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_config_def.json",
+      "domain": "Unknown",
+      "name": "painel_config_def",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_config.json",
+      "domain": "Unknown",
+      "name": "painel_config",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_consumo_evento.json",
+      "domain": "Unknown",
+      "name": "painel_consumo_evento",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_evento_stream.json",
+      "domain": "Unknown",
+      "name": "painel_evento_stream",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_fila_tipo.json",
+      "domain": "Unknown",
+      "name": "painel_fila_tipo",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_grupo_local.json",
+      "domain": "Unknown",
+      "name": "painel_grupo_local",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_grupo.json",
+      "domain": "Unknown",
+      "name": "painel_grupo",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_lane.json",
+      "domain": "Unknown",
+      "name": "painel_lane",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_local.json",
+      "domain": "Unknown",
+      "name": "painel_local",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_mensagem_consumo.json",
+      "domain": "Unknown",
+      "name": "painel_mensagem_consumo",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_mensagem.json",
+      "domain": "Unknown",
+      "name": "painel_mensagem",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel_monitoramento_especialidade.json",
+      "domain": "Unknown",
+      "name": "painel_monitoramento_especialidade",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "painel.json",
+      "domain": "Unknown",
+      "name": "painel",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "pdv_cliente.json",
+      "domain": "Unknown",
+      "name": "pdv_cliente",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "pdv_pagamento.json",
+      "domain": "Unknown",
+      "name": "pdv_pagamento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "pdv_venda_item.json",
+      "domain": "Unknown",
+      "name": "pdv_venda_item",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "pdv_venda.json",
+      "domain": "Unknown",
+      "name": "pdv_venda",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "pedido_medico_item.json",
+      "domain": "Unknown",
+      "name": "pedido_medico_item",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "pedido_medico.json",
+      "domain": "Unknown",
+      "name": "pedido_medico",
+      "refined_domain": "Diagnostics"
+    },
+    {
+      "file": "pep_assinatura_digital.json",
+      "domain": "Unknown",
+      "name": "pep_assinatura_digital",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "pep_registro.json",
+      "domain": "Unknown",
+      "name": "pep_registro",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "perfil_permissao.json",
+      "domain": "IAM",
+      "name": "perfil_permissao",
+      "refined_domain": "IAM"
+    },
+    {
+      "file": "perfil.json",
+      "domain": "IAM",
+      "name": "perfil",
+      "refined_domain": "IAM"
+    },
+    {
+      "file": "permissao.json",
+      "domain": "IAM",
+      "name": "permissao",
+      "refined_domain": "IAM"
+    },
+    {
+      "file": "pessoa_alergias.json",
+      "domain": "Core",
+      "name": "pessoa_alergias",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_conselho_registro.json",
+      "domain": "Core",
+      "name": "pessoa_conselho_registro",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_contato.json",
+      "domain": "Core",
+      "name": "pessoa_contato",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_documento.json",
+      "domain": "Core",
+      "name": "pessoa_documento",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_email.json",
+      "domain": "Core",
+      "name": "pessoa_email",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_endereco.json",
+      "domain": "Core",
+      "name": "pessoa_endereco",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_identificador.json",
+      "domain": "Core",
+      "name": "pessoa_identificador",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_logradouro.json",
+      "domain": "Core",
+      "name": "pessoa_logradouro",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_telefone.json",
+      "domain": "Core",
+      "name": "pessoa_telefone",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa_vinculo.json",
+      "domain": "Core",
+      "name": "pessoa_vinculo",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "pessoa.json",
+      "domain": "Core",
+      "name": "pessoa",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "plantao_escala.json",
+      "domain": "Unknown",
+      "name": "plantao_escala",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "plantao_modelo.json",
+      "domain": "Unknown",
+      "name": "plantao_modelo",
+      "refined_domain": "Workforce/Operational"
+    },
+    {
+      "file": "plantao.json",
+      "domain": "Unknown",
+      "name": "plantao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "prescricao_checagem_dupla.json",
+      "domain": "Unknown",
+      "name": "prescricao_checagem_dupla",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_checagem.json",
+      "domain": "Unknown",
+      "name": "prescricao_checagem",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_continua.json",
+      "domain": "Unknown",
+      "name": "prescricao_continua",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_internacao.json",
+      "domain": "Unknown",
+      "name": "prescricao_internacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_item.json",
+      "domain": "Unknown",
+      "name": "prescricao_item",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_itens.json",
+      "domain": "Unknown",
+      "name": "prescricao_itens",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_kit_itens.json",
+      "domain": "Unknown",
+      "name": "prescricao_kit_itens",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_kit_master.json",
+      "domain": "Unknown",
+      "name": "prescricao_kit_master",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_medica.json",
+      "domain": "Unknown",
+      "name": "prescricao_medica",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao_medicacao.json",
+      "domain": "Unknown",
+      "name": "prescricao_medicacao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescricao.json",
+      "domain": "Unknown",
+      "name": "prescricao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "prescritor_externo.json",
+      "domain": "Unknown",
+      "name": "prescritor_externo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "prioridade_social.json",
+      "domain": "Unknown",
+      "name": "prioridade_social",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "procedimento_protocolo_evento.json",
+      "domain": "Unknown",
+      "name": "procedimento_protocolo_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "procedimento_protocolo_resultado.json",
+      "domain": "Unknown",
+      "name": "procedimento_protocolo_resultado",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "procedimento_protocolo.json",
+      "domain": "Unknown",
+      "name": "procedimento_protocolo",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "procedimentos_sigtap.json",
+      "domain": "Unknown",
+      "name": "procedimentos_sigtap",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "produtividade_evento.json",
+      "domain": "Unknown",
+      "name": "produtividade_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "produto.json",
+      "domain": "Unknown",
+      "name": "produto",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "profissional_registro.json",
+      "domain": "Workforce",
+      "name": "profissional_registro",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "prontuario_evolucao.json",
+      "domain": "Unknown",
+      "name": "prontuario_evolucao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "protocolo_assistencial_global.json",
+      "domain": "Unknown",
+      "name": "protocolo_assistencial_global",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "protocolo_emissao.json",
+      "domain": "Unknown",
+      "name": "protocolo_emissao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "protocolo_sequencia.json",
+      "domain": "Unknown",
+      "name": "protocolo_sequencia",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "qualidade_eventos_adversos.json",
+      "domain": "Unknown",
+      "name": "qualidade_eventos_adversos",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "reabertura_atendimento.json",
+      "domain": "Unknown",
+      "name": "reabertura_atendimento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "reg_anexo.json",
+      "domain": "Unknown",
+      "name": "reg_anexo",
+      "refined_domain": "Compliance"
+    },
+    {
+      "file": "reg_auditoria_acesso_sensivel.json",
+      "domain": "Unknown",
+      "name": "reg_auditoria_acesso_sensivel",
+      "refined_domain": "Compliance"
+    },
+    {
+      "file": "reg_export_arquivo.json",
+      "domain": "Unknown",
+      "name": "reg_export_arquivo",
+      "refined_domain": "Compliance"
+    },
+    {
+      "file": "reg_export_erro_validacao.json",
+      "domain": "Unknown",
+      "name": "reg_export_erro_validacao",
+      "refined_domain": "Compliance"
+    },
+    {
+      "file": "reg_export_item.json",
+      "domain": "Unknown",
+      "name": "reg_export_item",
+      "refined_domain": "Compliance"
+    },
+    {
+      "file": "reg_export_lote.json",
+      "domain": "Unknown",
+      "name": "reg_export_lote",
+      "refined_domain": "Compliance"
+    },
+    {
+      "file": "reg_formulario_snapshot.json",
+      "domain": "Unknown",
+      "name": "reg_formulario_snapshot",
+      "refined_domain": "Compliance"
+    },
+    {
+      "file": "regra_timeout.json",
+      "domain": "Unknown",
+      "name": "regra_timeout",
+      "refined_domain": "Config"
+    },
+    {
+      "file": "regulacao_evento.json",
+      "domain": "Regulacao",
+      "name": "regulacao_evento",
+      "refined_domain": "Regulacao"
+    },
+    {
+      "file": "remocao_evento.json",
+      "domain": "Unknown",
+      "name": "remocao_evento",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "remocao_logistica.json",
+      "domain": "Unknown",
+      "name": "remocao_logistica",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "remocao.json",
+      "domain": "Unknown",
+      "name": "remocao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "retorno_atendimento.json",
+      "domain": "Unknown",
+      "name": "retorno_atendimento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "retry_semantico_controle.json",
+      "domain": "Unknown",
+      "name": "retry_semantico_controle",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "rh_evento.json",
+      "domain": "Unknown",
+      "name": "rh_evento",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "rh_pessoa_vinculo.json",
+      "domain": "Unknown",
+      "name": "rh_pessoa_vinculo",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "rh_registro_profissional.json",
+      "domain": "Unknown",
+      "name": "rh_registro_profissional",
+      "refined_domain": "Workforce"
+    },
+    {
+      "file": "runtime_api_session_token.json",
+      "domain": "Unknown",
+      "name": "runtime_api_session_token",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_concurrency_guard.json",
+      "domain": "Unknown",
+      "name": "runtime_concurrency_guard",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_contexto.json",
+      "domain": "Unknown",
+      "name": "runtime_contexto",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_dispositivo.json",
+      "domain": "Unknown",
+      "name": "runtime_dispositivo",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_edge_evento.json",
+      "domain": "Unknown",
+      "name": "runtime_edge_evento",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_estado_sobrevivencia.json",
+      "domain": "Unknown",
+      "name": "runtime_estado_sobrevivencia",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_evento_provisional.json",
+      "domain": "Unknown",
+      "name": "runtime_evento_provisional",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_execution_queue.json",
+      "domain": "Unknown",
+      "name": "runtime_execution_queue",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_invariant_log.json",
+      "domain": "Unknown",
+      "name": "runtime_invariant_log",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_kernel_locks.json",
+      "domain": "Unknown",
+      "name": "runtime_kernel_locks",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_lock_semantico.json",
+      "domain": "Unknown",
+      "name": "runtime_lock_semantico",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_snapshot_governanca.json",
+      "domain": "Unknown",
+      "name": "runtime_snapshot_governanca",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_snapshot_metadata.json",
+      "domain": "Unknown",
+      "name": "runtime_snapshot_metadata",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_sync_log.json",
+      "domain": "Unknown",
+      "name": "runtime_sync_log",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "runtime_sync_queue.json",
+      "domain": "Unknown",
+      "name": "runtime_sync_queue",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "saas_contrato.json",
+      "domain": "Unknown",
+      "name": "saas_contrato",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "saas_entidade.json",
+      "domain": "Unknown",
+      "name": "saas_entidade",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "sala_notificacao_evento.json",
+      "domain": "Unknown",
+      "name": "sala_notificacao_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "sala_notificacao.json",
+      "domain": "Unknown",
+      "name": "sala_notificacao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "schema_patch_execucao.json",
+      "domain": "Unknown",
+      "name": "schema_patch_execucao",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "senha_eventos.json",
+      "domain": "HIS",
+      "name": "senha_eventos",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "senha_sequencia.json",
+      "domain": "HIS",
+      "name": "senha_sequencia",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "senha_status.json",
+      "domain": "HIS",
+      "name": "senha_status",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "senha_transicao_matriz.json",
+      "domain": "HIS",
+      "name": "senha_transicao_matriz",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "senha.json",
+      "domain": "HIS",
+      "name": "senha",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "servico_agendamento.json",
+      "domain": "Unknown",
+      "name": "servico_agendamento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "sessao_ativa.json",
+      "domain": "Core",
+      "name": "sessao_ativa",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "sessao_contexto_historico.json",
+      "domain": "Core",
+      "name": "sessao_contexto_historico",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "sessao_evento.json",
+      "domain": "Core",
+      "name": "sessao_evento",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "sessao_usuario.json",
+      "domain": "Core",
+      "name": "sessao_usuario",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "setor.json",
+      "domain": "Core",
+      "name": "setor",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "sigpat_procedimento.json",
+      "domain": "Unknown",
+      "name": "sigpat_procedimento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "sinais_vitais.json",
+      "domain": "Unknown",
+      "name": "sinais_vitais",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "sinan_evento.json",
+      "domain": "Unknown",
+      "name": "sinan_evento",
+      "refined_domain": "Epidemiologia"
+    },
+    {
+      "file": "sinan_notificacao.json",
+      "domain": "Unknown",
+      "name": "sinan_notificacao",
+      "refined_domain": "Epidemiologia"
+    },
+    {
+      "file": "sincronizacao_federada_evento.json",
+      "domain": "Unknown",
+      "name": "sincronizacao_federada_evento",
+      "refined_domain": "Runtime"
+    },
+    {
+      "file": "sistema.json",
+      "domain": "Unknown",
+      "name": "sistema",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "solicitacao_exame.json",
+      "domain": "SAC",
+      "name": "solicitacao_exame",
+      "refined_domain": "SAC"
+    },
+    {
+      "file": "status_timeout.json",
+      "domain": "Unknown",
+      "name": "status_timeout",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "sus_cid10_competencia.json",
+      "domain": "Unknown",
+      "name": "sus_cid10_competencia",
+      "refined_domain": "Regulacao/SUS"
+    },
+    {
+      "file": "sus_cnes_estabelecimento.json",
+      "domain": "Unknown",
+      "name": "sus_cnes_estabelecimento",
+      "refined_domain": "Regulacao/SUS"
+    },
+    {
+      "file": "sus_competencia.json",
+      "domain": "Unknown",
+      "name": "sus_competencia",
+      "refined_domain": "Regulacao/SUS"
+    },
+    {
+      "file": "sus_sigtap_procedimento.json",
+      "domain": "Unknown",
+      "name": "sus_sigtap_procedimento",
+      "refined_domain": "Regulacao/SUS"
+    },
+    {
+      "file": "tabela_tuss.json",
+      "domain": "Unknown",
+      "name": "tabela_tuss",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "tenant_registry.json",
+      "domain": "Core",
+      "name": "tenant_registry",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "tipo_local.json",
+      "domain": "Unknown",
+      "name": "tipo_local",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "tipo_sala.json",
+      "domain": "Unknown",
+      "name": "tipo_sala",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "tombstone_evento_assistencial.json",
+      "domain": "Unknown",
+      "name": "tombstone_evento_assistencial",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "totem_evento.json",
+      "domain": "HIS",
+      "name": "totem_evento",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "totem_feedback.json",
+      "domain": "HIS",
+      "name": "totem_feedback",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "totem_senha_opcao.json",
+      "domain": "HIS",
+      "name": "totem_senha_opcao",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "totem.json",
+      "domain": "HIS",
+      "name": "totem",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "transporte_ambulancia_evento.json",
+      "domain": "Unknown",
+      "name": "transporte_ambulancia_evento",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "transporte_ambulancia.json",
+      "domain": "Unknown",
+      "name": "transporte_ambulancia",
+      "refined_domain": "Operational"
+    },
+    {
+      "file": "triagem.json",
+      "domain": "HIS",
+      "name": "triagem",
+      "refined_domain": "HIS"
+    },
+    {
+      "file": "tv_rotativo_tela.json",
+      "domain": "Unknown",
+      "name": "tv_rotativo_tela",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "tv_rotativo.json",
+      "domain": "Unknown",
+      "name": "tv_rotativo",
+      "refined_domain": "Displays"
+    },
+    {
+      "file": "unidade.json",
+      "domain": "Core",
+      "name": "unidade",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_alocacao.json",
+      "domain": "Core",
+      "name": "usuario_alocacao",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_contexto.json",
+      "domain": "Core",
+      "name": "usuario_contexto",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_historico_senha.json",
+      "domain": "Core",
+      "name": "usuario_historico_senha",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_local.json",
+      "domain": "Core",
+      "name": "usuario_local",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_log_acesso.json",
+      "domain": "Core",
+      "name": "usuario_log_acesso",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_perfil.json",
+      "domain": "Core",
+      "name": "usuario_perfil",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_profissional_registro.json",
+      "domain": "Core",
+      "name": "usuario_profissional_registro",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_refresh_token.json",
+      "domain": "Core",
+      "name": "usuario_refresh_token",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_refresh.json",
+      "domain": "Core",
+      "name": "usuario_refresh",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_reset_senha.json",
+      "domain": "Core",
+      "name": "usuario_reset_senha",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_sala.json",
+      "domain": "Core",
+      "name": "usuario_sala",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_senha_historico.json",
+      "domain": "Core",
+      "name": "usuario_senha_historico",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_senha_reset.json",
+      "domain": "Core",
+      "name": "usuario_senha_reset",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_setor.json",
+      "domain": "Core",
+      "name": "usuario_setor",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_sistema_acl_evento.json",
+      "domain": "Core",
+      "name": "usuario_sistema_acl_evento",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_sistema.json",
+      "domain": "Core",
+      "name": "usuario_sistema",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario_unidade.json",
+      "domain": "Core",
+      "name": "usuario_unidade",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "usuario.json",
+      "domain": "Core",
+      "name": "usuario",
+      "refined_domain": "Core"
+    },
+    {
+      "file": "venda_evento.json",
+      "domain": "Unknown",
+      "name": "venda_evento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "venda_item.json",
+      "domain": "Unknown",
+      "name": "venda_item",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "venda_pagamento.json",
+      "domain": "Unknown",
+      "name": "venda_pagamento",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "venda.json",
+      "domain": "Unknown",
+      "name": "venda",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "viatura.json",
+      "domain": "Unknown",
+      "name": "viatura",
+      "refined_domain": "Unknown"
+    },
+    {
+      "file": "workflow_ffa_evento.json",
+      "domain": "Unknown",
+      "name": "workflow_ffa_evento",
+      "refined_domain": "HIS"
+    }
+  ],
+  "total": 478,
+  "by_domain": {
+    "SAC": [
+      "chamado_evento",
+      "chamado_manutencao",
+      "chamado",
+      "solicitacao_exame"
+    ],
+    "Unknown": [
+      "acompanhante",
+      "administracao_medicacao_ordem",
+      "administracao_medicacao",
+      "alerta_consumo",
+      "alerta_destinatario",
+      "alerta_regra",
+      "alerta",
+      "almoxarifado_central",
+      "anamnese",
+      "anotacao_enfermagem",
+      "assinatura_digital_documentos",
+      "assinatura_digital_prontuario",
+      "assistencia_social_atendimento",
+      "assistencia_social_evento",
+      "assistencial_checkpoint_global",
+      "assistencial_circuit_breaker",
+      "assistencial_evento_hash",
+      "assistencial_minipal_metric",
+      "assistencial_quorum_clinico",
+      "assistencial_raim_metric",
+      "assistencial_runtime_federado",
+      "assistencial_runtime_panel",
+      "assistencial_simulacao_futura",
+      "assistencial_snapshot_runtime",
+      "assistencial_telemetria_runtime",
+      "assistencial_watchdog_fila",
+      "auditoria_acesso",
+      "auditoria_almoxarifado",
+      "auditoria_contexto",
+      "auditoria_erro",
+      "auditoria_estoque_sanitario",
+      "auditoria_estoque",
+      "auditoria_evento",
+      "auditoria_excecoes",
+      "auditoria_ffa",
+      "auditoria_fila",
+      "auditoria_mestre",
+      "auditoria_visualizacao_prontuario",
+      "auth_audit",
+      "auth_bloqueio",
+      "auth_grupo_permissao",
+      "auth_grupo_usuario",
+      "auth_grupo",
+      "auth_log",
+      "auth_notificacao",
+      "auth_parametro",
+      "auth_sessao_dispositivo",
+      "auth_sessao",
+      "auth_tentativa_login",
+      "auth_token",
+      "caixa_evento",
+      "caixa",
+      "cat_acidente_trabalho_evento",
+      "cat_acidente_trabalho",
+      "cat_evento",
+      "cat_notificacao",
+      "cat_regra_item",
+      "cidade",
+      "classificacao_risco",
+      "cliente",
+      "codigo_externo_map",
+      "codigo_externo_vinculo",
+      "codigo_prefixo_config",
+      "codigo_prefixo_regra",
+      "codigo_universal",
+      "config_leitos",
+      "config_locais",
+      "config_sistema",
+      "configuracao",
+      "conselho_profissional",
+      "consumo_insumo",
+      "consumo_limpeza",
+      "consumo_manutencao",
+      "contexto_atendimento",
+      "contrato",
+      "coordenador_estado_global",
+      "dispensacao_medicacao",
+      "dispositivo_tipo",
+      "dispositivo",
+      "documento_arquivo",
+      "documento_emissao_evento",
+      "documento_emissao",
+      "documento_tipo_config",
+      "enfermagem_aprazamento",
+      "enfermagem_diagnosticos",
+      "enfermagem",
+      "erro_catalogo",
+      "erro_evento",
+      "escala_medica",
+      "escala_plantao_atual",
+      "escala_plantao",
+      "escala_profissional",
+      "especialidade",
+      "estoque_alerta",
+      "estoque_almoxarifado_central",
+      "estoque_audit_stream",
+      "estoque_conciliacao_atomica",
+      "estoque_conta",
+      "estoque_documento_execucao",
+      "estoque_evento_confirmacao",
+      "estoque_execucao_pipeline",
+      "estoque_execucao",
+      "estoque_fluxo_assistencial",
+      "estoque_inventario_item",
+      "estoque_inventario",
+      "estoque_item",
+      "estoque_ledger",
+      "estoque_local",
+      "estoque_lote_snapshot",
+      "estoque_lote",
+      "estoque_movimentacao_itens",
+      "estoque_movimentacao",
+      "estoque_movimento_item",
+      "estoque_movimento",
+      "estoque_pipeline_estado",
+      "estoque_produto_codigo_externo",
+      "estoque_produto",
+      "estoque_reserva_evento",
+      "estoque_reserva",
+      "estoque_saldo_central",
+      "estoque_saldo_master",
+      "estoque_saldo",
+      "evento_ffa",
+      "evento_geral",
+      "evento_limpeza",
+      "eventos_fluxo",
+      "evolucao_enfermagem",
+      "evolucao_medica",
+      "evolucao_multidisciplinar",
+      "exame_fisico",
+      "exame_historico",
+      "exame_pedido_item",
+      "exame_pedido",
+      "exame",
+      "farm_atendimento_externo",
+      "farm_convenio_autorizacao",
+      "farm_dispensacao_item",
+      "farm_dispensacao",
+      "farm_operacao",
+      "farm_receita_controlada",
+      "farmacia_atendimento_externo_dispensacao",
+      "farmacia_atendimento_externo_item",
+      "farmacia_dispensacao_log",
+      "farmacia_externo_evento",
+      "farmaco_auditoria_bloqueio",
+      "farmaco_auditoria",
+      "farmaco_movimentacao",
+      "farmaco_unidade",
+      "faturamento_codigo",
+      "faturamento_conta_item",
+      "faturamento_conta_paciente",
+      "faturamento_conta_seq",
+      "faturamento_conta",
+      "faturamento_convenio",
+      "faturamento_convenios",
+      "faturamento_evento",
+      "faturamento_insumo",
+      "faturamento_item",
+      "faturamento_producao_sus",
+      "faturamento_producao",
+      "faturamento_regras_validacao",
+      "faturamento_sigtap",
+      "faturamento_sus_config",
+      "financeiro_repasse_medico",
+      "fluxo_orquestrador_canonico",
+      "fluxo_status",
+      "fluxo_transicao_matriz",
+      "fluxo_transicao",
+      "forma_pagamento",
+      "fornecedor",
+      "gaso_evento",
+      "gaso_solicitacao",
+      "gasoterapia_consumo_evento",
+      "gasoterapia_consumo",
+      "gpat_atendimento",
+      "gpat_dispensacao",
+      "gpat_evento",
+      "gpat_item",
+      "gpat",
+      "guardiao_acl_runtime",
+      "guardiao_runtime_final",
+      "hardening_sp_excecao",
+      "hipotese_diagnostica",
+      "hospital_leitos",
+      "identificador_global_assistencial",
+      "interconsulta",
+      "intercorrencia",
+      "kernel_authz_policy",
+      "kernel_identity_trust_chain",
+      "kernel_ledger",
+      "kernel_runtime_evento",
+      "kernel_runtime_heartbeat",
+      "kernel_runtime_single_writer_lock",
+      "kernel_single_writer_lock",
+      "lab_amostra",
+      "lab_evento",
+      "lab_pedido",
+      "lab_protocolo_interno",
+      "lab_resultado",
+      "laboratorio_protocolo_evento",
+      "laboratorio_protocolo",
+      "ledger_evento_sincronizacao_local",
+      "ledger_evento_sincronizacao",
+      "ledger_global_sincronismo",
+      "leito",
+      "local_capacidade",
+      "local_dispositivo",
+      "local_fila",
+      "local_runtime",
+      "local_turno",
+      "local",
+      "log_acesso_prontuario",
+      "log_auditoria",
+      "log_leitura_prontuario",
+      "login_tentativa",
+      "logradouro",
+      "manutencao_execucao",
+      "md_arquivo_fonte_evento",
+      "md_arquivo_fonte",
+      "md_cid10",
+      "md_cnes_estabelecimento",
+      "md_competencia",
+      "md_sigpat_medicamento",
+      "md_sigtap_procedimento",
+      "medicacao_reavaliacao",
+      "medico_especialidade",
+      "medico",
+      "notificacao_epidemiologica_evento",
+      "notificacao_epidemiologica",
+      "notificacao_violencia_evento",
+      "notificacao_violencia",
+      "nucleo_governanca_assistencial",
+      "obito_evento",
+      "obito",
+      "observacoes_eventos",
+      "operacao_idempotencia",
+      "ordem_assistencial_aprazamento",
+      "ordem_assistencial_execucao",
+      "ordem_assistencial_item",
+      "ordem_assistencial",
+      "ordem_tipo_documento_config",
+      "paciente_alertas",
+      "paciente_canonico",
+      "paciente_cns_evento",
+      "paciente_cns",
+      "paciente",
+      "painel_alertas_tempo",
+      "painel_config_def",
+      "painel_config",
+      "painel_consumo_evento",
+      "painel_evento_stream",
+      "painel_fila_tipo",
+      "painel_grupo_local",
+      "painel_grupo",
+      "painel_lane",
+      "painel_local",
+      "painel_mensagem_consumo",
+      "painel_mensagem",
+      "painel_monitoramento_especialidade",
+      "painel",
+      "pdv_cliente",
+      "pdv_pagamento",
+      "pdv_venda_item",
+      "pdv_venda",
+      "pedido_medico_item",
+      "pedido_medico",
+      "pep_assinatura_digital",
+      "pep_registro",
+      "plantao_escala",
+      "plantao_modelo",
+      "plantao",
+      "prescricao_checagem_dupla",
+      "prescricao_checagem",
+      "prescricao_continua",
+      "prescricao_internacao",
+      "prescricao_item",
+      "prescricao_itens",
+      "prescricao_kit_itens",
+      "prescricao_kit_master",
+      "prescricao_medica",
+      "prescricao_medicacao",
+      "prescricao",
+      "prescritor_externo",
+      "prioridade_social",
+      "procedimento_protocolo_evento",
+      "procedimento_protocolo_resultado",
+      "procedimento_protocolo",
+      "procedimentos_sigtap",
+      "produtividade_evento",
+      "produto",
+      "prontuario_evolucao",
+      "protocolo_assistencial_global",
+      "protocolo_emissao",
+      "protocolo_sequencia",
+      "qualidade_eventos_adversos",
+      "reabertura_atendimento",
+      "reg_anexo",
+      "reg_auditoria_acesso_sensivel",
+      "reg_export_arquivo",
+      "reg_export_erro_validacao",
+      "reg_export_item",
+      "reg_export_lote",
+      "reg_formulario_snapshot",
+      "regra_timeout",
+      "remocao_evento",
+      "remocao_logistica",
+      "remocao",
+      "retorno_atendimento",
+      "retry_semantico_controle",
+      "rh_evento",
+      "rh_pessoa_vinculo",
+      "rh_registro_profissional",
+      "runtime_api_session_token",
+      "runtime_concurrency_guard",
+      "runtime_contexto",
+      "runtime_dispositivo",
+      "runtime_edge_evento",
+      "runtime_estado_sobrevivencia",
+      "runtime_evento_provisional",
+      "runtime_execution_queue",
+      "runtime_invariant_log",
+      "runtime_kernel_locks",
+      "runtime_lock_semantico",
+      "runtime_snapshot_governanca",
+      "runtime_snapshot_metadata",
+      "runtime_sync_log",
+      "runtime_sync_queue",
+      "saas_contrato",
+      "saas_entidade",
+      "sala_notificacao_evento",
+      "sala_notificacao",
+      "schema_patch_execucao",
+      "servico_agendamento",
+      "sigpat_procedimento",
+      "sinais_vitais",
+      "sinan_evento",
+      "sinan_notificacao",
+      "sincronizacao_federada_evento",
+      "sistema",
+      "status_timeout",
+      "sus_cid10_competencia",
+      "sus_cnes_estabelecimento",
+      "sus_competencia",
+      "sus_sigtap_procedimento",
+      "tabela_tuss",
+      "tipo_local",
+      "tipo_sala",
+      "tombstone_evento_assistencial",
+      "transporte_ambulancia_evento",
+      "transporte_ambulancia",
+      "tv_rotativo_tela",
+      "tv_rotativo",
+      "venda_evento",
+      "venda_item",
+      "venda_pagamento",
+      "venda",
+      "viatura",
+      "workflow_ffa_evento"
+    ],
+    "Agendamento": [
+      "agenda_disponibilidade",
+      "agendamento",
+      "agendamentos_eventos"
+    ],
+    "Workforce": [
+      "funcionario_conselho_profissional",
+      "funcionario_especialidade",
+      "funcionario_unidade",
+      "funcionario",
+      "profissional_registro"
+    ],
+    "Core": [
+      "pessoa_alergias",
+      "pessoa_conselho_registro",
+      "pessoa_contato",
+      "pessoa_documento",
+      "pessoa_email",
+      "pessoa_endereco",
+      "pessoa_identificador",
+      "pessoa_logradouro",
+      "pessoa_telefone",
+      "pessoa_vinculo",
+      "pessoa",
+      "sessao_ativa",
+      "sessao_contexto_historico",
+      "sessao_evento",
+      "sessao_usuario",
+      "setor",
+      "tenant_registry",
+      "unidade",
+      "usuario_alocacao",
+      "usuario_contexto",
+      "usuario_historico_senha",
+      "usuario_local",
+      "usuario_log_acesso",
+      "usuario_perfil",
+      "usuario_profissional_registro",
+      "usuario_refresh_token",
+      "usuario_refresh",
+      "usuario_reset_senha",
+      "usuario_sala",
+      "usuario_senha_historico",
+      "usuario_senha_reset",
+      "usuario_setor",
+      "usuario_sistema_acl_evento",
+      "usuario_sistema",
+      "usuario_unidade",
+      "usuario"
+    ],
+    "Regulacao": [
+      "regulacao_evento"
+    ],
+    "IAM": [
+      "perfil_permissao",
+      "perfil",
+      "permissao"
+    ],
+    "Integration": [
+      "integracao_mensageria_externa"
+    ],
+    "HIS": [
+      "atendimento_anamnese",
+      "atendimento_balanco_hidrico",
+      "atendimento_checagem",
+      "atendimento_desfecho",
+      "atendimento_diagnostico",
+      "atendimento_escalas_risco",
+      "atendimento_estado_ativo",
+      "atendimento_evento_ledger",
+      "atendimento_evento",
+      "atendimento_evolucao",
+      "atendimento_exame_fisico",
+      "atendimento_identidade_fluxo",
+      "atendimento_movimentacao",
+      "atendimento_observacao",
+      "atendimento_pedidos_exame",
+      "atendimento_pre_hospitalar",
+      "atendimento_prescricao",
+      "atendimento_profissional",
+      "atendimento_recepcao",
+      "atendimento_sinais_vitais",
+      "atendimento_sumario_alta",
+      "atendimento_transicao_ledger",
+      "atendimento_triagem",
+      "atendimento_vinculo",
+      "atendimento",
+      "ffa_demandas_externas",
+      "ffa_diagnostico",
+      "ffa_estado",
+      "ffa_estoque_conciliacao",
+      "ffa_evolucao",
+      "ffa_extra",
+      "ffa_historico_status",
+      "ffa_item",
+      "ffa_prioridade",
+      "ffa_procedimento",
+      "ffa_sinais_vitais",
+      "ffa_substatus",
+      "ffa",
+      "fila_evento",
+      "fila_operacional_evento",
+      "fila_operacional",
+      "fila_painel_runtime",
+      "fila_retorno",
+      "fila_senha",
+      "internacao_braden_avaliacao",
+      "internacao_cuidados",
+      "internacao_dietas",
+      "internacao_dispositivos",
+      "internacao_ferida_avaliacao",
+      "internacao_historico",
+      "internacao_medicacao_administracao",
+      "internacao_movimentacao",
+      "internacao_prescricao_item",
+      "internacao_prescricao",
+      "internacao_registro_enfermagem",
+      "internacao_turno_registro",
+      "internacao",
+      "senha_eventos",
+      "senha_sequencia",
+      "senha_status",
+      "senha_transicao_matriz",
+      "senha",
+      "totem_evento",
+      "totem_feedback",
+      "totem_senha_opcao",
+      "totem",
+      "triagem"
+    ]
+  }
+}

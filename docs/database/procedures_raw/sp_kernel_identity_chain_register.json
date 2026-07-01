@@ -1,0 +1,7 @@
+{
+  "name": "sp_kernel_identity_chain_register",
+  "type": "PROCEDURE",
+  "startLine": 23023,
+  "endLine": 23065,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_kernel_identity_chain_register`(\n    IN p_id_tenant BIGINT,\n    IN p_id_usuario BIGINT,\n    IN p_id_sessao BIGINT,\n    IN p_id_dispositivo BIGINT,\n    IN p_estado VARCHAR(60),\n    IN p_ip VARCHAR(45)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_fingerprint CHAR(64);\n\n    SET v_fingerprint = SHA2(\n        CONCAT_WS('|',\n            IFNULL(p_id_tenant,''),\n            IFNULL(p_id_usuario,''),\n            IFNULL(p_id_sessao,''),\n            IFNULL(p_id_dispositivo,''),\n            IFNULL(p_estado,'')\n        ),\n    256);\n\n    INSERT IGNORE INTO kernel_identity_trust_chain (\n        id_tenant,\n        id_usuario,\n        id_sessao,\n        id_dispositivo,\n        ip_origem,\n        fingerprint_runtime,\n        estado_runtime\n    )\n    VALUES (\n        p_id_tenant,\n        p_id_usuario,\n        p_id_sessao,\n        p_id_dispositivo,\n        p_ip,\n        v_fingerprint,\n        p_estado\n    );\n\nEND ;;"
+}

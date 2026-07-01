@@ -1,0 +1,60 @@
+# KNOWLEDGE GRAPH — KILO v7
+
+## 📊 RAIZ DO GRAFO
+
+pessoa (raiz) → usuario → sessao_usuario → contexto → senha → ffa → atendimento → faturamento
+
+## 🧩 CONEXÕES PRINCIPAIS
+
+```mermaid
+graph TD
+  pessoa --> paciente
+  pessoa --> usuario
+  usuario --> sessao_usuario
+  sessao_usuario --> contexto_atendimento
+  contexto_atendimento --> senha
+  senha --> ffa
+  ffa --> atendimento
+  atendimento --> triagem
+  atendimento --> prescricao_medicacao
+  prescricao_medicacao --> farm_dispensacao
+  farm_dispensacao --> estoque_saldo
+  estoque_saldo --> kernel_ledger
+  
+  subgraph DOMAIN_ASSISTENCIAL
+    senha
+    ffa
+    atendimento
+    triagem
+  end
+  
+  subgraph DOMAIN_FARMACIA
+    farm_dispensacao
+    estoque_saldo
+  end
+  
+  subgraph EVENT_SYSTEM
+    kernel_ledger
+    auditoria_evento
+    atendimento_evento
+  end
+```
+
+## 🔗 RELATIONSHIPS DETECTADAS
+
+| Source | Target | Type | SP Bridge |
+|--------|--------|------|-----------|
+| ffa | senha | OPTIONAL_FK | - |
+| farm_dispensacao | ffa | FK | - |
+| estoque_saldo | unidade | FK | sp_fluxo_estoque |
+| atendimento_evento | ffa | FK | sp_ffa_orquestrador |
+| workflow_ffa_evento | sessao_usuario | FK | - |
+
+## 🎯 DOMÍNIOS IDENTIFICADOS
+
+| Domínio | Tabelas | SPs | MAP Referência |
+|---------|---------|-----|---------------|
+| ASSISTENCIAL | senha, ffa, atendimento, triagem | 10 | MAP-001 |
+| FARMACIA | farm_dispensacao, estoque_saldo, estoque_reserva | 5 | MAP-002 |
+| IDENTITY | pessoa, usuario, sessao_usuario | 8 | MAP-IAM |
+| EVENT | kernel_ledger, auditoria_evento | 15 | MD-104 |

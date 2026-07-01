@@ -1,0 +1,7 @@
+{
+  "name": "sp_recepcao_nao_compareceu",
+  "type": "PROCEDURE",
+  "startLine": 30210,
+  "endLine": 30220,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_recepcao_nao_compareceu`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha          BIGINT,\n    IN p_janela_minutos    INT,\n    IN p_observacao        VARCHAR(255)\n)\nBEGIN\n    -- regra: recepção marca a senha como NAO_COMPARECEU + abre janela de retorno\n    CALL sp_senha_nao_compareceu(p_id_sessao_usuario, p_id_senha, p_janela_minutos,\n                                 CONCAT('setor=RECEPCAO | ', IFNULL(p_observacao,'(n/a)')));\nEND ;;"
+}

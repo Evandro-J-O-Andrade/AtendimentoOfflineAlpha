@@ -1,0 +1,7 @@
+{
+  "name": "sp_internacao_registrar_evasao",
+  "type": "PROCEDURE",
+  "startLine": 22895,
+  "endLine": 22916,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_internacao_registrar_evasao`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_internacao BIGINT,\n    IN p_detalhe TEXT\n)\nBEGIN\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n    \n    START TRANSACTION;\n        -- Atualiza a internação para o status de EVASAO\n        UPDATE internacao SET \n            status = 'EVASAO', \n            data_fim = NOW() \n        WHERE id_internacao = p_id_internacao;\n\n        -- Mantém o histórico na tabela de eventos de movimentação/internação\n        INSERT INTO internacao_movimentacao (id_internacao, tipo_movimentacao, data_movimentacao, id_usuario, id_sessao_usuario, observacao)\n        SELECT p_id_internacao, 'EVASAO', NOW(), id_usuario, p_id_sessao_usuario, p_detalhe\n        FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao_usuario;\n\n    COMMIT;\nEND ;;"
+}

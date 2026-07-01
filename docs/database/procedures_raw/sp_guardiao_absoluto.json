@@ -1,0 +1,7 @@
+{
+  "name": "sp_guardiao_absoluto",
+  "type": "PROCEDURE",
+  "startLine": 22630,
+  "endLine": 22650,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_guardiao_absoluto`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_origem VARCHAR(60)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_valido INT DEFAULT 0;\n\n    SELECT COUNT(1)\n    INTO v_valido\n    FROM sessao_usuario\n    WHERE id_sessao_usuario = p_id_sessao_usuario\n    AND ativo = 1;\n\n    IF v_valido = 0 THEN\n        SIGNAL SQLSTATE '45000'\n        SET MESSAGE_TEXT = 'Sessão inválida no guardião absoluto';\n    END IF;\n\nEND ;;"
+}

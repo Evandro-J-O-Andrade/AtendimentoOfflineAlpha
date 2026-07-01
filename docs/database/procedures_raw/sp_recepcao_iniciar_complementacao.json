@@ -1,0 +1,7 @@
+{
+  "name": "sp_recepcao_iniciar_complementacao",
+  "type": "PROCEDURE",
+  "startLine": 30182,
+  "endLine": 30194,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_recepcao_iniciar_complementacao`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_senha BIGINT\n)\nBEGIN\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n    \n    UPDATE senha \n    SET status = 'EM_ATENDIMENTO',\n        id_usuario_operador = (SELECT id_usuario FROM sessao_usuario WHERE id_sessao_usuario = p_id_sessao_usuario),\n        inicio_atendimento_em = NOW()\n    WHERE id = p_id_senha;\nEND ;;"
+}

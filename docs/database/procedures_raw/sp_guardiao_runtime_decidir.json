@@ -1,0 +1,7 @@
+{
+  "name": "sp_guardiao_runtime_decidir",
+  "type": "PROCEDURE",
+  "startLine": 22707,
+  "endLine": 22728,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_guardiao_runtime_decidir`(\n    IN p_id_usuario BIGINT,\n    IN p_contexto VARCHAR(60),\n    IN p_recurso VARCHAR(120),\n    OUT p_permitido TINYINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_count INT DEFAULT 0;\n\n    SELECT COUNT(*)\n    INTO v_count\n    FROM guardiao_acl_runtime\n    WHERE id_usuario = p_id_usuario\n      AND contexto = p_contexto\n      AND recurso = p_recurso\n      AND permitido = 1;\n\n    SET p_permitido = IF(v_count > 0, 1, 0);\n\nEND ;;"
+}

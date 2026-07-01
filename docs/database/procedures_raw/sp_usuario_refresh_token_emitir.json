@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_refresh_token_emitir",
+  "type": "PROCEDURE",
+  "startLine": 33304,
+  "endLine": 33322,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_refresh_token_emitir`(\n    IN p_id_usuario BIGINT,\n    IN p_token VARCHAR(255),\n    IN p_expira_em DATETIME\n)\nBEGIN\n    INSERT INTO usuario_refresh_token(\n        id_usuario,\n        token,\n        expira_em,\n        revogado\n    )\n    VALUES(\n        p_id_usuario,\n        p_token,\n        p_expira_em,\n        0\n    );\nEND ;;"
+}

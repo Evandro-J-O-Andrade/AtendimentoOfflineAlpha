@@ -1,0 +1,106 @@
+{
+  "generated": "2026-07-01T08:39:51.645Z",
+  "total": 25,
+  "all": [
+    {
+      "name": "sp_executor_manchester_runtime",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_executor_recepcao_abrir_atendimento",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_farmacia_dispensar_registrar",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_farm_dispensacao_criar",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_farm_dispensacao_registrar",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_farm_reserva_confirmar",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_ffa_adicionar_item",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_ffa_gpat_garantir",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_ffa_gpat_gerar",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_ffa_orquestrador_transicao",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fila_chamar_proxima",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fila_finalizar",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fila_tipo_por_local",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_finalizar_procedimento_ecg",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_finalizar_procedimento_geral",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_finalizar_procedimento_laboratorio",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_finalizar_senha",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fix_columns_entidade",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fix_fk_unidade",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fluxo_estoque",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fluxo_executor_matriz",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fluxo_guardiao_transicao",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_fluxo_verificar_autorizacao",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_gatekeeper_assistencial",
+      "domain": "Unknown"
+    },
+    {
+      "name": "sp_gera_protocolo_lab",
+      "domain": "Unknown"
+    }
+  ]
+}

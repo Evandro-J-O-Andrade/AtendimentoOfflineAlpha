@@ -1,0 +1,51 @@
+{
+  "generated_at": "2026-07-01T03:46:00Z",
+  "source": "docs/database/tables_raw/*.json + procedures_raw_texts/*.sql",
+  "tables": {
+    "total": 478,
+    "core_tables": 11,
+    "event_tables": 28,
+    "fk_total": 283
+  },
+  "sps": {
+    "total": 19,
+    "types": {
+      "DISPATCHER": 1,
+      "GUARD": 2,
+      "ROUTER": 1,
+      "ORCHESTRATOR": 1,
+      "EXECUTOR": 10,
+      "UTILITY": 4
+    }
+  },
+  "domains": {
+    "ASSISTENCIAL": {
+      "tables": ["senha", "ffa", "atendimento", "triagem"],
+      "sps": ["sp_gatekeeper_assistencial", "sp_ffa_orquestrador_transicao"],
+      "event_tables": ["atendimento_evento", "workflow_ffa_evento"]
+    },
+    "FARMACIA": {
+      "tables": ["farm_dispensacao", "estoque_saldo", "estoque_reserva"],
+      "sps": ["sp_farm_dispensacao_criar", "sp_fluxo_estoque"],
+      "event_tables": ["estoque_audit_stream"]
+    },
+    "IAM": {
+      "tables": ["usuario", "sessao_usuario", "perfil"],
+      "sps": [],
+      "event_tables": ["sessao_evento", "usuario_log_acesso"]
+    }
+  },
+  "violations": [
+    {
+      "rule": "BR-001-001",
+      "description": "FFA created without senha",
+      "status": "VIOLATION",
+      "fix_required": true
+    }
+  ],
+  "missing_critical": [
+    "sp_senha_emitir",
+    "sp_sessao_assert",
+    "sp_kernel_ledger_write"
+  ]
+}

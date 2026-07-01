@@ -1,0 +1,7 @@
+{
+  "name": "sp_seed_dummy_usuarios_500",
+  "type": "PROCEDURE",
+  "startLine": 31226,
+  "endLine": 31255,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seed_dummy_usuarios_500`()\nBEGIN\n    DECLARE v_i INT DEFAULT 1;\n\n    START TRANSACTION;\n\n    WHILE v_i <= 500 DO\n\n        INSERT INTO usuario\n        (\n            login,\n            senha_hash,\n            ativo,\n            criado_em\n        )\n        VALUES\n        (\n            CONCAT('seed_user_', v_i),\n            '',\n            1,\n            NOW(6)\n        )\n        ON DUPLICATE KEY UPDATE login = login;\n\n        SET v_i = v_i + 1;\n\n    END WHILE;\n\n    COMMIT;\nEND ;;"
+}

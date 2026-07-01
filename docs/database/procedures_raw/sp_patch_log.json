@@ -1,0 +1,7 @@
+{
+  "name": "sp_patch_log",
+  "type": "PROCEDURE",
+  "startLine": 29174,
+  "endLine": 29190,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_patch_log`(\n    IN p_patch_nome VARCHAR(120),\n    IN p_status_execucao VARCHAR(20),\n    IN p_detalhes JSON\n)\nBEGIN\n    INSERT INTO schema_patch_execucao (\n        patch_nome,\n        status_execucao,\n        detalhes\n    )\n    VALUES (\n        p_patch_nome,\n        p_status_execucao,\n        p_detalhes\n    );\nEND ;;"
+}

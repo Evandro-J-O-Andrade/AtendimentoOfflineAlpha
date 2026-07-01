@@ -1,0 +1,7 @@
+{
+  "name": "sp_gatekeeper_assistencial",
+  "type": "PROCEDURE",
+  "startLine": 22399,
+  "endLine": 22457,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_gatekeeper_assistencial`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_saas BIGINT,\n    IN p_id_unidade BIGINT,\n    IN p_acao VARCHAR(80),\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_lock INT DEFAULT 0;\n\n    DECLARE EXIT HANDLER FOR SQLEXCEPTION\n    BEGIN\n        ROLLBACK;\n        RESIGNAL;\n    END;\n\n    /* ===============================\n       Validação runtime básica\n    =============================== */\n\n    CALL sp_sessao_assert(p_id_sessao_usuario);\n\n    START TRANSACTION;\n\n    /* Lock lógico anti concorrência básica */\n\n    SELECT 1\n    INTO v_lock\n    FROM coordenador_estado_global\n    WHERE id_saas_entidade = p_id_saas\n    AND id_unidade = p_id_unidade\n    AND bloqueado = FALSE\n    LIMIT 1\n    FOR UPDATE;\n\n    IF v_lock IS NULL THEN\n        SIGNAL SQLSTATE '45000'\n        SET MESSAGE_TEXT = 'Runtime assistencial bloqueado';\n    END IF;\n\n    /* ===============================\n       Encaminhamento para kernel\n    =============================== */\n\n    CALL sp_orquestrador_assistencial(\n        p_id_sessao_usuario,\n        p_id_saas,\n        p_id_unidade,\n        NULL,\n        JSON_UNQUOTE(p_payload->'$.id_senha'),\n        p_acao,\n        p_payload\n    );\n\n    COMMIT;\n\nEND ;;"
+}

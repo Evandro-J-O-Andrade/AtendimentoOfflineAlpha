@@ -1,0 +1,7 @@
+{
+  "name": "sp_senha_chamar",
+  "type": "PROCEDURE",
+  "startLine": 31439,
+  "endLine": 31486,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_senha_chamar`(\n    IN p_id_sessao_usuario BIGINT,\n    IN p_id_unidade BIGINT,\n    IN p_id_local BIGINT,\n    IN p_id_saas_entidade BIGINT\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_id_senha BIGINT;\n\n    START TRANSACTION;\n\n    /* Seleciona próxima senha da fila universal */\n\n    SELECT id_senha\n    INTO v_id_senha\n    FROM senha\n    WHERE\n        id_saas_entidade = p_id_saas_entidade\n        AND id_unidade = p_id_unidade\n        AND (p_id_local IS NULL OR id_local = p_id_local)\n        AND cancelado = FALSE\n        AND executado_em IS NULL\n    ORDER BY prioridade DESC,\n             ordem_fila ASC,\n             criado_em ASC\n    LIMIT 1\n    FOR UPDATE;\n\n    /* Atualiza estado operacional */\n\n    IF v_id_senha IS NOT NULL THEN\n\n        UPDATE senha\n        SET\n            chamada_sequencial = chamada_sequencial + 1,\n            chamada_em = CURRENT_TIMESTAMP(6),\n            id_sessao_usuario = p_id_sessao_usuario\n        WHERE id_senha = v_id_senha;\n\n    END IF;\n\n    COMMIT;\n\n    SELECT * FROM senha WHERE id_senha = v_id_senha;\n\nEND ;;"
+}

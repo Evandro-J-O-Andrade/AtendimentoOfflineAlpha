@@ -1,0 +1,7 @@
+{
+  "name": "sp_fluxo_verificar_autorizacao",
+  "type": "PROCEDURE",
+  "startLine": 22360,
+  "endLine": 22383,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_fluxo_verificar_autorizacao`(\n    IN p_id_usuario BIGINT,\n    IN p_id_sistema BIGINT,\n    IN p_nome_procedure VARCHAR(150)\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_permitido INT DEFAULT 0;\n\n    SELECT COUNT(1)\n    INTO v_permitido\n    FROM vw_usuario_permissoes vp\n    WHERE vp.id_usuario = p_id_usuario\n      AND vp.id_sistema = p_id_sistema\n      AND vp.nome_procedure = p_nome_procedure\n      AND vp.permitido = 1;\n\n    IF v_permitido = 0 THEN\n        SIGNAL SQLSTATE '45000'\n        SET MESSAGE_TEXT = 'Acesso negado ao fluxo operacional';\n    END IF;\n\nEND ;;"
+}

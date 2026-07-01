@@ -1,8 +1,10 @@
 # 🏥 Plataforma New Wave SaaS - Documentação Canônica
 
-> **Status:** Freeze Arquitetural - 45/45 documentos canônicos consolidados
+> **Status:** Freeze Arquitetural - 49/49 documentos canônicos consolidados
+>
+> **📋 CONSTITUIÇÃO DAS IAS:** `../../000-CONSTITUICAO-IA.md` — SYSTEM PROMPT permanente para todas as IAs que atuam no projeto
 
-## 📚 Documentos Canônicos (45/45)
+## 📚 Documentos Canônicos (49/49)
 
 | Nº | Documento | Status |
 |----|-----------|--------|
@@ -51,6 +53,10 @@
 | 43 | MD12_evolucao.md | ✅ |
 | 44 | MD-026-Portal-Analytics-Governance.md | ✅ |
 | 45 | MD-027-Security-Center.md | ✅ |
+| 46 | MD-CANONICO-IA-001-Lei-Evolucao-Documental.md | ✅ |
+| 47 | MD-CANONICO-IA-002-Lei-Governanca-Arquitetural.md | ✅ |
+| 48 | MD-CANONICO-IA-003-Lei-Evolucao-Core.md | ✅ |
+| 49 | MD-CANONICO-IA-004-Matriz-Evolucao-Projeto.md | ✅ |
 
 ## 📁 Estrutura Enterprise
 

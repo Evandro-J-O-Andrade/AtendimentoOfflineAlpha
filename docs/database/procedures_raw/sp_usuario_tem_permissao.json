@@ -1,0 +1,7 @@
+{
+  "name": "sp_usuario_tem_permissao",
+  "type": "PROCEDURE",
+  "startLine": 33484,
+  "endLine": 33500,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_usuario_tem_permissao`(\n    IN  p_id_usuario BIGINT,\n    IN  p_permissao  VARCHAR(100),\n    OUT p_ok         TINYINT\n)\nBEGIN\n    DECLARE v_ok INT DEFAULT 0;\n\n    SELECT 1\n      INTO v_ok\n      FROM vw_usuario_permissoes v\n     WHERE v.id_usuario = p_id_usuario\n       AND v.permissao = p_permissao\n     LIMIT 1;\n\n    SET p_ok = IFNULL(v_ok, 0);\nEND ;;"
+}

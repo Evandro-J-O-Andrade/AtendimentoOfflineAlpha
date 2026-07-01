@@ -1,0 +1,4 @@
+{
+  "name": "configuracao",
+  "block": "/*!50503 SET character_set_client = utf8mb4 */;\nCREATE TABLE `configuracao` (\n  `chave` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,\n  `valor` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,\n  `id_entidade` bigint unsigned NOT NULL,\n  PRIMARY KEY (`chave`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;\n/*!40101 SET character_set_client = @saved_cs_client */;\n\n--\n-- Dumping data for table `configuracao`\n--\n\nLOCK TABLES `configuracao` WRITE;\n/*!40000 ALTER TABLE `configuracao` DISABLE KEYS */;\n/*!40000 ALTER TABLE `configuracao` ENABLE KEYS */;\nUNLOCK TABLES;\n\n--\n-- Table structure for table `conselho_profissional`\n--\n\nDROP TABLE IF EXISTS `conselho_profissional`;\n/*!40101 SET @saved_cs_client     = @@character_set_client */;\n/*!50503 SET character_set_client = utf8mb4 */;"
+}

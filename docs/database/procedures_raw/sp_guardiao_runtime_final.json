@@ -1,0 +1,7 @@
+{
+  "name": "sp_guardiao_runtime_final",
+  "type": "PROCEDURE",
+  "startLine": 22744,
+  "endLine": 22794,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_guardiao_runtime_final`(\n    IN p_uuid_runtime CHAR(36),\n    IN p_id_saas BIGINT,\n    IN p_id_unidade BIGINT,\n    IN p_payload JSON\n)\n    SQL SECURITY INVOKER\nBEGIN\n\n    DECLARE v_hash CHAR(64);\n\n    SET v_hash = SHA2(\n        CONCAT(\n            p_uuid_runtime,\n            IFNULL(JSON_UNQUOTE(p_payload), '')\n        ),\n        256\n    );\n\n    SELECT estado_permitido\n    INTO @v_estado\n    FROM guardiao_runtime_final\n    WHERE uuid_runtime = p_uuid_runtime\n    LIMIT 1;\n\n    IF @v_estado IS NOT NULL AND @v_estado = FALSE THEN\n        SIGNAL SQLSTATE '45000'\n        SET MESSAGE_TEXT = 'Runtime bloqueado pelo guardiao final';\n    END IF;\n\n    INSERT INTO guardiao_runtime_final\n    (\n        uuid_runtime,\n        id_saas_entidade,\n        id_unidade,\n        hash_contexto,\n        estado_permitido\n    )\n    VALUES\n    (\n        p_uuid_runtime,\n        p_id_saas,\n        p_id_unidade,\n        v_hash,\n        TRUE\n    )\n    ON DUPLICATE KEY UPDATE\n        hash_contexto = VALUES(hash_contexto),\n        atualizado_em = CURRENT_TIMESTAMP(6);\n\nEND ;;"
+}

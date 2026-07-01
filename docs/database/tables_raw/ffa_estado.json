@@ -1,0 +1,4 @@
+{
+  "name": "ffa_estado",
+  "block": "/*!50503 SET character_set_client = utf8mb4 */;\nCREATE TABLE `ffa_estado` (\n  `id_estado` bigint unsigned NOT NULL AUTO_INCREMENT,\n  `nome` varchar(100) NOT NULL,\n  `descricao` varchar(255) DEFAULT NULL,\n  `ativo` tinyint(1) NOT NULL DEFAULT '1',\n  `id_entidade` bigint unsigned NOT NULL,\n  PRIMARY KEY (`id_estado`),\n  UNIQUE KEY `uk_ffa_estado_nome` (`nome`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n/*!40101 SET character_set_client = @saved_cs_client */;\n\n--\n-- Dumping data for table `ffa_estado`\n--\n\nLOCK TABLES `ffa_estado` WRITE;\n/*!40000 ALTER TABLE `ffa_estado` DISABLE KEYS */;\n/*!40000 ALTER TABLE `ffa_estado` ENABLE KEYS */;\nUNLOCK TABLES;\n\n--\n-- Table structure for table `ffa_estoque_conciliacao`\n--\n\nDROP TABLE IF EXISTS `ffa_estoque_conciliacao`;\n/*!40101 SET @saved_cs_client     = @@character_set_client */;\n/*!50503 SET character_set_client = utf8mb4 */;"
+}

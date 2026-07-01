@@ -1,0 +1,7 @@
+{
+  "name": "sp_emitir_evento_manchester",
+  "type": "PROCEDURE",
+  "startLine": 18885,
+  "endLine": 18904,
+  "text": "CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_emitir_evento_manchester`()\nBEGIN\n\n    INSERT INTO painel_consumo_evento (\n        origem,\n        id_evento,\n        painel_tipo,\n        id_local_operacional,\n        consumido_em\n    )\n    SELECT \n        'FILA_OPERACIONAL_EVENTO',\n        s.id_senha,\n        'MANCHESTER',\n        s.id_local,\n        NOW()\n    FROM senha s\n    WHERE s.risco_dinamico_em >= NOW() - INTERVAL 5 SECOND;\n\nEND ;;"
+}

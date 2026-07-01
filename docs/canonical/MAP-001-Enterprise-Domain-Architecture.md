@@ -351,3 +351,4 @@ Métricas
 | MD-110 — Canonical Laws | Leis |
 | MD-065 — Observability Platform | Observability |
 | MD-089 — Workflow Fabric | Workflow |
+| MAP-021 — Platform Infrastructure Domain | Infraestrutura, Load Balancer, API Pool |
