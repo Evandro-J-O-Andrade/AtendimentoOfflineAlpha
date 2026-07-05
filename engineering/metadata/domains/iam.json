@@ -1,0 +1,10 @@
+{
+  "domain": "IAM/Auth",
+  "description": "Autenticação, perfis, permissões, RBAC",
+  "tables": ["perfil", "perfil_usuario", "permissao", "papel_grupo", "papel_usuario", "grupo_usuario"],
+  "procedures": [],
+  "views": [],
+  "events": [],
+  "dependencies": ["usuario"],
+  "md_candidate": "MD-002"
+}

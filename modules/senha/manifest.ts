@@ -1,0 +1,1 @@
+export default { nome: 'senha', id: 'senha', categoria: 'Senha', ordem: 1, icone: 'Ticket', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Senha', icone: 'Ticket', route: '/senha' }], widgets: [], dashboard: './dashboard', events: ['./events'], procedures: ['./procedures'], featureFlags: [] }

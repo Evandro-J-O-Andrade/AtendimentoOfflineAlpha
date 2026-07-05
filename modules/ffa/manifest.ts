@@ -1,0 +1,1 @@
+export default { nome: 'ffa', id: 'ffa', categoria: 'Ffa', ordem: 1, icone: 'Activity', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Ffa', icone: 'Activity', route: '/ffa' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

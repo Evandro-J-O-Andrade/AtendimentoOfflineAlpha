@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "build": "^0.1.4",
-    "node.js": "^0.0.1-security"
+    "node.js": "^0.0.1-security",
+    "vite": "^7.3.6"
   }
 }

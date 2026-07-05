@@ -1,0 +1,1 @@
+export default { nome: 'paciente', id: 'paciente', categoria: 'Paciente', ordem: 1, icone: 'Heart', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Paciente', icone: 'Heart', route: '/paciente' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

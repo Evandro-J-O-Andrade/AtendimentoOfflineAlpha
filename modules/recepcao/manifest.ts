@@ -1,0 +1,1 @@
+export default { nome: 'recepcao', id: 'recepcao', categoria: 'Recepcao', ordem: 1, icone: 'Desk', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Recepcao', icone: 'Desk', route: '/recepcao' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

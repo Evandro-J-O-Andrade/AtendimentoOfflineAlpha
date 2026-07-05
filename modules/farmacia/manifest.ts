@@ -1,0 +1,1 @@
+export default { nome: 'farmacia', id: 'farmacia', categoria: 'Farmacia', ordem: 1, icone: 'Pill', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Farmacia', icone: 'Pill', route: '/farmacia' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

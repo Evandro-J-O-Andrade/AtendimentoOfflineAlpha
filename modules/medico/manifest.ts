@@ -1,0 +1,1 @@
+export default { nome: 'medico', id: 'medico', categoria: 'Medico', ordem: 1, icone: 'UserCheck', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Medico', icone: 'UserCheck', route: '/medico' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

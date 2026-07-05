@@ -1,0 +1,1 @@
+export default { nome: 'painel', id: 'painel', categoria: 'Painel', ordem: 1, icone: 'Monitor', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Painel', icone: 'Monitor', route: '/painel' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

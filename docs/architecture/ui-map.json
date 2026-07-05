@@ -1,0 +1,93 @@
+{
+  "devices": {
+    "totem": [
+      "senha",
+      "fila",
+      "totem"
+    ],
+    "painel": [
+      "fila",
+      "tv_rotativo",
+      "painel"
+    ],
+    "mobile": [
+      "recepcao",
+      "triagem",
+      "atendimento"
+    ],
+    "tablet": [
+      "enfermagem",
+      "medicacao"
+    ],
+    "kiosk": [
+      "atendimento",
+      "contexto"
+    ],
+    "tv": [
+      "tv_rotativo",
+      "painel"
+    ]
+  },
+  "flows": {
+    "entrada_paciente": [
+      "contexto",
+      "senha",
+      "fila",
+      "triagem"
+    ],
+    "atendimento_medico": [
+      "atendimento",
+      "prescricao",
+      "exame",
+      "internacao"
+    ],
+    "triagem": [
+      "triagem",
+      "classificacao_risco",
+      "senha"
+    ],
+    "farmacia": [
+      "farmacia",
+      "dispensacao",
+      "estoque"
+    ],
+    "faturamento": [
+      "faturamento",
+      "conta",
+      "convenio",
+      "producao"
+    ],
+    "recepcao": [
+      "recepcao",
+      "agendamento",
+      "contexto"
+    ],
+    "laboratorio": [
+      "lab",
+      "amostra",
+      "protocolo",
+      "resultado"
+    ],
+    "internacao": [
+      "internacao",
+      "leito",
+      "prescricao",
+      "enfermagem",
+      "evolucao"
+    ],
+    "fila": [
+      "fila",
+      "senha",
+      "chamada",
+      "timeout",
+      "retorno"
+    ],
+    "ffa": [
+      "ffa",
+      "item",
+      "gpat",
+      "prioridade",
+      "transicao"
+    ]
+  }
+}

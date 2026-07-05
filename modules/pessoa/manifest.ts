@@ -1,0 +1,1 @@
+export default { nome: 'pessoa', id: 'pessoa', categoria: 'Pessoa', ordem: 1, icone: 'User', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Pessoa', icone: 'User', route: '/pessoa' }], widgets: [], dashboard: './dashboard', events: ['./events'], procedures: ['./procedures'], featureFlags: [] }

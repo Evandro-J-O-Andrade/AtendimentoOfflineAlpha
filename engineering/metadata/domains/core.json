@@ -1,0 +1,10 @@
+{
+  "domain": "Core",
+  "description": "Identidade e contexto raiz do sistema",
+  "tables": ["pessoa", "usuario", "sessao", "sessao_usuario", "sessao_contexto", "sessao_evento", "sessao_ativa", "portal", "unidade", "setor", "entidade", "tenant_registry", "contexto", "local", "tipo_local", "tipo_sala"],
+  "procedures": [],
+  "views": [],
+  "events": ["sessao_evento", "usuario_*"],
+  "dependencies": [],
+  "md_candidate": "MD-001"
+}

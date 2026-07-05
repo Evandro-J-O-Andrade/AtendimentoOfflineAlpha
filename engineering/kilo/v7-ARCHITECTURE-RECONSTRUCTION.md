@@ -1,0 +1,14 @@
+# KILO ENGINE v7 — ARCHITECTURE RECONSTRUCTION ENGINE
+
+> Transforma dumps → arquitetura viva sincronizada
+
+## MÓDULOS IMPLEMENTADOS
+
+- ✅ DATABASE DISCOVERY (478 tabelas, 25 procedures)
+- ✅ FULL DEPENDENCY ENGINE (call-graph, canonical-mapping)
+- ✅ CANONICAL ENGINE (loader, mapper)
+- ⏳ DRIFT ENGINE
+- ⏳ SELF HEALING ENGINE
+- ⏳ CODE GENERATOR
+- ⏳ EVENT ENGINE
+- ⏳ IMPLEMENTATION ROADMAP

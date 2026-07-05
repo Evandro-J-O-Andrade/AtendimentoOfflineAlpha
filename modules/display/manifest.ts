@@ -1,0 +1,1 @@
+export default { nome: 'display', id: 'display', categoria: 'Display', ordem: 1, icone: 'Tv', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Display', icone: 'Tv', route: '/display' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

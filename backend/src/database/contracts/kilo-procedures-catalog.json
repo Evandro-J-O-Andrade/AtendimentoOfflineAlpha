@@ -1,0 +1,152 @@
+{
+  "sp_executor_manchester_runtime": {
+    "name": "sp_executor_manchester_runtime",
+    "params": "",
+    "param_count": 4,
+    "source_file": "sp_executor_manchester_runtime.sql"
+  },
+  "sp_executor_recepcao_abrir_atendimento": {
+    "name": "sp_executor_recepcao_abrir_atendimento",
+    "params": "",
+    "param_count": 5,
+    "source_file": "sp_executor_recepcao_abrir_atendimento.sql"
+  },
+  "sp_farmacia_dispensar_registrar": {
+    "name": "sp_farmacia_dispensar_registrar",
+    "params": "",
+    "param_count": 8,
+    "source_file": "sp_farmacia_dispensar_registrar.sql"
+  },
+  "sp_farm_dispensacao_criar": {
+    "name": "sp_farm_dispensacao_criar",
+    "params": "",
+    "param_count": 7,
+    "source_file": "sp_farm_dispensacao_criar.sql"
+  },
+  "sp_farm_dispensacao_registrar": {
+    "name": "sp_farm_dispensacao_registrar",
+    "params": "",
+    "param_count": 10,
+    "source_file": "sp_farm_dispensacao_registrar.sql"
+  },
+  "sp_farm_reserva_confirmar": {
+    "name": "sp_farm_reserva_confirmar",
+    "params": "",
+    "param_count": 7,
+    "source_file": "sp_farm_reserva_confirmar.sql"
+  },
+  "sp_ffa_adicionar_item": {
+    "name": "sp_ffa_adicionar_item",
+    "params": "",
+    "param_count": 13,
+    "source_file": "sp_ffa_adicionar_item.sql"
+  },
+  "sp_ffa_gpat_garantir": {
+    "name": "sp_ffa_gpat_garantir",
+    "params": "",
+    "param_count": 5,
+    "source_file": "sp_ffa_gpat_garantir.sql"
+  },
+  "sp_ffa_gpat_gerar": {
+    "name": "sp_ffa_gpat_gerar",
+    "params": "",
+    "param_count": 5,
+    "source_file": "sp_ffa_gpat_gerar.sql"
+  },
+  "sp_ffa_orquestrador_transicao": {
+    "name": "sp_ffa_orquestrador_transicao",
+    "params": "",
+    "param_count": 10,
+    "source_file": "sp_ffa_orquestrador_transicao.sql"
+  },
+  "sp_fila_chamar_proxima": {
+    "name": "sp_fila_chamar_proxima",
+    "params": "",
+    "param_count": 6,
+    "source_file": "sp_fila_chamar_proxima.sql"
+  },
+  "sp_fila_finalizar": {
+    "name": "sp_fila_finalizar",
+    "params": "",
+    "param_count": 5,
+    "source_file": "sp_fila_finalizar.sql"
+  },
+  "sp_fila_tipo_por_local": {
+    "name": "sp_fila_tipo_por_local",
+    "params": "",
+    "param_count": 7,
+    "source_file": "sp_fila_tipo_por_local.sql"
+  },
+  "sp_finalizar_procedimento_ecg": {
+    "name": "sp_finalizar_procedimento_ecg",
+    "params": "",
+    "param_count": 4,
+    "source_file": "sp_finalizar_procedimento_ecg.sql"
+  },
+  "sp_finalizar_procedimento_geral": {
+    "name": "sp_finalizar_procedimento_geral",
+    "params": "",
+    "param_count": 6,
+    "source_file": "sp_finalizar_procedimento_geral.sql"
+  },
+  "sp_finalizar_procedimento_laboratorio": {
+    "name": "sp_finalizar_procedimento_laboratorio",
+    "params": "",
+    "param_count": 5,
+    "source_file": "sp_finalizar_procedimento_laboratorio.sql"
+  },
+  "sp_finalizar_senha": {
+    "name": "sp_finalizar_senha",
+    "params": "",
+    "param_count": 3,
+    "source_file": "sp_finalizar_senha.sql"
+  },
+  "sp_fix_columns_entidade": {
+    "name": "sp_fix_columns_entidade",
+    "params": "",
+    "param_count": 1,
+    "source_file": "sp_fix_columns_entidade.sql"
+  },
+  "sp_fix_fk_unidade": {
+    "name": "sp_fix_fk_unidade",
+    "params": "",
+    "param_count": 1,
+    "source_file": "sp_fix_fk_unidade.sql"
+  },
+  "sp_fluxo_estoque": {
+    "name": "sp_fluxo_estoque",
+    "params": "",
+    "param_count": 10,
+    "source_file": "sp_fluxo_estoque.sql"
+  },
+  "sp_fluxo_executor_matriz": {
+    "name": "sp_fluxo_executor_matriz",
+    "params": "",
+    "param_count": 8,
+    "source_file": "sp_fluxo_executor_matriz.sql"
+  },
+  "sp_fluxo_guardiao_transicao": {
+    "name": "sp_fluxo_guardiao_transicao",
+    "params": "",
+    "param_count": 8,
+    "source_file": "sp_fluxo_guardiao_transicao.sql"
+  },
+  "sp_fluxo_verificar_autorizacao": {
+    "name": "sp_fluxo_verificar_autorizacao",
+    "params": "",
+    "param_count": 4,
+    "source_file": "sp_fluxo_verificar_autorizacao.sql"
+  },
+  "sp_gatekeeper_assistencial": {
+    "name": "sp_gatekeeper_assistencial",
+    "params": "",
+    "param_count": 7,
+    "source_file": "sp_gatekeeper_assistencial.sql"
+  },
+  "sp_gera_protocolo_lab": {
+    "name": "sp_gera_protocolo_lab",
+    "params": "",
+    "param_count": 9,
+    "source_file": "sp_gera_protocolo_lab.sql"
+  }
+}

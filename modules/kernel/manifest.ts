@@ -1,0 +1,1 @@
+export default { nome: 'kernel', id: 'kernel', categoria: 'Kernel', ordem: 1, icone: 'Cpu', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Kernel', icone: 'Cpu', route: '/kernel' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

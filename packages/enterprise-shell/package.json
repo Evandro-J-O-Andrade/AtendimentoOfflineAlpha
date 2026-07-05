@@ -1,0 +1,6 @@
+{
+  "name": "@atendimentooffline/enterprise-shell",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts"
+}

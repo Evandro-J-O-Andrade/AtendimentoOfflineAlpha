@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "violations": [],
+    "warnings": [],
+    "passed": [
+      {
+        "rule": "Pessoa_raiz",
+        "message": "Pessoa entity validated"
+      },
+      {
+        "rule": "Event_Driven",
+        "message": "57 event tables validated"
+      }
+    ]
+  },
+  "scores": {
+    "canonical": 105,
+    "coverage": 85,
+    "drift": 100,
+    "health": 97
+  }
+}

@@ -1,27 +1,51 @@
-# KILO v7 — STATUS
+# NEW WAVE Enterprise Platform
 
-## PRONTO
-- ✅ Estrutura de diretórios
-- ✅ Templates (MD, BR, FRONT)
-- ✅ Relatórios (35+ arquivos)
-- ✅ KILO MANIFEST
-- ✅ Knowledge Loader
-- ✅ Inventory: 9 arquivos (tables, procedures, domains, etc.)
-
-## SPRINT 1 CONCLUÍDA
-- ✅ tables.json: 478 tabelas mapeadas
-- ✅ procedures.json: 25 procedures listadas
-- ✅ domains.json: 11 domínios definidos
-- ✅ canonical-mapping-index.md atualizado
-
-## SPRINT 2 INICIADA
-- ⏳ call-graph.json
-- ⏳ dependency-graph.json
-- ⏳ event-graph.json
-- ⏳ table-graph.json
-
-## PRÓXIMO PASSO
-Quando dumps disponíveis → KILO executa Discovery completo → Atualiza MDs → Gera contratos
+## KILO ENGINE v8 — CONGELADO ✅
 
 ---
-*KILO ENGINE v7 pronto para operação*
+
+## 📊 PROGRESSO POR FASE
+
+| Fase | Previsto | Stubs | Completos |
+|------|----------|-------|-----------|
+| MDs | 478 | 478 (100%) | 14/14 Core ✅ |
+| BRs | 478 | 25/478 ⏳ |
+| MAPs | ~20 | 0 ⏳ |
+| FRONTs | ~478 | 5/478 ⏳ |
+
+---
+
+## ✅ CORE PLATFORM CONCLUÍDO (14/14)
+
+✅ Identity: Pessoa → Usuario → Sessao
+✅ Navigation: Portal → Contexto
+✅ Tenant: Entidade → Unidade → Registry
+✅ IAM: Perfil → Role → Permissão
+✅ Security: Autenticacao → Autorizacao → Token → Auditoria → Evento
+
+---
+
+## ✅ BR COMPLETION (25/478)
+Geradas automaticamente das SPs
+
+---
+
+## ✅ FRONT GENERATION (5/478)
+- FRONT-001 Portal Enterprise
+- FRONT-002 Context Selector  
+- FRONT-003 Dashboard
+- FRONT-004 App Registry
+- FRONT-005 Module Shell
+
+---
+
+## 🏗️ SOFTWARE ENGINEERING STRUCTURE
+
+apps/backend/ (adapter layer)
+apps/frontend/ (React components)  
+packages/core/ (shared)
+
+---
+
+## 🔒 PROJECT LOCKDOWN ATIVO
+APENAS EXECUÇÃO: LEGACY → FRONT → CODE

@@ -1,0 +1,1 @@
+export default { nome: 'fila', id: 'fila', categoria: 'Fila', ordem: 1, icone: 'List', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Fila', icone: 'List', route: '/fila' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

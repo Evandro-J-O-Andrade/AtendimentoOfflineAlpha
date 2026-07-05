@@ -1,0 +1,177 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/executor/manchester/runtime",
+    "procedure": "sp_executor_manchester_runtime",
+    "domain": "GENERIC",
+    "params": 4
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/executor/recepcao/abrir/atendimento",
+    "procedure": "sp_executor_recepcao_abrir_atendimento",
+    "domain": "GENERIC",
+    "params": 5
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/farmacia/dispensar/registrar",
+    "procedure": "sp_farmacia_dispensar_registrar",
+    "domain": "GENERIC",
+    "params": 8
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/farm/dispensacao/criar",
+    "procedure": "sp_farm_dispensacao_criar",
+    "domain": "GENERIC",
+    "params": 7
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/farm/dispensacao/registrar",
+    "procedure": "sp_farm_dispensacao_registrar",
+    "domain": "GENERIC",
+    "params": 10
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/farm/reserva/confirmar",
+    "procedure": "sp_farm_reserva_confirmar",
+    "domain": "GENERIC",
+    "params": 7
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/ffa/adicionar/item",
+    "procedure": "sp_ffa_adicionar_item",
+    "domain": "GENERIC",
+    "params": 13
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/ffa/gpat/garantir",
+    "procedure": "sp_ffa_gpat_garantir",
+    "domain": "GENERIC",
+    "params": 5
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/ffa/gpat/gerar",
+    "procedure": "sp_ffa_gpat_gerar",
+    "domain": "GENERIC",
+    "params": 5
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/ffa/orquestrador/transicao",
+    "procedure": "sp_ffa_orquestrador_transicao",
+    "domain": "GENERIC",
+    "params": 10
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fila/chamar/proxima",
+    "procedure": "sp_fila_chamar_proxima",
+    "domain": "GENERIC",
+    "params": 6
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fila/finalizar",
+    "procedure": "sp_fila_finalizar",
+    "domain": "GENERIC",
+    "params": 5
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fila/tipo/por/local",
+    "procedure": "sp_fila_tipo_por_local",
+    "domain": "GENERIC",
+    "params": 7
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/finalizar/procedimento/ecg",
+    "procedure": "sp_finalizar_procedimento_ecg",
+    "domain": "GENERIC",
+    "params": 4
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/finalizar/procedimento/geral",
+    "procedure": "sp_finalizar_procedimento_geral",
+    "domain": "GENERIC",
+    "params": 6
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/finalizar/procedimento/laboratorio",
+    "procedure": "sp_finalizar_procedimento_laboratorio",
+    "domain": "GENERIC",
+    "params": 5
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/finalizar/senha",
+    "procedure": "sp_finalizar_senha",
+    "domain": "GENERIC",
+    "params": 3
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fix/columns/entidade",
+    "procedure": "sp_fix_columns_entidade",
+    "domain": "GENERIC",
+    "params": 1
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fix/fk/unidade",
+    "procedure": "sp_fix_fk_unidade",
+    "domain": "GENERIC",
+    "params": 1
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fluxo/estoque",
+    "procedure": "sp_fluxo_estoque",
+    "domain": "GENERIC",
+    "params": 10
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fluxo/executor/matriz",
+    "procedure": "sp_fluxo_executor_matriz",
+    "domain": "GENERIC",
+    "params": 8
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fluxo/guardiao/transicao",
+    "procedure": "sp_fluxo_guardiao_transicao",
+    "domain": "GENERIC",
+    "params": 8
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/fluxo/verificar/autorizacao",
+    "procedure": "sp_fluxo_verificar_autorizacao",
+    "domain": "GENERIC",
+    "params": 4
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/gatekeeper/assistencial",
+    "procedure": "sp_gatekeeper_assistencial",
+    "domain": "GENERIC",
+    "params": 7
+  },
+  {
+    "method": "POST",
+    "path": "/api/GENERIC/gera/protocolo/lab",
+    "procedure": "sp_gera_protocolo_lab",
+    "domain": "GENERIC",
+    "params": 9
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "domain": "HIS",
+  "description": "Hospital Information System - Senhas, Fila, FFA, Atendimento",
+  "tables": ["senha", "senha_eventos", "senha_sequencia", "senha_status", "senha_transicao_matriz", "fila", "triagem", "totem", "totem_evento", "totem_feedback", "ffa", "workflow_ffa_evento", "atendimento", "internacao", "alta"],
+  "procedures": ["sp_finalizar_senha", "sp_fila_chamar_proxima", "sp_ffa_orquestrador_transicao", "sp_ffa_adicionar_item"],
+  "views": [],
+  "events": ["senha_eventos", "fila_*", "totem_*"],
+  "dependencies": ["pessoa", "usuario"],
+  "md_candidate": "MD-021"
+}

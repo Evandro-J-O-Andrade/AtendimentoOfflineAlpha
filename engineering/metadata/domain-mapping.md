@@ -27,15 +27,18 @@ KILO gera/atualiza documento
 
 ## Contagem
 - Total tabelas: 478
-- Domínios identificados: 9
+- Domínios identificados: 17
 - Tabelas mapeadas por domínio:
-  - Core: 36
-  - IAM: 3
-  - HIS: 67
+  - Core: 54
+  - HIS: 85
+  - Runtime: 70
+  - IAM/Auth: 12
   - Agendamento: 3
   - SAC: 4
-  - Regulacao: 1
-  - Workforce: 5
-  - Integration: 1
-  - Unknown: 358
-- MDs faltando: 3 (agendamento, SAC, regulação)
+  - Regulacao: 1 + 4 (SUS)
+  - Workforce: 10 + 10
+  - Displays: 16
+  - Diagnostics: 9
+  - Unknown: 121
+- FKs extraídas: 563
+- Relationships mapeadas: 28

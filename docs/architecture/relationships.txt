@@ -1,0 +1,50 @@
+TABLES: 478
+PROCEDURES: 25
+FUNCTIONS: 0
+VIEWS: 0
+FOREIGN_KEYS: 278
+PRIMARY_KEYS: 213
+RELATIONSHIP_DENSITY: 0.0012
+
+BY DOMAIN:
+  BILLING : 36 tables
+  CORE : 73 tables
+  CRM : 3 tables
+  FARMACY : 52 tables
+  FINANCE : 1 tables
+  GENERIC : 115 tables
+  HIS : 173 tables
+  INTEGRATION : 6 tables
+  SCHEDULE : 10 tables
+  WORKFLOW : 9 tables
+
+TOP PROCEDURES BY CALL COUNT:
+  sp_fila_finalizar => 4
+  sp_finalizar_procedimento_geral => 2
+  sp_ffa_gpat_garantir => 1
+  sp_ffa_gpat_gerar => 1
+  sp_fila_tipo_por_local => 1
+  sp_fluxo_executor_matriz => 1
+  sp_fluxo_guardiao_transicao => 1
+
+TOP FK RELATIONSHIPS:
+  administracao_medicacao.id_prescricao -> prescricao_internacao.id_prescricao
+  administracao_medicacao.id_enfermeiro -> usuario.id_usuario
+  administracao_medicacao_ordem.id_item -> ordem_assistencial_item.id_item
+  administracao_medicacao_ordem.id_usuario -> usuario.id_usuario
+  agenda_disponibilidade.id_local_operacional -> local_operacional.id_local_operacional
+  agenda_disponibilidade.id_profissional -> usuario.id_usuario
+  agenda_disponibilidade.id_sessao_usuario -> sessao_usuario.id_sessao_usuario
+  agenda_disponibilidade.id_sistema -> sistema.id_sistema
+  agenda_disponibilidade.id_usuario_criador -> usuario.id_usuario
+  agendamentos_eventos.id_agendamento -> agendamentos.id_agendamento
+  agendamentos_eventos.id_sessao_usuario -> sessao_usuario.id_sessao_usuario
+  agendamentos_eventos.id_usuario -> usuario.id_usuario
+  alerta.id_paciente -> paciente.id
+  alerta.id_usuario_origem -> usuario.id_usuario
+  alerta_consumo.id_alerta -> alerta.id_alerta
+  alerta_consumo.id_sessao_usuario -> sessao_usuario.id_sessao_usuario
+  alerta_consumo.id_usuario -> usuario.id_usuario
+  alerta_destinatario.id_alerta -> alerta.id_alerta
+  alerta_destinatario.id_usuario_acao -> usuario.id_usuario
+  anamnese.id_usuario -> usuario.id_usuario

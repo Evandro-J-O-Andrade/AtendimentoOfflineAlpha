@@ -1,0 +1,1 @@
+export default { nome: 'estoque', id: 'estoque', categoria: 'Estoque', ordem: 1, icone: 'Package', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Estoque', icone: 'Package', route: '/estoque' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

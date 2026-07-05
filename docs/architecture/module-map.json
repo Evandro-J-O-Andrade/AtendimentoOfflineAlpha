@@ -1,0 +1,104 @@
+[
+  {
+    "domain": "HIS",
+    "table_count": 173,
+    "modules": [
+      "auth",
+      "contexto",
+      "recepcao",
+      "triagem",
+      "consultorio",
+      "enfermagem",
+      "internacao",
+      "gpat",
+      "ffa",
+      "senha",
+      "fila",
+      "totem",
+      "painel",
+      "documentos"
+    ]
+  },
+  {
+    "domain": "SCHEDULE",
+    "table_count": 10,
+    "modules": [
+      "agenda",
+      "plantao",
+      "escala"
+    ]
+  },
+  {
+    "domain": "GENERIC",
+    "table_count": 115,
+    "modules": [
+      "generic"
+    ]
+  },
+  {
+    "domain": "FARMACY",
+    "table_count": 52,
+    "modules": [
+      "farmacia",
+      "estoque",
+      "dispensacao"
+    ]
+  },
+  {
+    "domain": "CORE",
+    "table_count": 73,
+    "modules": [
+      "auth",
+      "tenant",
+      "context",
+      "portal",
+      "identity",
+      "professionals"
+    ]
+  },
+  {
+    "domain": "BILLING",
+    "table_count": 36,
+    "modules": [
+      "faturamento",
+      "financeiro",
+      "sus"
+    ]
+  },
+  {
+    "domain": "CRM",
+    "table_count": 3,
+    "modules": [
+      "sac",
+      "ouvidoria",
+      "chamados"
+    ]
+  },
+  {
+    "domain": "WORKFLOW",
+    "table_count": 9,
+    "modules": [
+      "workflow",
+      "automacoes",
+      "fila"
+    ]
+  },
+  {
+    "domain": "INTEGRATION",
+    "table_count": 6,
+    "modules": [
+      "integracoes",
+      "n8n",
+      "webhooks"
+    ]
+  },
+  {
+    "domain": "FINANCE",
+    "table_count": 1,
+    "modules": [
+      "financeiro",
+      "faturamento",
+      "pdv"
+    ]
+  }
+]

@@ -1,0 +1,6888 @@
+{
+  "generated": "2026-07-05T02:11:52.707Z",
+  "entities": {
+    "acompanhante": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "administracao_medicacao_ordem": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "ordem_assistencial_item",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "administracao_medicacao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "prescricao_internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "agenda_disponibilidade": {
+      "type": "table",
+      "domain": "Agendamento",
+      "affects": {
+        "tables": [
+          "local_operacional",
+          "usuario",
+          "sessao_usuario",
+          "sistema",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "agendamento": {
+      "type": "table",
+      "domain": "Agendamento",
+      "affects": {
+        "tables": [
+          "paciente",
+          "usuario",
+          "servico_agendamento",
+          "sistema",
+          "saas_entidade",
+          "ffa",
+          "senha",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "agendamentos_eventos": {
+      "type": "table",
+      "domain": "Agendamento",
+      "affects": {
+        "tables": [
+          "agendamentos",
+          "sessao_usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "alerta_consumo": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "alerta",
+          "sessao_usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "alerta_destinatario": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "alerta",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "alerta_regra": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "perfil",
+          "sistema"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "alerta": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "paciente",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "almoxarifado_central": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "anamnese": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "usuario",
+          "atendimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "anotacao_enfermagem": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assinatura_digital_documentos": {
+      "type": "table",
+      "domain": "Documents",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assinatura_digital_prontuario": {
+      "type": "table",
+      "domain": "Documents",
+      "affects": {
+        "tables": [
+          "atendimento_evolucao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencia_social_atendimento": {
+      "type": "table",
+      "domain": "Social",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencia_social_evento": {
+      "type": "table",
+      "domain": "Social",
+      "affects": {
+        "tables": [
+          "assistencia_social_atendimento",
+          "sessao_usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_checkpoint_global": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_circuit_breaker": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_evento_hash": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_minipal_metric": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_quorum_clinico": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_raim_metric": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_runtime_federado": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_runtime_panel": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_simulacao_futura": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_snapshot_runtime": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_telemetria_runtime": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "assistencial_watchdog_fila": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_anamnese": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade",
+          "atendimento",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_balanco_hidrico": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "atendimento",
+          "atendimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_checagem": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "atendimento_prescricao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_desfecho": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "atendimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_diagnostico": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "atendimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_escalas_risco": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_estado_ativo": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "local_operacional"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_evento_ledger": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_evento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_evolucao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_exame_fisico": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_identidade_fluxo": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_movimentacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_observacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "leito",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_pedidos_exame": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "tabela_tuss"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_pre_hospitalar": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "atendimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_prescricao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_profissional": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_recepcao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_sinais_vitais": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_sumario_alta": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_transicao_ledger": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_triagem": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento_vinculo": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "atendimento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "ffa",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_acesso": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [
+          "sessao_usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_almoxarifado": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [
+          "produtos_almoxarifado",
+          "local_atendimento",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_contexto": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "local",
+          "sessao_usuario",
+          "unidade",
+          "usuario",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_erro": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [
+          "fila_operacional",
+          "fila_operacional",
+          "fila_operacional",
+          "fila_operacional"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_estoque_sanitario": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_estoque": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_evento": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_excecoes": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_ffa": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_fila": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [
+          "fila_senha"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_mestre": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [
+          "sessao_usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auditoria_visualizacao_prontuario": {
+      "type": "table",
+      "domain": "Runtime/Auditoria",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_audit": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_bloqueio": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_grupo_permissao": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [
+          "auth_grupo"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_grupo_usuario": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [
+          "auth_grupo",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_grupo": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_log": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_notificacao": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_parametro": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_sessao_dispositivo": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_sessao": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_tentativa_login": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "auth_token": {
+      "type": "table",
+      "domain": "IAM/Auth",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "caixa_evento": {
+      "type": "table",
+      "domain": "Financeiro",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "caixa": {
+      "type": "table",
+      "domain": "Financeiro",
+      "affects": {
+        "tables": [
+          "usuario",
+          "usuario",
+          "local_operacional"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "cat_acidente_trabalho_evento": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [
+          "cat_acidente_trabalho"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "cat_acidente_trabalho": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "cat_evento": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "cat_notificacao": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "cat_regra_item": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "chamado_evento": {
+      "type": "table",
+      "domain": "SAC",
+      "affects": {
+        "tables": [
+          "chamado",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "chamado_manutencao": {
+      "type": "table",
+      "domain": "SAC",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "chamado": {
+      "type": "table",
+      "domain": "SAC",
+      "affects": {
+        "tables": [
+          "sistema",
+          "usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "cidade": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "classificacao_risco": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "cliente": {
+      "type": "table",
+      "domain": "Core/Business",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "codigo_externo_map": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "codigo_universal"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "codigo_externo_vinculo": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "codigo_prefixo_config": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "codigo_prefixo_regra": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "codigo_universal": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "cliente",
+          "paciente",
+          "estoque_produto",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "config_leitos": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "config_locais": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "config_sistema": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "configuracao": {
+      "type": "table",
+      "domain": "Core/Business",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "conselho_profissional": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "consumo_insumo": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "consumo_limpeza": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "consumo_manutencao": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "contexto_atendimento": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "sistema"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "contrato": {
+      "type": "table",
+      "domain": "Core/Business",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "coordenador_estado_global": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "dispensacao_medicacao": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [
+          "ordem_assistencial_item"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "dispositivo_tipo": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "dispositivo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "documento_arquivo": {
+      "type": "table",
+      "domain": "Documents",
+      "affects": {
+        "tables": [
+          "documento_emissao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "documento_emissao_evento": {
+      "type": "table",
+      "domain": "Documents",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "documento_emissao": {
+      "type": "table",
+      "domain": "Documents",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "documento_tipo_config": {
+      "type": "table",
+      "domain": "Documents",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "enfermagem_aprazamento": {
+      "type": "table",
+      "domain": "HIS/Enfermagem",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "enfermagem_diagnosticos": {
+      "type": "table",
+      "domain": "HIS/Enfermagem",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "enfermagem": {
+      "type": "table",
+      "domain": "HIS/Enfermagem",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "erro_catalogo": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "erro_evento": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "erro_catalogo"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "escala_medica": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "escala_plantao_atual": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "escala_plantao": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [
+          "plantao_modelo",
+          "sistema",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "escala_profissional": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [
+          "funcionario",
+          "local",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "especialidade": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_alerta": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_produto_saldo"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_almoxarifado_central": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_audit_stream": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_conciliacao_atomica": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_conta": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_documento_execucao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_evento_confirmacao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_execucao_pipeline": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_execucao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_fluxo_assistencial": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_inventario_item": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_inventario": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_item": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_ledger": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_conta",
+          "estoque_movimento_item"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_local": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_lote_snapshot": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_lote",
+          "estoque_movimento_item"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_lote": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_item"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_movimentacao_itens": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_movimentacao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_produto_saldo"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_movimento_item": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_movimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_movimento": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "unidade",
+          "estoque_item",
+          "estoque_lote"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_pipeline_estado": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_produto_codigo_externo": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_produto"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_produto": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_reserva_evento": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_reserva"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_reserva": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_local",
+          "estoque_lote",
+          "estoque_produto"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_saldo_central": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_item",
+          "estoque_lote",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_saldo_master": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "unidade",
+          "estoque_item",
+          "estoque_lote"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "estoque_saldo": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "evento_ffa": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "evento_geral": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "evento_limpeza": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "eventos_fluxo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "evolucao_enfermagem": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "evolucao_medica": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "internacao",
+          "medico"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "evolucao_multidisciplinar": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "exame_fisico": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "exame_historico": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [
+          "exame_pedido"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "exame_pedido_item": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [
+          "exame_pedido"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "exame_pedido": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "exame": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farm_atendimento_externo": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farm_convenio_autorizacao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "farm_dispensacao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farm_dispensacao_item": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "estoque_lote",
+          "estoque_lote",
+          "farm_dispensacao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farm_dispensacao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "farm_receita_controlada"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farm_operacao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farm_receita_controlada": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "farm_atendimento_externo",
+          "farm_operacao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmacia_atendimento_externo_dispensacao": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [
+          "farmacia_atendimento_externo_item",
+          "local_atendimento",
+          "farmaco_lote",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmacia_atendimento_externo_item": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [
+          "farmacia_atendimento_externo",
+          "farmaco"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmacia_dispensacao_log": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [
+          "lote",
+          "prescricao_item",
+          "sessao_usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmacia_externo_evento": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmaco_auditoria_bloqueio": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmaco_auditoria": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmaco_movimentacao": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [
+          "farmaco",
+          "farmaco_lote"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "farmaco_unidade": {
+      "type": "table",
+      "domain": "HIS/Farmacia",
+      "affects": {
+        "tables": [
+          "farmaco"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_codigo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_conta_item": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_conta_paciente": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_conta_seq": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_conta": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_convenio": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_convenios": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_insumo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_item": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "faturamento_codigo",
+          "faturamento_conta"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_producao_sus": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_producao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_regras_validacao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_sigtap": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "faturamento_sus_config": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_demandas_externas": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_diagnostico": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_estado": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_estoque_conciliacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_evolucao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_extra": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_historico_status": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_item": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade",
+          "estoque_produto"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_prioridade": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_procedimento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_sinais_vitais": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "local_operacional",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa_substatus": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ffa": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fila_evento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "fila_senha"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fila_operacional_evento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "fila_operacional",
+          "sessao_usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fila_operacional": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario",
+          "local_atendimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fila_painel_runtime": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fila_retorno": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "fila_senha"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fila_senha": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "financeiro_repasse_medico": {
+      "type": "table",
+      "domain": "Financeiro",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fluxo_orquestrador_canonico": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fluxo_status": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fluxo_transicao_matriz": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fluxo_transicao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "fluxo_status",
+          "fluxo_status",
+          "perfil"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "forma_pagamento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "fornecedor": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "funcionario_conselho_profissional": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [
+          "funcionario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "funcionario_especialidade": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [
+          "funcionario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "funcionario_unidade": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [
+          "funcionario",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "funcionario": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gaso_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "gaso_solicitacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gaso_solicitacao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gasoterapia_consumo_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "gasoterapia_consumo"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gasoterapia_consumo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "leito"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gpat_atendimento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "cliente",
+          "prescritor_externo",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gpat_dispensacao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "gpat_item",
+          "local_atendimento",
+          "farmaco_lote",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gpat_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "gpat_atendimento",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gpat_item": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "farmaco",
+          "gpat_atendimento"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "gpat": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "guardiao_acl_runtime": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "guardiao_runtime_final": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "hardening_sp_excecao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "hipotese_diagnostica": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "medico"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "hospital_leitos": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "identificador_global_assistencial": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "integracao_mensageria_externa": {
+      "type": "table",
+      "domain": "Integration",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "interconsulta": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "especialidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "intercorrencia": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_braden_avaliacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "documento_emissao",
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_cuidados": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "prescricao_itens"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_dietas": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "prescricao_itens"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_dispositivos": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "internacao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_ferida_avaliacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "documento_emissao",
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_historico": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_medicacao_administracao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "internacao",
+          "internacao_prescricao_item",
+          "usuario",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_movimentacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "unidade",
+          "internacao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_prescricao_item": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "internacao_prescricao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_prescricao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_registro_enfermagem": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao_turno_registro": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "internacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "internacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "leito"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "kernel_authz_policy": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "kernel_identity_trust_chain": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "kernel_ledger": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "kernel_runtime_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "kernel_runtime_heartbeat": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "kernel_runtime_single_writer_lock": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "kernel_single_writer_lock": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "lab_amostra": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "lab_protocolo",
+          "procedimento_protocolo",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "lab_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "lab_pedido"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "lab_pedido": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "lab_protocolo_interno": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "lab_resultado": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "laboratorio_protocolo_evento": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "laboratorio_protocolo": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ledger_evento_sincronizacao_local": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ledger_evento_sincronizacao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ledger_global_sincronismo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "leito": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "setor"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "local_capacidade": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "local_dispositivo": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "local"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "local_fila": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "local"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "local_runtime": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "local"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "local_turno": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "local": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "tipo_local",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "log_acesso_prontuario": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "log_auditoria": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "log_leitura_prontuario": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "login_tentativa": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "logradouro": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "manutencao_execucao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "md_arquivo_fonte_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "md_arquivo_fonte",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "md_arquivo_fonte": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "md_competencia"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "md_cid10": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "md_cnes_estabelecimento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "md_competencia": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "md_sigpat_medicamento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "md_sigtap_procedimento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "medicacao_reavaliacao": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "fila_operacional",
+          "local_operacional",
+          "usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "medico_especialidade": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "especialidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "medico": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "especialidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "notificacao_epidemiologica_evento": {
+      "type": "table",
+      "domain": "Epidemiologia",
+      "affects": {
+        "tables": [
+          "notificacao_epidemiologica",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "notificacao_epidemiologica": {
+      "type": "table",
+      "domain": "Epidemiologia",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "notificacao_violencia_evento": {
+      "type": "table",
+      "domain": "Epidemiologia",
+      "affects": {
+        "tables": [
+          "notificacao_violencia"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "notificacao_violencia": {
+      "type": "table",
+      "domain": "Epidemiologia",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "nucleo_governanca_assistencial": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "obito_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "obito"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "obito": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "observacoes_eventos": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "operacao_idempotencia": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ordem_assistencial_aprazamento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "local_operacional",
+          "usuario",
+          "ordem_assistencial_item",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ordem_assistencial_execucao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "ordem_assistencial_aprazamento",
+          "ordem_assistencial_item",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ordem_assistencial_item": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "farmaco",
+          "ordem_assistencial",
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ordem_assistencial": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "ordem_tipo_documento_config": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "documento_tipo_config"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "paciente_alertas": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "paciente_canonico": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "paciente_cns_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "paciente_cns": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "paciente": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_alertas_tempo": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_config_def": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_config": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_consumo_evento": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_evento_stream": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_fila_tipo": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_grupo_local": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel_grupo"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_grupo": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_lane": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_local": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "local_operacional",
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_mensagem_consumo": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel_mensagem",
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_mensagem": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel_monitoramento_especialidade": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "painel": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pdv_cliente": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pdv_pagamento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "pdv_venda"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pdv_venda_item": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "estoque_lote",
+          "estoque_produto",
+          "pdv_venda"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pdv_venda": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "cliente",
+          "codigo_universal",
+          "estoque_local"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pedido_medico_item": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pedido_medico": {
+      "type": "table",
+      "domain": "Diagnostics",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pep_assinatura_digital": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pep_registro": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "perfil_permissao": {
+      "type": "table",
+      "domain": "IAM",
+      "affects": {
+        "tables": [
+          "perfil",
+          "permissao"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "perfil": {
+      "type": "table",
+      "domain": "IAM",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "permissao": {
+      "type": "table",
+      "domain": "IAM",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_alergias": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_conselho_registro": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "conselho_profissional",
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_contato": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_documento": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_email": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_endereco": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "cidade",
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_identificador": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_logradouro": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa",
+          "logradouro"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_telefone": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa_vinculo": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "pessoa",
+          "pessoa"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "pessoa": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "plantao_escala": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [
+          "funcionario",
+          "plantao_modelo",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "plantao_modelo": {
+      "type": "table",
+      "domain": "Workforce/Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "plantao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "funcionario",
+          "local",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_checagem_dupla": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "prescricao_checagem",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_checagem": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "prescricao_item",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_continua": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "medico"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_internacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "internacao",
+          "medico"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_item": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "prescricao_continua"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_itens": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_kit_itens": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "prescricao_kit_master"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_kit_master": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_medica": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao_medicacao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescricao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "medico"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prescritor_externo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prioridade_social": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "procedimento_protocolo_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "procedimento_protocolo",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "procedimento_protocolo_resultado": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "procedimento_protocolo_resultado",
+          "procedimento_protocolo",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "procedimento_protocolo": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "fila_operacional",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "procedimentos_sigtap": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "produtividade_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "usuario",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "produto": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "profissional_registro": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [
+          "funcionario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "prontuario_evolucao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "protocolo_assistencial_global": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "protocolo_emissao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "cliente",
+          "paciente",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "protocolo_sequencia": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "qualidade_eventos_adversos": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reabertura_atendimento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reg_anexo": {
+      "type": "table",
+      "domain": "Compliance",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reg_auditoria_acesso_sensivel": {
+      "type": "table",
+      "domain": "Compliance",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reg_export_arquivo": {
+      "type": "table",
+      "domain": "Compliance",
+      "affects": {
+        "tables": [
+          "reg_export_lote"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reg_export_erro_validacao": {
+      "type": "table",
+      "domain": "Compliance",
+      "affects": {
+        "tables": [
+          "reg_export_arquivo",
+          "reg_export_item"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reg_export_item": {
+      "type": "table",
+      "domain": "Compliance",
+      "affects": {
+        "tables": [
+          "reg_export_lote"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reg_export_lote": {
+      "type": "table",
+      "domain": "Compliance",
+      "affects": {
+        "tables": [
+          "unidade",
+          "md_competencia",
+          "local_atendimento",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "reg_formulario_snapshot": {
+      "type": "table",
+      "domain": "Compliance",
+      "affects": {
+        "tables": [
+          "md_competencia",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "regra_timeout": {
+      "type": "table",
+      "domain": "Config",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "regulacao_evento": {
+      "type": "table",
+      "domain": "Regulacao",
+      "affects": {
+        "tables": [
+          "ffa",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "remocao_evento": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "remocao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "remocao_logistica": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "remocao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "usuario",
+          "viatura",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "retorno_atendimento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "retry_semantico_controle": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "rh_evento": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "rh_pessoa_vinculo": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "rh_registro_profissional": {
+      "type": "table",
+      "domain": "Workforce",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_api_session_token": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_concurrency_guard": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_contexto": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "unidade",
+          "sessao_usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_dispositivo": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "dispositivo"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_edge_evento": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_estado_sobrevivencia": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_evento_provisional": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_execution_queue": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_invariant_log": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_kernel_locks": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_lock_semantico": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_snapshot_governanca": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_snapshot_metadata": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_sync_log": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "runtime_sync_queue": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "saas_contrato": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "saas_entidade": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sala_notificacao_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "sala_notificacao",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sala_notificacao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "schema_patch_execucao": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "senha_eventos": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "senha_sequencia": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "senha_status": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "senha_transicao_matriz": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "senha_status",
+          "senha_status"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "senha": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "ffa",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "servico_agendamento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade",
+          "sistema"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sessao_ativa": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sessao_contexto_historico": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "local",
+          "sessao_usuario",
+          "unidade",
+          "usuario",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sessao_evento": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "sessao_usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sessao_usuario": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "local",
+          "perfil",
+          "sistema",
+          "unidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "setor": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sigpat_procedimento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sinais_vitais": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sinan_evento": {
+      "type": "table",
+      "domain": "Epidemiologia",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sinan_notificacao": {
+      "type": "table",
+      "domain": "Epidemiologia",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sincronizacao_federada_evento": {
+      "type": "table",
+      "domain": "Runtime",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sistema": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "solicitacao_exame": {
+      "type": "table",
+      "domain": "SAC",
+      "affects": {
+        "tables": [
+          "exame",
+          "medico"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "status_timeout": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sus_cid10_competencia": {
+      "type": "table",
+      "domain": "Regulacao/SUS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sus_cnes_estabelecimento": {
+      "type": "table",
+      "domain": "Regulacao/SUS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sus_competencia": {
+      "type": "table",
+      "domain": "Regulacao/SUS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sus_sigtap_procedimento": {
+      "type": "table",
+      "domain": "Regulacao/SUS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "tabela_tuss": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "tenant_registry": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "tipo_local": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "tipo_sala": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "tombstone_evento_assistencial": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "totem_evento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "totem"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "totem_feedback": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "totem_senha_opcao": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "totem": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "transporte_ambulancia_evento": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [
+          "transporte_ambulancia"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "transporte_ambulancia": {
+      "type": "table",
+      "domain": "Operational",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "triagem": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "atendimento",
+          "saas_entidade",
+          "classificacao_risco",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "tv_rotativo_tela": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "painel"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "tv_rotativo": {
+      "type": "table",
+      "domain": "Displays",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "unidade": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "cidade",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_alocacao": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "especialidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_contexto": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "perfil",
+          "usuario",
+          "saas_entidade",
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_historico_senha": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_local": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "local",
+          "usuario",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_log_acesso": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuario",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_perfil": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "perfil",
+          "usuario",
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_profissional_registro": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuarios"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_refresh_token": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_refresh": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_reset_senha": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_sala": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "sala",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_senha_historico": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_senha_reset": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "usuario",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_setor": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_sistema_acl_evento": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_sistema": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "perfil",
+          "sistema",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario_unidade": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "saas_entidade",
+          "unidade",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "usuario": {
+      "type": "table",
+      "domain": "Core",
+      "affects": {
+        "tables": [
+          "saas_entidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "venda_evento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "venda_item": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "farmaco",
+          "farmaco_lote",
+          "venda"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "venda_pagamento": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "forma_pagamento",
+          "venda"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "venda": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "caixa",
+          "cliente",
+          "usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "viatura": {
+      "type": "table",
+      "domain": "Unknown",
+      "affects": {
+        "tables": [
+          "unidade"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "workflow_ffa_evento": {
+      "type": "table",
+      "domain": "HIS",
+      "affects": {
+        "tables": [
+          "sessao_usuario"
+        ],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_executor_manchester_runtime": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_executor_recepcao_abrir_atendimento": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_farmacia_dispensar_registrar": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_farm_dispensacao_criar": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_farm_dispensacao_registrar": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_farm_reserva_confirmar": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_ffa_adicionar_item": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_ffa_gpat_garantir": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_ffa_gpat_gerar": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_ffa_orquestrador_transicao": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fila_chamar_proxima": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fila_finalizar": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fila_tipo_por_local": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_finalizar_procedimento_ecg": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_finalizar_procedimento_geral": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_finalizar_procedimento_laboratorio": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_finalizar_senha": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fix_columns_entidade": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fix_fk_unidade": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fluxo_estoque": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fluxo_executor_matriz": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fluxo_guardiao_transicao": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_fluxo_verificar_autorizacao": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_gatekeeper_assistencial": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    },
+    "sp_gera_protocolo_lab": {
+      "type": "procedure",
+      "domain": "HIS",
+      "affects": {
+        "tables": [],
+        "procedures": [],
+        "apis": [],
+        "fronts": [],
+        "brs": [],
+        "maps": []
+      }
+    }
+  },
+  "impact_matrix": {}
+}

@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    "sp_ffa_gpat_garantir",
+    "sp_ffa_gpat_gerar",
+    "sp_fila_finalizar",
+    "sp_fila_tipo_por_local",
+    "sp_finalizar_procedimento_geral",
+    "sp_fluxo_executor_matriz",
+    "sp_fluxo_guardiao_transicao"
+  ],
+  "edges": []
+}

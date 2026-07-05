@@ -1,0 +1,1673 @@
+{
+  "edges": [
+    {
+      "from": "administracao_medicacao",
+      "to": "prescricao_internacao",
+      "from_col": "id_prescricao",
+      "to_col": "id_prescricao"
+    },
+    {
+      "from": "administracao_medicacao",
+      "to": "usuario",
+      "from_col": "id_enfermeiro",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "administracao_medicacao_ordem",
+      "to": "ordem_assistencial_item",
+      "from_col": "id_item",
+      "to_col": "id_item"
+    },
+    {
+      "from": "administracao_medicacao_ordem",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "agenda_disponibilidade",
+      "to": "local_operacional",
+      "from_col": "id_local_operacional",
+      "to_col": "id_local_operacional"
+    },
+    {
+      "from": "agenda_disponibilidade",
+      "to": "usuario",
+      "from_col": "id_profissional",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "agenda_disponibilidade",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "agenda_disponibilidade",
+      "to": "sistema",
+      "from_col": "id_sistema",
+      "to_col": "id_sistema"
+    },
+    {
+      "from": "agenda_disponibilidade",
+      "to": "usuario",
+      "from_col": "id_usuario_criador",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "agendamentos_eventos",
+      "to": "agendamentos",
+      "from_col": "id_agendamento",
+      "to_col": "id_agendamento"
+    },
+    {
+      "from": "agendamentos_eventos",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "agendamentos_eventos",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "alerta",
+      "to": "paciente",
+      "from_col": "id_paciente",
+      "to_col": "id"
+    },
+    {
+      "from": "alerta",
+      "to": "usuario",
+      "from_col": "id_usuario_origem",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "alerta_consumo",
+      "to": "alerta",
+      "from_col": "id_alerta",
+      "to_col": "id_alerta"
+    },
+    {
+      "from": "alerta_consumo",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "alerta_consumo",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "alerta_destinatario",
+      "to": "alerta",
+      "from_col": "id_alerta",
+      "to_col": "id_alerta"
+    },
+    {
+      "from": "alerta_destinatario",
+      "to": "usuario",
+      "from_col": "id_usuario_acao",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "anamnese",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "anamnese",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "anotacao_enfermagem",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "anotacao_enfermagem",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "assistencia_social_evento",
+      "to": "assistencia_social_atendimento",
+      "from_col": "id_as",
+      "to_col": "id_as"
+    },
+    {
+      "from": "assistencia_social_evento",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "assistencia_social_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "atendimento_balanco_hidrico",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_balanco_hidrico",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_balanco_hidrico",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_balanco_hidrico",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_checagem",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_checagem",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_checagem",
+      "to": "atendimento_prescricao",
+      "from_col": "id_prescricao",
+      "to_col": "id"
+    },
+    {
+      "from": "atendimento_escalas_risco",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_escalas_risco",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_estado_ativo",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_estado_ativo",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_estado_ativo",
+      "to": "local_operacional",
+      "from_col": "id_local_atual",
+      "to_col": "id_local_operacional"
+    },
+    {
+      "from": "atendimento_evento_ledger",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_evento_ledger",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_movimentacao",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "atendimento_movimentacao",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_movimentacao",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_observacao",
+      "to": "leito",
+      "from_col": "id_leito",
+      "to_col": "id_leito"
+    },
+    {
+      "from": "atendimento_observacao",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_observacao",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_pedidos_exame",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_pedidos_exame",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_pedidos_exame",
+      "to": "tabela_tuss",
+      "from_col": "id_exame_tuss",
+      "to_col": "codigo_tuss"
+    },
+    {
+      "from": "atendimento_recepcao",
+      "to": "usuario",
+      "from_col": "id_recepcionista",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "atendimento_recepcao",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_recepcao",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_sumario_alta",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_sumario_alta",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "atendimento_vinculo",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "atendimento_vinculo",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "auditoria_acesso",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "auditoria_almoxarifado",
+      "to": "produtos_almoxarifado",
+      "from_col": "id_produto",
+      "to_col": "id_produto"
+    },
+    {
+      "from": "auditoria_almoxarifado",
+      "to": "local_atendimento",
+      "from_col": "id_local",
+      "to_col": "id_local"
+    },
+    {
+      "from": "auditoria_almoxarifado",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "auditoria_contexto",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "auditoria_contexto",
+      "to": "local",
+      "from_col": "id_local",
+      "to_col": "id_local"
+    },
+    {
+      "from": "auditoria_contexto",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "auditoria_contexto",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "auditoria_contexto",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "auditoria_contexto",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "auditoria_fila",
+      "to": "fila_senha",
+      "from_col": "id_fila",
+      "to_col": "id"
+    },
+    {
+      "from": "auditoria_mestre",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "caixa",
+      "to": "usuario",
+      "from_col": "aberto_por",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "caixa",
+      "to": "usuario",
+      "from_col": "fechado_por",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "caixa",
+      "to": "local_operacional",
+      "from_col": "id_local_operacional",
+      "to_col": "id_local_operacional"
+    },
+    {
+      "from": "cat_acidente_trabalho",
+      "to": "pessoa",
+      "from_col": "id_pessoa_trabalhador",
+      "to_col": "id_pessoa"
+    },
+    {
+      "from": "cat_acidente_trabalho_evento",
+      "to": "cat_acidente_trabalho",
+      "from_col": "id_cat",
+      "to_col": "id"
+    },
+    {
+      "from": "chamado",
+      "to": "sistema",
+      "from_col": "id_sistema",
+      "to_col": "id_sistema"
+    },
+    {
+      "from": "chamado",
+      "to": "usuario",
+      "from_col": "id_usuario_abertura",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "chamado",
+      "to": "usuario",
+      "from_col": "id_usuario_atribuido",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "chamado_evento",
+      "to": "chamado",
+      "from_col": "id_chamado",
+      "to_col": "id_chamado"
+    },
+    {
+      "from": "chamado_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "codigo_externo_map",
+      "to": "codigo_universal",
+      "from_col": "id_codigo",
+      "to_col": "id_codigo"
+    },
+    {
+      "from": "codigo_universal",
+      "to": "cliente",
+      "from_col": "id_cliente",
+      "to_col": "id_cliente"
+    },
+    {
+      "from": "codigo_universal",
+      "to": "paciente",
+      "from_col": "id_paciente",
+      "to_col": "id"
+    },
+    {
+      "from": "codigo_universal",
+      "to": "estoque_produto",
+      "from_col": "id_produto",
+      "to_col": "id_produto"
+    },
+    {
+      "from": "codigo_universal",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "config_leitos",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "config_sistema",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "documento_emissao",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "enfermagem",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "escala_medica",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "escala_plantao_atual",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "estoque_ledger",
+      "to": "estoque_conta",
+      "from_col": "id_conta",
+      "to_col": "id_conta"
+    },
+    {
+      "from": "estoque_ledger",
+      "to": "estoque_movimento_item",
+      "from_col": "id_movimento_item",
+      "to_col": "id_movimento_item"
+    },
+    {
+      "from": "estoque_lote",
+      "to": "estoque_item",
+      "from_col": "id_item",
+      "to_col": "id_item"
+    },
+    {
+      "from": "estoque_movimentacao",
+      "to": "estoque_produto_saldo",
+      "from_col": "id_saldo",
+      "to_col": "id_saldo"
+    },
+    {
+      "from": "estoque_movimento_item",
+      "to": "estoque_movimento",
+      "from_col": "id_movimento",
+      "to_col": "id_movimento"
+    },
+    {
+      "from": "estoque_produto_codigo_externo",
+      "to": "estoque_produto",
+      "from_col": "id_produto",
+      "to_col": "id_produto"
+    },
+    {
+      "from": "estoque_saldo",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "estoque_saldo_central",
+      "to": "estoque_item",
+      "from_col": "id_item",
+      "to_col": "id_item"
+    },
+    {
+      "from": "estoque_saldo_central",
+      "to": "estoque_lote",
+      "from_col": "id_lote",
+      "to_col": "id_lote"
+    },
+    {
+      "from": "estoque_saldo_central",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "estoque_saldo_master",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "estoque_saldo_master",
+      "to": "estoque_item",
+      "from_col": "id_item",
+      "to_col": "id_item"
+    },
+    {
+      "from": "estoque_saldo_master",
+      "to": "estoque_lote",
+      "from_col": "id_lote",
+      "to_col": "id_lote"
+    },
+    {
+      "from": "evento_geral",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "evolucao_enfermagem",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "evolucao_enfermagem",
+      "to": "usuario",
+      "from_col": "id_enfermeiro",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "evolucao_medica",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "evolucao_medica",
+      "to": "medico",
+      "from_col": "id_medico",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "evolucao_multidisciplinar",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "exame_fisico",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "exame_historico",
+      "to": "exame_pedido",
+      "from_col": "id_pedido",
+      "to_col": "id_pedido"
+    },
+    {
+      "from": "farm_dispensacao",
+      "to": "farm_receita_controlada",
+      "from_col": "id_receita",
+      "to_col": "id_receita"
+    },
+    {
+      "from": "farmacia_atendimento_externo_dispensacao",
+      "to": "farmacia_atendimento_externo_item",
+      "from_col": "id_item",
+      "to_col": "id_item"
+    },
+    {
+      "from": "farmacia_atendimento_externo_dispensacao",
+      "to": "local_atendimento",
+      "from_col": "id_local_estoque",
+      "to_col": "id_local"
+    },
+    {
+      "from": "farmacia_atendimento_externo_dispensacao",
+      "to": "farmaco_lote",
+      "from_col": "id_lote",
+      "to_col": "id_lote"
+    },
+    {
+      "from": "farmacia_atendimento_externo_dispensacao",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "farmacia_atendimento_externo_dispensacao",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "farmacia_atendimento_externo_item",
+      "to": "farmacia_atendimento_externo",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "farmacia_atendimento_externo_item",
+      "to": "farmaco",
+      "from_col": "id_farmaco",
+      "to_col": "id_farmaco"
+    },
+    {
+      "from": "farmacia_dispensacao_log",
+      "to": "lote",
+      "from_col": "id_lote",
+      "to_col": "id"
+    },
+    {
+      "from": "farmacia_dispensacao_log",
+      "to": "prescricao_item",
+      "from_col": "id_prescricao_item",
+      "to_col": "id_item"
+    },
+    {
+      "from": "farmacia_dispensacao_log",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "farmaco_movimentacao",
+      "to": "farmaco",
+      "from_col": "id_farmaco",
+      "to_col": "id_farmaco"
+    },
+    {
+      "from": "farmaco_movimentacao",
+      "to": "farmaco_lote",
+      "from_col": "id_lote",
+      "to_col": "id_lote"
+    },
+    {
+      "from": "farmaco_unidade",
+      "to": "farmaco",
+      "from_col": "id_farmaco",
+      "to_col": "id_farmaco"
+    },
+    {
+      "from": "ffa_diagnostico",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "ffa_item",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "ffa_item",
+      "to": "estoque_produto",
+      "from_col": "id_produto",
+      "to_col": "id_produto"
+    },
+    {
+      "from": "fila_evento",
+      "to": "fila_senha",
+      "from_col": "id_fila",
+      "to_col": "id"
+    },
+    {
+      "from": "fila_operacional",
+      "to": "usuario",
+      "from_col": "id_responsavel",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "fila_operacional",
+      "to": "local_atendimento",
+      "from_col": "id_local",
+      "to_col": "id_local"
+    },
+    {
+      "from": "fila_operacional_evento",
+      "to": "fila_operacional",
+      "from_col": "id_fila",
+      "to_col": "id_fila"
+    },
+    {
+      "from": "fila_operacional_evento",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "gaso_evento",
+      "to": "gaso_solicitacao",
+      "from_col": "id_gaso",
+      "to_col": "id_gaso"
+    },
+    {
+      "from": "gaso_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "gasoterapia_consumo_evento",
+      "to": "gasoterapia_consumo",
+      "from_col": "id_consumo",
+      "to_col": "id"
+    },
+    {
+      "from": "gpat_atendimento",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "gpat_atendimento",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "gpat_atendimento",
+      "to": "cliente",
+      "from_col": "id_cliente",
+      "to_col": "id_cliente"
+    },
+    {
+      "from": "gpat_atendimento",
+      "to": "prescritor_externo",
+      "from_col": "id_prescritor_externo",
+      "to_col": "id_prescritor_externo"
+    },
+    {
+      "from": "gpat_atendimento",
+      "to": "usuario",
+      "from_col": "id_usuario_medico",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "gpat_dispensacao",
+      "to": "gpat_item",
+      "from_col": "id_gpat_item",
+      "to_col": "id_gpat_item"
+    },
+    {
+      "from": "gpat_dispensacao",
+      "to": "local_atendimento",
+      "from_col": "id_local_estoque",
+      "to_col": "id_local"
+    },
+    {
+      "from": "gpat_dispensacao",
+      "to": "farmaco_lote",
+      "from_col": "id_lote",
+      "to_col": "id_lote"
+    },
+    {
+      "from": "gpat_dispensacao",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "gpat_evento",
+      "to": "gpat_atendimento",
+      "from_col": "id_gpat",
+      "to_col": "id_gpat"
+    },
+    {
+      "from": "gpat_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "gpat_item",
+      "to": "farmaco",
+      "from_col": "id_farmaco",
+      "to_col": "id_farmaco"
+    },
+    {
+      "from": "gpat_item",
+      "to": "gpat_atendimento",
+      "from_col": "id_gpat",
+      "to_col": "id_gpat"
+    },
+    {
+      "from": "intercorrencia",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "intercorrencia",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "internacao",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "internacao",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "internacao",
+      "to": "leito",
+      "from_col": "id_leito",
+      "to_col": "id_leito"
+    },
+    {
+      "from": "internacao_braden_avaliacao",
+      "to": "documento_emissao",
+      "from_col": "id_documento",
+      "to_col": "id_documento"
+    },
+    {
+      "from": "internacao_braden_avaliacao",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "internacao_braden_avaliacao",
+      "to": "usuario",
+      "from_col": "id_usuario_responsavel",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "internacao_cuidados",
+      "to": "prescricao_itens",
+      "from_col": "id_prescricao_item",
+      "to_col": "id"
+    },
+    {
+      "from": "internacao_dietas",
+      "to": "prescricao_itens",
+      "from_col": "id_prescricao_item",
+      "to_col": "id"
+    },
+    {
+      "from": "internacao_ferida_avaliacao",
+      "to": "documento_emissao",
+      "from_col": "id_documento",
+      "to_col": "id_documento"
+    },
+    {
+      "from": "internacao_ferida_avaliacao",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "internacao_ferida_avaliacao",
+      "to": "usuario",
+      "from_col": "id_usuario_responsavel",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "internacao_movimentacao",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "internacao_movimentacao",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "internacao_movimentacao",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "internacao_movimentacao",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "internacao_prescricao",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "internacao_prescricao",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "internacao_prescricao",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "internacao_prescricao",
+      "to": "usuario",
+      "from_col": "id_usuario_prescritor",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "internacao_turno_registro",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "internacao_turno_registro",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "internacao_turno_registro",
+      "to": "internacao",
+      "from_col": "id_internacao",
+      "to_col": "id_internacao"
+    },
+    {
+      "from": "internacao_turno_registro",
+      "to": "usuario",
+      "from_col": "id_usuario_responsavel",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "lab_amostra",
+      "to": "lab_protocolo",
+      "from_col": "id_protocolo",
+      "to_col": "id_protocolo"
+    },
+    {
+      "from": "lab_amostra",
+      "to": "procedimento_protocolo",
+      "from_col": "id_protocolo",
+      "to_col": "id_protocolo"
+    },
+    {
+      "from": "lab_amostra",
+      "to": "usuario",
+      "from_col": "id_usuario_coleta",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "leito",
+      "to": "setor",
+      "from_col": "id_setor",
+      "to_col": "id_setor"
+    },
+    {
+      "from": "local_dispositivo",
+      "to": "local",
+      "from_col": "id_local",
+      "to_col": "id_local"
+    },
+    {
+      "from": "medicacao_reavaliacao",
+      "to": "fila_operacional",
+      "from_col": "id_fila_medicacao",
+      "to_col": "id_fila"
+    },
+    {
+      "from": "medicacao_reavaliacao",
+      "to": "local_operacional",
+      "from_col": "id_local_operacional",
+      "to_col": "id_local_operacional"
+    },
+    {
+      "from": "medicacao_reavaliacao",
+      "to": "usuario",
+      "from_col": "id_usuario_criador",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "medicacao_reavaliacao",
+      "to": "usuario",
+      "from_col": "id_usuario_executor",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "medico_especialidade",
+      "to": "especialidade",
+      "from_col": "id_especialidade",
+      "to_col": "id_especialidade"
+    },
+    {
+      "from": "medico_especialidade",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "notificacao_epidemiologica_evento",
+      "to": "notificacao_epidemiologica",
+      "from_col": "id_notificacao",
+      "to_col": "id"
+    },
+    {
+      "from": "notificacao_epidemiologica_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "notificacao_violencia_evento",
+      "to": "notificacao_violencia",
+      "from_col": "id_notificacao",
+      "to_col": "id"
+    },
+    {
+      "from": "obito_evento",
+      "to": "obito",
+      "from_col": "id_obito",
+      "to_col": "id_obito"
+    },
+    {
+      "from": "observacoes_eventos",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "observacoes_eventos",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "ordem_assistencial",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "ordem_assistencial",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "ordem_assistencial_aprazamento",
+      "to": "local_operacional",
+      "from_col": "id_local_operacional_execucao",
+      "to_col": "id_local_operacional"
+    },
+    {
+      "from": "ordem_assistencial_aprazamento",
+      "to": "usuario",
+      "from_col": "id_usuario_execucao",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "ordem_assistencial_aprazamento",
+      "to": "ordem_assistencial_item",
+      "from_col": "id_item",
+      "to_col": "id_item"
+    },
+    {
+      "from": "ordem_assistencial_aprazamento",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "ordem_assistencial_aprazamento",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "ordem_tipo_documento_config",
+      "to": "documento_tipo_config",
+      "from_col": "tipo_documento",
+      "to_col": "codigo"
+    },
+    {
+      "from": "paciente",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "paciente",
+      "to": "pessoa",
+      "from_col": "id_pessoa",
+      "to_col": "id_pessoa"
+    },
+    {
+      "from": "painel",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "painel_fila_tipo",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "painel_grupo_local",
+      "to": "painel_grupo",
+      "from_col": "id_grupo",
+      "to_col": "id_grupo"
+    },
+    {
+      "from": "painel_lane",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "painel_local",
+      "to": "local_operacional",
+      "from_col": "id_local_operacional",
+      "to_col": "id_local_operacional"
+    },
+    {
+      "from": "painel_local",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "painel_mensagem",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "painel_mensagem_consumo",
+      "to": "painel_mensagem",
+      "from_col": "id_mensagem",
+      "to_col": "id_mensagem"
+    },
+    {
+      "from": "painel_mensagem_consumo",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "painel_monitoramento_especialidade",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "pdv_venda_item",
+      "to": "estoque_lote",
+      "from_col": "id_lote",
+      "to_col": "id_lote"
+    },
+    {
+      "from": "pdv_venda_item",
+      "to": "estoque_produto",
+      "from_col": "id_produto",
+      "to_col": "id_produto"
+    },
+    {
+      "from": "pdv_venda_item",
+      "to": "pdv_venda",
+      "from_col": "id_venda",
+      "to_col": "id_venda"
+    },
+    {
+      "from": "pessoa_alergias",
+      "to": "pessoa",
+      "from_col": "id_pessoa",
+      "to_col": "id_pessoa"
+    },
+    {
+      "from": "pessoa_conselho_registro",
+      "to": "conselho_profissional",
+      "from_col": "id_conselho",
+      "to_col": "id_conselho"
+    },
+    {
+      "from": "pessoa_conselho_registro",
+      "to": "pessoa",
+      "from_col": "id_pessoa",
+      "to_col": "id_pessoa"
+    },
+    {
+      "from": "prescricao_checagem_dupla",
+      "to": "prescricao_checagem",
+      "from_col": "id_checagem_principal",
+      "to_col": "id_checagem"
+    },
+    {
+      "from": "prescricao_checagem_dupla",
+      "to": "usuario",
+      "from_col": "id_usuario_testemunha",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "prescricao_kit_itens",
+      "to": "prescricao_kit_master",
+      "from_col": "id_kit",
+      "to_col": "id"
+    },
+    {
+      "from": "procedimento_protocolo",
+      "to": "fila_operacional",
+      "from_col": "id_fila",
+      "to_col": "id_fila"
+    },
+    {
+      "from": "procedimento_protocolo",
+      "to": "usuario",
+      "from_col": "id_usuario_criacao",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "procedimento_protocolo_evento",
+      "to": "procedimento_protocolo",
+      "from_col": "id_protocolo",
+      "to_col": "id_protocolo"
+    },
+    {
+      "from": "procedimento_protocolo_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "procedimento_protocolo_resultado",
+      "to": "procedimento_protocolo_resultado",
+      "from_col": "id_resultado_anterior",
+      "to_col": "id_resultado"
+    },
+    {
+      "from": "procedimento_protocolo_resultado",
+      "to": "procedimento_protocolo",
+      "from_col": "id_protocolo",
+      "to_col": "id_protocolo"
+    },
+    {
+      "from": "procedimento_protocolo_resultado",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "protocolo_emissao",
+      "to": "cliente",
+      "from_col": "id_cliente",
+      "to_col": "id_cliente"
+    },
+    {
+      "from": "protocolo_emissao",
+      "to": "paciente",
+      "from_col": "id_paciente",
+      "to_col": "id"
+    },
+    {
+      "from": "protocolo_emissao",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "reabertura_atendimento",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "reabertura_atendimento",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "remocao_evento",
+      "to": "remocao",
+      "from_col": "id_remocao",
+      "to_col": "id_remocao"
+    },
+    {
+      "from": "remocao_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "retorno_atendimento",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "retorno_atendimento",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "saas_contrato",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "sala_notificacao",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "sala_notificacao",
+      "to": "usuario",
+      "from_col": "id_usuario_abertura",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "sala_notificacao_evento",
+      "to": "sala_notificacao",
+      "from_col": "id_notificacao",
+      "to_col": "id_notificacao"
+    },
+    {
+      "from": "sala_notificacao_evento",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "senha_sequencia",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "servico_agendamento",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "servico_agendamento",
+      "to": "sistema",
+      "from_col": "id_sistema",
+      "to_col": "id_sistema"
+    },
+    {
+      "from": "sessao_contexto_historico",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "sessao_contexto_historico",
+      "to": "local",
+      "from_col": "id_local",
+      "to_col": "id_local"
+    },
+    {
+      "from": "sessao_contexto_historico",
+      "to": "sessao_usuario",
+      "from_col": "id_sessao_usuario",
+      "to_col": "id_sessao_usuario"
+    },
+    {
+      "from": "sessao_contexto_historico",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "sessao_contexto_historico",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "sessao_contexto_historico",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "solicitacao_exame",
+      "to": "exame",
+      "from_col": "id_exame",
+      "to_col": "id_exame"
+    },
+    {
+      "from": "solicitacao_exame",
+      "to": "medico",
+      "from_col": "id_medico",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "totem_senha_opcao",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "transporte_ambulancia_evento",
+      "to": "transporte_ambulancia",
+      "from_col": "id_transporte",
+      "to_col": "id"
+    },
+    {
+      "from": "triagem",
+      "to": "atendimento",
+      "from_col": "id_atendimento",
+      "to_col": "id_atendimento"
+    },
+    {
+      "from": "triagem",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "triagem",
+      "to": "classificacao_risco",
+      "from_col": "id_risco",
+      "to_col": "id_risco"
+    },
+    {
+      "from": "triagem",
+      "to": "usuario",
+      "from_col": "id_enfermeiro",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "tv_rotativo",
+      "to": "unidade",
+      "from_col": "id_unidade",
+      "to_col": "id_unidade"
+    },
+    {
+      "from": "tv_rotativo_tela",
+      "to": "painel",
+      "from_col": "id_painel",
+      "to_col": "id_painel"
+    },
+    {
+      "from": "usuario_alocacao",
+      "to": "especialidade",
+      "from_col": "id_especialidade",
+      "to_col": "id_especialidade"
+    },
+    {
+      "from": "usuario_alocacao",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "usuario_historico_senha",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "usuario_local",
+      "to": "local",
+      "from_col": "id_local",
+      "to_col": "id_local"
+    },
+    {
+      "from": "usuario_local",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "usuario_local",
+      "to": "saas_entidade",
+      "from_col": "id_entidade",
+      "to_col": "id_entidade"
+    },
+    {
+      "from": "usuario_profissional_registro",
+      "to": "usuarios",
+      "from_col": "id_usuario",
+      "to_col": "id"
+    },
+    {
+      "from": "usuario_senha_historico",
+      "to": "usuario",
+      "from_col": "id_usuario_executor",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "usuario_senha_historico",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "usuario_senha_reset",
+      "to": "usuario",
+      "from_col": "id_usuario_solicitante",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "usuario_senha_reset",
+      "to": "usuario",
+      "from_col": "id_usuario",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "venda",
+      "to": "caixa",
+      "from_col": "id_caixa",
+      "to_col": "id_caixa"
+    },
+    {
+      "from": "venda",
+      "to": "cliente",
+      "from_col": "id_cliente",
+      "to_col": "id_cliente"
+    },
+    {
+      "from": "venda",
+      "to": "usuario",
+      "from_col": "criado_por",
+      "to_col": "id_usuario"
+    },
+    {
+      "from": "venda_item",
+      "to": "farmaco",
+      "from_col": "id_farmaco",
+      "to_col": "id_farmaco"
+    },
+    {
+      "from": "venda_item",
+      "to": "farmaco_lote",
+      "from_col": "id_lote",
+      "to_col": "id_lote"
+    },
+    {
+      "from": "venda_item",
+      "to": "venda",
+      "from_col": "id_venda",
+      "to_col": "id_venda"
+    },
+    {
+      "from": "venda_pagamento",
+      "to": "forma_pagamento",
+      "from_col": "id_forma_pagamento",
+      "to_col": "id_forma_pagamento"
+    },
+    {
+      "from": "venda_pagamento",
+      "to": "venda",
+      "from_col": "id_venda",
+      "to_col": "id_venda"
+    }
+  ],
+  "density": 0.0012
+}

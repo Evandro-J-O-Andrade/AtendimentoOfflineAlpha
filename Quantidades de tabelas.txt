@@ -1,1 +1,0 @@
-402 tabelas feitas com 106 procedures e  1 function e 17 views

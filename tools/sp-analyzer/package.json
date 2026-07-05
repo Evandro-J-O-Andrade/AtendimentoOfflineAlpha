@@ -1,0 +1,15 @@
+{
+  "name": "sp-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "ts-node sp-client-generator.ts"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43"
+  }
+}

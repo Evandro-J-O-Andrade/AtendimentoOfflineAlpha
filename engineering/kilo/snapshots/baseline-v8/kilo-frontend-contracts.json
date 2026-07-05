@@ -1,0 +1,181 @@
+{
+  "source": "Dump20260606.sql",
+  "total_contracts": 25,
+  "contracts": [
+    {
+      "sp": "sp_executor_manchester_runtime",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 4,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_executor_recepcao_abrir_atendimento",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 5,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_farmacia_dispensar_registrar",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 8,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_farm_dispensacao_criar",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 7,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_farm_dispensacao_registrar",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 10,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_farm_reserva_confirmar",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 7,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_ffa_adicionar_item",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 13,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_ffa_gpat_garantir",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 5,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_ffa_gpat_gerar",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 5,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_ffa_orquestrador_transicao",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 10,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fila_chamar_proxima",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 6,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fila_finalizar",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 5,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fila_tipo_por_local",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 7,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_finalizar_procedimento_ecg",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 4,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_finalizar_procedimento_geral",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 6,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_finalizar_procedimento_laboratorio",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 5,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_finalizar_senha",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 3,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fix_columns_entidade",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 1,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fix_fk_unidade",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 1,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fluxo_estoque",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 10,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fluxo_executor_matriz",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 8,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fluxo_guardiao_transicao",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 8,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_fluxo_verificar_autorizacao",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 4,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_gatekeeper_assistencial",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 7,
+      "tenant_required": true
+    },
+    {
+      "sp": "sp_gera_protocolo_lab",
+      "domain": "GENERIC",
+      "params": "",
+      "param_count": 9,
+      "tenant_required": true
+    }
+  ]
+}

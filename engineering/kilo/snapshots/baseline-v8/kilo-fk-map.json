@@ -1,0 +1,1664 @@
+{
+  "administracao_medicacao.id_prescricao": [
+    {
+      "table": "prescricao_internacao",
+      "col": "id_prescricao"
+    }
+  ],
+  "administracao_medicacao.id_enfermeiro": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "administracao_medicacao_ordem.id_item": [
+    {
+      "table": "ordem_assistencial_item",
+      "col": "id_item"
+    }
+  ],
+  "administracao_medicacao_ordem.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "agenda_disponibilidade.id_local_operacional": [
+    {
+      "table": "local_operacional",
+      "col": "id_local_operacional"
+    }
+  ],
+  "agenda_disponibilidade.id_profissional": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "agenda_disponibilidade.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "agenda_disponibilidade.id_sistema": [
+    {
+      "table": "sistema",
+      "col": "id_sistema"
+    }
+  ],
+  "agenda_disponibilidade.id_usuario_criador": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "agendamentos_eventos.id_agendamento": [
+    {
+      "table": "agendamentos",
+      "col": "id_agendamento"
+    }
+  ],
+  "agendamentos_eventos.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "agendamentos_eventos.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "alerta.id_paciente": [
+    {
+      "table": "paciente",
+      "col": "id"
+    }
+  ],
+  "alerta.id_usuario_origem": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "alerta_consumo.id_alerta": [
+    {
+      "table": "alerta",
+      "col": "id_alerta"
+    }
+  ],
+  "alerta_consumo.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "alerta_consumo.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "alerta_destinatario.id_alerta": [
+    {
+      "table": "alerta",
+      "col": "id_alerta"
+    }
+  ],
+  "alerta_destinatario.id_usuario_acao": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "anamnese.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "anamnese.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "anotacao_enfermagem.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "anotacao_enfermagem.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "assistencia_social_evento.id_as": [
+    {
+      "table": "assistencia_social_atendimento",
+      "col": "id_as"
+    }
+  ],
+  "assistencia_social_evento.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "assistencia_social_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "atendimento_balanco_hidrico.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    },
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    },
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_balanco_hidrico.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_checagem.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_checagem.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_checagem.id_prescricao": [
+    {
+      "table": "atendimento_prescricao",
+      "col": "id"
+    }
+  ],
+  "atendimento_escalas_risco.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_escalas_risco.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_estado_ativo.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_estado_ativo.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_estado_ativo.id_local_atual": [
+    {
+      "table": "local_operacional",
+      "col": "id_local_operacional"
+    }
+  ],
+  "atendimento_evento_ledger.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_evento_ledger.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_movimentacao.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "atendimento_movimentacao.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_movimentacao.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_observacao.id_leito": [
+    {
+      "table": "leito",
+      "col": "id_leito"
+    }
+  ],
+  "atendimento_observacao.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_observacao.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_pedidos_exame.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_pedidos_exame.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_pedidos_exame.id_exame_tuss": [
+    {
+      "table": "tabela_tuss",
+      "col": "codigo_tuss"
+    }
+  ],
+  "atendimento_recepcao.id_recepcionista": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "atendimento_recepcao.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_recepcao.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_sumario_alta.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_sumario_alta.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "atendimento_vinculo.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "atendimento_vinculo.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "auditoria_acesso.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "auditoria_almoxarifado.id_produto": [
+    {
+      "table": "produtos_almoxarifado",
+      "col": "id_produto"
+    }
+  ],
+  "auditoria_almoxarifado.id_local": [
+    {
+      "table": "local_atendimento",
+      "col": "id_local"
+    }
+  ],
+  "auditoria_almoxarifado.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "auditoria_contexto.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "auditoria_contexto.id_local": [
+    {
+      "table": "local",
+      "col": "id_local"
+    }
+  ],
+  "auditoria_contexto.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "auditoria_contexto.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "auditoria_contexto.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "auditoria_contexto.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "auditoria_fila.id_fila": [
+    {
+      "table": "fila_senha",
+      "col": "id"
+    }
+  ],
+  "auditoria_mestre.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "caixa.aberto_por": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "caixa.fechado_por": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "caixa.id_local_operacional": [
+    {
+      "table": "local_operacional",
+      "col": "id_local_operacional"
+    }
+  ],
+  "cat_acidente_trabalho.id_pessoa_trabalhador": [
+    {
+      "table": "pessoa",
+      "col": "id_pessoa"
+    }
+  ],
+  "cat_acidente_trabalho_evento.id_cat": [
+    {
+      "table": "cat_acidente_trabalho",
+      "col": "id"
+    }
+  ],
+  "chamado.id_sistema": [
+    {
+      "table": "sistema",
+      "col": "id_sistema"
+    }
+  ],
+  "chamado.id_usuario_abertura": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "chamado.id_usuario_atribuido": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "chamado_evento.id_chamado": [
+    {
+      "table": "chamado",
+      "col": "id_chamado"
+    }
+  ],
+  "chamado_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "codigo_externo_map.id_codigo": [
+    {
+      "table": "codigo_universal",
+      "col": "id_codigo"
+    }
+  ],
+  "codigo_universal.id_cliente": [
+    {
+      "table": "cliente",
+      "col": "id_cliente"
+    }
+  ],
+  "codigo_universal.id_paciente": [
+    {
+      "table": "paciente",
+      "col": "id"
+    }
+  ],
+  "codigo_universal.id_produto": [
+    {
+      "table": "estoque_produto",
+      "col": "id_produto"
+    }
+  ],
+  "codigo_universal.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "config_leitos.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "config_sistema.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "documento_emissao.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "enfermagem.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "escala_medica.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "escala_plantao_atual.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "estoque_ledger.id_conta": [
+    {
+      "table": "estoque_conta",
+      "col": "id_conta"
+    }
+  ],
+  "estoque_ledger.id_movimento_item": [
+    {
+      "table": "estoque_movimento_item",
+      "col": "id_movimento_item"
+    }
+  ],
+  "estoque_lote.id_item": [
+    {
+      "table": "estoque_item",
+      "col": "id_item"
+    }
+  ],
+  "estoque_movimentacao.id_saldo": [
+    {
+      "table": "estoque_produto_saldo",
+      "col": "id_saldo"
+    }
+  ],
+  "estoque_movimento_item.id_movimento": [
+    {
+      "table": "estoque_movimento",
+      "col": "id_movimento"
+    }
+  ],
+  "estoque_produto_codigo_externo.id_produto": [
+    {
+      "table": "estoque_produto",
+      "col": "id_produto"
+    }
+  ],
+  "estoque_saldo.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "estoque_saldo_central.id_item": [
+    {
+      "table": "estoque_item",
+      "col": "id_item"
+    }
+  ],
+  "estoque_saldo_central.id_lote": [
+    {
+      "table": "estoque_lote",
+      "col": "id_lote"
+    }
+  ],
+  "estoque_saldo_central.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "estoque_saldo_master.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "estoque_saldo_master.id_item": [
+    {
+      "table": "estoque_item",
+      "col": "id_item"
+    }
+  ],
+  "estoque_saldo_master.id_lote": [
+    {
+      "table": "estoque_lote",
+      "col": "id_lote"
+    }
+  ],
+  "evento_geral.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "evolucao_enfermagem.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "evolucao_enfermagem.id_enfermeiro": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "evolucao_medica.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "evolucao_medica.id_medico": [
+    {
+      "table": "medico",
+      "col": "id_usuario"
+    }
+  ],
+  "evolucao_multidisciplinar.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "exame_fisico.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "exame_historico.id_pedido": [
+    {
+      "table": "exame_pedido",
+      "col": "id_pedido"
+    }
+  ],
+  "farm_dispensacao.id_receita": [
+    {
+      "table": "farm_receita_controlada",
+      "col": "id_receita"
+    }
+  ],
+  "farmacia_atendimento_externo_dispensacao.id_item": [
+    {
+      "table": "farmacia_atendimento_externo_item",
+      "col": "id_item"
+    }
+  ],
+  "farmacia_atendimento_externo_dispensacao.id_local_estoque": [
+    {
+      "table": "local_atendimento",
+      "col": "id_local"
+    }
+  ],
+  "farmacia_atendimento_externo_dispensacao.id_lote": [
+    {
+      "table": "farmaco_lote",
+      "col": "id_lote"
+    }
+  ],
+  "farmacia_atendimento_externo_dispensacao.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "farmacia_atendimento_externo_dispensacao.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "farmacia_atendimento_externo_item.id_atendimento": [
+    {
+      "table": "farmacia_atendimento_externo",
+      "col": "id_atendimento"
+    }
+  ],
+  "farmacia_atendimento_externo_item.id_farmaco": [
+    {
+      "table": "farmaco",
+      "col": "id_farmaco"
+    }
+  ],
+  "farmacia_dispensacao_log.id_lote": [
+    {
+      "table": "lote",
+      "col": "id"
+    }
+  ],
+  "farmacia_dispensacao_log.id_prescricao_item": [
+    {
+      "table": "prescricao_item",
+      "col": "id_item"
+    }
+  ],
+  "farmacia_dispensacao_log.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "farmaco_movimentacao.id_farmaco": [
+    {
+      "table": "farmaco",
+      "col": "id_farmaco"
+    }
+  ],
+  "farmaco_movimentacao.id_lote": [
+    {
+      "table": "farmaco_lote",
+      "col": "id_lote"
+    }
+  ],
+  "farmaco_unidade.id_farmaco": [
+    {
+      "table": "farmaco",
+      "col": "id_farmaco"
+    }
+  ],
+  "ffa_diagnostico.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "ffa_item.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "ffa_item.id_produto": [
+    {
+      "table": "estoque_produto",
+      "col": "id_produto"
+    }
+  ],
+  "fila_evento.id_fila": [
+    {
+      "table": "fila_senha",
+      "col": "id"
+    }
+  ],
+  "fila_operacional.id_responsavel": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "fila_operacional.id_local": [
+    {
+      "table": "local_atendimento",
+      "col": "id_local"
+    }
+  ],
+  "fila_operacional_evento.id_fila": [
+    {
+      "table": "fila_operacional",
+      "col": "id_fila"
+    }
+  ],
+  "fila_operacional_evento.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "gaso_evento.id_gaso": [
+    {
+      "table": "gaso_solicitacao",
+      "col": "id_gaso"
+    }
+  ],
+  "gaso_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "gasoterapia_consumo_evento.id_consumo": [
+    {
+      "table": "gasoterapia_consumo",
+      "col": "id"
+    }
+  ],
+  "gpat_atendimento.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "gpat_atendimento.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "gpat_atendimento.id_cliente": [
+    {
+      "table": "cliente",
+      "col": "id_cliente"
+    }
+  ],
+  "gpat_atendimento.id_prescritor_externo": [
+    {
+      "table": "prescritor_externo",
+      "col": "id_prescritor_externo"
+    }
+  ],
+  "gpat_atendimento.id_usuario_medico": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "gpat_dispensacao.id_gpat_item": [
+    {
+      "table": "gpat_item",
+      "col": "id_gpat_item"
+    }
+  ],
+  "gpat_dispensacao.id_local_estoque": [
+    {
+      "table": "local_atendimento",
+      "col": "id_local"
+    }
+  ],
+  "gpat_dispensacao.id_lote": [
+    {
+      "table": "farmaco_lote",
+      "col": "id_lote"
+    }
+  ],
+  "gpat_dispensacao.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "gpat_evento.id_gpat": [
+    {
+      "table": "gpat_atendimento",
+      "col": "id_gpat"
+    }
+  ],
+  "gpat_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "gpat_item.id_farmaco": [
+    {
+      "table": "farmaco",
+      "col": "id_farmaco"
+    }
+  ],
+  "gpat_item.id_gpat": [
+    {
+      "table": "gpat_atendimento",
+      "col": "id_gpat"
+    }
+  ],
+  "intercorrencia.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "intercorrencia.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "internacao.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "internacao.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "internacao.id_leito": [
+    {
+      "table": "leito",
+      "col": "id_leito"
+    }
+  ],
+  "internacao_braden_avaliacao.id_documento": [
+    {
+      "table": "documento_emissao",
+      "col": "id_documento"
+    }
+  ],
+  "internacao_braden_avaliacao.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "internacao_braden_avaliacao.id_usuario_responsavel": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "internacao_cuidados.id_prescricao_item": [
+    {
+      "table": "prescricao_itens",
+      "col": "id"
+    }
+  ],
+  "internacao_dietas.id_prescricao_item": [
+    {
+      "table": "prescricao_itens",
+      "col": "id"
+    }
+  ],
+  "internacao_ferida_avaliacao.id_documento": [
+    {
+      "table": "documento_emissao",
+      "col": "id_documento"
+    }
+  ],
+  "internacao_ferida_avaliacao.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "internacao_ferida_avaliacao.id_usuario_responsavel": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "internacao_movimentacao.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "internacao_movimentacao.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "internacao_movimentacao.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "internacao_movimentacao.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "internacao_prescricao.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "internacao_prescricao.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "internacao_prescricao.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "internacao_prescricao.id_usuario_prescritor": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "internacao_turno_registro.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "internacao_turno_registro.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "internacao_turno_registro.id_internacao": [
+    {
+      "table": "internacao",
+      "col": "id_internacao"
+    }
+  ],
+  "internacao_turno_registro.id_usuario_responsavel": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "lab_amostra.id_protocolo": [
+    {
+      "table": "lab_protocolo",
+      "col": "id_protocolo"
+    },
+    {
+      "table": "procedimento_protocolo",
+      "col": "id_protocolo"
+    }
+  ],
+  "lab_amostra.id_usuario_coleta": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "leito.id_setor": [
+    {
+      "table": "setor",
+      "col": "id_setor"
+    }
+  ],
+  "local_dispositivo.id_local": [
+    {
+      "table": "local",
+      "col": "id_local"
+    }
+  ],
+  "medicacao_reavaliacao.id_fila_medicacao": [
+    {
+      "table": "fila_operacional",
+      "col": "id_fila"
+    }
+  ],
+  "medicacao_reavaliacao.id_local_operacional": [
+    {
+      "table": "local_operacional",
+      "col": "id_local_operacional"
+    }
+  ],
+  "medicacao_reavaliacao.id_usuario_criador": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "medicacao_reavaliacao.id_usuario_executor": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "medico_especialidade.id_especialidade": [
+    {
+      "table": "especialidade",
+      "col": "id_especialidade"
+    }
+  ],
+  "medico_especialidade.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "notificacao_epidemiologica_evento.id_notificacao": [
+    {
+      "table": "notificacao_epidemiologica",
+      "col": "id"
+    }
+  ],
+  "notificacao_epidemiologica_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "notificacao_violencia_evento.id_notificacao": [
+    {
+      "table": "notificacao_violencia",
+      "col": "id"
+    }
+  ],
+  "obito_evento.id_obito": [
+    {
+      "table": "obito",
+      "col": "id_obito"
+    }
+  ],
+  "observacoes_eventos.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "observacoes_eventos.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "ordem_assistencial.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "ordem_assistencial.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "ordem_assistencial_aprazamento.id_local_operacional_execucao": [
+    {
+      "table": "local_operacional",
+      "col": "id_local_operacional"
+    }
+  ],
+  "ordem_assistencial_aprazamento.id_usuario_execucao": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "ordem_assistencial_aprazamento.id_item": [
+    {
+      "table": "ordem_assistencial_item",
+      "col": "id_item"
+    }
+  ],
+  "ordem_assistencial_aprazamento.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "ordem_assistencial_aprazamento.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "ordem_tipo_documento_config.tipo_documento": [
+    {
+      "table": "documento_tipo_config",
+      "col": "codigo"
+    }
+  ],
+  "paciente.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "paciente.id_pessoa": [
+    {
+      "table": "pessoa",
+      "col": "id_pessoa"
+    }
+  ],
+  "painel.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "painel_fila_tipo.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "painel_grupo_local.id_grupo": [
+    {
+      "table": "painel_grupo",
+      "col": "id_grupo"
+    }
+  ],
+  "painel_lane.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "painel_local.id_local_operacional": [
+    {
+      "table": "local_operacional",
+      "col": "id_local_operacional"
+    }
+  ],
+  "painel_local.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "painel_mensagem.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "painel_mensagem_consumo.id_mensagem": [
+    {
+      "table": "painel_mensagem",
+      "col": "id_mensagem"
+    }
+  ],
+  "painel_mensagem_consumo.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "painel_monitoramento_especialidade.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "pdv_venda_item.id_lote": [
+    {
+      "table": "estoque_lote",
+      "col": "id_lote"
+    }
+  ],
+  "pdv_venda_item.id_produto": [
+    {
+      "table": "estoque_produto",
+      "col": "id_produto"
+    }
+  ],
+  "pdv_venda_item.id_venda": [
+    {
+      "table": "pdv_venda",
+      "col": "id_venda"
+    }
+  ],
+  "pessoa_alergias.id_pessoa": [
+    {
+      "table": "pessoa",
+      "col": "id_pessoa"
+    }
+  ],
+  "pessoa_conselho_registro.id_conselho": [
+    {
+      "table": "conselho_profissional",
+      "col": "id_conselho"
+    }
+  ],
+  "pessoa_conselho_registro.id_pessoa": [
+    {
+      "table": "pessoa",
+      "col": "id_pessoa"
+    }
+  ],
+  "prescricao_checagem_dupla.id_checagem_principal": [
+    {
+      "table": "prescricao_checagem",
+      "col": "id_checagem"
+    }
+  ],
+  "prescricao_checagem_dupla.id_usuario_testemunha": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "prescricao_kit_itens.id_kit": [
+    {
+      "table": "prescricao_kit_master",
+      "col": "id"
+    }
+  ],
+  "procedimento_protocolo.id_fila": [
+    {
+      "table": "fila_operacional",
+      "col": "id_fila"
+    }
+  ],
+  "procedimento_protocolo.id_usuario_criacao": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "procedimento_protocolo_evento.id_protocolo": [
+    {
+      "table": "procedimento_protocolo",
+      "col": "id_protocolo"
+    }
+  ],
+  "procedimento_protocolo_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "procedimento_protocolo_resultado.id_resultado_anterior": [
+    {
+      "table": "procedimento_protocolo_resultado",
+      "col": "id_resultado"
+    }
+  ],
+  "procedimento_protocolo_resultado.id_protocolo": [
+    {
+      "table": "procedimento_protocolo",
+      "col": "id_protocolo"
+    }
+  ],
+  "procedimento_protocolo_resultado.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "protocolo_emissao.id_cliente": [
+    {
+      "table": "cliente",
+      "col": "id_cliente"
+    }
+  ],
+  "protocolo_emissao.id_paciente": [
+    {
+      "table": "paciente",
+      "col": "id"
+    }
+  ],
+  "protocolo_emissao.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "reabertura_atendimento.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "reabertura_atendimento.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "remocao_evento.id_remocao": [
+    {
+      "table": "remocao",
+      "col": "id_remocao"
+    }
+  ],
+  "remocao_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "retorno_atendimento.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "retorno_atendimento.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "saas_contrato.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "sala_notificacao.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "sala_notificacao.id_usuario_abertura": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "sala_notificacao_evento.id_notificacao": [
+    {
+      "table": "sala_notificacao",
+      "col": "id_notificacao"
+    }
+  ],
+  "sala_notificacao_evento.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "senha_sequencia.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "servico_agendamento.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "servico_agendamento.id_sistema": [
+    {
+      "table": "sistema",
+      "col": "id_sistema"
+    }
+  ],
+  "sessao_contexto_historico.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "sessao_contexto_historico.id_local": [
+    {
+      "table": "local",
+      "col": "id_local"
+    }
+  ],
+  "sessao_contexto_historico.id_sessao_usuario": [
+    {
+      "table": "sessao_usuario",
+      "col": "id_sessao_usuario"
+    }
+  ],
+  "sessao_contexto_historico.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "sessao_contexto_historico.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "sessao_contexto_historico.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "solicitacao_exame.id_exame": [
+    {
+      "table": "exame",
+      "col": "id_exame"
+    }
+  ],
+  "solicitacao_exame.id_medico": [
+    {
+      "table": "medico",
+      "col": "id_usuario"
+    }
+  ],
+  "totem_senha_opcao.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "transporte_ambulancia_evento.id_transporte": [
+    {
+      "table": "transporte_ambulancia",
+      "col": "id"
+    }
+  ],
+  "triagem.id_atendimento": [
+    {
+      "table": "atendimento",
+      "col": "id_atendimento"
+    }
+  ],
+  "triagem.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "triagem.id_risco": [
+    {
+      "table": "classificacao_risco",
+      "col": "id_risco"
+    }
+  ],
+  "triagem.id_enfermeiro": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "tv_rotativo.id_unidade": [
+    {
+      "table": "unidade",
+      "col": "id_unidade"
+    }
+  ],
+  "tv_rotativo_tela.id_painel": [
+    {
+      "table": "painel",
+      "col": "id_painel"
+    }
+  ],
+  "usuario_alocacao.id_especialidade": [
+    {
+      "table": "especialidade",
+      "col": "id_especialidade"
+    }
+  ],
+  "usuario_alocacao.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "usuario_historico_senha.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "usuario_local.id_local": [
+    {
+      "table": "local",
+      "col": "id_local"
+    }
+  ],
+  "usuario_local.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "usuario_local.id_entidade": [
+    {
+      "table": "saas_entidade",
+      "col": "id_entidade"
+    }
+  ],
+  "usuario_profissional_registro.id_usuario": [
+    {
+      "table": "usuarios",
+      "col": "id"
+    }
+  ],
+  "usuario_senha_historico.id_usuario_executor": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "usuario_senha_historico.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "usuario_senha_reset.id_usuario_solicitante": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "usuario_senha_reset.id_usuario": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "venda.id_caixa": [
+    {
+      "table": "caixa",
+      "col": "id_caixa"
+    }
+  ],
+  "venda.id_cliente": [
+    {
+      "table": "cliente",
+      "col": "id_cliente"
+    }
+  ],
+  "venda.criado_por": [
+    {
+      "table": "usuario",
+      "col": "id_usuario"
+    }
+  ],
+  "venda_item.id_farmaco": [
+    {
+      "table": "farmaco",
+      "col": "id_farmaco"
+    }
+  ],
+  "venda_item.id_lote": [
+    {
+      "table": "farmaco_lote",
+      "col": "id_lote"
+    }
+  ],
+  "venda_item.id_venda": [
+    {
+      "table": "venda",
+      "col": "id_venda"
+    }
+  ],
+  "venda_pagamento.id_forma_pagamento": [
+    {
+      "table": "forma_pagamento",
+      "col": "id_forma_pagamento"
+    }
+  ],
+  "venda_pagamento.id_venda": [
+    {
+      "table": "venda",
+      "col": "id_venda"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+export default { nome: 'runtime', id: 'runtime', categoria: 'Runtime', ordem: 1, icone: 'Cpu', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Runtime', icone: 'Cpu', route: '/runtime' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }

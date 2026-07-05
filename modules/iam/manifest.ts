@@ -1,0 +1,1 @@
+export default { nome: 'iam', id: 'iam', categoria: 'Iam', ordem: 1, icone: 'Lock', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Iam', icone: 'Lock', route: '/iam' }], widgets: [], dashboard: './dashboard', events: ['./events'], procedures: ['./procedures'], featureFlags: [] }

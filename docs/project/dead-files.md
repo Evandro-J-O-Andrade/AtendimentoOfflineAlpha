@@ -1,0 +1,18 @@
+# Dead / Disposable Files
+
+- D:\AtendimentoOfflineAlpha\database\dump\Dump20260606.sql (.sql, 1671,13 KB)
+- D:\AtendimentoOfflineAlpha\database\stages\Stage100.sql (.sql, 1,4 KB)
+- D:\AtendimentoOfflineAlpha\database\stages\Stage200.sql (.sql, 0,82 KB)
+- D:\AtendimentoOfflineAlpha\database\stages\Stage201.sql (.sql, 0,87 KB)
+- D:\AtendimentoOfflineAlpha\database\stages\Stage202.sql (.sql, 0,8 KB)
+- D:\AtendimentoOfflineAlpha\docs\database\checklist_integridade.ps1 (.ps1, 11,42 KB)
+- D:\AtendimentoOfflineAlpha\docs\database\generate_tables_docs.ps1 (.ps1, 7,78 KB)
+- D:\AtendimentoOfflineAlpha\docs\project\inventory-raw.csv (.csv, 2088 KB)
+- D:\AtendimentoOfflineAlpha\engineering\kilo\kilo-engine-v8.ps1 (.ps1, 21,42 KB)
+- D:\AtendimentoOfflineAlpha\engineering\kilo\knowledge-engine\generate-inventory.ps1 (.ps1, 0,9 KB)
+- D:\AtendimentoOfflineAlpha\engineering\kilo\knowledge-engine\loader.ps1 (.ps1, 1,9 KB)
+- D:\AtendimentoOfflineAlpha\engineering\kilo\knowledge-engine\parse-tables.ps1 (.ps1, 1,55 KB)
+- D:\AtendimentoOfflineAlpha\engineering\kilo\knowledge-engine\reclassify.ps1 (.ps1, 1,72 KB)
+- D:\AtendimentoOfflineAlpha\engineering\kilo\knowledge-engine\synchronizer.ps1 (.ps1, 1,08 KB)
+- D:\AtendimentoOfflineAlpha\scripts\gerar_docs_banco.ps1 (.ps1, 3,18 KB)
+- D:\AtendimentoOfflineAlpha\scripts\gerar_tables_raw.ps1 (.ps1, 2,74 KB)

@@ -1,0 +1,1 @@
+export default { nome: 'triagem', id: 'triagem', categoria: 'Triagem', ordem: 1, icone: 'Clipboard', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Triagem', icone: 'Clipboard', route: '/triagem' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
