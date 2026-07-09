@@ -19,13 +19,16 @@ Este documento estabelece as regras de conduta operacional para todas as IAs que
 
 ## Ordem de Leitura Obrigatória
 
-1. `000-CONSTITUICAO-IA.md` (regras operacionais - este documento)
-2. `docs/canonical/MD-CANONICO-IA-001-Lei-Evolucao-Documental.md` (lei de evolução documental)
-3. `docs/canonical/MD-CANONICO-IA-002-Lei-Governanca-Arquitetural.md` (lei de governança arquitetural)
-4. `docs/canonical/MD-110-Canonical-Laws.md` (leis supremas)
-5. `docs/canonical/MD-100-Unified-Enterprise-Operating-System.md` (arquitetura)
-6. `docs/canonical/MAP-001-Enterprise-Domain-Architecture.md` (domínios)
-7. Documentos específicos do escopo
+1. `000-CONSTITUICAO-PLATAFORMA.md` (Constituição Suprema da Plataforma)
+2. `000-CONSTITUICAO-IA.md` (Guia Operacional das IAs)
+3. `docs/canonical/MD-CANONICO-IA-001-Lei-Evolucao-Documental.md` (Lei de Evolução Documental)
+4. `docs/canonical/MD-CANONICO-IA-002-Lei-Governanca-Arquitetural.md` (Lei de Governança Arquitetural)
+5. `docs/canonical/MD-CANONICO-IA-003-Lei-Evolucao-Core.md` (Lei da Evolução do Core)
+6. `docs/canonical/MD-CANONICO-IA-004-Matriz-Evolucao-Projeto.md` (Matriz de Evolução)
+7. `docs/canonical/MD-110-Canonical-Laws.md` (Leis Supremas)
+8. `docs/canonical/MD-100-Unified-Enterprise-Operating-System.md` (Arquitetura)
+9. `docs/canonical/MAP-001-Enterprise-Domain-Architecture.md` (Domínios)
+10. Documentos específicos do escopo
 
 ---
 

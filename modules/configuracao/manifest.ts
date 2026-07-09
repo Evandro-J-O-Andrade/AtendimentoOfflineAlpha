@@ -1,1 +1,39 @@
-export default { nome: 'configuracao', id: 'configuracao', categoria: 'Configuracao', ordem: 1, icone: 'Settings', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Configuracao', icone: 'Settings', route: '/configuracao' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "configuracao",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "configuracao",
+                     "icone":  "Box",
+                     "route":  "/configuracao"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "configuracao",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/configuracao"
+               ],
+    "widgets":  [
+
+                ]
+}

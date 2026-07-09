@@ -1,1 +1,39 @@
-export default { nome: 'paciente', id: 'paciente', categoria: 'Paciente', ordem: 1, icone: 'Heart', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Paciente', icone: 'Heart', route: '/paciente' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "paciente",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "paciente",
+                     "icone":  "Box",
+                     "route":  "/paciente"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "paciente",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/paciente"
+               ],
+    "widgets":  [
+
+                ]
+}

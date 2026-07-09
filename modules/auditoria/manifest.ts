@@ -1,1 +1,39 @@
-export default { nome: 'auditoria', id: 'auditoria', categoria: 'Auditoria', ordem: 1, icone: 'FileText', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Auditoria', icone: 'FileText', route: '/auditoria' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "auditoria",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "auditoria",
+                     "icone":  "Box",
+                     "route":  "/auditoria"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "auditoria",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/auditoria"
+               ],
+    "widgets":  [
+
+                ]
+}

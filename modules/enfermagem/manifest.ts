@@ -1,1 +1,39 @@
-export default { nome: 'enfermagem', id: 'enfermagem', categoria: 'Enfermagem', ordem: 1, icone: 'Shield', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Enfermagem', icone: 'Shield', route: '/enfermagem' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "enfermagem",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "enfermagem",
+                     "icone":  "Box",
+                     "route":  "/enfermagem"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "enfermagem",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/enfermagem"
+               ],
+    "widgets":  [
+
+                ]
+}

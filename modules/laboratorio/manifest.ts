@@ -1,1 +1,39 @@
-export default { nome: 'laboratorio', id: 'laboratorio', categoria: 'Laboratorio', ordem: 1, icone: 'TestTube', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Laboratorio', icone: 'TestTube', route: '/laboratorio' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "laboratorio",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "laboratorio",
+                     "icone":  "Box",
+                     "route":  "/laboratorio"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "laboratorio",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/laboratorio"
+               ],
+    "widgets":  [
+
+                ]
+}

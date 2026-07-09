@@ -1,1 +1,2 @@
-export const permissions = []
+﻿// PermissÃµes do mÃ³dulo display
+export const permissions = [];

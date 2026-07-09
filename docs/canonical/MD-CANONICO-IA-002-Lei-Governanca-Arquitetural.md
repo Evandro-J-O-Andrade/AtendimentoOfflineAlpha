@@ -504,6 +504,8 @@ Ler MD-CANONICO-IA-002 (este documento)
 ↓
 Ler Leis Canônicas (MD-110, LC-001-LC-018)
 ↓
+Ler MD-CANONICO-IA-007 (Banco Fonte da Verdade + Knowledge Graph Vivo)
+↓
 Ler MAPs existentes do domínio
 ↓
 Ler BRs existentes do domínio
@@ -554,6 +556,7 @@ Registrar maturidade atualizada
 |-----------|------------|
 | 000-CONSTITUICAO-IA.md | Constituição operacional das IAs |
 | MD-CANONICO-IA-001 | Lei de Evolução Documental |
+| MD-CANONICO-IA-007 | Lei do Banco Fonte da Verdade + Knowledge Graph Vivo |
 | MD-110 — Canonical Laws | Leis supremas da plataforma |
 | LC-001 → LC-018 | Leis Canônicas Globais |
 | MD-001 até MD-110 | Documentos arquiteturais complementares |

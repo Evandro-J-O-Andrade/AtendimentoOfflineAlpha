@@ -1,1 +1,39 @@
-export default { nome: 'kernel', id: 'kernel', categoria: 'Kernel', ordem: 1, icone: 'Cpu', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Kernel', icone: 'Cpu', route: '/kernel' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "kernel",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "kernel",
+                     "icone":  "Box",
+                     "route":  "/kernel"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "kernel",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/kernel"
+               ],
+    "widgets":  [
+
+                ]
+}

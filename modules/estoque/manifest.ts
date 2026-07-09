@@ -1,1 +1,39 @@
-export default { nome: 'estoque', id: 'estoque', categoria: 'Estoque', ordem: 1, icone: 'Package', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Estoque', icone: 'Package', route: '/estoque' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "estoque",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "estoque",
+                     "icone":  "Box",
+                     "route":  "/estoque"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "estoque",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/estoque"
+               ],
+    "widgets":  [
+
+                ]
+}

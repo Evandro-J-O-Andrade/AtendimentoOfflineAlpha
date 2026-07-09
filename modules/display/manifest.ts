@@ -1,1 +1,39 @@
-export default { nome: 'display', id: 'display', categoria: 'Display', ordem: 1, icone: 'Tv', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Display', icone: 'Tv', route: '/display' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "display",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "display",
+                     "icone":  "Box",
+                     "route":  "/display"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "display",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/display"
+               ],
+    "widgets":  [
+
+                ]
+}

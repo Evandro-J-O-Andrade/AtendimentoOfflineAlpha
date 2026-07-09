@@ -1,1 +1,39 @@
-export default { nome: 'notificacao', id: 'notificacao', categoria: 'Notificacao', ordem: 1, icone: 'Bell', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Notificacao', icone: 'Bell', route: '/notificacao' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "notificacao",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "notificacao",
+                     "icone":  "Box",
+                     "route":  "/notificacao"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "notificacao",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/notificacao"
+               ],
+    "widgets":  [
+
+                ]
+}

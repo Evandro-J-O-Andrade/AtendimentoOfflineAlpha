@@ -1,1 +1,39 @@
-export default { nome: 'pessoa', id: 'pessoa', categoria: 'Pessoa', ordem: 1, icone: 'User', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Pessoa', icone: 'User', route: '/pessoa' }], widgets: [], dashboard: './dashboard', events: ['./events'], procedures: ['./procedures'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "pessoa",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "pessoa",
+                     "icone":  "Box",
+                     "route":  "/pessoa"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "pessoa",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/pessoa"
+               ],
+    "widgets":  [
+
+                ]
+}

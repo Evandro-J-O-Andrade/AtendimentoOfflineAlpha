@@ -1,0 +1,10 @@
+export type AuthenticationState =
+  | 'UNAUTHENTICATED'
+  | 'AUTHENTICATING'
+  | 'AUTHENTICATED'
+  | 'SESSION_RESTORED'
+  | 'SESSION_EXPIRED'
+  | 'PASSWORD_EXPIRED'
+  | 'ACCOUNT_LOCKED'
+  | 'MFA_REQUIRED'
+  | 'ERROR'

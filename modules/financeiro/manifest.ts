@@ -1,1 +1,39 @@
-export default { nome: 'financeiro', id: 'financeiro', categoria: 'Financeiro', ordem: 1, icone: 'DollarSign', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Financeiro', icone: 'DollarSign', route: '/financeiro' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "financeiro",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "financeiro",
+                     "icone":  "Box",
+                     "route":  "/financeiro"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "financeiro",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/financeiro"
+               ],
+    "widgets":  [
+
+                ]
+}

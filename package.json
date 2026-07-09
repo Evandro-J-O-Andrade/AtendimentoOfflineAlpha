@@ -1,4 +1,14 @@
 {
+  "name": "enterprise-saas",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean"
+  },
   "dependencies": {
     "node.js": "^0.0.1-security",
     "vite": "^7.3.6"

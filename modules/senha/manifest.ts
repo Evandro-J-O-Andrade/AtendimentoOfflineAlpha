@@ -1,1 +1,39 @@
-export default { nome: 'senha', id: 'senha', categoria: 'Senha', ordem: 1, icone: 'Ticket', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Senha', icone: 'Ticket', route: '/senha' }], widgets: [], dashboard: './dashboard', events: ['./events'], procedures: ['./procedures'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "senha",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "senha",
+                     "icone":  "Box",
+                     "route":  "/senha"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "senha",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/senha"
+               ],
+    "widgets":  [
+
+                ]
+}

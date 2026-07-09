@@ -1,1 +1,39 @@
-export default { nome: 'recepcao', id: 'recepcao', categoria: 'Recepcao', ordem: 1, icone: 'Desk', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Recepcao', icone: 'Desk', route: '/recepcao' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "recepcao",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "recepcao",
+                     "icone":  "Box",
+                     "route":  "/recepcao"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "recepcao",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/recepcao"
+               ],
+    "widgets":  [
+
+                ]
+}

@@ -1,1 +1,39 @@
-export default { nome: 'atendimento', id: 'atendimento', categoria: 'Atendimento', ordem: 1, icone: 'Stethoscope', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Atendimento', icone: 'Stethoscope', route: '/atendimento' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "atendimento",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "atendimento",
+                     "icone":  "Box",
+                     "route":  "/atendimento"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "atendimento",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/atendimento"
+               ],
+    "widgets":  [
+
+                ]
+}

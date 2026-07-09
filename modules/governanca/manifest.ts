@@ -1,1 +1,39 @@
-export default { nome: 'governanca', id: 'governanca', categoria: 'Governanca', ordem: 1, icone: 'Shield', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Governanca', icone: 'Shield', route: '/governanca' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "governanca",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "governanca",
+                     "icone":  "Box",
+                     "route":  "/governanca"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "governanca",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/governanca"
+               ],
+    "widgets":  [
+
+                ]
+}

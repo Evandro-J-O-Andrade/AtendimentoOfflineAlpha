@@ -1,1 +1,39 @@
-export default { nome: 'painel', id: 'painel', categoria: 'Painel', ordem: 1, icone: 'Monitor', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Painel', icone: 'Monitor', route: '/painel' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "painel",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "painel",
+                     "icone":  "Box",
+                     "route":  "/painel"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "painel",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/painel"
+               ],
+    "widgets":  [
+
+                ]
+}

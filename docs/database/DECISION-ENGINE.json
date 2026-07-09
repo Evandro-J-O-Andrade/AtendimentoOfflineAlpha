@@ -1,0 +1,50 @@
+{
+  "schema": "kernel-governance/decision-engine",
+  "version": "1.0",
+  "status": "frozen",
+  "source": "DECISION-ENGINE.md",
+  "decisionFlow": [
+    "discover",
+    "impact",
+    "owner",
+    "invariants",
+    "reuse",
+    "adapt",
+    "extend",
+    "merge",
+    "propose"
+  ],
+  "classification": ["REUSE", "ADAPT", "EXTEND", "MERGE", "PROPOSE"],
+  "gates": [
+    { "id": 1, "name": "DATABASE-MAP", "artifact": "DATABASE-MAP.md" },
+    { "id": 2, "name": "DECISION-ENGINE", "artifact": "DECISION-ENGINE.md" },
+    { "id": 3, "name": "DOMAIN", "artifact": "modules/DOMAINS.md" },
+    { "id": 4, "name": "IMPACT_ANALYZER", "artifacts": ["TABLE-SP-MAP.md", "CALLGRAPH.md", "BACKEND-SP-MAP.md", "FRONT-SP-MAP.md", "runtime/"] },
+    { "id": 5, "name": "OWNER", "artifact": "OWNERSHIP-MAP.md" },
+    { "id": 6, "name": "INVARIANTS", "artifact": "SYSTEM-INVARIANTS.md" },
+    { "id": 7, "name": "DUPLICATION", "artifact": "DUPLICATION-MAP.md" },
+    { "id": 8, "name": "CLASSIFY", "values": ["REUSE", "ADAPT", "EXTEND", "MERGE", "PROPOSE"] },
+    { "id": 9, "name": "CODE", "requires": "DECISION-LOG.md entry for PROPOSE/MERGE" }
+  ],
+  "metrics": {
+    "reuseRate": "% implementações que reutilizaram objetos existentes",
+    "proposeRate": "novos objetos criados por sprint",
+    "mergeRate": "duplicações eliminadas",
+    "impactCoverage": "% alterações que passaram pelo Impact Analyzer",
+    "gateCompliance": "% tarefas que executaram Gates 1-9",
+    "invariantCompliance": "violações das invariantes",
+    "architecturalDebt": "itens R1-R5 abertos"
+  },
+  "familySearch": {
+    "dashboard": ["painel", "painel_config", "painel_lane", "painel_local", "painel_grupo", "painel_evento_stream", "painel_alertas_tempo"],
+    "runtime": ["runtime_*", "kernel_*"],
+    "auth": ["auth_*", "sessao_*", "usuario_*"],
+    "fila": ["fila_*", "fila_painel_runtime"],
+    "estoque": ["estoque_*"],
+    "ledger": ["ledger_*", "kernel_ledger"],
+    "auditoria": ["auditoria_*", "log_auditoria"]
+  },
+  "invariants": ["INV-001", "INV-002", "INV-003", "INV-004", "INV-005", "INV-006", "INV-007"],
+  "derivedArtifacts": "Tudo em docs/database/ é regenerável a partir de Dump + Código (nunca editado como fonte).",
+  "notes": "Este arquivo é um CONTRATO MÁQUINA derivado de DECISION-ENGINE.md. Não o substitui; permite que scripts/CI validem o processo sem interpretar texto livre. Congelado em v1.0 (DEC-0004)."
+}

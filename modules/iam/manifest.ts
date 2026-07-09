@@ -1,1 +1,39 @@
-export default { nome: 'iam', id: 'iam', categoria: 'Iam', ordem: 1, icone: 'Lock', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Iam', icone: 'Lock', route: '/iam' }], widgets: [], dashboard: './dashboard', events: ['./events'], procedures: ['./procedures'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "iam",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "iam",
+                     "icone":  "Box",
+                     "route":  "/iam"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "iam",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/iam"
+               ],
+    "widgets":  [
+
+                ]
+}

@@ -1,1 +1,39 @@
-export default { nome: 'fila', id: 'fila', categoria: 'Fila', ordem: 1, icone: 'List', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Fila', icone: 'List', route: '/fila' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "fila",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "fila",
+                     "icone":  "Box",
+                     "route":  "/fila"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "fila",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/fila"
+               ],
+    "widgets":  [
+
+                ]
+}

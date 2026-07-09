@@ -1,1 +1,39 @@
-export default { nome: 'ffa', id: 'ffa', categoria: 'Ffa', ordem: 1, icone: 'Activity', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Ffa', icone: 'Activity', route: '/ffa' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "ffa",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "ffa",
+                     "icone":  "Box",
+                     "route":  "/ffa"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "ffa",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/ffa"
+               ],
+    "widgets":  [
+
+                ]
+}

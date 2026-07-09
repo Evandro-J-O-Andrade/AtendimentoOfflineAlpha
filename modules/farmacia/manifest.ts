@@ -1,1 +1,39 @@
-export default { nome: 'farmacia', id: 'farmacia', categoria: 'Farmacia', ordem: 1, icone: 'Pill', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Farmacia', icone: 'Pill', route: '/farmacia' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "farmacia",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "farmacia",
+                     "icone":  "Box",
+                     "route":  "/farmacia"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "farmacia",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/farmacia"
+               ],
+    "widgets":  [
+
+                ]
+}

@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { EnterpriseShell } from './shell'
+import { ProviderStack } from './app/providers'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <EnterpriseShell />
+    <ProviderStack />
   </React.StrictMode>
 )

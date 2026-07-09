@@ -1,1 +1,39 @@
-export default { nome: 'faturamento', id: 'faturamento', categoria: 'Faturamento', ordem: 1, icone: 'Receipt', routes: ['./routes'], permissions: ['./permissions'], menu: [{ label: 'Faturamento', icone: 'Receipt', route: '/faturamento' }], widgets: [], dashboard: './dashboard', events: ['./events'], types: ['./types'], procedures: ['./procedures'], contracts: ['./contracts'], featureFlags: [] }
+﻿export default {
+    "automation":  [
+                       "./automation"
+                   ],
+    "id":  "faturamento",
+    "featureFlags":  [
+
+                     ],
+    "ordem":  1,
+    "menu":  [
+                 {
+                     "label":  "faturamento",
+                     "icone":  "Box",
+                     "route":  "/faturamento"
+                 }
+             ],
+    "procedures":  [
+
+                   ],
+    "permissions":  [
+
+                    ],
+    "categoria":  "Core",
+    "icone":  "Box",
+    "ai":  [
+               "./ai"
+           ],
+    "nome":  "faturamento",
+    "events":  [
+
+               ],
+    "dashboard":  "./dashboard",
+    "routes":  [
+                   "/faturamento"
+               ],
+    "widgets":  [
+
+                ]
+}
