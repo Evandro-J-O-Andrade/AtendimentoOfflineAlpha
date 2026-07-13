@@ -1,0 +1,226 @@
+.wrapper {
+  position: relative;
+  min-height: 100vh;
+  padding: 24px;
+  background: #020916;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 9, 22, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.rightPanel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  margin: auto;
+  display: grid;
+  gap: 28px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.logoSaaS {
+  width: 44px;
+  height: auto;
+}
+
+.themeBadge {
+  color: rgba(203, 213, 225, 0.95);
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 14px;
+  border-radius: 999px;
+}
+
+.titleBlock h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.05;
+  color: #ffffff;
+}
+
+.titleBlock h1 span {
+  color: #4f7dff;
+}
+
+.titleBlock p {
+  margin: 18px 0 0;
+  max-width: 520px;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.75;
+}
+
+.cardForm {
+  width: 100%;
+  padding: 36px;
+  background: rgba(7, 13, 27, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45);
+}
+
+.label {
+  display: block;
+  margin-bottom: 18px;
+  color: rgba(203, 213, 225, 0.94);
+  font-size: 14px;
+}
+
+.input {
+  width: 100%;
+  padding: 16px 18px;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 14, 27, 0.96);
+  border-radius: 18px;
+  color: #fff;
+  font-size: 15px;
+}
+
+.input::placeholder {
+  color: rgba(203, 213, 225, 0.45);
+}
+
+.button {
+  width: 100%;
+  padding: 16px 18px;
+  margin-top: 24px;
+  background: linear-gradient(90deg, #2f80ed, #8b5cf6);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.error {
+  margin-top: 14px;
+  color: #fb7185;
+}
+
+.formRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(203, 213, 225, 0.9);
+  font-size: 14px;
+}
+
+.checkboxLabel input {
+  width: 16px;
+  height: 16px;
+}
+
+.forgotLink {
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.securityInfo {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 30px;
+  color: rgba(203, 213, 225, 0.78);
+  font-size: 13px;
+}
+
+.securityInfo div {
+  min-width: 0;
+}
+
+.securityInfo strong {
+  display: block;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.footerBar {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: rgba(8, 15, 28, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  color: rgba(255, 255, 255, 0.82);
+  z-index: 1;
+}
+
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.footerLogo {
+  width: 30px;
+  height: auto;
+}
+
+.footerInfo {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 13px;
+  color: rgba(203, 213, 225, 0.75);
+}
+
+.status {
+  font-size: 16px;
+  color: #fff;
+}
+
+.container {
+  display: flex;
+  min-height: 200px;
+  align-items: center;
+  justify-content: center;
+}

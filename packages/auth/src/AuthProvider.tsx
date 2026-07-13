@@ -27,7 +27,7 @@ export interface AuthProviderProps {
   baseUrl?: string
 }
 
-export function AuthProvider({ children, apiClient, baseUrl = '/api' }: AuthProviderProps) {
+export function AuthProvider({ children, apiClient, baseUrl = '' }: AuthProviderProps) {
   const api = apiClient ?? createApiClient({ baseUrl })
   const authApi = createAuthApi(api)
   const [session, setSession] = useState<AuthSessionContract | null>(null)

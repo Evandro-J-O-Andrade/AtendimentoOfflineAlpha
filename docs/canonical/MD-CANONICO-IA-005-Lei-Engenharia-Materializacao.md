@@ -30,6 +30,17 @@ O projeto evolui por **incremento**, nunca por reconstrução.
 
 ## 2. Lei Canônica da Materialização
 
+```text
+Nenhuma tabela nasce sem justificar
+por que as existentes não atendem.
+
+Nenhuma SP nasce sem justificar
+por que as existentes não atendem.
+
+Nenhuma FK nasce sem um relacionamento
+canônico previamente definido.
+```
+
 O banco de dados é a fonte da verdade.
 Nunca o código.
 
@@ -66,13 +77,19 @@ Toda nova funcionalidade ou CORE obrigatoriamente segue:
     ↓
 5. Só então propor (PROPOSE)
     ↓
-6. Gerar SQL
+6. DOSSIER DE MATERIALIZAÇÃO
     ↓
-7. Implementar backend
+7. MODELO CONCEITUAL
     ↓
-8. Implementar frontend
+8. REVISÃO TRANSVERSAL
     ↓
-9. Validar
+9. Gerar SQL
+    ↓
+10. Implementar backend
+    ↓
+11. Implementar frontend
+    ↓
+12. Validar
 ```
 
 ---
@@ -536,3 +553,105 @@ Antes de concluir qualquer CORE ou sprint, deve ser verificada a existência de:
 - Componentes redundantes
 
 Se encontrado, propor consolidação antes do merge/entrega.
+
+---
+
+## 23. Revisão Transversal Obrigatória
+
+Nenhum objeto PROPOSE pode ser materializado enquanto não for confrontado com todos os domínios estratégicos da plataforma.
+
+### 23.1 Domínios mínimos obrigatórios
+
+- HIS
+- Portal Enterprise
+- Intranet
+- ERP
+- CRM
+- BI
+- Mobile
+- API
+- Marketplace
+- Display/TV
+- Integrações
+
+### 23.2 Critério de aprovação
+
+A revisão transversal está APROVADA quando:
+1. Todos os domínios estratégicos foram consultados
+2. A matriz de consumo está preenchida
+3. Não há conceitos específicos de um único domínio no Kernel
+4. O modelo é suficientemente genérico para todos os domínios
+5. A quantidade de tabelas/procedures é mínima mas suficiente
+
+### 23.3 Pergunta final
+
+> Qual é o menor conjunto de conceitos que atende TODOS os domínios?
+
+Se a resposta for "X conceitos", e X for maior que o necessário, reduzir.
+
+---
+
+## 24. Banco Vivo e Artefatos Derivados
+
+O `bancoMysql.md` é a fonte oficial (imutável).
+
+Qualquer índice, mapa ou catálogo é um artefato derivado, descartável e regenerável.
+
+Exemplos de artefatos derivados:
+- `DB-INDEX.md`
+- `DB-DOMAINS.md`
+- `DB-DEPENDENCIES.md`
+- `DB-SP-MAP.md`
+- `DB-VIEW-MAP.md`
+- `DB-FK-MAP.md`
+- `DB-JOIN-MAP.md`
+
+Regra:
+```
+Fonte oficial → bancoMysql.md (nunca alterado)
+Artefatos derivados → podem ser regenerados
+```
+
+---
+
+## 25. Conclusão
+
+Essa lei define o comportamento padrão do agente para todo o restante do projeto.
+
+Qualquer implementação futura deve ser validada contra essas regras antes de ser considerada aceitável.
+
+```text
+AUDIT
+  ↓
+GATE
+  ↓
+DOSSIER
+  ↓
+MODELO CONCEITUAL
+  ↓
+REVISÃO TRANSVERSAL
+  ↓
+DOSSIER APROVADO
+  ↓
+MATERIALIZAÇÃO
+```
+
+Sempre.
+Sem exceção.
+
+---
+
+## 26. Integração com MD-110
+
+```text
+Todos os MDs canônicos (MD-001 até MD-113) são complementares.
+Em caso de conflito, MD-110 prevalece.
+Qualquer alteração em MD-005 impacta toda a plataforma.
+Mudança exige ADR + aprovação do Arquiteto Chefe.
+```
+
+---
+
+Documento Canônico Supremo — MD-005
+
+**Esta é a lei de engenharia e materialização do projeto AtendimentoOfflineAlpha.**

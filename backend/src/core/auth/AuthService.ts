@@ -1,16 +1,10 @@
-import { createConnection } from '@backend/database/mysql/connection'
+import { getDatabasePool } from '@backend/database/mysql/connection'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 import type { AuthLoginResponse, AuthSessionResponse, AuthContextResponse } from '@backend/shared/types/auth'
 
-const config = {
-  host: process.env.DB_HOST ?? 'localhost',
-  port: Number(process.env.DB_PORT ?? 3306),
-  user: process.env.DB_USER ?? 'root',
-  password: process.env.DB_PASSWORD ?? '',
-  database: process.env.DB_NAME ?? 'pronto_atendimento'
-}
-
 export class AuthService {
-  private connection = createConnection(config)
+  private connection = getDatabasePool()
 
   async login(login: string, tokenJwt: string, refreshToken: string, ip: string, device: string) {
     const conn = await this.connection
@@ -57,6 +51,35 @@ export class AuthService {
       session,
       state: 'AUTHENTICATED' as const
     }
+  }
+
+  async authenticate(username: string, password: string, ip: string, device: string) {
+    const conn = await this.connection
+    const [rows] = await conn.query(
+      'SELECT id_usuario, senha, ativo FROM usuario WHERE login = ? LIMIT 1',
+      [username]
+    )
+    const user = (rows as any[])[0]
+
+    if (!user) {
+      return { authenticated: false, state: 'ERROR' as const, message: 'USUARIO_NAO_ENCONTRADO' }
+    }
+    if (Number(user.ativo) !== 1) {
+      return { authenticated: false, state: 'ERROR' as const, message: 'USUARIO_INATIVO' }
+    }
+
+    const senhaOk = await bcrypt.compare(password, String(user.senha))
+    if (!senhaOk) {
+      return { authenticated: false, state: 'ERROR' as const, message: 'CREDENCIAIS_INVALIDAS' }
+    }
+
+    const token = jwt.sign(
+      { sub: Number(user.id_usuario), login: username },
+      process.env.JWT_SECRET ?? 'dev-secret-atendimento-offline',
+      { expiresIn: '24h' }
+    )
+
+    return this.login(username, token, '', ip, device)
   }
 
   async session(idSessao: number) {

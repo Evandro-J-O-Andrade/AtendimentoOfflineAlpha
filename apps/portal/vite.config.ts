@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@atendimentooffline/contracts': path.resolve(__dirname, '../packages/contracts/src'),
-      '@atendimentooffline/api': path.resolve(__dirname, '../packages/api/src'),
-      '@atendimentooffline/auth': path.resolve(__dirname, '../packages/auth/src'),
-      '@atendimentooffline/runtime': path.resolve(__dirname, '../packages/runtime/src')
+      '@atendimentooffline/contracts': path.resolve(__dirname, '../../packages/contracts/src'),
+      '@atendimentooffline/api': path.resolve(__dirname, '../../packages/api/src'),
+      '@atendimentooffline/auth': path.resolve(__dirname, '../../packages/auth/src'),
+      '@atendimentooffline/runtime': path.resolve(__dirname, '../../packages/runtime/src')
     }
   },
   server: {

@@ -49,6 +49,15 @@ Portal orquestra experiências.
 
 ---
 
+## Lei Canônica MAP-005-005
+```text
+Portal é Runtime, não apenas interface (LEI 23).
+Portal expõe a mesma capacidade para interfaces humanas
+e para interfaces computacionais, via o mesmo Runtime.
+```
+
+---
+
 ## Leis Canônicas Globais Aplicáveis
 
 ### LC-002 — Identity ≠ Operational Context
@@ -264,6 +273,94 @@ O que fazer
 O que revisar
 O que aprovar
 O que acompanhar
+```
+
+---
+
+## Portal como Runtime (LEI 23)
+
+### Consumidores Universais
+O Portal não serve apenas ao frontend React. Toda capacidade
+deve ser consumível pelas mesmas interfaces:
+
+```text
+Interfaces humanas (UI):
+  Web (React)
+  Mobile
+  Kiosk
+  TV Display
+
+Interfaces computacionais (API):
+  APIs externas
+  MCPs (Model Context Protocol)
+  Agentes de IA
+  Automações
+  Integrações futuras
+```
+
+### Fluxo Único (Humano ou Computacional)
+Nenhum consumidor cria lógica paralela. Todos usam o mesmo Runtime.
+
+```text
+Interface (humana ou computacional)
+        ↓
+MCP / API
+        ↓
+Portal Runtime
+        ↓
+Master
+        ↓
+Dispatcher
+        ↓
+Executors
+        ↓
+Stored Procedures
+        ↓
+Banco Canônico
+```
+
+### MVPs do Portal
+Cada domínio nasce com MVP mínimo. Para o Portal:
+
+```text
+MVP-001 — Dashboard inicial
+MVP-002 — Widgets
+MVP-003 — Favoritos
+MVP-004 — Layouts
+MVP-005 — Notificações
+```
+
+Cada MVP exige:
+
+```text
+MD (Materialização)
+BR (Business Rules)
+MAP (Mapeamento)
+Contratos
+APIs
+Procedures
+Testes
+Critérios de aceite
+```
+
+### APIs Canônicas do Portal
+```text
+Portal API
+Runtime API
+Auth API
+Context API
+Dashboard API
+Widget API
+Notification API
+AI API
+MCP API
+```
+
+### Proibição (LEI 23)
+```text
+É proibido criar lógica exclusiva para IA que contorne
+o Kernel, os contratos ou as Stored Procedures canônicas.
+Nenhuma IA acessa o banco diretamente.
 ```
 
 ---

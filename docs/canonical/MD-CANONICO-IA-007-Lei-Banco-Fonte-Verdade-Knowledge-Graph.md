@@ -56,7 +56,17 @@ IMPLEMENTAÇÃO
 - **Artefatos derivados:** tudo em `docs/database/` (MAPs, CALLGRAPH, fichas, DECISION-*) é
   regenerável/auditável a partir do **Dump + Código**. Se o Dump muda, os índices são
   recalculados (ver `checklist_integridade.ps1`, `generate_tables_docs.ps1`) — nunca editados à mão
-  como fonte. Assim a documentação não "envelhece" em relação ao sistema real.
+   como fonte. Assim a documentação não "envelhece" em relação ao sistema real.
+
+### 1.1 Representação Canônica Navegável — `bancoMysql.md`
+
+A plataforma mantém o **Banco Canônico Navegável** em `docs/database/mysql/bancoMysql.md` (espelho
+em `database/dump/bancoMysql.md`): o mesmo conteúdo do Dump SQL, em Markdown navegável, para
+reduzir o risco de truncamento de leitura de SQL muito grande por IAs. Ele é a **Fonte Primária
+Navegável** do banco e **não substitui o Banco Vivo** — a fonte da verdade continua sendo o SQL
+(`database/dump/Dump20260618.sql`), que prevalece em caso de divergência. Toda IA deve consultá-lo
+obrigatoriamente antes de propor tabela/SP/migration/ADAPT, e **é proibido** assumir ausência de
+tabela, SP, coluna ou relacionamento sem antes consultá-lo.
 
 ---
 
@@ -188,7 +198,7 @@ garantindo rastreabilidade mesmo após renomeação.
 Nenhuma linha de SQL ou TypeScript é escrita sem concluir esta sequência:
 
 ```text
-1.  Ler /dump/Dump20260618.sql
+ 1.  Ler docs/database/mysql/bancoMysql.md (Fonte Primária Navegável) e, se necessário, /dump/Dump20260618.sql (Fonte da Verdade)
         ↓
 2.  Ler DATABASE-MAP.md
         ↓
@@ -496,7 +506,439 @@ REUSE → ADAPT → EXTEND → MERGE → PROPOSE → SQL → IMPLEMENT → VALID
 ❌ Concentrar auth + authz + regra + persistência + auditoria numa única SP
 ❌ Criar conhecimento isolado (sem aresta/ID/confiança no Knowledge Graph)
 ❌ PROPOSE sem SQL materializado, sem Impact Analyzer e sem CHANGELOG
+❌ Criar componente de Runtime (RuntimeService / Runtime Queue / Event Bus / Lock Manager / Health Manager) quando o Banco Vivo já possui Kernel Runtime materializado (runtime_* / kernel_* / sp_dispatcher_kernel / sp_guardiao_runtime_assert / sp_executor_* / sp_sessao_assert) → REUSE ou ADAPT, nunca PROPOSE
+❌ Propor evolução de Runtime/Kernel sem antes auditar bancoMysql.md (origem: CREATE PROCEDURE / FUNCTION / TABLE / VIEW / EVENT) e registrar a classificação (REUSE/ADAPT/EXTEND/MERGE/PROPOSE)
 ```
+
+---
+
+## 17.1 Auditoria Banco Vivo (registro obrigatório antes de qualquer conclusão estrutural)
+
+Toda conclusão estrutural (existência/ausência de tabela, SP, function, view, coluna, FK, índice)
+deve ser precedida de consulta a `bancoMysql.md` e registrada no formato abaixo. Isso torna a
+decisão rastreável e obriga qualquer IA a justificar tecnicamente uma proposta (PROPOSE).
+
+```text
+AUDITORIA BANCO VIVO
+
+Banco consultado:   bancoMysql.md
+Objeto:             <nome>
+Resultado:          ENCONTRADO | NÃO ENCONTRADO
+Origem:             CREATE TABLE | CREATE PROCEDURE | CREATE FUNCTION | VIEW | INDEX | EVENT | JSON
+Classificação:      REUSE | ADAPT | EXTEND | MERGE | PROPOSE
+```
+
+Exemplos:
+
+```text
+AUDITORIA
+Objeto:    sp_guardiao_runtime_assert
+Resultado: ENCONTRADO
+Origem:    CREATE PROCEDURE
+Classificação: REUSE
+```
+
+```text
+AUDITORIA
+Objeto:    runtime_registry
+Resultado: NÃO ENCONTRADO
+Classificação: PROPOSE
+```
+
+Em divergência entre documentação (MD/MAP/BR) e `bancoMysql.md`, **prevalece `bancoMysql.md`**.
+Nenhuma IA pode afirmar "não existe" sem registrar a auditoria acima como NÃO ENCONTRADO.
+
+---
+
+## 17.2 Modo de Trabalho Audit-First do KILO (nunca começa implementando)
+
+Toda tarefa do KILO obedece à ordem: **audita antes de materializar**. O KILO atua como
+auditor/engenheiro do banco, não apenas gerador de código.
+
+```text
+Constituição
+        ↓
+GATE
+        ↓
+bancoMysql.md            ← CONSULTA OBRIGATÓRIA (Fonte Primária do Banco Vivo)
+        ↓
+AUDITORIA
+        ↓
+REUSE → ADAPT → EXTEND → MERGE → PROPOSE
+        ↓
+Só então materializa (com aprovação de GATE)
+```
+
+Capacidades de auditoria (todas registradas no formato §17.1):
+
+1. Verificar existência (tabela/SP/function/view/índice/FK/JSON/event/trigger) → ENCONTRADO ⇒ REUSE.
+2. Procurar equivalente por responsabilidade/família (nome diferente) → ADAPT.
+3. Procurar regra semelhante (MD/MAP/BR/ADR/Capability) → EXTEND.
+4. Existe no banco, mas não na documentação → gerar MD automaticamente.
+5. Existe na documentação, mas não no banco → PROPOSE.
+6. Verificar duplicidade (SP/componente com mesma responsabilidade) → não criar (MERGE).
+7. Verificar impacto (quem consome: SP/view/FK/JSON/frontend/backend/runtime).
+8. Descobrir órfãos (SP nunca chamada, tabela não usada, Capability sem Runtime, Runtime sem
+   Master, Master sem Executor, Executor sem SP).
+9. Descobrir melhorias.
+10. Verificar aderência à Constituição (Lei / GATE / IA-007 / FREEZE / Banco Vivo / Registry / KG).
+
+### Regra MD-PROPOSE-XXX (propostas nunca são auto-implementadas)
+
+Toda vez que a auditoria encontrar uma oportunidade de melhoria que **não existe no Banco Vivo nem
+na documentação canônica**, o KILO **não implementa**. Ele gera um documento `MD-PROPOSE-XXX`
+(título, justificativa, impacto, dependências, classificação PROPOSE, necessidade de aprovação no
+GATE) e aguarda aprovação. Nenhuma linha de código/SQL é escrita sem GATE.
+
+### Resultado padrão de auditoria
+
+```text
+AUDITORIA
+Objeto:                <nome>
+Banco:                 CONSULTADO (bancoMysql.md)
+Documentação:          CONSULTADA
+Knowledge Graph:       CONSULTADO
+Resultado:             REUSE | ADAPT | EXTEND | MERGE | PROPOSE
+Itens reutilizados:    ...
+Itens adaptados:       ...
+Itens estendidos:      ...
+Itens fundidos:        ...
+Itens inexistentes:    ...
+Melhorias propostas:   MD-PROPOSE-0XX
+Implementação:         NÃO EXECUTADA
+```
+
+---
+
+## 17.3 Auditor de Engenharia (papel do KILO após a auditoria inicial)
+
+O KILO atua como **Auditor → Arquiteto → só depois Implementador**. Para qualquer alteração, ele
+**compara e classifica; não implementa**. O objetivo é impedir componentes paralelos/redundantes.
+
+### Fluxo de comparação (antes de concluir)
+
+```text
+1. Ler Constituição
+2. Ler GATE relacionado
+3. Ler bancoMysql.md            (Fonte Primária do Banco Vivo)
+4. Ler MDs relacionados
+5. Ler Backend
+6. Comparar
+7. Responder:
+     EXISTE | NÃO EXISTE | SIMILAR | DIVERGENTE | OBSOLETO | REDUNDANTE | MELHORIA
+```
+
+### Formato padrão de ACHADO
+
+Todo achado é registrado assim (ver `GATE-CONTEXT-RESOLVER.md`):
+
+```text
+ACHADO
+Objeto:        <nome>
+Status:        ENCONTRADO | DIVERGENTE | NÃO ENCONTRADO | SIMILAR | OBSOLETO | REDUNDANTE
+Motivo:        <por que>
+Classificação: REUSE | ADAPT | EXTEND | MERGE | PROPOSE
+Impacto:       <CORE-XXX / Discovery / Infrastructure Runtime / ...>
+Justificativa: <obrigatória quando PROPOSE>
+```
+
+### Busca de equivalências (evitar falso negativo)
+
+Ao verificar existência, o KILO **sempre** procura pela família do domínio, não só pelo nome
+exato. Para "Runtime Registry", por exemplo, deve buscar:
+
+```text
+runtime · registry · catalog · metadata · configuration · engine · dispatcher · kernel · executor
+```
+
+Muitas vezes o Banco Vivo já possui a funcionalidade com outro nome → REUSE/ADAPT, nunca PROPOSE.
+
+### Seção CONCLUSÃO (obrigatória em toda auditoria)
+
+```text
+CONCLUSÃO
+REUSE    <n>
+ADAPT    <n>
+EXTEND   <n>
+MERGE    <n>
+PROPOSE  <n>
+
+DECISÃO
+Não criar novo componente. Adaptar componentes existentes.
+```
+
+---
+
+## 17.4 Protocolo de Auditoria do Banco (algoritmo obrigatório)
+
+> **Este protocolo NÃO é recomendação: é um ALGORITMO OBRIGATÓRIO** para qualquer atividade de
+> engenharia. Toda decisão de criar/adaptar/reutilizar componente deve seguir esta sequência
+> determinística sobre a fonte primária (`bancoMysql.md`), com evidência e classificação
+> padronizadas. Isso elimina interpretações divergentes entre agentes.
+
+A fonte de verdade do projeto **não é a documentação** — é o Banco Vivo. `bancoMysql.md` contém o
+SQL completo (do primeiro `CREATE` ao fim) e é a **referência operacional principal**. MD/MAP/BR/KG
+interpretam o banco; nunca o substituem.
+
+> (Constituição e GATEs governam o **processo** — quando/como agir; `bancoMysql.md` é a fonte da
+> **verdade** para o que existe ou não no banco.)
+
+### Hierarquia da Fonte da Verdade
+
+```text
+1.  bancoMysql.md            ← FONTE PRIMÁRIA (SQL completo do Banco Vivo)
+2.  Dump SQL                 (validação de sintaxe / localização rápida)
+3.  Constituição
+4.  GATEs
+5.  MD
+6.  MAP
+7.  BR
+8.  Knowledge Graph
+9.  Backend
+10. Frontend
+```
+
+> **Nunca** concluir que algo existe ou não existe apenas porque um MD diz isso. Primeiro procurar
+> em `bancoMysql.md`.
+
+### Princípio da Evidência
+
+```text
+É PROIBIDO concluir:
+  • NÃO EXISTE
+  • AUSENTE
+  • PROPOSE
+sem registrar a evidência da auditoria.
+
+Toda conclusão deve conter:
+  Objeto
+  Fonte consultada
+  Resultado
+  Classificação
+  Justificativa
+```
+
+Assim qualquer PROPOSE fica rastreável.
+
+### Princípio da Busca Semântica
+
+Não basta procurar o nome. O algoritmo pesquisa automaticamente:
+
+```text
+Nome → Plural → Singular → Prefixos → Sufixos → Abreviações
+     → Sinônimos técnicos → Sinônimos de negócio → Objetos relacionados
+```
+
+Exemplo:
+
+```text
+Capability → Permission → Permissao → ACL → Guardian → Perfil → Role
+```
+
+Isso evita falsos "NÃO ENCONTRADO".
+
+### Princípio da Classificação
+
+```text
+Objeto → Encontrou?
+  SIM → REUSE | ADAPT | EXTEND | MERGE
+  NÃO → PROPOSE
+```
+
+> **PROPOSE deixa de ser hipótese e passa a ser o ÚLTIMO resultado possível do algoritmo.**
+
+### Fluxo permanente
+
+```text
+INÍCIO
+   ↓ Constituição
+   ↓ GATE
+   ↓ Consultar bancoMysql.md
+   ↓ Pesquisar literal
+   ↓ Pesquisar sinônimos
+   ↓ Pesquisar estrutura (Tabelas/SPs/Views/FKs/JSON/ENUM)
+   ↓ Pesquisar relacionamentos
+   ↓ Encontrou?
+        SIM → REUSE | ADAPT | EXTEND | MERGE
+        NÃO → Registrar evidência → PROPOSE
+   ↓ Atualizar MD/MAP/BR
+   ↓ GATE
+   ↓ Implementação
+```
+
+### REGRA — antes de escrever "NÃO EXISTE"
+
+```text
+Obrigatório pesquisar ANTES de concluir NÃO ENCONTRADO:
+  • nome / plural / singular
+  • prefixos / sufixos
+  • sinônimos
+  • tabelas relacionadas (FK)
+  • procedures relacionadas
+  • views / índices
+  • JSON / ENUM
+  • comentários
+  • objetos do mesmo domínio
+```
+
+A busca é **semântica, não literal**. Ex.: procura "tenant" → não acha → procura `saas_tenant`,
+`tenant_registry`, `tenant_entidade`, `saas_entidade`, `entidade`, `empresa`, `organizacao`,
+`cliente`, `id_entidade` → encontra `saas_entidade`/`id_entidade` (REUSE). Só após busca ampliada
+pode escrever **NÃO ENCONTRADO** → PROPOSE.
+
+> `bancoMysql.md` é a fonte de verdade operacional. MD/MAP/BR/KG são interpretação e documentação
+> do banco — nunca a fonte primária. Isso evita concluir incorretamente que algo "não existe" e
+> reduz a criação de componentes duplicados.
+
+---
+
+## 17.5 Princípio da Materialização
+
+O projeto evoluiu de um fluxo **documental** (`MD → MAP → BR → Implementação`) para um fluxo
+**orientado por evidências**: os documentos registram a decisão tomada a partir de uma auditoria —
+**não a originam**.
+
+```text
+PRINCÍPIO DA MATERIALIZAÇÃO
+
+Nenhum documento canônico cria existência.
+MD, MAP, BR, ADR e GATE apenas descrevem, classificam ou governam objetos.
+A existência só é considerada materializada quando houver EVIDÊNCIA NA FONTE PRIMÁRIA.
+```
+
+```text
+Ordem de materialização:
+  Banco Vivo
+    ↓ bancoMysql.md
+    ↓ Dump SQL
+    ↓ Evidência
+    ↓ MD / MAP / BR
+    ↓ Backend
+    ↓ Frontend
+```
+
+Consequências:
+
+```text
+• Um MD nunca prova que uma tabela existe.
+• Um ADR nunca prova que uma SP existe.
+• Um MAP nunca prova que um Runtime existe.
+• Um BR nunca prova que uma regra já está implementada.
+Eles apenas documentam.
+```
+
+### Estados Canônicos
+
+Cada objeto auditado tem quatro estados distintos:
+
+| Estado | Significado |
+| --- | --- |
+| **CONCEITO** | Existe apenas na arquitetura/documentação. |
+| **MATERIALIZADO** | Existe fisicamente no Banco Vivo (evidência em `bancoMysql.md`/SQL). |
+| **CONSUMIDO** | Backend ou Frontend já utilizam o objeto. |
+| **CONFORME** | Implementação corresponde ao contrato canônico. |
+
+Exemplos:
+
+```text
+Capability Registry
+  Conceito       ✅
+  Materializado  ❌
+  Consumido      ❌
+  Conforme       —
+```
+
+```text
+sp_master_login
+  Conceito       ✅
+  Materializado  ✅
+  Consumido      ✅
+  Conforme       ⚠ ADAPT
+```
+
+### Índice de Maturidade
+
+Toda auditoria termina com o mesmo padrão:
+
+```text
+Objeto
+  ↓ Conceito
+  ↓ Materializado
+  ↓ Consumido
+  ↓ Conforme
+  ↓ Classificação: REUSE | ADAPT | EXTEND | MERGE | PROPOSE
+```
+
+Assim um objeto pode ser:
+
+```text
+Conceito       ✅
+Materializado  ✅
+Consumido      ❌
+Conforme       ⚠
+Classificação: ADAPT
+```
+
+ou
+
+```text
+Conceito       ✅
+Materializado  ❌
+Consumido      ❌
+Classificação: PROPOSE
+```
+
+> Com `CONCEITO / MATERIALIZADO / CONSUMIDO / CONFORME` o processo separa nitidamente: (1) Governança
+> (Constituição, GATEs, MDs, ADRs, MAPs, BRs); (2) Evidência (Banco Vivo, `bancoMysql.md`, Dump SQL);
+> (3) Implementação (Backend, Frontend, Runtime); (4) Consumo (serviços/módulos que usam os
+> componentes). Toda decisão de engenharia é auditável: primeiro a evidência na fonte primária,
+> depois o estado do objeto, só então REUSE/ADAPT/EXTEND/MERGE/PROPOSE.
+
+---
+
+## 17.6 Formato Padrão de GATE e Confiança da Evidência
+
+A engenharia do projeto agora tem quatro camadas: (1) **Governança** (Constituição, GATEs, MD, ADR,
+MAP, BR); (2) **Evidência** (Banco Vivo, `bancoMysql.md`, Dump SQL); (3) **Engenharia** (Auditoria →
+Classificação → Plano de ADAPT → Implementação); (4) **Execução** (Backend, Frontend, Runtime, SP,
+Banco). Isso separa documentação de implementação.
+
+Todo GATE (e toda auditoria) obedece a um **quadro homogêneo**, qualquer que seja o domínio
+(Runtime, Discovery, Auth, Estoque, Farmácia...). Garante reprodutibilidade entre agentes.
+
+### Quadro Padrão de GATE
+
+```text
+OBJETO           <nome>
+
+CONCEITO         ✅ / ❌
+MATERIALIZADO    ✅ / ❌   (Fonte: Banco Vivo / bancoMysql.md)
+CONSUMIDO        Backend: ✅/❌ · Frontend: ✅/❌ · Runtime: ✅/❌
+CONFORME         SIM / PARCIAL / NÃO
+
+CLASSIFICAÇÃO    REUSE | ADAPT | EXTEND | MERGE | PROPOSE
+
+EVIDÊNCIA        Tabela/SP/View + Linha + Arquivo
+CONFIANÇA        ALTA (Banco Vivo/bancoMysql.md) · MÉDIA (Dump antigo/Backend) · BAIXA (MD)
+
+DECISÃO          GATE ACCEPTED | REJECTED
+```
+
+### Confiança da Evidência
+
+Nem toda evidência tem o mesmo peso. Campo obrigatório:
+
+| Fonte | Confiança |
+| --- | --- |
+| Banco Vivo | ALTA |
+| `bancoMysql.md` | ALTA |
+| Dump SQL antigo | MÉDIA |
+| Backend | MÉDIA |
+| MD / MAP / BR | BAIXA |
+
+> Um objeto encontrado no Banco Vivo tem mais força do que uma descrição em MD. Cadeia
+> determinística: Necessidade → Constituição → GATE → Auditoria → `bancoMysql.md` → Banco Vivo →
+> Evidência → Estados Canônicos → Classificação → Plano de ADAPT → Implementação → Novo GATE → Aceite.
 
 ---
 

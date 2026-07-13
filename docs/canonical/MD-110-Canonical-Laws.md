@@ -5,6 +5,13 @@
 Documento Canônico Supremo.
 Consolida todas as leis canônicas da Plataforma New Wave Enterprise.
 
+```text
+FREEZE (Ciclo Arquitetural 1)
+Fundação Runtime/Integração (LEI 23–26) congelada.
+Alteração exige ADR + aprovação do Arquiteto Chefe (Art. 63/65).
+Ver 000-CONSTITUICAO-PLATAFORMA.md — Título XV.
+```
+
 ---
 
 ## Objetivo
@@ -311,6 +318,157 @@ Redis é cache, nunca fonte da verdade.
 
 ---
 
+### LEI 23 — Portal é Runtime, Não Interface
+
+```text
+Portal não é apenas frontend. Portal é Runtime.
+Todo domínio materializado na plataforma deve ser consumível por:
+
+  Interfaces humanas:
+    Web (React), Mobile, Kiosk, TV Display
+
+  Interfaces computacionais:
+    APIs externas, MCPs (Model Context Protocol),
+    Agentes de IA, Automações, Integrações futuras
+
+Todas consomem o mesmo Runtime, o mesmo Kernel,
+as mesmas regras de negócio e as mesmas Stored Procedures.
+
+É proibido criar lógica exclusiva para IA que contorne
+o Kernel, os contratos ou as Stored Procedures canônicas.
+
+Fluxo obrigatório de qualquer interface (humana ou computacional):
+
+  Interface
+    ↓
+  MCP / API
+    ↓
+  AI Runtime (se IA) / Runtime de domínio (se humano)
+    ↓
+  Capability Resolver → Runtime Resolver
+    ↓
+  Runtime alvo (Portal / Farmácia / Estoque / ...)
+    ↓
+  Master
+    ↓
+  Dispatcher
+    ↓
+  Executors
+    ↓
+  Stored Procedures
+    ↓
+  Banco Canônico
+
+Portal Runtime não é obrigatório para toda operação.
+É apenas mais um Runtime da plataforma (LEI 25).
+
+Nenhuma IA acessa o banco diretamente.
+Nenhuma IA contorna o Runtime.
+Nenhuma IA decide regra de negócio fora da SP.
+```
+
+---
+
+### LEI 24 — Lei da Integração Universal da Plataforma
+
+```text
+Toda a plataforma segue uma única espinha dorsal.
+Usuários, aplicações, automações e agentes de IA
+nunca criam caminhos paralelos nem regras duplicadas.
+
+1. Todo serviço da plataforma deve ser consumível por
+   interfaces humanas e computacionais.
+
+2. Nenhuma IA pode acessar diretamente o banco de dados.
+
+3. Toda IA deve operar através do AI Runtime e do Runtime
+   correspondente ao domínio.
+
+4. Toda operação deve passar pelo fluxo
+   Master → Dispatcher → Executor → Stored Procedure.
+
+5. O banco canônico permanece a única fonte de verdade.
+
+6. As capacidades disponíveis para uma IA devem ser
+   descobertas pelo Runtime, nunca codificadas no agente.
+
+7. Toda execução de IA deve possuir sessão, contexto,
+   permissões e auditoria.
+```
+
+---
+
+### LEI 25 — Lei da Descoberta Canônica de Capacidades
+
+```text
+A plataforma é desacoplada por descoberta, não por
+conhecimento interno da arquitetura.
+
+1. Nenhum cliente (Frontend, API, MCP ou IA) pode conhecer
+   diretamente Stored Procedures.
+
+2. Toda capacidade deve ser descoberta pelo Runtime.
+
+3. Toda ferramenta deve estar registrada no Tool Registry.
+
+4. Toda integração deve utilizar contratos canônicos.
+
+5. O Runtime é o único responsável por resolver qual Master,
+   Dispatcher e Executor serão utilizados.
+
+6. O banco canônico continua sendo a fonte oficial da verdade.
+```
+
+---
+
+### LEI 26 — Lei da Execução Canônica
+
+```text
+Toda capacidade descoberta deve ser executada pelo mesmo
+pipeline. Nenhum cliente pode pular etapas.
+
+Capability
+   ↓
+Action
+   ↓
+Contract
+   ↓
+Runtime
+   ↓
+Master
+   ↓
+Guardião (Permission + Context + Tenant + Feature)
+   ↓
+Dispatcher
+   ↓
+Executor
+   ↓
+Stored Procedure
+   ↓
+Banco Canônico
+   ↓
+Eventos
+   ↓
+Auditoria
+   ↓
+Resposta
+
+Capability NÃO executa. Ela apenas informa:
+  existe / quem pode usar / qual contrato utiliza.
+Quem executa é o Runtime, que resolve internamente
+qual Master, Executor e SP serão usados.
+
+A capacidade é a unidade de engenharia.
+Novo módulo começa por Capability, não por tabela.
+
+Futuro: banco vivo como Grafo de Capacidades
+(Graph Runtime) — relações navegáveis entre
+Capability, Runtime, Contrato, SP, Tabelas,
+Eventos, BRs, MDs, MAPs e Testes.
+```
+
+---
+
 ## Matriz de Responsabilidade
 
 | Camada | Decidir | Validar | Executar | Escrever | Exibir |
@@ -486,6 +644,24 @@ Recovery automático via health checks.
 ### LC-AI-001 — Sugerir, Não Decidir
 ```text
 IA sugere. Usuário decide.
+```
+
+### LC-AI-002 — IA Acessa Pelo Mesmo Runtime
+```text
+IA não acessa banco diretamente.
+IA acessa via MCP / API → Portal Runtime → Master
+  → Dispatcher → Executors → Stored Procedures.
+Nenhuma IA cria lógica paralela ao Kernel, contratos ou SPs.
+IA consome as mesmas regras de negócio dos humanos.
+```
+
+### LC-AI-003 — IA é Governada, Não Solta
+```text
+Agente de IA é registrado, autenticado e autorizado.
+Contexto, permissão, ferramentas e auditoria são controlados
+pelo domínio ai_agent (registry, session, permission, context,
+audit, execution, tool, memory).
+Toda chamada de IA é rastreável.
 ```
 
 ---

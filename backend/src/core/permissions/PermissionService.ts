@@ -1,15 +1,7 @@
-import { createConnection } from '@backend/database/mysql/connection'
-
-const config = {
-  host: process.env.DB_HOST ?? 'localhost',
-  port: Number(process.env.DB_PORT ?? 3306),
-  user: process.env.DB_USER ?? 'root',
-  password: process.env.DB_PASSWORD ?? '',
-  database: process.env.DB_NAME ?? 'pronto_atendimento'
-}
+import { getDatabasePool } from '@backend/database/mysql/connection'
 
 export class PermissionService {
-  private connection = createConnection(config)
+  private connection = getDatabasePool()
 
   async evaluate(idSessao: number): Promise<string[]> {
     const conn = await this.connection

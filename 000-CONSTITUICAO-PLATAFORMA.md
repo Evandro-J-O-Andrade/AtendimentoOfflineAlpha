@@ -948,6 +948,273 @@ Nenhuma alteração é feita sem registro formal.
 
 ---
 
+## Título XV — Arquitetura de Plataforma e Congelamento do Ciclo 1
+
+### Artigo 67 — Camadas da Constituição da Plataforma
+
+A plataforma organiza-se em quatro camadas. Nenhuma camada
+superior é contornada por camada inferior.
+
+```text
+CAMADA CONSTITUCIONAL
+  Leis Canônicas (LEI 01...26)
+  ADRs
+  Princípios de Engenharia
+  Banco Vivo
+  Knowledge Graph
+
+CAMADA DE ENGENHARIA
+  MDs  MAPs  BRs  FRONTs  Dossiês  Gates
+
+CAMADA DE EXECUÇÃO
+  Runtime → Master → Guardião → Dispatcher
+          → Executor → Stored Procedures
+
+CAMADA DE CONSUMO
+  React · Mobile · Kiosk · TV Display
+  APIs · MCP · Agentes de IA
+```
+
+A capacidade (Capability) é a unidade de engenharia.
+Novo domínio começa por Capability, não por tabela.
+
+### Artigo 68 — Congelamento do Ciclo Arquitetural 1
+
+O primeiro ciclo de definição da arquitetura de plataforma
+está encerrado e CONGELADO. O congelamento preserva a fundação
+enquanto os domínios são materializados.
+
+```text
+✅ LEI 23 — Portal é Runtime, Não Interface
+✅ LEI 24 — Lei da Integração Universal da Plataforma
+✅ LEI 25 — Lei da Descoberta Canônica de Capacidades
+✅ LEI 26 — Lei da Execução Canônica
+✅ MAP-019 — AI Domain Architecture
+✅ MD-110  — Canonical Laws (fundação Runtime/Integração)
+✅ Arquitetura Runtime (AI/Portal/Farmácia/Estoque/...)
+```
+
+Regras do congelamento (Art. 63 e Art. 65):
+
+```text
+- Congelamento NÃO impede evolução, apenas estabiliza a fundação.
+- Alteração exige ADR + aprovação do Arquiteto Chefe.
+- Evolução ocorre por NOVOS DOMÍNIOS (Portal, Farmácia,
+  Estoque, Financeiro, ...), seguindo as leis, não alterando-as.
+- Validação sempre contra banco vivo, Knowledge Graph e MDs.
+```
+
+### Artigo 69 — Próximo Grande Passo: Materialização
+
+Após o congelamento, a prioridade migra de "definir arquitetura"
+para "materializar a plataforma":
+
+```text
+1. Capability Registry (real) — catálogo, ações, contratos,
+   runtimes, permissões no banco vivo.
+2. Runtime Registry (real)    — cada Runtime registrado e
+   descoberto dinamicamente.
+3. Tool Registry (real)       — Portal, Mobile, MCP, CLI,
+   Jobs, Automação (não só IA).
+4. Capability Resolver        — responde "quem executa esta
+   capacidade?" sem expor SP/tabela/Runtime/Executor.
+5. Graph Runtime (futuro)     — Knowledge Graph dirigindo a
+   engenharia: análise de impacto, consistência, suporte a IAs.
+```
+
+### Artigo 70 — GATE-PLATFORM-001: Fundação Congelada
+
+Todo novo domínio (Portal, Farmácia, Financeiro, RH, Estoque, ...)
+deve passar obrigatoriamente pelo `GATE-PLATFORM-001` antes de
+iniciar. O gate impede reintrodução de arquitetura paralela e
+qualquer alteração da fundação congelada (LEI 23–26, Runtime,
+Kernel, MAP-019, MD-110).
+
+```text
+Checklist (resumo):
+  Arquitetura : respeita Constituição, não viola LEI 23–26,
+                não altera Runtime/Kernel, não cria fluxo paralelo
+  Banco Vivo  : dump analisado, KG consultado,
+                REUSE→ADAPT→EXTEND→MERGE→somente então PROPOSE
+  Engenharia  : MD, MAP, BR, FRONT, Contratos, APIs, Runtime
+  Materializ. : Master, Dispatcher, Executors, Procedures,
+                Auditoria, Eventos
+  IA          : Capability/Tool/Runtime Registry, AI Runtime,
+                MCP compatíveis
+```
+
+Falha em Arquitetura → domínio bloqueado (retorna a ADR +
+Arquiteto Chefe). Documento completo: `docs/canonical/GATE-PLATFORM-001.md`.
+
+### Artigo 71 — Precedência de Leitura das IAs
+
+A Constituição é o documento de MÁXIMA precedência para toda IA
+de engenharia. Toda IA segue ordem de leitura explícita antes
+de produzir código, documento ou decisão.
+
+```text
+Constituição
+   ↓
+Leis
+   ↓
+ADRs
+   ↓
+Banco Vivo
+   ↓
+Knowledge Graph
+   ↓
+MDs
+   ↓
+MAPs
+   ↓
+BRs
+   ↓
+FRONTs
+   ↓
+Código
+```
+
+Variação coerente (Banco Vivo como fonte primária de dados):
+
+```text
+Constituição → Leis → ADRs → Banco Vivo → Knowledge Graph
+   → MDs → MAPs → BRs → FRONTs → Código
+```
+
+Complementa o Art. 53 (Fluxo Obrigatório Antes de Implementar).
+Nenhuma IA tem privilégio arquitetural (Art. 54).
+
+### Artigo 72 — O Banco é Quádrupla Fonte
+
+O banco não é apenas persistência. Ele desempenha quatro papéis
+simultâneos, o que justifica decisões que começam no dump, nas
+SPs e no grafo antes do código.
+
+```text
+1. Fonte da verdade dos dados      (estado operacional)
+2. Fonte da verdade da engenharia  (Banco Vivo)
+3. Base de descoberta de capacidades (Runtime + Registry)
+4. Base de conhecimento navegável  (Knowledge Graph)
+```
+
+Essa convergência mantém a plataforma consistente e reduz
+retrabalho conforme ela cresce.
+
+---
+
+## Título XVI — Ciclo 2: Materialização
+
+O Ciclo Arquitetural 1 está encerrado e congelado (Art. 68).
+O risco deixa de ser arquitetura e passa a ser **execução
+disciplinada**. Nenhuma nova lei é aberta; a fundação não é
+revisada exceto por ADR formal (Art. 63/65).
+
+### Artigo 73 — Objetivo do Ciclo 2
+
+```text
+Antes: construir a arquitetura.
+Agora:  construir domínios USANDO a arquitetura.
+```
+
+Esforço direcionado para:
+1. Materializar os domínios (Portal, Farmácia, Estoque, Financeiro...).
+2. Aumentar a cobertura de capacidades.
+3. Consolidar Banco Vivo e Knowledge Graph como fontes de verdade.
+4. Automatizar os GATEs sempre que possível.
+
+### Artigo 74 — Ordem Obrigatória de Materialização de Domínio
+
+Nenhum domínio pula etapas. Sequência canônica:
+
+```text
+GATE-PLATFORM-001
+   ↓
+Banco Vivo
+   ↓
+Knowledge Graph
+   ↓
+MD
+   ↓
+MAP
+   ↓
+BR
+   ↓
+Contratos
+   ↓
+APIs
+   ↓
+Runtime
+   ↓
+Master
+   ↓
+Dispatcher
+   ↓
+Executor
+   ↓
+SQL
+   ↓
+Backend
+   ↓
+Frontend
+   ↓
+Testes
+   ↓
+Dossiê
+   ↓
+GATE (validação final)
+```
+
+### Artigo 75 — Indicador: Cobertura por Capability
+
+Volume de artefatos (tabelas, SPs, MDs) é insuficiente.
+O indicador central do Ciclo 2 é maturidade funcional:
+
+```text
+Portal
+  ✅ Dashboard   ✅ Widgets
+  ⬜ Favoritos   ⬜ Notificações
+  ⬜ Layout      ⬜ Busca   ⬜ Home
+
+Farmácia
+  ✅ Consulta
+  ⬜ Dispensação ⬜ Prescrição ⬜ Lotes
+  ⬜ Inventário  ⬜ Transferência ⬜ Devolução
+```
+
+### Artigo 76 — Indicador: Rastreabilidade de Capability
+
+Cada Capability deve ser totalmente rastreável. Elo ausente
+gera STATUS INCOMPLETO e falha no GATE.
+
+```text
+Capability → MD → MAP → BR → Contrato → API
+   → Runtime → Master → Executor → SP → Tabela
+```
+
+```text
+Se algum elo estiver ausente → STATUS: INCOMPLETO
+Pode virar validação automática do GATE-PLATFORM-001.
+```
+
+### Artigo 77 — Capacidade é a Unidade, Não o Módulo
+
+Parar de pensar em "telas/módulos". Pensar em capacidades.
+
+```text
+Portal não é um módulo. É um conjunto de capacidades.
+Farmácia não é um módulo. É um conjunto de capacidades.
+Financeiro não é um módulo. É um conjunto de capacidades.
+```
+
+A plataforma responde:
+  "Quais capacidades existem?"
+e não:
+  "Quais telas existem?"
+
+Isso é coerente com LEI 25 (descoberta) e LEI 26 (execução).
+
+---
+
 ## Anexo A — Glossário de Domínios Oficiais
 
 ```text

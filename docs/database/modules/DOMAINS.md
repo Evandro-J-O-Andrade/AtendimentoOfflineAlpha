@@ -40,7 +40,55 @@ local_fila, painel_fila_tipo, totem_senha_opcao
 
 ## 4. Kernel / Runtime (Núcleo de Execução)
 
-Orquestração, guardião, ledger, locks, runtime federado.
+**Referência canônica do Kernel Runtime.** Toda evolução de Runtime deve partir daqui. O Banco
+Vivo **já possui** um Kernel Runtime materializado — o backend é um **adaptador** desse Kernel, não
+um novo Runtime. Ver `MD-CANONICO-IA-007` §17 (proibição de PROPOSE de Runtime) e §17.1 (Auditoria
+Banco Vivo obrigatória antes de qualquer conclusão).
+
+```text
+Backend Runtime (adaptador/coordena)
+        ↓
+sp_dispatcher_kernel          (Dispatcher — orquestra/roteia)
+        ↓
+sp_guardiao_runtime_assert    (Guardian — valida sessão/tenant/contexto/invariantes)
+        ↓
+sp_executor_*                 (Executores — realizam a mudança de dados)
+        ↓
+Banco Vivo (Kernel Runtime)
+```
+
+### Mapa Canônico do Kernel Runtime (Banco Vivo)
+
+| Componente | Objeto no Banco Vivo | Tipo |
+|---|---|---|
+| Dispatcher | `sp_dispatcher_kernel` | SP |
+| Guardian | `sp_guardiao_runtime_assert`, `guardiao_runtime_final`, `guardiao_acl_runtime` | SP / Tabela |
+| Session | `sp_sessao_assert`, `sessao_usuario`, `sessao_ativa`, `sessao_evento` | SP / Tabela |
+| Queue | `runtime_execution_queue`, `fila_painel_runtime` | Tabela |
+| Ledger | `kernel_ledger`, `ledger_evento_sincronizacao*`, `ledger_global_sincronismo` | Tabela |
+| Locks | `runtime_kernel_locks`, `runtime_lock_semantico`, `kernel_runtime_single_writer_lock`, `kernel_single_writer_lock` | Tabela |
+| Snapshots | `runtime_snapshot_governanca`, `runtime_snapshot_metadata` | Tabela |
+| Synchronization | `runtime_sync_log`, `runtime_sync_queue`, `sincronizacao_federada_evento` | Tabela |
+| Context | `runtime_contexto`, `runtime_concurrency_guard`, `runtime_estado_sobrevivencia` | Tabela |
+| Federation | `runtime_edge_evento`, `runtime_evento_provisional`, `coordenador_estado_global` | Tabela |
+| Authz Policy | `kernel_authz_policy`, `kernel_identity_trust_chain` | Tabela |
+| Audit | `auditoria_evento`, `sessao_evento`, `runtime_invariant_log` | Tabela |
+| Orchestration | `fluxo_orquestrador_canonico`, `fluxo_status`, `fluxo_transicao*`, `operacao_idempotencia`, `retry_semantico_controle` | Tabela |
+
+### Regra de evolução (Ciclo 2)
+
+```text
+REUSE   → componente já existe no Kernel (runtime_*/kernel_*/sp_dispatcher_*/sp_guardiao_*/sp_executor_*/sp_sessao_assert)
+ADAPT   → existe sob outro nome/camada
+EXTEND  → existe parcialmente (ex.: sp_auth_permissions_evaluate — CORE-005, AUSENTE → PROPOSE/EXTEND)
+MERGE   → comportamento espalhado → consolidar no Kernel
+PROPOSE → SÓ após auditar bancoMysql.md e provar ausência
+```
+
+> **Proibido** propor `RuntimeService` / `Runtime Queue` / `Event Bus` / `Lock Manager` / `Health
+> Manager` paralelos ao Kernel que já existe. Backend **coordena**; Kernel **executa**.
+
+Tabelas do domínio (dump):
 
 ```text
 runtime_execution_queue, runtime_api_session_token, runtime_concurrency_guard, runtime_contexto,

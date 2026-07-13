@@ -25,6 +25,63 @@ IMPLEMENTAÇÃO
 a autoridade; o `.md` é descoberta e governança sobre essa base. Editar o MAP sem alterar o Dump
 é anti-padrão.
 
+## Representação Canônica Navegável — `bancoMysql.md`
+
+Além do Dump SQL (`database/dump/Dump20260618.sql`), a plataforma mantém o **Banco Canônico
+Navegável** em `docs/database/mysql/bancoMysql.md` (espelho em `database/dump/bancoMysql.md`). Ele
+é a **Fonte Primária Navegável** do banco: o mesmo conteúdo do dump (CREATE TABLE / VIEW /
+PROCEDURE / FUNCTION / FK / INDEX / JSON / eventos), porém em Markdown navegável, para reduzir o
+risco de truncamento de leitura de SQL muito grande por IAs.
+
+```text
+bancoMysql.md            ← FONTE PRIMÁRIA NAVEGÁVEL (leitura obrigatória da IA)
+       ↓ deriva de
+Dump20260618.sql         ← FONTE DA VERDADE (autoridade física; prevalece em divergência)
+       ↓ reflete
+docs/database/ (KG)      ← índice cruzado da verdade (não a verdade)
+```
+
+> **Regra de prevalência:** em caso de divergência entre `bancoMysql.md` e o Dump SQL, o **Dump
+> SQL prevalece** — `bancoMysql.md` é representação, não autoridade. Nenhuma IA trata
+> `bancoMysql.md` como substituto do Banco Vivo; ele é a memória estrutural navegável do Banco Vivo
+> para engenharia e IA. Antes de qualquer decisão de engenharia de banco, a IA DEVE consultar
+> `bancoMysql.md` (e, se necessário, o Dump SQL) **antes** de assumir ausência de tabela, SP, coluna
+> ou relacionamento.
+
+### Ordem de Consulta Obrigatória (antes de qualquer materialização)
+
+```text
+1. Constituição (000-CONSTITUICAO-IA / -PLATAFORMA)
+        ↓
+2. GATE correspondente
+        ↓
+3. bancoMysql.md            ← FONTE PRIMÁRIA DO BANCO (Banco Canônico Navegável)
+        ↓
+4. MDs / MAPs / BRs         (interpretação arquitetural — não substitui o banco)
+        ↓
+5. Knowledge Graph (docs/database/)
+        ↓
+6. Backend
+        ↓
+7. Frontend
+```
+
+Em divergência, a precedência é: `bancoMysql.md` (e Dump SQL) **prevalecem** sobre MD / MAP / BR /
+código. Nenhuma IA pode dizer "não existe essa tabela/procedure" sem antes ter consultado
+`bancoMysql.md`.
+
+### Registro de Auditoria Banco Vivo (obrigatório)
+
+Toda conclusão estrutural deve registrar a consulta a `bancoMysql.md` (ver `MD-CANONICO-IA-007` §17.1):
+
+```text
+Banco consultado: bancoMysql.md
+Objeto:           <nome>
+Resultado:        ENCONTRADO | NÃO ENCONTRADO
+Origem:           CREATE TABLE | CREATE PROCEDURE | CREATE FUNCTION | VIEW | INDEX | EVENT | JSON
+Classificação:    REUSE | ADAPT | EXTEND | MERGE | PROPOSE
+```
+
 ## Regra obrigatória
 
 > **É proibido criar objeto novo (tabela, SP, function, trigger, runtime, auditoria, ledger,
@@ -47,7 +104,7 @@ SQL → IMPACT ANALYZER → IMPLEMENT → VALIDATE
 ## Algoritmo obrigatório (toda IA — ver MD-CANONICO-IA-007 §5)
 
 ```text
-1.  Ler /dump/Dump20260618.sql
+1.  Ler docs/database/mysql/bancoMysql.md (Fonte Primária Navegável) e, se necessário, /dump/Dump20260618.sql (Fonte da Verdade)
 2.  Ler DATABASE-MAP.md
 3.  Procurar TABELA existente            → usar (REUSE)
 4.  Procurar TABELA EQUIVALENTE          → adaptar (ADAPT)
