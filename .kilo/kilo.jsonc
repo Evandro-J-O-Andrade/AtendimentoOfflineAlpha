@@ -1,3 +1,12 @@
 {
-  "$schema": "https://app.kilo.ai/config.json"
+  "$schema": "https://app.kilo.ai/config.json",
+  "model": "kilo/kilo-auto/free",
+  "permission": {
+    "bash": "allow"
+  },
+  "instructions": [
+    "Sempre ler os arquivos .MD antes de tudo",
+    "1. Memória do KiloCode (curta) ✅  Na memória/configuração permanente do KiloCode coloque apenas as regras imutáveis e de alto nível.  Algo como:  Este projeto segue a Constituição das IAs. Nunca criar V2, final, backup, temp. Sempre ler a documentação canônica antes de codar. Nunca inventar arquitetura. Banco é Source of Truth. Stored Procedures são a única porta de escrita. Portal é o Entry Point. React não possui regra de negócio. Node é Gateway. Toda App entra pelo Registry. Multi-tenant obrigatório. Event Store obrigatório. Se houver dúvida, parar e pedir confirmação.  Isso cabe na memória e funciona como identidade do agente.",
+    "├── 000-BOOTSTRAP-IA.md                ← PRIMEIRO ARQUIVO (sempre) ├── 001-CONSTITUICAO-IA.md             ← Constituição das IAs ├── 002-INDICE-GERAL.md                ← Índice navegável ├── 003-GLOSSARIO.md                   ← Linguagem oficial"
+  ]
 }
