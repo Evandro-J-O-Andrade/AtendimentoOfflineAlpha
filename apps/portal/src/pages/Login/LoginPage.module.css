@@ -27,7 +27,7 @@ html, body, #root {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 0 5px 0 0;
+  padding: 0 10px;
   gap: 5px;
 }
 
@@ -61,18 +61,18 @@ html, body, #root {
   z-index: 1;
   max-width: 460px;
   text-align: center;
-  margin-top: -40px;
+  margin-top: -60px;
 }
 
 .leftLogo {
-  width: 180px;
+  width: 220px;
   height: auto;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .leftTitle {
   margin: 0;
-  font-size: 40px;
+  font-size: 42px;
   font-weight: 600;
   line-height: 1.1;
 }
@@ -125,9 +125,9 @@ html, body, #root {
 /* PAINEL DIREITO */
 .rightPanel {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 28px 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
   background-color: #020916;
   position: relative;
   overflow: hidden;
@@ -137,15 +137,7 @@ html, body, #root {
 
 /* ONDAS DO LADO DO FORMULÁRIO */
 .wavesLeft {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 120px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 800' preserveAspectRatio='none'%3E%3Cpath d='M0,0 C40,200 80,400 0,800 L0,0 Z' fill='rgba(30,112,244,0.06)'/%3E%3Cpath d='M40,0 C80,200 120,400 40,800 L40,0 Z' fill='rgba(126,78,253,0.04)'/%3E%3Cpath d='M80,0 C120,200 160,400 80,800 L80,0 Z' fill='rgba(30,112,244,0.03)'/%3E%3C/svg%3E") no-repeat left center;
-  background-size: 120px 100%;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 .cardThemeToggle {
@@ -189,18 +181,18 @@ html, body, #root {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex: 0 1 auto;
   position: relative;
   z-index: 1;
   padding: 0;
   min-height: 0;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
+  width: 100%;
 }
 
 .cardForm {
   width: 100%;
-  max-width: 580px;
-  padding: 24px 28px;
+  max-width: 480px;
+  padding: 32px;
   background: rgba(9, 16, 29, 0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -210,17 +202,17 @@ html, body, #root {
 }
 
 .formLogo {
-  width: 150px;
+  width: 170px;
   height: auto;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
 .cardTitle {
-  margin: 0 0 12px 0;
-  font-size: 30px;
+  margin: -6px 0 8px 0;
+  font-size: 26px;
   font-weight: 600;
   line-height: 1.25;
   color: #ffffff;
@@ -265,8 +257,8 @@ html, body, #root {
   position: absolute;
   left: 16px;
   color: #475569;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   pointer-events: none;
   z-index: 1;
 }
@@ -306,59 +298,11 @@ html, body, #root {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0;
   z-index: 1;
-}
-
-.fieldIcon {
-  position: absolute;
-  left: 16px;
-  color: #475569;
-  width: 18px;
-  height: 18px;
-  pointer-events: none;
-}
-
-.fieldIcon path {
-  stroke: currentColor;
-  stroke-width: 1.5;
-  fill: none;
-}
-
-.fieldIcon {
-  color: #475569;
-}
-
-.input {
-  width: 100%;
-  padding: 12px 44px 12px 44px;
-  background: #050a14;
-  border: 1px solid #1e293b;
-  border-radius: 10px;
-  color: #ffffff;
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.input:focus {
-  border-color: #1e70f4;
-}
-
-.input::placeholder {
-  color: #475569;
-}
-
-.toggleVisibility {
-  position: absolute;
-  right: 16px;
-  background: none;
-  border: none;
-  color: #475569;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 0;
+  width: 32px;
+  height: 32px;
 }
 
 /* CONFIGURAÇÃO DA SUB-LINHA */
@@ -487,15 +431,15 @@ html, body, #root {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 24px;
+  padding: 10px 24px;
   border-top: 1px solid #111929;
-  font-size: 12px;
+  font-size: 14px;
   color: #475569;
   background: #020916;
   gap: 24px;
   flex-shrink: 0;
   margin: 5px;
-  min-height: 36px;
+  min-height: 44px;
 }
 
 .footerLeft {
@@ -505,26 +449,29 @@ html, body, #root {
 }
 
 .miniLogo {
-  width: 32px;
+  width: 40px;
   height: auto;
 }
 
 .brandName {
   color: #ffffff;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .dividerPipe {
   color: #1e293b;
-  margin: 0 6px;
+  margin: 0 8px;
 }
 
 .version {
   color: #64748b;
+  font-size: 14px;
 }
 
 .copyright {
   color: #475569;
+  font-size: 14px;
 }
 
 .footerCenter {
@@ -541,10 +488,55 @@ html, body, #root {
   flex-direction: column;
   gap: 2px;
   margin-left: auto;
+  margin-top: 4px;
 }
 
 .footerRight strong {
   color: #ffffff;
+  font-size: 14px;
+}
+
+.brandName {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.dividerPipe {
+  color: #1e293b;
+  margin: 0 8px;
+}
+
+.version {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.copyright {
+  color: #475569;
+  font-size: 14px;
+}
+
+.footerCenter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footerRight {
+  text-align: right;
+  line-height: 1.4;
+  color: #475569;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: auto;
+  margin-top: 4px;
+}
+
+.footerRight strong {
+  color: #ffffff;
+  font-size: 14px;
 }
 
 .ceoLink {
@@ -591,10 +583,6 @@ html, body, #root {
     padding: 20px 16px;
   }
 
-  .wavesLeft {
-    display: none;
-  }
-
   .footer {
     flex-direction: column;
     gap: 10px;
@@ -634,10 +622,6 @@ html, body, #root {
     padding: 0;
   }
 
-  .wavesLeft {
-    display: none;
-  }
-
   .cardForm {
     max-width: 100%;
   }
@@ -646,21 +630,17 @@ html, body, #root {
     padding: 10px 16px;
     margin: 5px;
   }
-}
 
-@media (max-width: 640px) {
-  .themeLight .rightPanel {
-    background: transparent;
+  .footerLeft,
+  .footerCenter,
+  .footerRight {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
-  .themeLight .cardForm {
-    background: rgba(221, 238, 255, 0.96);
-    border-color: rgba(17, 24, 39, 0.08);
-  }
-
-  .themeLight .footer {
-    background-color: #EDF6FF;
-    border-top-color: #D3E8FF;
+  .footerRight {
+    margin-top: 6px;
   }
 }
 
@@ -745,8 +725,4 @@ html, body, #root {
 
 .themeLight .themeToggleActive {
   color: #111827;
-}
-
-.themeLight .wavesLeft {
-  opacity: 0.4;
 }
