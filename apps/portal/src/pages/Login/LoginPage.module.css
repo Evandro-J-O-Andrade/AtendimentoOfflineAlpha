@@ -18,7 +18,6 @@ html, body, #root {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #ffffff;
   overflow: hidden;
-  gap: 24px;
 }
 
 /* Grid principal: esquerda (hero) + direita (formulário) - proporção 60/40 */
@@ -28,8 +27,8 @@ html, body, #root {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 10px 15px;
-  gap: 15px;
+  padding: 0 5px 0 0;
+  gap: 5px;
 }
 
 /* HERO ESQUERDO */
@@ -43,6 +42,7 @@ html, body, #root {
   background-position: center;
   background-repeat: no-repeat;
   overflow: hidden;
+  height: 100%;
 }
 
 .leftOverlay {
@@ -61,30 +61,34 @@ html, body, #root {
   z-index: 1;
   max-width: 460px;
   text-align: center;
+  margin-top: -40px;
 }
 
 .leftLogo {
-  width: 220px;
+  width: 180px;
   height: auto;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .leftTitle {
   margin: 0;
-  font-size: 56px;
-  font-weight: 700;
+  font-size: 40px;
+  font-weight: 600;
   line-height: 1.1;
 }
 
 .leftTitle span {
-  color: #3b82f6;
+  background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .leftText {
-  margin-top: 16px;
-  font-size: 18px;
+  margin-top: 12px;
+  font-size: 16px;
   color: #94a3b8;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .brandIcons {
@@ -128,6 +132,7 @@ html, body, #root {
   position: relative;
   overflow: hidden;
   min-height: 0;
+  height: 100%;
 }
 
 /* ONDAS DO LADO DO FORMULÁRIO */
@@ -145,8 +150,8 @@ html, body, #root {
 
 .cardThemeToggle {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 12px;
+  right: 12px;
   z-index: 2;
 }
 
@@ -189,12 +194,13 @@ html, body, #root {
   z-index: 1;
   padding: 0;
   min-height: 0;
+  margin-bottom: 5px;
 }
 
 .cardForm {
   width: 100%;
   max-width: 580px;
-  padding: 28px 32px;
+  padding: 24px 28px;
   background: rgba(9, 16, 29, 0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -206,23 +212,27 @@ html, body, #root {
 .formLogo {
   width: 150px;
   height: auto;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
 .cardTitle {
-  margin: 0 0 10px 0;
-  font-size: 28px;
+  margin: 0 0 12px 0;
+  font-size: 30px;
   font-weight: 600;
   line-height: 1.25;
   color: #ffffff;
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .cardTitle span {
-  color: #1e70f4;
+  background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .cardSubtitle {
@@ -235,7 +245,7 @@ html, body, #root {
 
 /* INPUTS E LABELS */
 .fieldGroup {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .label {
@@ -249,6 +259,55 @@ html, body, #root {
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.fieldIcon {
+  position: absolute;
+  left: 16px;
+  color: #475569;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fieldIcon path {
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 44px 12px 44px;
+  background: #050a14;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #1e70f4;
+}
+
+.input::placeholder {
+  color: #475569;
+}
+
+.toggleVisibility {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  z-index: 1;
 }
 
 .fieldIcon {
@@ -307,7 +366,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   font-size: 14px;
 }
 
@@ -363,7 +422,7 @@ html, body, #root {
 .divider {
   position: relative;
   text-align: center;
-  margin: 18px 0 14px;
+  margin: 18px 0 12px;
 }
 
 .divider::before {
@@ -428,14 +487,15 @@ html, body, #root {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 24px;
+  padding: 4px 24px;
   border-top: 1px solid #111929;
-  font-size: 13px;
+  font-size: 12px;
   color: #475569;
   background: #020916;
   gap: 24px;
   flex-shrink: 0;
-  margin: 5px 10px;
+  margin: 5px;
+  min-height: 36px;
 }
 
 .footerLeft {
@@ -445,7 +505,7 @@ html, body, #root {
 }
 
 .miniLogo {
-  width: 40px;
+  width: 32px;
   height: auto;
 }
 
@@ -456,6 +516,7 @@ html, body, #root {
 
 .dividerPipe {
   color: #1e293b;
+  margin: 0 6px;
 }
 
 .version {
@@ -466,13 +527,20 @@ html, body, #root {
   color: #475569;
 }
 
+.footerCenter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .footerRight {
   text-align: right;
-  line-height: 1.5;
+  line-height: 1.4;
   color: #475569;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
+  margin-left: auto;
 }
 
 .footerRight strong {
@@ -558,11 +626,16 @@ html, body, #root {
     width: 100%;
     max-width: 420px;
     margin: 0 auto;
-    background: rgba(9, 16, 29, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+  }
+
+  .wavesLeft {
+    display: none;
   }
 
   .cardForm {
@@ -572,6 +645,22 @@ html, body, #root {
   .footer {
     padding: 10px 16px;
     margin: 5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .themeLight .rightPanel {
+    background: transparent;
+  }
+
+  .themeLight .cardForm {
+    background: rgba(221, 238, 255, 0.96);
+    border-color: rgba(17, 24, 39, 0.08);
+  }
+
+  .themeLight .footer {
+    background-color: #EDF6FF;
+    border-top-color: #D3E8FF;
   }
 }
 

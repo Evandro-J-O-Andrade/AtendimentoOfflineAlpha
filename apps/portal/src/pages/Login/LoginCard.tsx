@@ -123,7 +123,7 @@ export function LoginCard({
                 </div>
 
                 <button className={styles.button} type="submit" disabled={loading}>
-                  {loading ? 'Entrando...' : 'Entrar'}
+                  Entrar
                 </button>
 
                 {error && <p className={styles.error}>{error}</p>}

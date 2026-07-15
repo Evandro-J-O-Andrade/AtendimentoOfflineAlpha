@@ -10,8 +10,10 @@ export function LoginFooter({ darkMode }: LoginFooterProps) {
       <div className={styles.footerLeft}>
         <img src="/assets/branding/logoSaaS.png" alt="Logo" className={styles.miniLogo} />
         <span className={styles.brandName}>New Wave Enterprise</span>
-        <span className={styles.dividerPipe}>|</span>
+      </div>
+      <div className={styles.footerCenter}>
         <span className={styles.version}>v1.0.0</span>
+        <span className={styles.dividerPipe}>|</span>
         <span className={styles.copyright}>© 2026 New Wave Sistemas Digitais. Todos os direitos reservados.</span>
       </div>
       <div className={styles.footerRight}>

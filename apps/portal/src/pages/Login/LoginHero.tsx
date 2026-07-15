@@ -64,7 +64,7 @@ export function LoginHero() {
   return (
     <section
       className={styles.leftPanel}
-      style={{ backgroundImage: `url('/assets/login/pagsaas.png')` }}
+      style={{ backgroundImage: `url('/assets/login/pagsaas.webp')` }}
     >
       <div className={styles.leftOverlay} />
       <div className={styles.leftContent}>
