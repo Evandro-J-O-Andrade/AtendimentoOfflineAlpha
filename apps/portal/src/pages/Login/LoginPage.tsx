@@ -59,9 +59,9 @@ function LoginPageInner() {
 
   if (authState === 'MFA_REQUIRED') {
     return (
-      <div className={styles.pageLayout}>
+      <div className={`${styles.pageLayout} ${darkMode ? styles.themeDark : styles.themeLight}`}>
         <div className={styles.mainContent}>
-          <LoginHero />
+          <LoginHero darkMode={darkMode} />
           <LoginCard
             darkMode={darkMode}
             onToggleTheme={toggleTheme}
@@ -89,7 +89,7 @@ function LoginPageInner() {
   return (
     <div className={`${styles.pageLayout} ${darkMode ? styles.themeDark : styles.themeLight}`}>
       <div className={styles.mainContent}>
-        <LoginHero />
+        <LoginHero darkMode={darkMode} />
         <LoginCard
           darkMode={darkMode}
           onToggleTheme={toggleTheme}

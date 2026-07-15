@@ -60,12 +60,13 @@ function IconPieChart() {
   )
 }
 
-export function LoginHero() {
+interface LoginHeroProps {
+  darkMode: boolean
+}
+
+export function LoginHero({ darkMode }: LoginHeroProps) {
   return (
-    <section
-      className={styles.leftPanel}
-      style={{ backgroundImage: `url('/assets/login/pagsaas.webp')` }}
-    >
+    <section className={`${styles.leftPanel} ${darkMode ? styles.themeDark : styles.themeLight}`}>
       <div className={styles.leftOverlay} />
       <div className={styles.leftContent}>
         <img

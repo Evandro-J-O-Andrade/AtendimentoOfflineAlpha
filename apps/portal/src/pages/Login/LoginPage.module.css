@@ -13,11 +13,12 @@ html, body, #root {
 .pageLayout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100dvh;
   background-color: #020916;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #ffffff;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Grid principal: esquerda (hero) + direita (formulário) - proporção 60/40 */
@@ -26,9 +27,8 @@ html, body, #root {
   grid-template-columns: 60% 40%;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
-  padding: 0 10px;
-  gap: 5px;
+  padding: 0;
+  gap: 0;
 }
 
 /* HERO ESQUERDO */
@@ -37,22 +37,62 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px;
+  padding: 40px 60px 60px 60px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden;
-  height: 100%;
+  overflow: visible;
+}
+
+.themeDark .leftPanel {
+  background-image: url('/assets/login/pagsaas.png');
+}
+
+.themeLight .leftPanel {
+  background-image: url('/assets/login/pagsaas.png');
 }
 
 .leftOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(3, 11, 26, 0.25) 0%,
-    rgba(3, 11, 26, 0.7) 65%,
-    rgba(3, 11, 26, 0.95) 100%
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.15) 0%,
+      rgba(124, 58, 237, 0.1) 40%,
+      rgba(3, 11, 26, 0.8) 100%
+    );
+  mix-blend-mode: overlay;
+}
+
+.leftOverlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(59, 130, 246, 0.2) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.themeLight .leftOverlay {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.2) 0%,
+      rgba(30, 64, 120, 0.25) 50%,
+      rgba(3, 11, 26, 0.75) 100%
+    );
+  mix-blend-mode: overlay;
+}
+
+.themeLight .leftOverlay::after {
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(59, 130, 246, 0.25) 0%,
+    transparent 60%
   );
 }
 
@@ -61,13 +101,14 @@ html, body, #root {
   z-index: 1;
   max-width: 460px;
   text-align: center;
-  margin-top: -60px;
+  margin-top: -20px;
 }
 
 .leftLogo {
   width: 220px;
   height: auto;
   margin-bottom: 12px;
+  filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.35)) brightness(1.05);
 }
 
 .leftTitle {
@@ -75,10 +116,11 @@ html, body, #root {
   font-size: 42px;
   font-weight: 600;
   line-height: 1.1;
+  color: #ffffff;
 }
 
 .leftTitle span {
-  background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
+  background: linear-gradient(90deg, #93c5fd 0%, #c084fc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -95,7 +137,7 @@ html, body, #root {
   display: flex;
   gap: 16px;
   margin-top: 28px;
-  color: #64748b;
+  color: #94a3b8;
   justify-content: center;
 }
 
@@ -106,14 +148,16 @@ html, body, #root {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
 }
 
 .brandIconItem svg {
   width: 20px;
   height: 20px;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
 }
 
 .brandIconItem svg path {
@@ -125,14 +169,14 @@ html, body, #root {
 /* PAINEL DIREITO */
 .rightPanel {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 32px;
   background-color: #020916;
   position: relative;
-  overflow: hidden;
   min-height: 0;
-  height: 100%;
+  overflow: visible;
 }
 
 /* ONDAS DO LADO DO FORMULÁRIO */
@@ -159,7 +203,7 @@ html, body, #root {
   padding: 6px 10px;
   border-radius: 999px;
   opacity: 0.9;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s ease, background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .themeToggle:hover {
@@ -183,36 +227,38 @@ html, body, #root {
   align-items: center;
   position: relative;
   z-index: 1;
-  padding: 0;
+  padding: 20px;
   min-height: 0;
-  margin-bottom: 15px;
+  margin-bottom: 0;
   width: 100%;
 }
 
 .cardForm {
   width: 100%;
-  max-width: 480px;
+  max-width: 580px;
   padding: 32px;
-  background: rgba(9, 16, 29, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(9, 16, 29, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
 }
 
 .formLogo {
-  width: 170px;
+  width: 200px;
   height: auto;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: block;
   margin-left: auto;
   margin-right: auto;
+  filter: brightness(1.15);
 }
 
 .cardTitle {
-  margin: -6px 0 8px 0;
-  font-size: 26px;
+  margin: -2px 0 8px 0;
+  font-size: 28px;
   font-weight: 600;
   line-height: 1.25;
   color: #ffffff;
@@ -237,14 +283,16 @@ html, body, #root {
 
 /* INPUTS E LABELS */
 .fieldGroup {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  padding: 0 10px;
 }
 
 .label {
   display: block;
   font-size: 14px;
   color: #e2e8f0;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  text-align: left;
 }
 
 .inputWrapper {
@@ -257,8 +305,8 @@ html, body, #root {
   position: absolute;
   left: 16px;
   color: #475569;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   pointer-events: none;
   z-index: 1;
 }
@@ -271,22 +319,26 @@ html, body, #root {
 
 .input {
   width: 100%;
-  padding: 12px 44px 12px 44px;
+  padding: 14px 44px 14px 44px;
   background: #050a14;
   border: 1px solid #1e293b;
   border-radius: 10px;
   color: #ffffff;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.35s ease, color 0.35s ease;
+  min-height: 54px;
+  text-align: left;
 }
 
 .input:focus {
   border-color: #1e70f4;
+  box-shadow: 0 0 0 4px rgba(60, 130, 255, 0.12);
 }
 
 .input::placeholder {
   color: #475569;
+  text-align: left;
 }
 
 .toggleVisibility {
@@ -340,7 +392,7 @@ html, body, #root {
 /* BOTÃO ENTRAR COM GRADIENTE */
 .button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background: linear-gradient(90deg, #1e70f4 0%, #7e4efd 100%);
   border: none;
   border-radius: 10px;
@@ -348,11 +400,12 @@ html, body, #root {
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .button:hover {
   opacity: 0.92;
+  transform: translateY(-1px);
 }
 
 .error {
@@ -391,21 +444,33 @@ html, body, #root {
 .securityBadges {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 12px;
+  text-align: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 .badge {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
   color: #94a3b8;
-  font-size: 11px;
+  font-size: 12px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .badgeIcon {
   color: #475569;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
 }
 
 .badgeIcon path {
@@ -416,14 +481,25 @@ html, body, #root {
 
 .badgeIcon {
   color: #475569;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
 .badge strong {
   display: block;
   color: #cbd5e1;
   font-weight: 500;
+  font-size: 12px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.badge span {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.2;
+  word-break: break-word;
 }
 
 /* --- ESTILO RECRIAÇÃO DO FOOTER.PNG --- */
@@ -431,117 +507,76 @@ html, body, #root {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 24px;
-  border-top: 1px solid #111929;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 14px;
-  color: #475569;
+  color: #64748b;
   background: #020916;
   gap: 24px;
   flex-shrink: 0;
-  margin: 5px;
-  min-height: 44px;
+  margin: 0;
+  min-height: 52px;
+  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
 }
 
 .footerLeft {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .miniLogo {
-  width: 40px;
+  width: 24px;
   height: auto;
 }
 
 .brandName {
-  color: #ffffff;
+  color: #e2e8f0;
   font-weight: 600;
   font-size: 14px;
+  transition: color 0.35s ease;
 }
 
 .dividerPipe {
-  color: #1e293b;
-  margin: 0 8px;
+  color: #334155;
+  margin: 0 6px;
+  transition: color 0.35s ease;
 }
 
 .version {
   color: #64748b;
   font-size: 14px;
+  transition: color 0.35s ease;
 }
 
 .copyright {
-  color: #475569;
-  font-size: 14px;
-}
-
-.footerCenter {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.footerRight {
-  text-align: right;
-  line-height: 1.4;
-  color: #475569;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-left: auto;
-  margin-top: 4px;
-}
-
-.footerRight strong {
-  color: #ffffff;
-  font-size: 14px;
-}
-
-.brandName {
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.dividerPipe {
-  color: #1e293b;
-  margin: 0 8px;
-}
-
-.version {
   color: #64748b;
   font-size: 14px;
-}
-
-.copyright {
-  color: #475569;
-  font-size: 14px;
-}
-
-.footerCenter {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  transition: color 0.35s ease;
 }
 
 .footerRight {
   text-align: right;
   line-height: 1.4;
-  color: #475569;
+  color: #64748b;
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-left: auto;
-  margin-top: 4px;
+  transition: color 0.35s ease;
 }
 
 .footerRight strong {
-  color: #ffffff;
+  color: #e2e8f0;
   font-size: 14px;
+  transition: color 0.35s ease;
 }
 
 .ceoLink {
-  color: #1e70f4;
+  color: #3b82f6;
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.35s ease;
 }
 
 .ceoLink:hover {
@@ -569,100 +604,29 @@ html, body, #root {
   color: #ffffff;
 }
 
-/* RESPONSIVIDADE */
-@media (max-width: 1024px) {
-  .mainContent {
-    grid-template-columns: 1fr;
-  }
-
-  .leftPanel {
-    display: none;
-  }
-
-  .rightPanel {
-    padding: 20px 16px;
-  }
-
-  .footer {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
-    padding: 10px 20px;
-    margin: 5px 10px;
-  }
-
-  .footerRight {
-    text-align: center;
-  }
-}
-
-@media (max-width: 640px) {
-  .pageLayout {
-    background:
-      linear-gradient(rgba(2, 9, 22, 0.55), rgba(2, 9, 22, 0.75)),
-      url('/assets/login/pagsaas.png') center/cover no-repeat fixed;
-  }
-
-  .mainContent {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-  }
-
-  .rightPanel {
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    padding: 0;
-  }
-
-  .cardForm {
-    max-width: 100%;
-  }
-
-  .footer {
-    padding: 10px 16px;
-    margin: 5px;
-  }
-
-  .footerLeft,
-  .footerCenter,
-  .footerRight {
-    width: 100%;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .footerRight {
-    margin-top: 6px;
-  }
-}
-
 /* TEMA CLARO */
 .themeLight {
-  background-color: #EDF6FF;
-  color: #111827;
+  background-color: #eef5ff;
+  color: #183b67;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 .themeLight .rightPanel {
-  background-color: #EDF6FF;
+  background-color: #eef5ff;
+  transition: background-color 0.35s ease;
 }
 
 .themeLight .cardForm {
-  background: rgba(221, 238, 255, 0.96);
-  border-color: rgba(17, 24, 39, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(120, 150, 210, 0.25);
+  transition: background 0.35s ease, border-color 0.35s ease;
 }
 
 .themeLight .input {
   background: #F8FBFF;
   border-color: #D3E8FF;
   color: #111827;
+  transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
 
 .themeLight .input::placeholder {
@@ -674,21 +638,23 @@ html, body, #root {
 }
 
 .themeLight .footer {
-  background-color: #EDF6FF;
-  border-top-color: #D3E8FF;
-  color: #475569;
+  background: rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(120, 150, 210, 0.25);
+  color: #4a5a6a;
+  transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
 
 .themeLight .brandName {
-  color: #111827;
+  color: #183b67;
 }
 
 .themeLight .footerRight strong {
-  color: #111827;
+  color: #183b67;
 }
 
 .themeLight .label {
   color: #111827;
+  text-align: left;
 }
 
 .themeLight .cardTitle {
@@ -723,6 +689,479 @@ html, body, #root {
   color: #374151;
 }
 
-.themeLight .themeToggleActive {
+.themeLight .leftTitle {
+  color: #ffffff;
+}
+
+.themeLight .leftTitle span {
+  background: linear-gradient(90deg, #93c5fd 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.themeLight .leftText {
+  color: #e2e8f0;
+}
+
+.themeLight .brandIconItem {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+
+.themeLight .brandIconItem svg {
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.4));
+}
+
+.themeLight .checkboxLabel {
   color: #111827;
+}
+
+.themeLight .checkboxLabel input[type="checkbox"] {
+  accent-color: #1e70f4;
+}
+
+.themeLight .forgotLink {
+  color: #1e70f4;
+}
+
+/* TEMA ESCURO */
+.themeDark .rightPanel {
+  background-color: #020916;
+}
+
+.themeDark .cardForm {
+  background: rgba(9, 16, 29, 0.88);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.themeDark .footer {
+  background: #020916;
+  border-top-color: rgba(255, 255, 255, 0.08);
+  color: #64748b;
+}
+
+/* RESPONSIVIDADE MOBILE-FIRST */
+@media (max-width: 1024px) {
+  .mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .themeDark .mainContent {
+    background-image: url('/assets/login/pagsaas.png');
+  }
+
+  .themeLight .mainContent {
+    background-image: url('/assets/login/pagsaas.png');
+  }
+
+  .leftPanel {
+    display: none;
+  }
+
+  .rightPanel {
+    padding: 0;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    position: relative;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .cardForm {
+    max-width: 100%;
+    width: 100%;
+    padding: 20px;
+    background: rgba(9, 16, 29, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .themeLight .cardForm {
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(120, 150, 210, 0.25);
+  }
+
+  .cardThemeToggle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+  }
+
+  .formLogo {
+    display: block;
+    width: 140px;
+    height: auto;
+    margin-bottom: 4px;
+    filter: brightness(1.15);
+  }
+
+  .cardTitle {
+    display: block;
+    margin: -2px 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #ffffff;
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+
+  .cardTitle span {
+    background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cardSubtitle {
+    display: block;
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    padding: 10px 16px;
+    margin: 0;
+    font-size: 12px;
+    width: 100%;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    background: #020916;
+  }
+
+  .themeLight .footer {
+    background: rgba(255, 255, 255, 0.25);
+    border-top-color: rgba(120, 150, 210, 0.4);
+    color: #4a5a6a;
+  }
+
+  .footerLeft {
+    width: auto;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .footerRight {
+    width: auto;
+    text-align: center;
+    margin-top: 0;
+  }
+
+  .miniLogo {
+    width: 20px;
+  }
+
+  .brandName {
+    font-size: 12px;
+  }
+
+  .version {
+    font-size: 12px;
+  }
+
+  .copyright {
+    font-size: 11px;
+  }
+
+  .securityBadges {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 8px 6px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .badgeIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .badge strong {
+    font-size: 11px;
+  }
+
+  .badge span {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .leftPanel {
+    display: none;
+  }
+
+  .rightPanel {
+    padding: 12px;
+  }
+
+  .cardForm {
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .formLogo {
+    width: 120px;
+  }
+
+  .cardTitle {
+    font-size: 22px;
+  }
+
+  .input {
+    font-size: 14px;
+    min-height: 48px;
+    padding: 12px 40px 12px 40px;
+  }
+
+  .fieldGroup {
+    padding: 0;
+    margin-bottom: 12px;
+  }
+
+  .button {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .footer {
+    padding: 8px 12px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .miniLogo {
+    width: 18px;
+  }
+
+  .brandName {
+    font-size: 11px;
+  }
+
+  .version {
+    font-size: 11px;
+  }
+
+  .copyright {
+    font-size: 10px;
+  }
+
+  .dividerPipe {
+    margin: 0 3px;
+  }
+
+  .securityBadges {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 6px 4px;
+    gap: 4px;
+    border-radius: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badgeIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .badge strong {
+    font-size: 10px;
+  }
+
+  .badge span {
+    font-size: 9px;
+  }
+
+  .formRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageLayout {
+    background:
+      linear-gradient(rgba(2, 9, 22, 0.6), rgba(2, 9, 22, 0.8)),
+      url('/assets/login/pagsaas.png') center/cover no-repeat fixed;
+    transition: background 0.35s ease;
+  }
+
+  .themeLight .pageLayout {
+    background:
+      linear-gradient(rgba(2, 9, 22, 0.45), rgba(2, 9, 22, 0.7)),
+      url('/assets/login/pagsaas.png') center/cover no-repeat fixed;
+  }
+
+  .mainContent {
+    padding: 10px;
+  }
+
+  .leftPanel {
+    display: none;
+  }
+
+  .rightPanel {
+    width: 100%;
+    padding: 0;
+    background: transparent;
+  }
+
+  .cardForm {
+    max-width: 100%;
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+
+  .formLogo {
+    width: 120px;
+  }
+
+  .cardTitle {
+    font-size: 20px;
+  }
+
+  .cardSubtitle {
+    font-size: 13px;
+  }
+
+  .input {
+    font-size: 13px;
+    min-height: 44px;
+    padding: 10px 36px 10px 36px;
+  }
+
+  .button {
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .footer {
+    padding: 8px 10px;
+    margin: 0;
+    font-size: 10px;
+    gap: 3px;
+    min-height: auto;
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .footerLeft {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 3px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .footerRight {
+    width: 100%;
+    text-align: center;
+    margin-top: 3px;
+    font-size: 10px;
+  }
+
+  .miniLogo {
+    width: 16px;
+  }
+
+  .brandName {
+    font-size: 11px;
+  }
+
+  .version {
+    font-size: 10px;
+  }
+
+  .copyright {
+    font-size: 10px;
+  }
+
+  .dividerPipe {
+    display: none;
+  }
+
+  .securityBadges {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 5px 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .badgeIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .badge strong {
+    font-size: 10px;
+  }
+
+  .badge span {
+    font-size: 9px;
+  }
+
+  .fieldGroup {
+    padding: 0;
+    margin-bottom: 10px;
+  }
+
+  .label {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .formContainer {
+    padding: 10px;
+  }
 }
