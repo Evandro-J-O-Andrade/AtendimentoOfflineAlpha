@@ -21,15 +21,15 @@ html, body, #root {
   gap: 24px;
 }
 
-/* Grid principal: esquerda (hero) + direita (formulário) */
+/* Grid principal: esquerda (hero) + direita (formulário) - proporção 60/40 */
 .mainContent {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 60% 40%;
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 24px;
-  gap: 24px;
+  padding: 10px 15px;
+  gap: 15px;
 }
 
 /* HERO ESQUERDO */
@@ -64,14 +64,14 @@ html, body, #root {
 }
 
 .leftLogo {
-  width: 120px;
+  width: 220px;
   height: auto;
   margin-bottom: 24px;
 }
 
 .leftTitle {
   margin: 0;
-  font-size: 40px;
+  font-size: 56px;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -82,7 +82,7 @@ html, body, #root {
 
 .leftText {
   margin-top: 16px;
-  font-size: 15px;
+  font-size: 18px;
   color: #94a3b8;
   line-height: 1.6;
 }
@@ -113,7 +113,9 @@ html, body, #root {
 }
 
 .brandIconItem svg path {
-  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
 }
 
 /* PAINEL DIREITO */
@@ -141,23 +143,25 @@ html, body, #root {
   z-index: 0;
 }
 
-.topHeader {
-  display: flex;
-  justify-content: flex-end;
-  position: relative;
-  z-index: 1;
+.cardThemeToggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
 }
 
 .themeToggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: transparent;
-  border: none;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #94a3b8;
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
-  opacity: 0.8;
+  padding: 6px 10px;
+  border-radius: 999px;
+  opacity: 0.9;
   transition: opacity 0.2s;
 }
 
@@ -171,8 +175,8 @@ html, body, #root {
 }
 
 .themeIcon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 /* CONTAINER CENTRAL DO CARD */
@@ -257,7 +261,13 @@ html, body, #root {
 }
 
 .fieldIcon path {
-  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.fieldIcon {
+  color: #475569;
 }
 
 .input {
@@ -396,7 +406,15 @@ html, body, #root {
 }
 
 .badgeIcon path {
-  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.badgeIcon {
+  color: #475569;
+  width: 18px;
+  height: 18px;
 }
 
 .badge strong {
@@ -410,13 +428,14 @@ html, body, #root {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 64px;
+  padding: 6px 24px;
   border-top: 1px solid #111929;
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   background: #020916;
   gap: 24px;
   flex-shrink: 0;
+  margin: 5px 10px;
 }
 
 .footerLeft {
@@ -501,7 +520,7 @@ html, body, #root {
   }
 
   .rightPanel {
-    padding: 32px 24px;
+    padding: 20px 16px;
   }
 
   .wavesLeft {
@@ -510,13 +529,49 @@ html, body, #root {
 
   .footer {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     text-align: center;
-    padding: 24px;
+    padding: 10px 20px;
+    margin: 5px 10px;
   }
 
   .footerRight {
     text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .pageLayout {
+    background:
+      linear-gradient(rgba(2, 9, 22, 0.55), rgba(2, 9, 22, 0.75)),
+      url('/assets/login/pagsaas.png') center/cover no-repeat fixed;
+  }
+
+  .mainContent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .rightPanel {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    background: rgba(9, 16, 29, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .cardForm {
+    max-width: 100%;
+  }
+
+  .footer {
+    padding: 10px 16px;
+    margin: 5px;
   }
 }
 
