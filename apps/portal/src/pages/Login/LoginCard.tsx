@@ -40,6 +40,7 @@ export function LoginCard({
 }: LoginCardProps) {
   return (
     <section className={styles.rightPanel}>
+      <div className={styles.wavesLeft} />
       <div className={styles.topHeader}>
         <button
           type="button"

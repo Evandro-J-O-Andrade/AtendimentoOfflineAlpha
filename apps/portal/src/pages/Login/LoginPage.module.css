@@ -1,3 +1,14 @@
+/* RESET para eliminar bordas brancas do navegador */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 /* Layout da tela cheia: sem scroll horizontal/vertical, altura fixa */
 .pageLayout {
   display: flex;
@@ -7,15 +18,18 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #ffffff;
   overflow: hidden;
+  gap: 24px;
 }
 
 /* Grid principal: esquerda (hero) + direita (formulário) */
 .mainContent {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr 1.2fr;
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  padding: 24px;
+  gap: 24px;
 }
 
 /* HERO ESQUERDO */
@@ -81,18 +95,57 @@
   justify-content: center;
 }
 
+.brandIconItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.brandIconItem svg {
+  width: 20px;
+  height: 20px;
+}
+
+.brandIconItem svg path {
+  fill: currentColor;
+}
+
 /* PAINEL DIREITO */
 .rightPanel {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 40px 64px;
+  padding: 28px 36px;
   background-color: #020916;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ONDAS DO LADO DO FORMULÁRIO */
+.wavesLeft {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 800' preserveAspectRatio='none'%3E%3Cpath d='M0,0 C40,200 80,400 0,800 L0,0 Z' fill='rgba(30,112,244,0.06)'/%3E%3Cpath d='M40,0 C80,200 120,400 40,800 L40,0 Z' fill='rgba(126,78,253,0.04)'/%3E%3Cpath d='M80,0 C120,200 160,400 80,800 L80,0 Z' fill='rgba(30,112,244,0.03)'/%3E%3C/svg%3E") no-repeat left center;
+  background-size: 120px 100%;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .topHeader {
   display: flex;
   justify-content: flex-end;
+  position: relative;
+  z-index: 1;
 }
 
 .themeToggle {
@@ -127,13 +180,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  flex: 1;
+  flex: 0 1 auto;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  min-height: 0;
 }
 
 .cardForm {
   width: 100%;
-  max-width: 460px;
-  padding: 44px;
+  max-width: 580px;
+  padding: 28px 32px;
   background: rgba(9, 16, 29, 0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -143,17 +200,17 @@
 }
 
 .formLogo {
-  width: 160px;
+  width: 150px;
   height: auto;
-  margin-bottom: 14px;
+  margin-bottom: 6px;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
 .cardTitle {
-  margin: 0 0 12px 0;
-  font-size: 32px;
+  margin: 0 0 10px 0;
+  font-size: 28px;
   font-weight: 600;
   line-height: 1.25;
   color: #ffffff;
@@ -165,7 +222,7 @@
 }
 
 .cardSubtitle {
-  margin: 0 0 32px 0;
+  margin: 0 0 16px 0;
   font-size: 14px;
   color: #94a3b8;
   line-height: 1.5;
@@ -174,14 +231,14 @@
 
 /* INPUTS E LABELS */
 .fieldGroup {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .label {
   display: block;
   font-size: 14px;
   color: #e2e8f0;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .inputWrapper {
@@ -205,7 +262,7 @@
 
 .input {
   width: 100%;
-  padding: 14px 48px 14px 48px;
+  padding: 12px 44px 12px 44px;
   background: #050a14;
   border: 1px solid #1e293b;
   border-radius: 10px;
@@ -240,7 +297,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   font-size: 14px;
 }
 
@@ -270,7 +327,7 @@
 /* BOTÃO ENTRAR COM GRADIENTE */
 .button {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: linear-gradient(90deg, #1e70f4 0%, #7e4efd 100%);
   border: none;
   border-radius: 10px;
@@ -286,7 +343,7 @@
 }
 
 .error {
-  margin-top: 12px;
+  margin-top: 10px;
   color: #f87171;
   font-size: 14px;
   text-align: center;
@@ -296,7 +353,7 @@
 .divider {
   position: relative;
   text-align: center;
-  margin: 32px 0 24px;
+  margin: 18px 0 14px;
 }
 
 .divider::before {
@@ -321,7 +378,7 @@
 .securityBadges {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 8px;
 }
 
 .badge {
@@ -359,6 +416,7 @@
   color: #475569;
   background: #020916;
   gap: 24px;
+  flex-shrink: 0;
 }
 
 .footerLeft {
@@ -444,6 +502,10 @@
 
   .rightPanel {
     padding: 32px 24px;
+  }
+
+  .wavesLeft {
+    display: none;
   }
 
   .footer {
@@ -539,4 +601,8 @@
 
 .themeLight .themeToggleActive {
   color: #111827;
+}
+
+.themeLight .wavesLeft {
+  opacity: 0.4;
 }
