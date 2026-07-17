@@ -1,9 +1,13 @@
-/* RESET para eliminar bordas brancas do navegador */
-*, *::before, *::after {
+por que quando eu passo esse css aqui o meu fundo muda a heros fica sem o que tem  eu quero e o seguinte o meu mobile fique como esta nesse aqui fundo transparente do fomrulario no modo dark e no claro não tem porda mais esse aqui mexe na imagem tando do dark quando do claro /* RESET para eliminar bordas brancas do navegador */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -22,7 +26,9 @@ body {
   flex-direction: column;
   min-height: 100dvh;
   background-color: #020916;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
   color: #ffffff;
   overflow-y: auto;
   overflow-x: hidden;
@@ -47,8 +53,9 @@ body {
   justify-content: center;
   padding: 24px 32px 40px 32px;
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   overflow: visible;
   min-width: 0;
 }
@@ -64,13 +71,12 @@ body {
 .leftOverlay {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(59, 130, 246, 0.15) 0%,
-      rgba(124, 58, 237, 0.1) 40%,
-      rgba(3, 11, 26, 0.8) 100%
-    );
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(124, 58, 237, 0.1) 40%,
+    rgba(3, 11, 26, 0.8) 100%
+  );
   mix-blend-mode: overlay;
 }
 
@@ -87,13 +93,12 @@ body {
 }
 
 .themeLight .leftOverlay {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(59, 130, 246, 0.2) 0%,
-      rgba(30, 64, 120, 0.25) 50%,
-      rgba(3, 11, 26, 0.75) 100%
-    );
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.2) 0%,
+    rgba(30, 64, 120, 0.25) 50%,
+    rgba(3, 11, 26, 0.75) 100%
+  );
   mix-blend-mode: overlay;
 }
 
@@ -129,7 +134,7 @@ body {
 }
 
 .leftTitle span {
-  background: linear-gradient(90deg, #93c5fd 0%, #c084fc 100%);
+  background: linear-gradient(90deg, #c084fc 0%, #a855f7 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -182,7 +187,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background-color: #020916;
+  background: transparent;
   position: relative;
   min-height: 0;
   overflow: visible;
@@ -213,7 +218,11 @@ body {
   padding: 6px 10px;
   border-radius: 999px;
   opacity: 0.9;
-  transition: opacity 0.3s ease, background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .themeToggle:hover {
@@ -277,7 +286,7 @@ body {
 }
 
 .cardTitle span {
-  background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
+  background: linear-gradient(90deg, #a855f7 0%, #7e22ce 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -338,7 +347,11 @@ body {
   color: #ffffff;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.35s ease, color 0.35s ease;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.35s ease,
+    color 0.35s ease;
   min-height: 54px;
   text-align: left;
 }
@@ -412,7 +425,9 @@ body {
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .button:hover {
@@ -532,7 +547,10 @@ body {
   flex-shrink: 0;
   margin: 0;
   min-height: 52px;
-  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+  transition:
+    background 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease;
 }
 
 .footerLeft {
@@ -622,27 +640,23 @@ body {
 
 /* TEMA CLARO */
 .themeLight {
-  background-color: #eef5ff;
-  color: #183b67;
-  transition: background-color 0.35s ease, color 0.35s ease;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+  color: #111827;
 }
 
 .themeLight .rightPanel {
-  background-color: #eef5ff;
-  transition: background-color 0.35s ease;
+  background: transparent;
 }
 
 .themeLight .cardForm {
   background: rgba(255, 255, 255, 0.72);
   border-color: rgba(120, 150, 210, 0.25);
-  transition: background 0.35s ease, border-color 0.35s ease;
 }
 
 .themeLight .input {
-  background: #F8FBFF;
-  border-color: #D3E8FF;
+  background: #f8fbff;
+  border-color: #d3e8ff;
   color: #111827;
-  transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
 
 .themeLight .input::placeholder {
@@ -654,14 +668,54 @@ body {
 }
 
 .themeLight .footer {
-  background: rgba(255, 255, 255, 0.25);
-  border-top-color: rgba(120, 150, 210, 0.4);
-  color: #4a5a6a;
-  transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+  border-top-color: rgba(120, 150, 210, 0.5);
+  color: #111827;
 }
 
 .themeLight .brandName {
-  color: #2d3748;
+  background: linear-gradient(90deg, #2b6cb0 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.themeLight .rightPanel {
+  background: transparent;
+}
+
+.themeLight .cardForm {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(120, 150, 210, 0.25);
+}
+
+.themeLight .input {
+  background: #f8fbff;
+  border-color: #d3e8ff;
+  color: #111827;
+}
+
+.themeLight .input::placeholder {
+  color: #6b7280;
+}
+
+.themeLight .button {
+  color: #ffffff;
+}
+
+.themeLight .footer {
+  background: linear-gradient(135deg, #bae6fd 0%, #7c3aed 50%, #374151 100%);
+  border-top-color: rgba(120, 150, 210, 0.5);
+  color: #111827;
+}
+
+.themeLight .brandName {
+  background: linear-gradient(90deg, #9333ea 0%, #7e22ce 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .themeLight .version {
@@ -698,11 +752,11 @@ body {
 }
 
 .themeLight .divider span {
-  background: #DDEEFF;
+  background: #ddeeff;
 }
 
 .themeLight .divider::before {
-  background: #D3E8FF;
+  background: #d3e8ff;
 }
 
 .themeLight .badge strong {
@@ -726,7 +780,7 @@ body {
 }
 
 .themeLight .leftTitle span {
-  background: linear-gradient(90deg, #93c5fd 0%, #c084fc 100%);
+  background: linear-gradient(90deg, #c084fc 0%, #a855f7 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -750,7 +804,7 @@ body {
   color: #111827;
 }
 
-.themeLight .checkboxLabel input[type="checkbox"] {
+.themeLight .checkboxLabel input[type='checkbox'] {
   accent-color: #1e70f4;
 }
 
@@ -760,12 +814,12 @@ body {
 
 /* TEMA ESCURO */
 .themeDark .rightPanel {
-  background-color: #020916;
+  background: transparent;
 }
 
 .themeDark .cardForm {
-  background: rgba(9, 16, 29, 0.88);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(9, 16, 29, 0.42);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .themeDark .footer {
@@ -786,8 +840,9 @@ body {
     min-height: 0;
     padding: 16px;
     background-size: cover;
-    background-position: center;
+    background-position: center center;
     background-repeat: no-repeat;
+    background-attachment: fixed;
   }
 
   .themeDark .mainContent {
@@ -1055,15 +1110,17 @@ body {
 @media (max-width: 480px) {
   .pageLayout {
     background:
-      linear-gradient(rgba(2, 9, 22, 0.6), rgba(2, 9, 22, 0.8)),
-      url('/assets/login/pagsaas.webp') center/cover no-repeat fixed;
+      linear-gradient(rgba(2, 9, 22, 0.72), rgba(2, 9, 22, 0.9)),
+      url('/assets/login/pagsaas.webp') center center/cover no-repeat;
     transition: background 0.35s ease;
+    background-attachment: scroll;
   }
 
   .themeLight .pageLayout {
     background:
-      linear-gradient(rgba(2, 9, 22, 0.45), rgba(2, 9, 22, 0.7)),
-      url('/assets/login/pagsaas.webp') center/cover no-repeat fixed;
+      linear-gradient(rgba(255, 255, 255, 0.26), rgba(245, 247, 255, 0.48)),
+      url('/assets/login/pagsaas.webp') center center/cover no-repeat;
+    background-attachment: scroll;
   }
 
   .mainContent {
