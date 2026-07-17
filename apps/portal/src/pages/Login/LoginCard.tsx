@@ -58,7 +58,7 @@ export function LoginCard({
           {mode === 'login' && (
             <>
               <img
-                src="/assets/branding/logoSaaS.png"
+                src="/assets/branding/logoSaaSFormulario.png"
                 alt="New Wave Enterprise Logo"
                 className={styles.formLogo}
               />

@@ -21,6 +21,7 @@ authRouter.post('/login', async (req, res) => {
     const status = response.authenticated ? 200 : 401
     return res.status(status).json(response)
   } catch (error) {
+    console.error('LOGIN_ERROR', error)
     return res.status(500).json({ authenticated: false, state: 'ERROR', message: 'ERRO_INTERNO' })
   }
 })

@@ -8,22 +8,23 @@ export class AuthService {
 
   async login(login: string, tokenJwt: string, refreshToken: string, ip: string, device: string) {
     const conn = await this.connection
-    const [rows] = await conn.query('CALL sp_master_login(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+    const payload = JSON.stringify({
+      login,
+      token_jwt: tokenJwt,
+      refresh_token: refreshToken,
+      ip,
+      device,
+      fingerprint: device
+    })
+
+    await conn.query('SET @p_resultado = NULL, @p_sucesso = NULL, @p_mensagem = NULL')
+    const [rows] = await conn.query('CALL sp_master_login(?, ?, @p_resultado, @p_sucesso, @p_mensagem)', [
       'AUTH.LOGIN.REQUEST',
-      JSON.stringify({ login, token_jwt: tokenJwt, refresh_token: refreshToken, ip, device, fingerprint: device }),
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
+      payload
     ])
 
-    const resultado = (rows as any[])[0]
+    const [outRows] = await conn.query('SELECT @p_resultado AS resultado, @p_sucesso AS sucesso, @p_mensagem AS mensagem')
+    const resultado = (outRows as any[])[0]
     const sucesso = Boolean(resultado?.sucesso)
 
     if (!sucesso) {
@@ -34,16 +35,21 @@ export class AuthService {
       }
     }
 
+    const parsed = typeof resultado?.resultado === 'string'
+      ? JSON.parse(resultado.resultado)
+      : (resultado?.resultado ?? {})
+
+    const sessao = parsed?.sessao ?? {}
     const session = {
-      id_sessao_usuario: Number(resultado.id_sessao_usuario ?? 0),
-      id_usuario: Number(resultado.id_usuario ?? 0),
-      id_entidade: Number(resultado.id_saas_entidade ?? resultado.id_entidade ?? 0),
-      id_unidade: Number(resultado.id_unidade ?? 0),
-      id_local: Number(resultado.id_local ?? 0),
-      id_perfil: Number(resultado.id_perfil ?? 0),
-      token_jwt: String(resultado.token_jwt ?? ''),
-      refresh_token: String(resultado.refresh_token ?? ''),
-      expira_em: new Date(resultado.expira_em ?? Date.now())
+      id_sessao_usuario: Number(sessao?.id_sessao_usuario ?? 0),
+      id_usuario: Number(sessao?.id_usuario ?? 0),
+      id_entidade: Number(sessao?.id_entidade ?? 0),
+      id_unidade: Number(sessao?.id_unidade ?? 0),
+      id_local: Number(sessao?.id_local ?? 0),
+      id_perfil: Number(sessao?.id_perfil ?? 0),
+      token_jwt: String(sessao?.token_jwt ?? ''),
+      refresh_token: String(sessao?.refresh_token ?? ''),
+      expira_em: new Date(sessao?.expira_em ?? Date.now())
     }
 
     return {
@@ -56,7 +62,7 @@ export class AuthService {
   async authenticate(username: string, password: string, ip: string, device: string) {
     const conn = await this.connection
     const [rows] = await conn.query(
-      'SELECT id_usuario, senha, ativo FROM usuario WHERE login = ? LIMIT 1',
+      'SELECT id_usuario, senha_hash, ativo FROM usuario WHERE login = ? LIMIT 1',
       [username]
     )
     const user = (rows as any[])[0]
@@ -68,7 +74,7 @@ export class AuthService {
       return { authenticated: false, state: 'ERROR' as const, message: 'USUARIO_INATIVO' }
     }
 
-    const senhaOk = await bcrypt.compare(password, String(user.senha))
+    const senhaOk = await bcrypt.compare(password, String(user.senha_hash ?? ''))
     if (!senhaOk) {
       return { authenticated: false, state: 'ERROR' as const, message: 'CREDENCIAIS_INVALIDAS' }
     }

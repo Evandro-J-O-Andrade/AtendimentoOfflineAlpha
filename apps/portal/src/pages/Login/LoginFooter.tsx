@@ -8,7 +8,7 @@ export function LoginFooter({ darkMode }: LoginFooterProps) {
   return (
     <footer className={styles.footer}>
       <div className={styles.footerLeft}>
-        <img src="/assets/branding/logoSaaS.png" alt="Logo" className={styles.miniLogo} />
+        <img src="/assets/branding/logoSaaSFooter.png" alt="Logo" className={styles.miniLogo} />
         <span className={styles.brandName}>New Wave Enterprise</span>
         <span className={styles.dividerPipe}>|</span>
         <span className={styles.version}>v1.0.0</span>

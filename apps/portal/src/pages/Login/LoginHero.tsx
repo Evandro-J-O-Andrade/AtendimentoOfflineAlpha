@@ -70,7 +70,7 @@ export function LoginHero({ darkMode }: LoginHeroProps) {
       <div className={styles.leftOverlay} />
       <div className={styles.leftContent}>
         <img
-          src="/assets/branding/logoSaaS.png"
+          src="/assets/branding/logoSaaSHeros.png"
           alt="New Wave Enterprise Logo"
           className={styles.leftLogo}
         />
