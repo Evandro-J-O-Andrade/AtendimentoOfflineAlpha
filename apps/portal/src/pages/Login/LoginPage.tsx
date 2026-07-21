@@ -1,43 +1,47 @@
-import { useState, type FormEvent } from 'react'
-import { useAuth } from '@atendimentooffline/auth'
-import type { LoginRequestContract, AuthenticationState } from '@atendimentooffline/contracts'
-import { ThemeProvider, useTheme } from './ThemeProvider'
-import { LoginHero } from './LoginHero'
-import { LoginCard } from './LoginCard'
-import { LoginFooter } from './LoginFooter'
-import styles from './LoginPage.module.css'
+import { useState, type FormEvent } from 'react';
+import { useAuth } from '@atendimentooffline/auth';
+import type {
+  LoginRequestContract,
+  AuthenticationState,
+} from '@atendimentooffline/contracts';
+import { ThemeProvider, useTheme } from './ThemeProvider';
+import { LoginHero } from './LoginHero';
+import { LoginCard } from './LoginCard';
+import { LoginFooter } from './LoginFooter';
+import styles from './LoginPage.module.css';
 
 function LoginPageInner() {
-  const { login, loading, authenticated } = useAuth()
-  const { theme, toggle: toggleTheme } = useTheme()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [mfaCode, setMfaCode] = useState('')
-  const [authState, setAuthState] = useState<AuthenticationState>('UNAUTHENTICATED')
+  const { login, loading, authenticated } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+  const [authState, setAuthState] =
+    useState<AuthenticationState>('UNAUTHENTICATED');
 
-  const darkMode = theme === 'dark'
+  const darkMode = theme === 'dark';
 
   async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
     const request: LoginRequestContract = {
       username,
       password,
       tenant: undefined,
       mfaCode: mfaCode || undefined,
-    }
+    };
 
     try {
-      const response = await login(request)
-      setAuthState(response.state)
-      setError(response.message ?? null)
+      const response = await login(request);
+      setAuthState(response.state);
+      setError(response.message ?? null);
     } catch {
-      setError('Erro de conexão')
-      setAuthState('ERROR')
+      setError('Erro de conexão');
+      setAuthState('ERROR');
     }
   }
 
@@ -46,7 +50,7 @@ function LoginPageInner() {
       <div className={styles.pageLayout}>
         <div className={styles.status}>Autenticando...</div>
       </div>
-    )
+    );
   }
 
   if (authenticated) {
@@ -54,12 +58,14 @@ function LoginPageInner() {
       <div className={styles.pageLayout}>
         <div className={styles.status}>Redirecionando...</div>
       </div>
-    )
+    );
   }
 
   if (authState === 'MFA_REQUIRED') {
     return (
-      <div className={`${styles.pageLayout} ${darkMode ? styles.themeDark : styles.themeLight}`}>
+      <div
+        className={`${styles.pageLayout} ${darkMode ? styles.themeDark : styles.themeLight}`}
+      >
         <div className={styles.mainContent}>
           <LoginHero darkMode={darkMode} />
           <LoginCard
@@ -83,11 +89,13 @@ function LoginPageInner() {
         </div>
         <LoginFooter darkMode={darkMode} />
       </div>
-    )
+    );
   }
 
   return (
-    <div className={`${styles.pageLayout} ${darkMode ? styles.themeDark : styles.themeLight}`}>
+    <div
+      className={`${styles.pageLayout} ${darkMode ? styles.themeDark : styles.themeLight}`}
+    >
       <div className={styles.mainContent}>
         <LoginHero darkMode={darkMode} />
         <LoginCard
@@ -111,7 +119,7 @@ function LoginPageInner() {
       </div>
       <LoginFooter darkMode={darkMode} />
     </div>
-  )
+  );
 }
 
 export function LoginPage() {
@@ -119,5 +127,5 @@ export function LoginPage() {
     <ThemeProvider>
       <LoginPageInner />
     </ThemeProvider>
-  )
+  );
 }
