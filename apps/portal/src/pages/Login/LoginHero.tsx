@@ -141,7 +141,14 @@ export function LoginHero({ darkMode }: LoginHeroProps) {
         <div className={styles.brandIconOverlay} onClick={() => setActiveIcon(null)}>
           <div className={styles.brandIconOverlayInner} onClick={(e) => e.stopPropagation()}>
             <div className={styles.brandIconOverlayIcon}>{activeIcon.icon}</div>
-            <div className={styles.brandIconOverlayLabel}>{activeIcon.label}</div>
+            <div className={styles.brandIconOverlayLabel}>
+              {activeIcon.label === 'Analytics' && 'Visualize métricas e relatórios em tempo real'}
+              {activeIcon.label === 'Usuários' && 'Gerencie permissões e acessos da equipe'}
+              {activeIcon.label === 'Documentos' && 'Armazene e organize documentos corporativos'}
+              {activeIcon.label === 'Mensagens' && 'Comunique-se com sua equipe de forma segura'}
+              {activeIcon.label === 'Segurança' && 'Monitore e proteja seus dados corporativos'}
+              {activeIcon.label === 'Inteligência Analítica' && 'Insights avançados para decisões estratégicas'}
+            </div>
           </div>
         </div>
       )}

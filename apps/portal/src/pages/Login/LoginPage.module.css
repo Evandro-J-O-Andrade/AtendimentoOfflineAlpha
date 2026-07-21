@@ -243,19 +243,16 @@ body {
 
 .brandIconOverlayLabel {
   color: #ffffff;
-  font-size: 14px;
+  font-size: 20px;
+  font-weight: 600;
   text-align: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 8px 14px;
-  border-radius: 12px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  letter-spacing: 0.5px;
   opacity: 0;
-  animation: brandFadeIn 0.4s ease 0.65s forwards;
+  animation: brandFadeInUp 0.4s ease 0.5s forwards;
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
 }
 
-@keyframes brandFadeIn {
+@keyframes brandFadeInUp {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
