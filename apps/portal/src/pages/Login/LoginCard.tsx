@@ -1,6 +1,35 @@
+/**
+ * Login Card
+ *
+ * Componente de formulário de autenticação do Portal.
+ * Suporta modos 'login' (credenciais) e 'mfa' (código multifator).
+ *
+ * @param props.darkMode - Indica se o tema escuro está ativo.
+ * @param props.onToggleTheme - Callback para alternar tema.
+ * @param props.mode - Modo do formulário: 'login' ou 'mfa'.
+ * @param props.username - Valor do campo usuário.
+ * @param props.password - Valor do campo senha.
+ * @param props.mfaCode - Valor do código MFA.
+ * @param props.rememberMe - Estado do checkbox 'Lembrar de mim'.
+ * @param props.showPassword - Indica se a senha está visível.
+ * @param props.loading - Indica estado de carregamento.
+ * @param props.error - Mensagem de erro ou null.
+ * @param props.onUsernameChange - Callback para alteração de usuário.
+ * @param props.onPasswordChange - Callback para alteração de senha.
+ * @param props.onMfaCodeChange - Callback para alteração de MFA.
+ * @param props.onRememberMeChange - Callback para alteração do checkbox.
+ * @param props.onShowPasswordChange - Callback para alternar visibilidade da senha.
+ * @param props.onSubmit - Callback de submissão do formulário.
+ *
+ * @see {@link LoginPage}
+ * @see {@link ThemeProvider}
+ */
 import { type FormEvent } from 'react'
 import styles from './LoginPage.module.css'
 
+/**
+ * Props do Login Card
+ */
 interface LoginCardProps {
   darkMode: boolean
   onToggleTheme: () => void

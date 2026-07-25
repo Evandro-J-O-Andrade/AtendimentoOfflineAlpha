@@ -13,6 +13,7 @@
     "@atendimentooffline/contracts": "workspace:*",
     "@atendimentooffline/auth": "workspace:*",
     "@atendimentooffline/runtime": "workspace:*",
+    "@atendimentooffline/kernel": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

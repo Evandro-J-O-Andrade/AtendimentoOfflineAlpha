@@ -27,6 +27,9 @@ importers:
       '@atendimentooffline/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@atendimentooffline/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
       '@atendimentooffline/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -140,6 +143,19 @@ importers:
   packages/enterprise-shell: {}
 
   packages/enterprise-theme: {}
+
+  packages/kernel:
+    dependencies:
+      '@atendimentooffline/api':
+        specifier: workspace:*
+        version: link:../api
+      '@atendimentooffline/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
 
   packages/runtime:
     dependencies:

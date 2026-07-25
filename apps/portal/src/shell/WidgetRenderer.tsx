@@ -1,6 +1,11 @@
 import React from 'react'
 import type { WidgetContract } from '@atendimentooffline/contracts'
 
+/**
+ * Widget Component Type
+ *
+ * Tipo de componente React para renderização de widgets.
+ */
 export type WidgetComponent = React.FC<{ widget: WidgetContract }>
 
 const cardStyle: React.CSSProperties = {
@@ -75,6 +80,17 @@ function GenericWidget({ widget }: { widget: WidgetContract }) {
  * Para suportar um novo tipo (ex.: kanban, timeline, heatmap, gauge), basta
  * registrar o componente; não é necessário alterar o WidgetRenderer.
  */
+/**
+ * Widget Registry
+ *
+ * Registro de renderizadores de widget por tipo.
+ * Mapeia widget.type → componente visual.
+ * Para suportar novo tipo, basta registrar componente; não é necessário
+ * alterar o WidgetRenderer.
+ *
+ * @example
+ * widgetRegistry.register('kanban', KanbanWidget)
+ */
 export class WidgetRegistry {
   private readonly renderers = new Map<string, WidgetComponent>()
 
@@ -104,6 +120,18 @@ export const widgetRegistry = new WidgetRegistry()
   .register('generic', GenericWidget)
 
 /** WidgetRenderer: resolve o componente visual a partir do contrato (GAP-1 resolvido). */
+/**
+ * Widget Renderer
+ *
+ * Resolve o componente visual a partir do contrato WidgetContract.
+ * Encapsula lógica de dispatch por tipo de widget.
+ *
+ * @param props.widget - Contrato do widget a ser renderizado.
+ * @returns Componente visual correspondente ao tipo do widget.
+ *
+ * @see {@link WidgetRegistry}
+ * @see {@link WidgetContract}
+ */
 export function WidgetRenderer({ widget }: { widget: WidgetContract }) {
   const Renderer = widgetRegistry.resolve(widget.type)
   return <Renderer widget={widget} />

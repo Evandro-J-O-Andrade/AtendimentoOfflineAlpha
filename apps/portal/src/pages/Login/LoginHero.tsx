@@ -1,3 +1,14 @@
+/**
+ * Login Hero
+ *
+ * Painel visual esquerdo da página de login. Exibe branding,
+ * valor da plataforma e ícones interativos representando capacidades.
+ *
+ * @param props.darkMode - Indica se o tema escuro está ativo.
+ *
+ * @see {@link LoginPage}
+ * @see {@link LoginCard}
+ */
 import { useState, type ReactNode } from 'react'
 import styles from './LoginPage.module.css'
 
@@ -105,6 +116,9 @@ function IconPieChart() {
   )
 }
 
+/**
+ * Props do Login Hero
+ */
 interface LoginHeroProps {
   darkMode: boolean
 }

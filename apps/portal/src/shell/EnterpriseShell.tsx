@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { usePortalRuntime } from './PortalRuntime'
 import { useAuth } from '@atendimentooffline/auth'
 import type { ReactNode } from 'react'
 import { WidgetRenderer } from './WidgetRenderer'
+import type { DomainConfig } from '../domains'
+import { useRouter } from '../app/router'
 
 const shellStyle: React.CSSProperties = {
   display: 'flex',
@@ -40,9 +43,40 @@ const mainStyle: React.CSSProperties = {
   overflowY: 'auto'
 }
 
+const domainItemStyle: React.CSSProperties = {
+  padding: '6px 8px',
+  cursor: 'pointer',
+  borderRadius: 4,
+  marginBottom: 4
+}
+
+const domainItemHoverStyle: React.CSSProperties = {
+  ...domainItemStyle,
+  background: '#f1f5f9'
+}
+
+/**
+ * Enterprise Shell
+ *
+ * Shell principal do Portal Enterprise. Renderiza layout com header,
+ * sidebar de domínios, área principal e widgets.
+ *
+ * Integra DomainRegistry para navegação por domínios canônicos.
+ *
+ * @param props.children - Conteúdo adicional renderizado abaixo do shell.
+ * @returns Estrutura visual completa do Portal.
+ *
+ * @see {@link ShellContent}
+ * @see {@link PortalRuntimeProvider}
+ * @see {@link WidgetRenderer}
+ * @see {@link DomainConfig}
+ * @see {@link DOMAIN_REGISTRY}
+ */
 function ShellContent() {
   const rt = usePortalRuntime()
   const { logout } = useAuth()
+  const { navigate } = useRouter()
+  const [hoveredDomain, setHoveredDomain] = useState<string | null>(null)
 
   return (
     <div style={shellStyle}>
@@ -67,17 +101,32 @@ function ShellContent() {
       <div style={bodyStyle}>
         <aside style={asideStyle}>
           <nav>
-            {rt.navigation.length === 0 && <em>Nenhuma navegação</em>}
-            {rt.navigation.map((group) => (
-              <div key={group.id} style={{ marginBottom: 12 }}>
-                <div style={{ fontWeight: 600 }}>{group.label}</div>
-                {group.items.map((item) => (
-                  <div key={item.id} style={{ padding: '4px 0' }}>
-                    {item.label}
-                  </div>
-                ))}
-              </div>
-            ))}
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Domínios</div>
+            {rt.applications
+              .filter((app) => app.enabled)
+              .map((app) => (
+                <div
+                  key={app.id}
+                  style={hoveredDomain === app.id ? domainItemHoverStyle : domainItemStyle}
+                  onMouseEnter={() => setHoveredDomain(app.id)}
+                  onMouseLeave={() => setHoveredDomain(null)}
+                  onClick={() => {
+                    navigate({
+                      type: 'domain',
+                      domain: {
+                        id: app.id,
+                        nome: app.name,
+                        modulo: app.code,
+                        rota: app.route,
+                        icone: app.icon ?? '',
+                        acoes: app.permission ? [app.permission] : []
+                      } as DomainConfig
+                    })
+                  }}
+                >
+                  {app.name}
+                </div>
+              ))}
           </nav>
           {rt.management?.enabled && (
             <div style={{ marginTop: 16, padding: 12, border: '1px solid #cbd5e1', borderRadius: 8 }}>
@@ -133,6 +182,16 @@ function ShellContent() {
   )
 }
 
+/**
+ * Enterprise Shell Export
+ *
+ * Componente exportado que renderiza o ShellContent e permite
+ * injeção de conteúdo adicional via children.
+ *
+ * @param props.children - Nós filhos injetados abaixo do shell padrão.
+ * @returns Shell do Portal com conteúdo opcional.
+ * @see {@link ShellContent}
+ */
 export function EnterpriseShell({ children }: { children?: ReactNode }) {
   return (
     <>
@@ -141,3 +200,4 @@ export function EnterpriseShell({ children }: { children?: ReactNode }) {
     </>
   )
 }
+

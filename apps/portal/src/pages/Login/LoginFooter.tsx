@@ -1,5 +1,18 @@
+/**
+ * Login Footer
+ *
+ * Rodapé da página de login da plataforma.
+ * Exibe branding, versão, copyright e créditos.
+ *
+ * @param props.darkMode - Indica se o tema escuro está ativo.
+ *
+ * @see {@link LoginPage}
+ */
 import styles from './LoginPage.module.css'
 
+/**
+ * Props do Login Footer
+ */
 interface LoginFooterProps {
   darkMode: boolean
 }

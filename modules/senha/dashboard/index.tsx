@@ -1,13 +1,35 @@
-﻿import { ModuleDashboard } from '@/core/components/ModuleDashboard';
+﻿/**
+ * Dashboard - módulo senha
+ *
+ * Exporta os componentes de dashboard principal, analytics e timeline
+ * para o módulo de senha. Utiliza o componente genérico
+ * ModuleDashboard para renderização.
+ *
+ * @module senha
+ */
 
+import { ModuleDashboard } from '@/core/components/ModuleDashboard';
+
+/**
+ * Dashboard inicial / home do módulo senha.
+ * @returns Componente React com dashboard inicial.
+ */
 export function HomeDashboard() {
-  return <ModuleDashboard title="senha - InÃ­cio" moduleId="senha" />;
+  return <ModuleDashboard title="senha - Início" moduleId="senha" />;
 }
 
+/**
+ * Dashboard de analytics do módulo senha.
+ * @returns Componente React com dashboard de analytics.
+ */
 export function AnalyticsDashboard() {
   return <ModuleDashboard title="senha - Analytics" moduleId="senha" />;
 }
 
+/**
+ * Dashboard de timeline do módulo senha.
+ * @returns Componente React com dashboard de timeline.
+ */
 export function TimelineDashboard() {
   return <ModuleDashboard title="senha - Timeline" moduleId="senha" />;
 }

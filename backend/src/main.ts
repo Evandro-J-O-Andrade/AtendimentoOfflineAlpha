@@ -3,6 +3,11 @@ import express from 'express'
 import cors from 'cors'
 import authRoutes from './routes/auth.js'
 import portalRoutes from './routes/portal.js'
+import contextoRoutes from './routes/contexto.js'
+import eventosRoutes from './routes/eventos.js'
+import auditoriaRoutes from './routes/auditoria.js'
+import integracaoRoutes from './routes/integracoes.js'
+import dispatcherRoutes from './routes/dispatcher.js'
 import { getDatabasePool } from './database/mysql/connection.js'
 
 const app = express()
@@ -23,6 +28,11 @@ app.get('/health', async (_req, res) => {
 
 app.use('/auth', authRoutes)
 app.use('/portal', portalRoutes)
+app.use('/contexto', contextoRoutes)
+app.use('/eventos', eventosRoutes)
+app.use('/auditoria', auditoriaRoutes)
+app.use('/integracoes', integracaoRoutes)
+app.use('/dispatcher', dispatcherRoutes)
 
 const PORT = process.env.PORT ?? 3001
 

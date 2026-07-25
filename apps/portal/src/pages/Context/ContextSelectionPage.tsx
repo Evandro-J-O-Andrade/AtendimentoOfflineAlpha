@@ -1,56 +1,53 @@
-import { useState, useEffect } from 'react'
+/**
+ * Context Selection Page
+ *
+ * Página de seleção de contexto operacional para usuários autenticados.
+ * Carrega unidades de negócio disponíveis e permite ao usuário
+ * selecionar o contexto (tenant/unidade) antes de acessar o Portal.
+ *
+ * @see {@link NavigationController}
+ * @see {@link ContextGuard}
+ * @see {@link MD-124-Context-First-Architecture}
+ */
+import { useState, useMemo } from 'react'
 import { useRouter } from '../../app/router'
 import { useAuth } from '@atendimentooffline/auth'
 import type { ContextContract } from '@atendimentooffline/contracts'
 
+/**
+ * Context Selection Page Component
+ *
+ * Orquestra o carregamento de contextos e a seleção pelo usuário.
+ * Em caso de sucesso, navega para a rota 'portal'.
+ *
+ * @returns Interface de seleção de contexto.
+ */
 export function ContextSelectionPage() {
   const { navigate } = useRouter()
-  const { session, selectContext, loading } = useAuth()
-  const [contexts, setContexts] = useState<ContextContract[]>([])
+  const { session, selectContext, context, contextLoading } = useAuth()
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!session?.id_sessao_usuario) {
-      return
-    }
-
-    fetch(`/auth/context/${session.id_sessao_usuario}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('FALHA_CARREGAR_CONTEXTO')
-        }
-        return res.json()
-      })
-      .then((data) => {
-        const mapped = (data.unidades ?? []).map((u: any) => ({
-          id: String(u.id_unidade),
-          tenantId: session?.id_entidade ?? null,
-          name: u.nome_unidade,
-          kind: 'UNIT' as const,
-          parentId: null
-        }))
-        setContexts(mapped)
-      })
-      .catch(() => {
-        setError('Erro ao carregar contextos')
-      })
-  }, [session?.id_sessao_usuario, session?.id_entidade])
+  const contexts = useMemo<ContextContract[]>(() => {
+    return (context?.unidades ?? []).map((u) => ({
+      id: String(u.id_unidade),
+      tenantId: session?.id_entidade ? String(session.id_entidade) : '',
+      name: u.nome_unidade,
+      kind: 'UNIT' as const,
+      parentId: null
+    }))
+  }, [context, session?.id_entidade])
 
   async function handleSelect(context: ContextContract) {
     setSelectedId(context.id)
-    setError(null)
-
     try {
       await selectContext(Number(context.id), 1, 0)
       navigate('portal')
     } catch {
-      setError('Erro ao selecionar contexto')
       setSelectedId(null)
     }
   }
 
-  if (loading) {
+  if (contextLoading) {
     return (
       <div>
         <h1>Carregando contexto...</h1>
@@ -58,11 +55,11 @@ export function ContextSelectionPage() {
     )
   }
 
-  if (error) {
+  if (!context) {
     return (
       <div>
         <h1>Erro</h1>
-        <p>{error}</p>
+        <p>Erro ao carregar contextos</p>
       </div>
     )
   }

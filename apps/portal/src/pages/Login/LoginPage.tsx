@@ -1,3 +1,16 @@
+/**
+ * Login Page
+ *
+ * Página de autenticação do Portal Enterprise.
+ * Gerencia o fluxo de login, incluindo estados de carregamento,
+ * MFA e feedback de erro.
+ *
+ * @see {@link ThemeProvider}
+ * @see {@link LoginHero}
+ * @see {@link LoginCard}
+ * @see {@link LoginFooter}
+ * @see {@link NavigationController}
+ */
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '@atendimentooffline/auth';
 import type {
@@ -10,6 +23,14 @@ import { LoginCard } from './LoginCard';
 import { LoginFooter } from './LoginFooter';
 import styles from './LoginPage.module.css';
 
+/**
+ * Login Page Inner Component
+ *
+ * Componente interno que gerencia estado e lógica de autenticação.
+ * Envolvido por ThemeProvider para gerenciamento de tema.
+ *
+ * @returns Layout da página de login com hero, formulário e footer.
+ */
 function LoginPageInner() {
   const { login, loading, authenticated } = useAuth();
   const { theme, toggle: toggleTheme } = useTheme();
@@ -122,6 +143,16 @@ function LoginPageInner() {
   );
 }
 
+/**
+ * Login Page Export
+ *
+ * Componente exportado que envolve LoginPageInner com ThemeProvider.
+ * Entry point público da página de login.
+ *
+ * @returns Página de login com tema aplicado.
+ * @see {@link LoginPageInner}
+ * @see {@link ThemeProvider}
+ */
 export function LoginPage() {
   return (
     <ThemeProvider>

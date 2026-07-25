@@ -1,3 +1,12 @@
+/**
+ * IdentityDashboard
+ *
+ * Dashboard principal do módulo identity. Renderiza um ModuleDashboard
+ * com título e descrição específicos do domínio de identidade.
+ *
+ * @module identity
+ */
+
 import { ModuleDashboard } from '@/core/components/ModuleDashboard';
 
 export default function CORE Dashboard() {
