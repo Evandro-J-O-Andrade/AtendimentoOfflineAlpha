@@ -1,8 +1,7 @@
-import { useState, useCallback, useEffect } from 'react'
-import { ApiDispatcherClientAdapter } from '@atendimentooffline/kernel'
+import { ApiDispatcherClientAdapter, IdentityRuntime, TenantRuntime, SessionRuntime, ContextRuntime, AuthorizationRuntime, NavigationRuntime } from '@atendimentooffline/kernel'
 import type { PortalRuntimeContract } from '@atendimentooffline/contracts'
 import { PortalRuntimeEngine } from '@atendimentooffline/runtime'
-import { portalConfig } from '../../app/config'
+import { portalConfig } from '../app/config'
 
 export interface PortalRuntimeBridgeState {
   runtime: PortalRuntimeContract | null
@@ -19,12 +18,12 @@ export function createPortalRuntimeBridge(): PortalRuntimeBridge {
   const baseUrl = portalConfig.apiUrl
   const dispatcher = new ApiDispatcherClientAdapter(baseUrl)
 
-  const identity = new (require('@atendimentooffline/kernel').IdentityRuntime)(dispatcher)
-  const tenant = new (require('@atendimentooffline/kernel').TenantRuntime)(dispatcher)
-  const session = new (require('@atendimentooffline/kernel').SessionRuntime)(dispatcher)
-  const context = new (require('@atendimentooffline/kernel').ContextRuntime)(dispatcher)
-  const authorization = new (require('@atendimentooffline/kernel').AuthorizationRuntime)(dispatcher)
-  const navigation = new (require('@atendimentooffline/kernel').NavigationRuntime)(dispatcher)
+  const identity = new IdentityRuntime(dispatcher)
+  const tenant = new TenantRuntime(dispatcher)
+  const session = new SessionRuntime(dispatcher)
+  const context = new ContextRuntime(dispatcher)
+  const authorization = new AuthorizationRuntime(dispatcher)
+  const navigation = new NavigationRuntime(dispatcher)
 
   const engine = new PortalRuntimeEngine(dispatcher as any)
 
@@ -58,7 +57,7 @@ export function createPortalRuntimeBridge(): PortalRuntimeBridge {
       const runtime = engine.compose({
         session: sessionData ?? { authenticated: false },
         tenant: tenantData,
-        context: { unidades: [], perfis: [], salas: [] },
+        context: context,
         applications: applicationsData,
         widgets: [],
         navigation: navigationData,
@@ -68,7 +67,7 @@ export function createPortalRuntimeBridge(): PortalRuntimeBridge {
         permissions: []
       })
 
-      return runtime as PortalRuntimeContract
+      state.runtime = runtime
     }
   }
 }
