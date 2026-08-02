@@ -9,7 +9,7 @@ export interface ContextResponse {
 
 export interface AuthApi {
   login(request: LoginRequestContract): Promise<LoginResponseContract>
-  session(): Promise<import('@atendimentooffline/contracts').AuthSessionContract>
+  session(idSessao: number): Promise<import('@atendimentooffline/contracts').AuthSessionContract>
   refresh(): Promise<import('@atendimentooffline/contracts').AuthSessionContract>
   logout(): Promise<void>
   context(idSessao: number): Promise<ContextResponse>
@@ -21,8 +21,8 @@ export function createAuthApi(api: ApiClient): AuthApi {
     async login(request) {
       return api.post<LoginResponseContract>('/auth/login', request)
     },
-    async session() {
-      return api.get('/auth/session')
+    async session(idSessao: number) {
+      return api.get(`/auth/session/${idSessao}`)
     },
     async refresh() {
       return api.post('/auth/refresh', {})

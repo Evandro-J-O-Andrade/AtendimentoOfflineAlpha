@@ -8,6 +8,7 @@ import eventosRoutes from './routes/eventos.js'
 import auditoriaRoutes from './routes/auditoria.js'
 import integracaoRoutes from './routes/integracoes.js'
 import dispatcherRoutes from './routes/dispatcher.js'
+import totemRoutes from './routes/totem.js'
 import { getDatabasePool } from './database/mysql/connection.js'
 
 const app = express()
@@ -33,6 +34,7 @@ app.use('/eventos', eventosRoutes)
 app.use('/auditoria', auditoriaRoutes)
 app.use('/integracoes', integracaoRoutes)
 app.use('/dispatcher', dispatcherRoutes)
+app.use('/totem', totemRoutes)
 
 const PORT = process.env.PORT ?? 3001
 

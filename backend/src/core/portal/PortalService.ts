@@ -21,6 +21,10 @@ export class PortalService {
     const resultado = typeof raw === 'string' ? JSON.parse(raw) : raw
     const modulos = resultado?.modulos ?? []
 
+    if (!modulos) {
+      return []
+    }
+
     return (modulos as any[]).map((modulo: any) => ({
       id: String(modulo.modulo),
       label: String(modulo.nome),

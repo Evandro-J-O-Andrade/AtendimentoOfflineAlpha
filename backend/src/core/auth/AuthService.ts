@@ -90,49 +90,72 @@ export class AuthService {
 
   async session(idSessao: number) {
     const conn = await this.connection
-    const [rows] = await conn.query('CALL sp_sessao_contexto_get(?)', [idSessao])
-
-    const data = (rows as any[])[0]
-    if (!data) {
-      return null
+    try {
+      const [rows] = await conn.query('CALL sp_sessao_contexto_get(?)', [idSessao])
+      const data = ((rows as any[])[0] as any[])[0]
+      
+      if (!data) {
+        return null
+      }
+      const result = {
+        id_sessao_usuario: Number(data.id_sessao_usuario),
+        id_usuario: Number(data.id_usuario),
+        id_entidade: Number(data.id_sistema ?? 0),
+        id_unidade: Number(data.id_unidade),
+        id_local: Number(data.id_local_operacional ?? 0),
+        id_perfil: Number(data.id_perfil ?? 0),
+        expira_em: new Date(data.expira_em ?? Date.now()),
+        ativo: Number(data.ativo ?? 0)
+      } as AuthSessionResponse
+      
+      return result
+    } catch (error) {
+      console.error('SESSION_ERROR', error)
+      throw error
     }
-
-    return {
-      id_sessao_usuario: Number(data.id_sessao_usuario),
-      id_usuario: Number(data.id_usuario),
-      id_entidade: Number(data.id_sistema ?? 0),
-      id_unidade: Number(data.id_unidade),
-      id_local: Number(data.id_local_operacional ?? 0),
-      id_perfil: Number(data.id_perfil ?? 0),
-      expira_em: new Date(data.expira_em ?? Date.now()),
-      ativo: Number(data.ativo ?? 0)
-    } as AuthSessionResponse
   }
 
   async context(idSessao: number) {
     const conn = await this.connection
-    const [rows] = await conn.query('CALL sp_auth_contexto_get(?)', [idSessao])
-    const data = (rows as any[])[0]
+    try {
+      const [result] = await conn.query('CALL sp_auth_contexto_get(?)', [idSessao])
+      const unidades = (((result as any)[0] as any[]) ?? []).map((u: any) => ({ id_unidade: Number(u.id_unidade), nome_unidade: String(u.nome_unidade) }))
+      const perfis = (((result as any)[1] as any[]) ?? []).map((p: any) => ({ id_perfil: Number(p.id_perfil), nome_perfil: String(p.nome_perfil), id_unidade: Number(p.id_unidade) }))
+      const salas = (((result as any)[2] as any[]) ?? []).map((s: any) => ({ id_sala: Number(s.id_sala), nome_sala: String(s.nome_sala), id_unidade: Number(s.id_unidade) }))
 
-    if (!data) {
       return {
-        unidades: [],
-        perfis: [],
-        salas: []
+        unidades,
+        perfis,
+        salas
       } as AuthContextResponse
+    } catch (error) {
+      console.error('CONTEXT_ERROR', error)
+      throw error
     }
-
-    return {
-      unidades: (data.unidades ?? []).map((u: any) => ({ id_unidade: Number(u.id_unidade), nome_unidade: String(u.nome_unidade) })),
-      perfis: (data.perfis ?? []).map((p: any) => ({ id_perfil: Number(p.id_perfil), nome_perfil: String(p.nome_perfil), id_unidade: Number(p.id_unidade) })),
-      salas: (data.salas ?? []).map((s: any) => ({ id_sala: Number(s.id_sala), nome_sala: String(s.nome_sala), id_unidade: Number(s.id_unidade) }))
-    } as AuthContextResponse
   }
 
   async selectContext(idSessao: number, idUnidade: number, idPerfil: number, idLocal: number) {
     const conn = await this.connection
-    await conn.query('CALL sp_auth_contexto_set(?, ?, ?, ?)', [idSessao, idUnidade, idPerfil, idLocal])
-    return this.session(idSessao)
+    try {
+      const [result] = await conn.query('CALL sp_auth_contexto_set(?, ?, ?, ?)', [idSessao, idUnidade, idPerfil, idLocal])
+      const data = ((result as any)[0] as any[])[0]
+      if (!data) {
+        return null
+      }
+      return {
+        id_sessao_usuario: Number(data.id_sessao_usuario),
+        id_usuario: Number(data.id_usuario),
+        id_entidade: Number(data.id_sistema ?? 0),
+        id_unidade: Number(data.id_unidade),
+        id_local: Number(data.id_local_operacional ?? 0),
+        id_perfil: Number(data.id_perfil ?? 0),
+        expira_em: new Date(data.expira_em ?? Date.now()),
+        ativo: Number(data.ativo ?? 0)
+      } as any
+    } catch (error) {
+      console.error('SELECT_CONTEXT_ERROR', error)
+      throw error
+    }
   }
 }
 

@@ -6,6 +6,7 @@ export interface DispatcherRequest {
   acao: string
   payload: Record<string, unknown>
   id_sessao: number
+  uuid_transacao?: string
 }
 
 export interface DispatcherResponse {

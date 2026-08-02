@@ -3,8 +3,7 @@ import { AuthProvider, useAuth } from '@atendimentooffline/auth'
 import { PortalRuntimeProvider, DEFAULT_RUNTIME } from '../shell/PortalRuntime'
 import { EnterpriseShell } from '../shell/EnterpriseShell'
 import { PortalRuntimeEngine } from '@atendimentooffline/runtime'
-import { createApiClient } from '@atendimentooffline/api'
-import { ApiDispatcherClient } from '../core/api/DispatcherClient'
+import { createApiClient, createPortalApi } from '@atendimentooffline/api'
 import type { PortalRuntimeContract } from '@atendimentooffline/contracts'
 import { RouterProvider, useRouter, type RouteName } from './router'
 import { AuthGuard } from '../guards/AuthGuard'
@@ -14,6 +13,7 @@ import { ContextSelectionPage } from '../pages/Context/ContextSelectionPage'
 import { portalConfig } from './config'
 
 const PORTAL_RUNTIME_API = createApiClient({ baseUrl: portalConfig.apiUrl })
+const PORTAL_API = createPortalApi(PORTAL_RUNTIME_API)
 
 /**
  * Navigation Controller
@@ -29,7 +29,7 @@ const PORTAL_RUNTIME_API = createApiClient({ baseUrl: portalConfig.apiUrl })
  * @see {@link ContextGuard}
  */
 function NavigationController({ children }: { children?: React.ReactNode }) {
-  const { authenticated } = useAuth()
+  const { authenticated, authState } = useAuth()
   const { route, navigate } = useRouter()
 
   const isShellRoute =
@@ -45,8 +45,6 @@ function NavigationController({ children }: { children?: React.ReactNode }) {
 
     if (route === 'login') {
       navigate('context')
-    } else if (route === 'context') {
-      navigate('portal')
     }
   }, [authenticated, route, navigate])
 
@@ -54,7 +52,7 @@ function NavigationController({ children }: { children?: React.ReactNode }) {
     return <LoginPage />
   }
 
-  if (route === 'context') {
+  if (route === 'context' || authState === 'CONTEXT_REQUIRED') {
     return (
       <AuthGuard>
         <ContextSelectionPage />
@@ -62,7 +60,7 @@ function NavigationController({ children }: { children?: React.ReactNode }) {
     )
   }
 
-  if (isShellRoute) {
+  if (isShellRoute && (authState === 'SESSION_READY' || authState === 'PORTAL_READY')) {
     return (
       <AuthGuard>
         <ContextGuard>
@@ -82,16 +80,16 @@ function NavigationController({ children }: { children?: React.ReactNode }) {
  * carregados via API. Funde o runtime estático (compose) com o runtime
  * dinâmico (carregado do backend).
  *
- * Utiliza o Dispatcher Client canônico para carga única de runtime.
+ * Utiliza o PortalApi canônico para carga única de runtime.
  *
  * @param props.children - Nós filhos que receberão o contexto de runtime.
  *
  * @see {@link PortalRuntimeProvider}
  * @see {@link ProviderStack}
- * @see {@link ApiDispatcherClient}
+ * @see {@link PortalApi}
  */
 function PortalRuntimeComposer({ children }: { children: React.ReactNode }) {
-  const { session } = useAuth()
+  const { session, markPortalReady } = useAuth()
   const api = React.useMemo(() => PORTAL_RUNTIME_API, [])
   const engine = React.useMemo(() => new PortalRuntimeEngine(api), [api])
 
@@ -128,17 +126,34 @@ function PortalRuntimeComposer({ children }: { children: React.ReactNode }) {
     setLoadingPortal(true)
     setErrorPortal(null)
 
-    const dispatcher = new ApiDispatcherClient(portalConfig.apiUrl)
-
-    dispatcher.send({
-      modulo: 'PORTAL',
-      acao: 'RUNTIME.LOAD',
-      payload: {},
-      idSessao: session.id_sessao_usuario
-    })
-      .then((response) => {
-        if (!cancelled && response.sucesso && response.resultado) {
-          setPortalRuntime(response.resultado as PortalRuntimeContract)
+    Promise.all([
+      PORTAL_API.applications(session.id_sessao_usuario).catch(() => []),
+      PORTAL_API.navigation(session.id_sessao_usuario).catch(() => []),
+      PORTAL_API.dashboard(session.id_sessao_usuario).catch(() => null),
+      PORTAL_API.widgets(session.id_sessao_usuario).catch(() => []),
+      PORTAL_API.notifications(session.id_sessao_usuario).catch(() => []),
+      PORTAL_API.permissions(session.id_sessao_usuario).catch(() => []),
+      PORTAL_API.branding().catch(() => ({ name: 'Enterprise Portal' }))
+    ])
+      .then(([applications, navigation, dashboard, widgets, notifications, permissions, branding]) => {
+        if (!cancelled) {
+          const composed = engine.compose({
+            session,
+            tenant: null,
+            context: null,
+            applications,
+            widgets,
+            navigation,
+            dashboard,
+            notifications,
+            management: { enabled: false, containers: [] },
+            permissions
+          })
+          setPortalRuntime({
+            ...composed,
+            branding
+          } as PortalRuntimeContract)
+          markPortalReady()
         }
       })
       .catch((error) => {
@@ -155,7 +170,7 @@ function PortalRuntimeComposer({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [session?.id_sessao_usuario])
+  }, [session?.id_sessao_usuario, markPortalReady, api, engine])
 
   const finalRuntime = portalRuntime ?? runtime
 

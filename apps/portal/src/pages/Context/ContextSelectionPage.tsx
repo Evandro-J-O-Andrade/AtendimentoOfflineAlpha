@@ -9,7 +9,7 @@
  * @see {@link ContextGuard}
  * @see {@link MD-124-Context-First-Architecture}
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from '../../app/router'
 import { useAuth } from '@atendimentooffline/auth'
 import type { ContextContract } from '@atendimentooffline/contracts'
@@ -23,9 +23,10 @@ import type { ContextContract } from '@atendimentooffline/contracts'
  * @returns Interface de seleção de contexto.
  */
 export function ContextSelectionPage() {
-  const { navigate } = useRouter()
-  const { session, selectContext, context, contextLoading } = useAuth()
+  const { navigate, route } = useRouter()
+  const { session, selectContext, context, contextLoading, authState, markPortalReady } = useAuth()
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const contexts = useMemo<ContextContract[]>(() => {
     return (context?.unidades ?? []).map((u) => ({
@@ -39,13 +40,21 @@ export function ContextSelectionPage() {
 
   async function handleSelect(context: ContextContract) {
     setSelectedId(context.id)
+    setError(null)
     try {
       await selectContext(Number(context.id), 1, 0)
-      navigate('portal')
+      markPortalReady()
     } catch {
       setSelectedId(null)
+      setError('Falha ao selecionar contexto.')
     }
   }
+
+  useEffect(() => {
+    if (authState === 'SESSION_READY' && route === 'context') {
+      navigate('portal')
+    }
+  }, [authState, route, navigate])
 
   if (contextLoading) {
     return (
@@ -76,15 +85,16 @@ export function ContextSelectionPage() {
   return (
     <div>
       <h1>Selecione o Contexto</h1>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul>
-        {contexts.map((context) => (
-          <li key={context.id}>
+        {contexts.map((ctx) => (
+          <li key={ctx.id}>
             <button
               type="button"
-              onClick={() => handleSelect(context)}
+              onClick={() => handleSelect(ctx)}
               disabled={Boolean(selectedId)}
             >
-              {context.name}
+              {ctx.name}
             </button>
           </li>
         ))}
