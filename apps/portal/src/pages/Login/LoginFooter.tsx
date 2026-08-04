@@ -30,7 +30,10 @@ export function LoginFooter({ darkMode }: LoginFooterProps) {
       </div>
       <div className={styles.footerRight}>
         <span>Desenvolvido por <a href="https://newwavesistemasdigital.netlify.app/" target="_blank" rel="noreferrer noopener" className={styles.ceoLink}><strong>New Wave Sistemas Digitais</strong></a></span>
+        <span className={styles.dividerPipe}>|</span>
         <span>Fundador e CEO: <a href="https://evandroandrade.netlify.app/" target="_blank" rel="noreferrer noopener" className={styles.ceoLink}>Evandro Andrade</a></span>
+        <span className={styles.dividerPipe}>|</span>
+        <a href="/help" className={styles.helpLink}>Precisa de ajuda?</a>
       </div>
     </footer>
   )

@@ -27,6 +27,14 @@ export default defineConfig({
       '/portal': {
         target: 'http://localhost:3001',
         changeOrigin: true
+      },
+      '/dispatcher': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
+      },
+      '/totem': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
       }
     }
   }

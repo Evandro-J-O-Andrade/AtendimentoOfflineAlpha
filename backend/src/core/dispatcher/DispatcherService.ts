@@ -1,17 +1,37 @@
 import { getDatabasePool } from '@backend/database/mysql/connection'
 
-export interface DispatcherRequest {
-  modulo: string
-  acao: string
-  payload: Record<string, unknown>
+export interface RuntimeContext {
   id_sessao: number
+  id_usuario: number
+  id_entidade: number
+  id_unidade: number
+  id_perfil: number
+  id_local: number
+}
+
+export interface DispatcherContext {
+  id_sessao?: number
+  id_usuario?: number
+  id_entidade?: number
+  id_unidade?: number
+  id_perfil?: number
+  id_local?: number
+}
+
+export interface DispatcherRequest {
+  capability: string
+  payload?: Record<string, unknown>
+  context?: DispatcherContext
   uuid_transacao?: string
+  idempotencia?: boolean
 }
 
 export interface DispatcherResponse {
   sucesso: boolean
   resultado?: unknown
   mensagem?: string
+  uuid?: string
+  executor?: string
 }
 
 export class DispatcherService {
@@ -20,16 +40,19 @@ export class DispatcherService {
   async dispatch(request: DispatcherRequest): Promise<DispatcherResponse> {
     const conn = await this.connection
 
-    const dominio = request.modulo.toUpperCase()
-    const acao = request.acao.toUpperCase()
+    const capability = request.capability.toUpperCase()
     const uuid = request.uuid_transacao ?? crypto.randomUUID()
-    const idReferencia = (request.payload?.id_referencia as number) ?? 0
-    const payloadJson = JSON.stringify(request.payload)
+    const idSessao = request.context?.id_sessao ?? 0
+    const payload = request.payload ?? {}
+    const idReferencia = (payload?.id_referencia as number) ?? 0
+    const payloadJson = JSON.stringify({ ...payload, id_referencia: idReferencia })
+
+    const [dominio, acao] = capability.split('.')
 
     try {
       const [rows] = await conn.query(
         'CALL sp_master_dispatcher(?, ?, ?, ?, ?, ?)',
-        [request.id_sessao, uuid, dominio, acao, idReferencia, payloadJson]
+        [idSessao, uuid, dominio, acao, idReferencia, payloadJson]
       )
 
       const allRows = rows as any[]
@@ -39,7 +62,8 @@ export class DispatcherService {
       if (!result) {
         return {
           sucesso: false,
-          mensagem: 'ERRO_DESCONHECIDO'
+          mensagem: 'ERRO_DESCONHECIDO',
+          uuid,
         }
       }
 
@@ -49,20 +73,25 @@ export class DispatcherService {
       if (!sucesso) {
         return {
           sucesso: false,
-          mensagem: String(result?.mensagem ?? 'ERRO_DESCONHECIDO')
+          mensagem: String(result?.mensagem ?? 'ERRO_DESCONHECIDO'),
+          uuid,
+          executor: result?.executor,
         }
       }
 
       return {
         sucesso: true,
         resultado: result,
-        mensagem: 'OK'
+        mensagem: 'OK',
+        uuid,
+        executor: result?.executor,
       }
     } catch (error: any) {
       const spMessage = error?.sqlMessage ?? 'ERRO_INTERNO'
       return {
         sucesso: false,
-        mensagem: spMessage
+        mensagem: spMessage,
+        uuid,
       }
     }
   }

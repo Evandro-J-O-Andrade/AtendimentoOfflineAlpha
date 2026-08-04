@@ -590,6 +590,22 @@ body {
   text-align: center;
 }
 
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* DIVISÓRIA */
 .divider {
   position: relative;
@@ -765,11 +781,12 @@ body {
   text-align: right;
   line-height: 1.4;
   color: #64748b;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin-left: auto;
   transition: color 0.35s ease;
+  flex-wrap: nowrap;
 }
 
 .footerRight strong {
@@ -778,14 +795,27 @@ body {
   transition: color 0.35s ease;
 }
 
-.ceoLink {
+.helpLink {
   color: #3b82f6;
+  fontSize: 13px;
+  fontWeight: 500;
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.35s ease;
+  transition: color 0.2s ease;
+}
+
+.helpLink:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.ceoLink {
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .ceoLink:hover {
+  color: #f1f5f9;
   text-decoration: underline;
 }
 

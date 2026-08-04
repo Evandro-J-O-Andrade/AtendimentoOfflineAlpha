@@ -152,7 +152,14 @@ export function LoginCard({
                 </div>
 
                 <button className={styles.button} type="submit" disabled={loading}>
-                  Entrar
+                  {loading ? (
+                    <>
+                      <span className={styles.spinner} />
+                      Entrando...
+                    </>
+                  ) : (
+                    'Entrar'
+                  )}
                 </button>
 
                 {error && <p className={styles.error}>{error}</p>}

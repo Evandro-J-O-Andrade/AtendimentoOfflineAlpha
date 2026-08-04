@@ -13,10 +13,12 @@
  */
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '@atendimentooffline/auth';
+import { useToast } from '../../shared/Toast';
 import type {
   LoginRequestContract,
   AuthenticationState,
 } from '@atendimentooffline/contracts';
+import { FAQInteligente } from '../../shared/FAQInteligente';
 import { ThemeProvider, useTheme } from './ThemeProvider';
 import { LoginHero } from './LoginHero';
 import { LoginCard } from './LoginCard';
@@ -38,16 +40,16 @@ function LoginPageInner() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState('');
   const [authState, setAuthState] =
     useState<AuthenticationState>('UNAUTHENTICATED');
+  const [showFAQ, setShowFAQ] = useState(false);
 
   const darkMode = theme === 'dark';
+  const toast = useToast();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError(null);
 
     const request: LoginRequestContract = {
       username,
@@ -59,10 +61,46 @@ function LoginPageInner() {
     try {
       const response = await login(request);
       setAuthState(response.state);
-      setError(response.message ?? null);
-    } catch {
-      setError('Erro de conexão');
+
+      if (response.state === 'AUTHENTICATED' || response.state === 'SESSION_READY' || response.state === 'PORTAL_READY') {
+        toast.add({
+          type: 'success',
+          title: 'Login realizado',
+          message: 'Redirecionando para o Portal...',
+        });
+      } else if (response.state === 'MFA_REQUIRED') {
+        toast.add({
+          type: 'info',
+          title: 'Código MFA necessário',
+          message: 'Digite o código de autenticação multifator.',
+        });
+      } else if (response.state === 'ERROR') {
+        toast.add({
+          type: 'error',
+          title: 'Credenciais inválidas',
+          message: response.message ?? 'Não foi possível autenticar.',
+          action: { label: 'Ver FAQ', onClick: () => setShowFAQ(true) },
+        });
+      }
+    } catch (err: any) {
+      const message = err?.message ?? 'Erro de conexão';
       setAuthState('ERROR');
+
+      if (!navigator.onLine || message.includes('fetch') || message.includes('ECONNREFUSED') || message.includes('timeout')) {
+        toast.add({
+          type: 'offline',
+          title: 'Backend indisponível',
+          message: 'Verifique sua conexão ou tente novamente mais tarde.',
+          action: { label: 'Ver FAQ', onClick: () => setShowFAQ(true) },
+        });
+      } else {
+        toast.add({
+          type: 'error',
+          title: 'Erro de conexão',
+          message: message,
+          action: { label: 'Ver FAQ', onClick: () => setShowFAQ(true) },
+        });
+      }
     }
   }
 
@@ -99,7 +137,7 @@ function LoginPageInner() {
             rememberMe={rememberMe}
             showPassword={showPassword}
             loading={loading}
-            error={error}
+            error={null}
             onUsernameChange={setUsername}
             onPasswordChange={setPassword}
             onMfaCodeChange={setMfaCode}
@@ -129,7 +167,7 @@ function LoginPageInner() {
           rememberMe={rememberMe}
           showPassword={showPassword}
           loading={loading}
-          error={error}
+          error={null}
           onUsernameChange={setUsername}
           onPasswordChange={setPassword}
           onMfaCodeChange={setMfaCode}
@@ -139,6 +177,55 @@ function LoginPageInner() {
         />
       </div>
       <LoginFooter darkMode={darkMode} />
+
+      {showFAQ && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'auto',
+          }}
+          onClick={() => setShowFAQ(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              maxWidth: '600px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflow: 'auto',
+            }}
+          >
+            <div style={{ padding: '1rem', borderBottom: '1px solid #e0e0e0', textAlign: 'right' }}>
+              <button
+                onClick={() => setShowFAQ(false)}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#666',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ padding: '1rem' }}>
+              <FAQInteligente errorType="error" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

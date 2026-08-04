@@ -5,11 +5,15 @@ import { EnterpriseShell } from '../shell/EnterpriseShell'
 import { PortalRuntimeEngine } from '@atendimentooffline/runtime'
 import { createApiClient, createPortalApi } from '@atendimentooffline/api'
 import type { PortalRuntimeContract } from '@atendimentooffline/contracts'
-import { RouterProvider, useRouter, type RouteName } from './router'
+import { RouterProvider, RouteRenderer, useRouter } from './router'
 import { AuthGuard } from '../guards/AuthGuard'
 import { ContextGuard } from '../guards/ContextGuard'
 import { LoginPage } from '../pages/Login/LoginPage'
+import { HelpPage } from '../pages/Help/HelpPage'
 import { ContextSelectionPage } from '../pages/Context/ContextSelectionPage'
+import { Fallback } from '../shared/Fallback'
+import { ToastProvider, useToast } from '../shared/Toast'
+import { ErrorBoundary } from '../shared/ErrorBoundary'
 import { portalConfig } from './config'
 
 const PORTAL_RUNTIME_API = createApiClient({ baseUrl: portalConfig.apiUrl })
@@ -31,6 +35,7 @@ const PORTAL_API = createPortalApi(PORTAL_RUNTIME_API)
 function NavigationController({ children }: { children?: React.ReactNode }) {
   const { authenticated, authState } = useAuth()
   const { route, navigate } = useRouter()
+  const { add: addToast } = useToast()
 
   const isShellRoute =
     route === 'portal' || (typeof route === 'object' && route.type === 'domain')
@@ -90,6 +95,7 @@ function NavigationController({ children }: { children?: React.ReactNode }) {
  */
 function PortalRuntimeComposer({ children }: { children: React.ReactNode }) {
   const { session, markPortalReady } = useAuth()
+  const { add: addToast } = useToast()
   const api = React.useMemo(() => PORTAL_RUNTIME_API, [])
   const engine = React.useMemo(() => new PortalRuntimeEngine(api), [api])
 
@@ -158,7 +164,13 @@ function PortalRuntimeComposer({ children }: { children: React.ReactNode }) {
       })
       .catch((error) => {
         if (!cancelled) {
-          setErrorPortal(error instanceof Error ? error.message : 'Falha ao carregar portal')
+          const msg = error instanceof Error ? error.message : 'Falha ao carregar portal'
+          setErrorPortal(msg)
+          addToast({
+            type: 'error',
+            title: 'Erro ao carregar portal',
+            message: msg,
+          })
         }
       })
       .finally(() => {
@@ -173,6 +185,24 @@ function PortalRuntimeComposer({ children }: { children: React.ReactNode }) {
   }, [session?.id_sessao_usuario, markPortalReady, api, engine])
 
   const finalRuntime = portalRuntime ?? runtime
+
+  if (loadingPortal) {
+    return (
+      <PortalRuntimeProvider value={finalRuntime}>
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>Carregando portal...</p>
+        </div>
+      </PortalRuntimeProvider>
+    )
+  }
+
+  if (errorPortal) {
+    return (
+      <PortalRuntimeProvider value={DEFAULT_RUNTIME}>
+        <Fallback type="portal" onRetry={() => window.location.reload()} />
+      </PortalRuntimeProvider>
+    )
+  }
 
   return (
     <PortalRuntimeProvider value={finalRuntime}>
@@ -195,13 +225,43 @@ function PortalRuntimeComposer({ children }: { children: React.ReactNode }) {
  * @see {@link NavigationController}
  */
 export function ProviderStack() {
+  const currentPath = window.location.pathname
+
+  if (currentPath === '/help') {
+    return (
+      <AuthProvider baseUrl={portalConfig.apiUrl}>
+        <ToastProvider>
+          <ErrorBoundary>
+            <HelpPage />
+          </ErrorBoundary>
+        </ToastProvider>
+      </AuthProvider>
+    )
+  }
+
+  if (currentPath === '/diagnostico') {
+    return (
+      <AuthProvider baseUrl={portalConfig.apiUrl}>
+        <ToastProvider>
+          <ErrorBoundary>
+            {React.createElement(RouteRenderer, { route: 'diagnostic', navigate: () => {} })}
+          </ErrorBoundary>
+        </ToastProvider>
+      </AuthProvider>
+    )
+  }
+
   return (
     <AuthProvider baseUrl={portalConfig.apiUrl}>
-      <PortalRuntimeComposer>
-        <RouterProvider>
-          <NavigationController />
-        </RouterProvider>
-      </PortalRuntimeComposer>
+      <ToastProvider>
+        <ErrorBoundary>
+          <PortalRuntimeComposer>
+            <RouterProvider>
+              <NavigationController />
+            </RouterProvider>
+          </PortalRuntimeComposer>
+        </ErrorBoundary>
+      </ToastProvider>
     </AuthProvider>
   )
 }
