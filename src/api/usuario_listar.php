@@ -6,8 +6,9 @@ header('Content-Type: application/json');
 $pdo = getPDO();
 $usuario = validarToken($pdo);
 
-// Permitir apenas ADMIN ou SUPORTE
-if (!usuarioTemPerfil('ADMIN') && !usuarioTemPerfil('SUPORTE')) {
+// Permitir apenas ADMIN ou SUPORTE (inclui perfis MASTER equivalentes)
+$perfisPermitidos = ['ADMIN', 'SUPORTE', 'ADMIN_MASTER', 'SUPORTE_MASTER', 'MASTER'];
+if (!array_intersect($perfisPermitidos, $usuario['perfis'] ?? [])) {
     http_response_code(403);
     echo json_encode(['error' => 'Acesso negado']);
     exit;
